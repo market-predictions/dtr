@@ -83,7 +83,7 @@ Decision: `HOLD_FOR_FRESH_DATA`. All unfiltered variants are negative. `CONT_A2_
 
 ## Phase 4 — Entry and context modules
 
-Status: **active; IFVG complete and rejected, CISD next**
+Status: **active; IFVG and CISD complete and rejected, entry routing next**
 
 Research order and state:
 
@@ -91,8 +91,11 @@ Research order and state:
    - Decision: `REJECT_NO_INCREMENTAL_VALUE`.
    - Causal detector, manifest, tests, compact evidence, attribution, review, and handover retained.
    - No IFVG rule may enter the reversal candidate or be tuned further on the current sample.
-2. [ ] CISD entry confirmation — next work package.
-3. [ ] First-pullback and hybrid entry routing.
+2. [x] CISD entry confirmation.
+   - Decision: `REJECT_NO_INCREMENTAL_VALUE`.
+   - Broad confirmation reduces expectancy; the retest subset remains diagnostic only.
+   - No CISD filter, sizing rule, or further tuning is authorized on the current sample.
+3. [ ] First-pullback and hybrid entry routing — next work package.
 4. [ ] Session VWAP as information, score, soft gate, and hard gate.
 5. [ ] Weekly VWAP as information, score, soft gate, and hard gate.
 6. [ ] H1Vol conditioning.
