@@ -35,7 +35,13 @@ def main() -> None:
     one_minute = load_zip(dataset_path)
     five_minute = resample_5m(one_minute)
     sessions = build_session_table(one_minute, five_minute)
-    trades, funnel = run_backtest(one_minute, five_minute, sessions, config)
+    trades, funnel = run_backtest(
+        one_minute,
+        five_minute,
+        sessions,
+        config,
+        gap_policy=manifest.execution.gap_policy,
+    )
 
     summary = write_run_artifacts(
         output,
