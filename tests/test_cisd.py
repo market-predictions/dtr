@@ -113,6 +113,19 @@ def test_newer_opposite_delivery_expires_unconfirmed_older_sequence() -> None:
     assert annotation.sequence_anchor == 102.0
 
 
+def test_newer_unconfirmed_sequence_expires_older_confirmed_sequence() -> None:
+    bars = _bars(
+        [100.0, 101.0, 99.5, 102.0, 101.0, 99.0],
+        [99.0, 100.0, 101.0, 100.0, 100.0, 100.5],
+    )
+    annotation = annotate_signal(bars, _signal(1, sweep=0, entry=5, bars=bars))
+
+    # The first sequence confirms at index 2, but the newer bearish sequence
+    # starts at index 3 and remains unconfirmed. The old confirmation is stale.
+    assert not annotation.sequence_confirmed
+    assert not annotation.last_candle_confirmed
+
+
 def test_reset_epoch_invalidates_cisd_window() -> None:
     bars = _bars(
         [100.0, 102.0, 101.0, 100.5, 102.0],
