@@ -80,7 +80,7 @@ class ResearchManifest(BaseModel):
     dataset: DatasetSpec
     periods: PeriodSpec
     strategy: dict[str, Any]
-    execution: ExecutionSpec = ExecutionSpec()
+    execution: ExecutionSpec = Field(default_factory=ExecutionSpec)
     expected_baseline: ExpectedBaseline | None = None
 
     @field_validator("strategy")
@@ -93,7 +93,7 @@ class ResearchManifest(BaseModel):
         return value
 
     def strategy_config(self) -> StrategyConfig:
-        payload = {"name": self.candidate_name, **self.strategy}
+        payload = {**self.strategy, "name": self.candidate_name}
         for tuple_field in ("sessions", "weekdays"):
             if tuple_field in payload and isinstance(payload[tuple_field], list):
                 payload[tuple_field] = tuple(payload[tuple_field])
