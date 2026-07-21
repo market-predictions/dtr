@@ -4,114 +4,99 @@ Python-first research and optimization framework for the Daytrading Rauf (DTR) s
 
 ## Research policy
 
-TradingView is parked as the primary research environment. The Lab starts from the known DTR market concept and tests structural alternatives directly on historical market data. Pine and TradingView are used later to implement and validate a small number of robust finalists, not to define the Python baseline.
+TradingView is parked as the primary research environment. The Lab tests explicit market hypotheses directly on historical data, instruments every setup funnel, performs chronological and cost robustness checks, and ports only a small number of independently supported finalists back to Pine.
 
 The workflow is:
 
 1. validate and normalize market data;
-2. implement DTR market logic as explicit, testable Python modules;
-3. instrument the complete setup funnel and rejection reasons;
-4. run staged experiments for BOS/MSS, sweeps, regime, calendar, timing, risk, and exits;
-5. perform walk-forward, cost-stress, parameter-neighbourhood, and Monte Carlo checks;
-6. add new modules only when they demonstrate independent value;
-7. port no more than a few robust finalists back to Pine.
+2. implement market logic as causal, testable modules;
+3. report the full opportunity and rejection funnel;
+4. test structural alternatives and context modules independently;
+5. distinguish cohort association from implementable portfolio effects;
+6. run chronological, cost, neighbourhood, walk-forward, and uncertainty checks;
+7. reject modules that do not add value rather than combining them in search of a rescue effect;
+8. port no more than a few robust finalists to Pine.
 
 ## Current scope
 
-The first market is NQ futures using one-minute data from late December 2022 through 10 December 2025. NQ remains the sole optimization base for the current program. Other providers and instruments are deferred.
+The first market is NQ futures using one-minute data from late December 2022 through 10 December 2025. NQ remains the sole optimization base for the current program. Other instruments and providers are deferred.
 
-The current research engine implements the reversal branch with:
+### Frozen reversal baseline
 
-- London 2AM, New York 9AM, and Asia 7PM session ranges;
-- first one-sided range sweep and reclaim;
-- configurable protected pivots and BOS definitions;
-- impulse and acceptance requirements;
-- break-close and retest entries;
-- efficiency-ratio, ADX, VWAP, weekday, and session filters;
-- structural/ATR stops, TP1, runner, breakeven, time close, and maximum hold;
-- one-minute intrabar stop/target simulation;
-- complete funnel counters and attribution;
-- deterministic gap classification and gap-safe setup/trade handling.
+`DTR_PY_NQ_CANDIDATE_0_1_GAP_SAFE`
 
-The continuation engine is also implemented as a separate research branch. Its unfiltered variants failed; a late two-bar pullback is retained under `HOLD_FOR_FRESH_DATA`. IFVG/CISD, H1Vol, Weekly VWAP, higher-timeframe scoring, and footprint logic remain separate work packages.
+- 491 trades;
+- 0.180235811449135R expectancy;
+- 88.49578342152539R net;
+- profit factor 1.3819983049452256;
+- 14.107857513807524R maximum drawdown.
 
-## Reproducible research runs
+The original 504-trade observe-only reference is also preserved for historical reproducibility.
 
-A research run is defined by a YAML manifest containing:
+### Continuation branch
 
-- dataset path and SHA-256 checksum;
-- timestamp and timezone assumptions;
-- development, validation, and later-research periods;
-- complete `StrategyConfig` parameters;
-- execution, gap-policy, and random-seed assumptions;
-- optional regression expectations.
+The standalone continuation engine is implemented. All unfiltered variants failed. `CONT_A2_PULLBACK_LATE60` is retained under `HOLD_FOR_FRESH_DATA`; it may not be combined with reversal or tuned further on the current sample.
 
-Install the research environment with:
+### IFVG module
+
+The causal IFVG detector, manifest runner, fixtures, and evidence are implemented. The decision is `REJECT_NO_INCREMENTAL_VALUE`: all five predeclared implementable IFVG filters lower aggregate expectancy versus the frozen reversal baseline. IFVG remains available for diagnostics only.
+
+CISD is the next independent entry-confirmation work package.
+
+## Installation
 
 ```bash
 pip install -e ".[dev,research]"
 ```
 
-### Frozen reference run
+## Reproducible research runs
 
-The original candidate remains machine-runnable under `gap_policy: observe_only`. It preserves the historical 504-trade regression while reporting any observed unsafe-gap bridges.
+### Frozen reference
 
 ```bash
 python scripts/run_manifest.py configs/manifests/nq_candidate_0_1.yaml
 ```
 
-### Gap-safe run
-
-The sanitized candidate uses exactly the same strategy parameters under `gap_policy: reject_unsafe`. It rejects contaminated session ranges, truncates setup paths at reset boundaries, and excludes trades that overlap unsafe missing-data intervals.
+### Gap-safe reversal baseline
 
 ```bash
 python scripts/run_manifest.py configs/manifests/nq_candidate_0_1_gap_safe.yaml
 ```
 
-Each command verifies the dataset checksum and writes deterministic CSV, Parquet, JSON, funnel, and attribution artifacts under `reports/<run_id>/`.
-
-
 ### Continuation structural baseline
-
-Run the four predeclared continuation variants with:
 
 ```bash
 python scripts/run_continuation_manifest.py \
   configs/manifests/nq_continuation_structural_baseline.yaml
 ```
 
-Run the held late-pullback lead and key cost/exit stresses with:
+### Held continuation stress candidate
 
 ```bash
 python scripts/run_continuation_manifest.py \
   configs/manifests/nq_continuation_late60_stress.yaml
 ```
 
-The unfiltered continuation branch is negative. `CONT_A2_PULLBACK_LATE60` remains a research lead only and may not be combined with reversal until genuinely fresh data confirms it. See `docs/CONTINUATION_RESEARCH_2026-07-21.md`.
-
-## Parameter research
-
-The staged pack runner remains available for controlled NQ research:
+### IFVG ablation
 
 ```bash
-python scripts/run_research.py data/raw/NQ_Futures_-_1min_Bar_2022_2025.zip --pack bos
+python scripts/run_ifvg_manifest.py \
+  configs/manifests/nq_ifvg_ablation.yaml
 ```
 
-Available packs are `baseline`, `bos`, `sweep`, `regime`, `timing`, `risk`, and `exit`. Ordinary research runs use the gap-safe execution path. No additional parameter optimization should be promoted until the reference and gap-safe full-dataset comparison is locked.
+Each manifest verifies the registered dataset checksum and writes deterministic research artifacts under `reports/<run_id>/`. Raw market data and bulk generated reports are excluded from Git.
 
-## First research run
+## Evidence
 
-The first staged run evaluated **904 controlled configurations**. The frozen reference candidate is `DTR_PY_NQ_CANDIDATE_0_1`; its identical-parameter sanitized counterpart is `DTR_PY_NQ_CANDIDATE_0_1_GAP_SAFE`.
+Primary methodology and results are documented in:
 
-Methodology, results, limitations, and artifacts are documented in:
+- `docs/RESEARCH_RUN_2026-07-21.md`;
+- `docs/NQ_GAP_SAFE_COMPARISON_2026-07-21.md`;
+- `docs/CONTINUATION_RESEARCH_2026-07-21.md`;
+- `docs/IFVG_ABLATION_RESEARCH_2026-07-21.md`;
+- `results/2026-07-21/`.
 
-- `docs/RESEARCH_RUN_2026-07-21.md`
-- `configs/nq_candidate_0_1.yaml`
-- `configs/manifests/nq_candidate_0_1.yaml`
-- `configs/manifests/nq_candidate_0_1_gap_safe.yaml`
-- `results/2026-07-21/`
-
-These are research findings, not production-performance claims. Continuous-contract rollover and exact timestamp semantics remain unresolved, and no post-December-2025 paper-forward sample exists yet.
+These are research findings, not production-performance claims. Continuous-contract rollover, exact timestamp and daylight-saving semantics, session boundaries, and supplied VWAP reset semantics remain unresolved. No post-December-2025 paper-forward sample is included.
 
 ## Data policy
 
@@ -121,14 +106,16 @@ Raw market datasets and generated bulk artifacts are not committed to normal Git
 
 - No ranking by net profit alone.
 - Every filter reports performance effect and opportunity coverage.
-- Entry and exit modules are tested separately before combinations.
-- Chronological forward folds are mandatory.
+- Cohort and implementable portfolio results are separate.
+- Entry, exit, and context modules are tested independently before combinations.
+- Chronological forward evidence is mandatory.
 - Parameter plateaus are preferred over sharp optima.
 - Cost stress and conservative intrabar assumptions are mandatory.
 - Missing bars are never silently synthesized into market structure.
+- Negative results are retained and close the tested line of inquiry.
 - A Python winner is not automatically a production strategy.
 - TradingView is a later implementation-validation target, not the primary optimizer.
 
 ## Status
 
-**v0.2.2 — gap-safe execution implemented; full NQ reference-versus-sanitized rerun pending.**
+**v0.3.1 — gap-safe reversal baseline locked; continuation held for fresh data; IFVG rejected; CISD next.**
