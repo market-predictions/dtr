@@ -1,38 +1,49 @@
 # Changelog
 
-## Unreleased — 2026-07-21
+## v0.2.2 — 2026-07-21
 
 ### Added
 
-- Dukascopy data-source viability review with technical, legal, provenance, and promotion gates.
-- Phase 0B provider-neutral market-data acquisition roadmap.
-- A staged pilot basket for FX, metals, and U.S. index-CFD structural proxies.
-- Cross-market sequencing that tests the frozen DTR candidate before allowing asset-specific retuning.
+- Deterministic gap-state and unsafe-gap epochs on derived five-minute bars.
+- Session-range rejection when source-data reset boundaries contaminate the defining range.
+- Signal-path truncation at the first reset boundary after a session range.
+- Open-trade rejection when a simulated position bridges an unsafe market-data gap.
+- Integrity funnel counters for range rejections, path truncations, rejected trade bridges, and observed bridges.
+- Explicit manifest `gap_policy` values: `observe_only` and `reject_unsafe`.
+- A gap-safe manifest for `DTR_PY_NQ_CANDIDATE_0_1_GAP_SAFE` using exactly the same strategy parameters as the frozen candidate.
+- Focused tests for intra-bucket missing bars, session contamination, setup resets, trade bridges, clean-data preservation, and policy separation.
+- Work-package, claim, status, independent-review, and handover artifacts for the baseline-integrity closure.
 
-### Decision
+### Changed
 
-- Keep the existing NQ futures dataset as the frozen primary baseline for the current reversal candidate.
-- Do not adopt the legacy `giuse88/duka` package as a production dependency.
-- Prefer a native Python adapter over approved official Dukascopy API access.
-- Use a pinned `dukascopy-node` result as an independent comparison oracle during the pilot.
-- Treat Dukascopy index CFDs as structural proxies rather than CME futures substitutes.
+- `DTR_PY_NQ_CANDIDATE_0_1` is explicitly preserved as the `observe_only` reference run so its 504-trade regression remains reproducible.
+- Optimization and ordinary research runs default to `reject_unsafe`; legacy manifests without a policy default to `observe_only` for backward compatibility.
+- Standard package and direct engine entry points route through the integrity-safe execution layer.
+- The NQ dataset remains the sole optimization base; Dukascopy and other providers are deferred to a future work package.
+- The package version is now `0.2.2`.
 
 ### Why
 
-Dukascopy can provide broader history and cross-asset coverage, but provider, timestamp, bid/ask, spread, session, volume, and instrument semantics must remain explicit. Integrating the source through a provider-neutral contract adds cross-market research capacity without contaminating the frozen NQ baseline or implying that broker-CFD results validate futures execution.
+The gap audit identified missing and offset intervals, but the strategy engine could still form setups or simulate trades across those boundaries. Optimizing before closing that contract could reward structures that were partly created by absent data. The split-policy design preserves historical reproducibility while producing a separate sanitized result without retuning parameters.
+
+### Independent review finding
+
+The initial implementation routed the frozen manifest directly through the new rejection policy. That would have intentionally changed the trade set while causing the historic 504-trade regression to fail, without preserving a machine-runnable reference. The review required two explicit manifests and separate observe-only versus reject-unsafe semantics before promotion.
 
 ### Known limitations
 
-- Approved Dukascopy API access and automation/data-use rights have not yet been documented for this project.
-- No live acquisition pilot or canonical Dukascopy dataset has yet passed the DTR integrity gate.
-- Dukascopy index-CFD prices, activity volume, spreads, sessions, and contract semantics are not equivalent to CME futures.
-- Energy commodities and equities are deferred until the first pilot basket establishes reliable normalization.
+- The raw NQ dataset is excluded from Git, so the full reference and gap-safe reruns must execute where the checksum-matched local archive is available.
+- Gap-safe aggregate metrics and changed-trade attribution are not yet locked.
+- Continuous-contract rollover, back-adjustment, timestamp meaning, daylight-saving boundaries, and supplied VWAP semantics remain unresolved.
+- A rejected trade bridge is excluded from primary results rather than assigned a hypothetical fill through missing data.
+- Continuation, IFVG/CISD, H1Vol, Weekly VWAP, higher-timeframe scoring, and footprint are not yet included.
 
 ### Next
 
-- Confirm approved API access and applicable data-use terms.
-- Implement the provider interface, canonical schema, fixtures, caching, checksums, and provider-specific audits.
-- Run the controlled pilot after the current NQ data-integrity gate without interrupting the NQ reversal and continuation workstreams.
+- Run `configs/manifests/nq_candidate_0_1.yaml` and confirm the frozen regression.
+- Run `configs/manifests/nq_candidate_0_1_gap_safe.yaml` and generate the complete comparison report.
+- Lock gap-safe artifact hashes, funnel deltas, and regression tolerances.
+- Begin the independent continuation engine only after the comparison is reviewed.
 
 ## v0.2.1 — 2026-07-21
 
