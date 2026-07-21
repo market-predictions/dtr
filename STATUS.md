@@ -4,7 +4,7 @@
 
 `DTR-NQ-WP-20260721-03 — IFVG entry-confirmation ablation`
 
-Status: **complete; awaiting final CI and PR merge**
+Status: **complete; final CI passed; ready for PR merge**
 
 Branch: `agent/nq-ifvg-ablation`
 
@@ -58,7 +58,7 @@ Any aligned IFVG covers 92.7% of baseline trades and is weakly selective. Strict
 - pinned Ruff: **passed**;
 - pytest Python 3.11: **passed**;
 - pytest Python 3.12: **passed**;
-- GitHub CI implementation run `29860594349`: **success**;
+- governance-complete CI run `29862841068`: **success**;
 - independent adversarial review: **complete**.
 
 ## Promotion restriction
