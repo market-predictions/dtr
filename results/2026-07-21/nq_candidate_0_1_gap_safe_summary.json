@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "work_package": "DTR-NQ-WP-20260721-01",
+  "promotion_decision": "PROMOTE_TO_CONTINUATION_RESEARCH",
+  "execution_commit": "6f4812817a9b85f659c605b38af506a72d51d5fa",
+  "dataset_sha256": "8d3f157a422636e5b8dda51cc3a3d9209c50cb53f9b279d3e14b627ce59370dc",
+  "reference_manifest_sha256": "18a1437182628cf52bec6facce7de16cb582de6c1efb50748a0c57ccd99aa666",
+  "gap_safe_manifest_sha256": "679218bda288d4831f471861063ceab571e5b98262225931860d461096d1eaa2",
+  "strategy_parameters_identical": true,
+  "reference_regression_passed": true,
+  "gap_safe_regression_passed": true,
+  "metrics": {
+    "reference": {"trades": 504, "net_r": 84.16435914242919, "max_drawdown_r": 14.107857513807524, "expectancy_r": 0.1669927760762483, "win_rate": 0.5059523809523809, "profit_factor": 1.3510592124242256},
+    "gap_safe": {"trades": 491, "net_r": 88.49578342152539, "max_drawdown_r": 14.107857513807524, "expectancy_r": 0.180235811449135, "win_rate": 0.5112016293279023, "profit_factor": 1.3819983049452256},
+    "delta": {"trades": -13, "net_r": 4.331424279096197, "max_drawdown_r": 0.0, "expectancy_r": 0.013243035372886708, "win_rate": 0.00524924837552132, "profit_factor": 0.030939092521000022}
+  },
+  "funnel": {
+    "reference": {"sessions_raw": 1686, "sessions_range_gap_rejected": 19, "sessions_signal_path_truncated": 31, "entry_signal": 517, "observed_unsafe_gap_bridges": 6, "skipped_unsafe_gap_bridge": 0, "trades": 504},
+    "gap_safe": {"sessions_raw": 1686, "sessions_range_gap_rejected": 19, "sessions_signal_path_truncated": 31, "entry_signal": 508, "observed_unsafe_gap_bridges": 0, "skipped_unsafe_gap_bridge": 4, "trades": 491}
+  },
+  "trade_diff": {
+    "removed": 13,
+    "added": 0,
+    "unexplained": 0,
+    "classifications": [
+      {"classification": "contaminated_session_range", "trades": 9, "removed_net_r": -2.541029338332793},
+      {"classification": "unsafe_gap_during_open_trade", "trades": 4, "removed_net_r": -1.7903949407633593}
+    ],
+    "removed_trades_file": "results/2026-07-21/nq_candidate_0_1_gap_safe_removed_trades.csv"
+  },
+  "session_deltas": [
+    {"session": "ASIA_7PM", "trades": -9, "net_r": 3.292325},
+    {"session": "LONDON_2AM", "trades": -2, "net_r": 2.061106},
+    {"session": "NEW_YORK_9AM", "trades": -2, "net_r": -1.022007}
+  ],
+  "period_deltas": [
+    {"period": "development", "trades": -6, "net_r": 2.303617140302819, "max_drawdown_r": 0.0},
+    {"period": "validation", "trades": -2, "net_r": 0.8653710786207469, "max_drawdown_r": -0.8653710786207442},
+    {"period": "research_later", "trades": -4, "net_r": 0.13407785121736282, "max_drawdown_r": 0.0}
+  ],
+  "determinism": {
+    "reference_second_run_identical": true,
+    "gap_safe_second_run_identical": true,
+    "gap_safe_artifact_sha256": {
+      "trades.csv": "037c15aba380fc68b0d20146a3fec1dac26cdf91a7c460234831971a32f2ff6b",
+      "trades.parquet": "bc3c92c2df27e62fd424573bc15e4562b14ec3a7f7227f7591115da363b1be13",
+      "funnel.csv": "2b93d806289da8453cdbb454b9360d1ea9083a1a9f759d0322fb0ba20a22593f",
+      "halfyear.csv": "048e750e95306e8e7b0feb9137b353edc848cc0389472fdc65678da479395b27",
+      "by_session.csv": "94be604227b1a8d83136550b661177b05fa5b8f7641bfd424371160d21f4989e",
+      "by_weekday.csv": "577a92edaad25dc233a6f85d8247d57a10198a3f307792ab777d431695ea54c3",
+      "by_direction.csv": "2d8b24a4127b20a624629417f317b8b01ad2e737b6b8997f9caf572542c43488",
+      "summary.json": "96c46ace8e067765a6322bfdb80a45c037a68d6de895d7f3ce748b4a587e4612"
+    }
+  },
+  "interpretation": "The 4.331424R increase is a data-integrity consequence, not an optimization gain. New York declines after sanitization and the later-research improvement is only 0.134078R.",
+  "limitations": [
+    "Continuous-contract rollover and back-adjustment methodology remain unresolved.",
+    "Timestamp, daylight-saving, session-boundary and supplied VWAP-reset semantics remain provisional.",
+    "The gap-safe policy excludes missing-data execution rather than estimating hypothetical fills.",
+    "No post-December-2025 paper-forward sample is included."
+  ]
+}

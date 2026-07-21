@@ -36,6 +36,7 @@ def _payload(dataset_path: str, digest: str) -> dict:
             "intrabar_source": "1min",
             "same_minute_collision_policy": "conservative_stop_first",
             "random_seed": 7,
+            "gap_policy": "reject_unsafe",
         },
     }
 
@@ -56,7 +57,35 @@ def test_manifest_loads_strategy_and_verifies_dataset(tmp_path: Path) -> None:
     assert config.sessions == ("LONDON_2AM",)
     assert config.weekdays == (1, 2, 3, 4)
     assert config.pivot_len == 2
+    assert manifest.execution.gap_policy == "reject_unsafe"
     assert verify_dataset(manifest, manifest_path) == dataset.resolve()
+
+
+def test_manifest_defaults_legacy_runs_to_observe_only(tmp_path: Path) -> None:
+    dataset = tmp_path / "sample.zip"
+    dataset.write_bytes(b"fixture")
+    digest = sha256(dataset.read_bytes()).hexdigest()
+    payload = _payload(dataset.name, digest)
+    del payload["execution"]["gap_policy"]
+    manifest_path = tmp_path / "manifest.yaml"
+    manifest_path.write_text(yaml.safe_dump(payload), encoding="utf-8")
+
+    manifest = load_manifest(manifest_path)
+
+    assert manifest.execution.gap_policy == "observe_only"
+
+
+def test_manifest_rejects_unknown_gap_policy(tmp_path: Path) -> None:
+    dataset = tmp_path / "sample.zip"
+    dataset.write_bytes(b"fixture")
+    digest = sha256(dataset.read_bytes()).hexdigest()
+    payload = _payload(dataset.name, digest)
+    payload["execution"]["gap_policy"] = "silently_fill_gaps"
+    manifest_path = tmp_path / "manifest.yaml"
+    manifest_path.write_text(yaml.safe_dump(payload), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="gap_policy"):
+        load_manifest(manifest_path)
 
 
 def test_manifest_rejects_unknown_strategy_field(tmp_path: Path) -> None:

@@ -18,7 +18,9 @@ The workflow is:
 
 ## Current scope
 
-The first market is NQ futures using one-minute data from late December 2022 through 10 December 2025. The current research engine implements the reversal branch with:
+The first market is NQ futures using one-minute data from late December 2022 through 10 December 2025. NQ remains the sole optimization base for the current program. Other providers and instruments are deferred.
+
+The current research engine implements the reversal branch with:
 
 - London 2AM, New York 9AM, and Asia 7PM session ranges;
 - first one-sided range sweep and reclaim;
@@ -28,7 +30,8 @@ The first market is NQ futures using one-minute data from late December 2022 thr
 - efficiency-ratio, ADX, VWAP, weekday, and session filters;
 - structural/ATR stops, TP1, runner, breakeven, time close, and maximum hold;
 - one-minute intrabar stop/target simulation;
-- complete funnel counters and attribution.
+- complete funnel counters and attribution;
+- deterministic gap classification and gap-safe setup/trade handling.
 
 Continuation, IFVG/CISD, H1Vol, Weekly VWAP, higher-timeframe scoring, and footprint logic remain separate work packages.
 
@@ -40,38 +43,55 @@ A research run is defined by a YAML manifest containing:
 - timestamp and timezone assumptions;
 - development, validation, and later-research periods;
 - complete `StrategyConfig` parameters;
-- execution and random-seed assumptions;
+- execution, gap-policy, and random-seed assumptions;
 - optional regression expectations.
 
-Run the current candidate with:
+Install the research environment with:
 
 ```bash
 pip install -e ".[dev,research]"
+```
+
+### Frozen reference run
+
+The original candidate remains machine-runnable under `gap_policy: observe_only`. It preserves the historical 504-trade regression while reporting any observed unsafe-gap bridges.
+
+```bash
 python scripts/run_manifest.py configs/manifests/nq_candidate_0_1.yaml
 ```
 
-The command verifies the dataset checksum, runs the strategy, checks the frozen baseline, and writes deterministic CSV, Parquet, JSON, funnel, and attribution artifacts under `reports/<run_id>/`.
+### Gap-safe run
+
+The sanitized candidate uses exactly the same strategy parameters under `gap_policy: reject_unsafe`. It rejects contaminated session ranges, truncates setup paths at reset boundaries, and excludes trades that overlap unsafe missing-data intervals.
+
+```bash
+python scripts/run_manifest.py configs/manifests/nq_candidate_0_1_gap_safe.yaml
+```
+
+Each command verifies the dataset checksum and writes deterministic CSV, Parquet, JSON, funnel, and attribution artifacts under `reports/<run_id>/`.
 
 ## Parameter research
 
-The staged pack runner remains available for controlled research:
+The staged pack runner remains available for controlled NQ research:
 
 ```bash
 python scripts/run_research.py data/raw/NQ_Futures_-_1min_Bar_2022_2025.zip --pack bos
 ```
 
-Available packs are `baseline`, `bos`, `sweep`, `regime`, `timing`, `risk`, and `exit`.
+Available packs are `baseline`, `bos`, `sweep`, `regime`, `timing`, `risk`, and `exit`. Ordinary research runs use the gap-safe execution path. The frozen reversal baseline is locked; new research proceeds through separate work packages.
 
 ## First research run
 
-The first staged run evaluated **904 controlled configurations**. The current research candidate is `DTR_PY_NQ_CANDIDATE_0_1`.
+The first staged run evaluated **904 controlled configurations**. The frozen reference candidate is `DTR_PY_NQ_CANDIDATE_0_1`; its identical-parameter sanitized counterpart is `DTR_PY_NQ_CANDIDATE_0_1_GAP_SAFE`.
 
 Methodology, results, limitations, and artifacts are documented in:
 
 - `docs/RESEARCH_RUN_2026-07-21.md`
 - `configs/nq_candidate_0_1.yaml`
 - `configs/manifests/nq_candidate_0_1.yaml`
-- `results/2026-07-21/`
+- `configs/manifests/nq_candidate_0_1_gap_safe.yaml`
+- `docs/NQ_GAP_SAFE_COMPARISON_2026-07-21.md`
+- `results/2026-07-21/nq_candidate_0_1_gap_safe_summary.json`
 
 These are research findings, not production-performance claims. Continuous-contract rollover and exact timestamp semantics remain unresolved, and no post-December-2025 paper-forward sample exists yet.
 
@@ -87,9 +107,10 @@ Raw market datasets and generated bulk artifacts are not committed to normal Git
 - Chronological forward folds are mandatory.
 - Parameter plateaus are preferred over sharp optima.
 - Cost stress and conservative intrabar assumptions are mandatory.
+- Missing bars are never silently synthesized into market structure.
 - A Python winner is not automatically a production strategy.
 - TradingView is a later implementation-validation target, not the primary optimizer.
 
 ## Status
 
-**v0.2.1 — manifest-driven reproducibility and baseline-integrity work in progress.**
+**v0.2.3 — gap-safe baseline locked; independent continuation research authorized.**
