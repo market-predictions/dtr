@@ -6,8 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from dtr_lab.research import StrategyConfig, resample_5m, run_backtest
-from dtr_lab.research import engine, integrity
+from dtr_lab.research import StrategyConfig, engine, integrity, resample_5m, run_backtest
 
 
 def _market_with_unsafe_gap() -> pd.DataFrame:
