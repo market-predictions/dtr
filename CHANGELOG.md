@@ -1,5 +1,53 @@
 # Changelog
 
+## v0.3.0 — 2026-07-21
+
+### Added
+
+- Standalone, gap-safe NQ continuation engine.
+- First-breakout event state with one-bar and two-bar acceptance.
+- Immediate and first-pullback entry routes.
+- Return-inside, opposite-boundary, extension, expiry, failed-breakout, and unsafe-gap handling.
+- Continuation-specific structural stops, partial target, runner, breakeven, event-end, and maximum-hold exits.
+- Diagnostics for displacement, range extension, volume, VWAP, ER, ADX, and time since range completion.
+- Strict continuation manifest schema and canonical manifest runner.
+- Structural baseline and late-60 stress manifests.
+- Deterministic CSV, Parquet, JSON, funnel, and attribution artifacts.
+- Structural fixtures, manifest tests, full research report, independent review, and handover.
+
+### Research result
+
+- All four unfiltered continuation variants are negative overall.
+- Two-bar pullback is materially better than immediate entry but remains negative without a timing condition.
+- `CONT_A2_PULLBACK_LATE60` produced 147 trades, 0.108895R expectancy, 16.007565R net, PF 1.242960, and 8.003633R maximum drawdown.
+- The 60–70 minute timing region is a positive parameter plateau across development, validation, and later research.
+- All 12 predeclared risk/exit variants on the late-60 population remained positive across the three main periods.
+- Four-tick slippage turns the aggregate result negative.
+- Trade and month-block bootstrap intervals include zero.
+- Expanding threshold selection was negative in 2025H1 and had only nine trades in the final fold.
+
+### Decision
+
+- Complete the continuation-engine work package.
+- Record `HOLD_FOR_FRESH_DATA`.
+- Retain the late two-bar pullback as a research lead only.
+- Do not combine continuation with reversal and do not tune it further on the current NQ sample.
+- Advance the roadmap to IFVG entry-confirmation ablation.
+
+### Known limitations
+
+- The continuation lead was discovered through diagnostic screening on a finite research dataset.
+- No pristine post-December-2025 sample exists.
+- Cost sensitivity is material.
+- Continuous-contract rollover, timestamp, daylight-saving, session, and VWAP semantics remain provisional.
+- The existing commission convention charges one round trip even when the position exits in multiple legs.
+
+### Next
+
+- Open `DTR-NQ-WP-20260721-03` for IFVG entry-confirmation ablation.
+- Test IFVG first against the frozen gap-safe reversal baseline.
+- Preserve removal attribution and opportunity coverage before any composite use.
+
 ## v0.2.3 — 2026-07-21
 
 ### Added

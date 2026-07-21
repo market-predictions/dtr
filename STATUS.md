@@ -2,81 +2,84 @@
 
 ## Current work package
 
-`DTR-NQ-WP-20260721-01 — Baseline integrity closure`
+`DTR-NQ-WP-20260721-02 — Independent continuation engine`
 
-Status: **complete**
+Status: **complete; ready for PR merge**
 
-Branch: `agent/nq-baseline-integrity-closure`
+Branch: `agent/nq-continuation-engine`
 
-Draft PR: `#1 — Close NQ baseline integrity gate`
+PR: `#2 — Independent NQ continuation research`
 
-## Current primary dataset
+Decision: `HOLD_FOR_FRESH_DATA`
 
-`nq_futures_1m_2022_2025`
+## Locked data and reversal baselines
 
 Dataset SHA-256:
 
 `8d3f157a422636e5b8dda51cc3a3d9209c50cb53f9b279d3e14b627ce59370dc`
 
-NQ remains the sole optimization base for the current phase. Dukascopy and other feeds are deferred.
+### Observe-only reference
 
-## Frozen reference
+- candidate: `DTR_PY_NQ_CANDIDATE_0_1`
+- trades: `504`
+- net R: `84.16435914242919`
+- maximum drawdown: `14.107857513807524R`
 
-`DTR_PY_NQ_CANDIDATE_0_1`
+### Gap-safe reversal baseline
 
-- policy: `observe_only`;
-- trades: `504`;
-- net R: `84.16435914242919`;
-- maximum drawdown: `14.107857513807524R`;
-- regression: **passed**.
+- candidate: `DTR_PY_NQ_CANDIDATE_0_1_GAP_SAFE`
+- trades: `491`
+- net R: `88.49578342152539`
+- maximum drawdown: `14.107857513807524R`
 
-## Gap-safe baseline
+Both remain frozen.
 
-`DTR_PY_NQ_CANDIDATE_0_1_GAP_SAFE`
+## Continuation result
 
-- policy: `reject_unsafe`;
-- strategy parameters: **identical to the frozen reference**;
-- trades: `491`;
-- net R: `88.49578342152539`;
-- maximum drawdown: `14.107857513807524R`;
-- regression: **locked and passed**.
+The four unfiltered structural variants are negative. Immediate entry is decisively poor. Two-bar pullback is the least adverse unfiltered route.
 
-## Difference attribution
+Held research lead:
 
-- removed trades: `13`;
-- added trades: `0`;
-- contaminated session ranges: `9` trades;
-- unsafe gaps during open trades: `4` trades;
-- unexplained differences: `0`;
-- deterministic clean reruns: **byte-identical for all required artifacts**.
+`CONT_A2_PULLBACK_LATE60`
 
-Comparison report:
+- trades: `147`
+- expectancy: `0.108895R`
+- net R: `16.007565R`
+- profit factor: `1.242960`
+- maximum drawdown: `8.003633R`
 
-`docs/NQ_GAP_SAFE_COMPARISON_2026-07-21.md`
-
-Compact machine-readable result:
-
-`results/2026-07-21/nq_candidate_0_1_gap_safe_summary.json`
+The lead remains held because bootstrap intervals include zero, four-tick slippage produces a negative aggregate result, and no fresh post-December-2025 sample exists.
 
 ## Validation status
 
-- Independent adversarial review: **complete**
-- Pinned Ruff 0.15.22: **passed**
-- Pytest Python 3.11: **passed**
-- Pytest Python 3.12: **passed**
-- Frozen reference full-data rerun: **passed**
-- Gap-safe full-data rerun: **passed**
-- Trade-level attribution: **complete**
-- Artifact hash lock: **complete**
+- standalone continuation module: **complete**
+- strict continuation manifests: **complete**
+- structural fixtures: **passed**
+- full existing regression suite: **passed locally**
+- canonical baseline rerun: **byte-identical**
+- canonical late-60 stress rerun: **byte-identical**
+- independent adversarial review: **complete**
+- reviewed package publication: **complete**
+- temporary publication material: **removed**
+- normal read-only CI workflow: **restored**
+- pinned Ruff: **passed**
+- pytest Python 3.11: **passed**
+- pytest Python 3.12: **passed**
+- GitHub CI run `29858218752`: **success**
 
-## Promotion state
+## Promotion restriction
 
-`PROMOTE_TO_CONTINUATION_RESEARCH`
-
-This closes the baseline-integrity gate. It does not authorize production use, performance claims, or combination with reversal before the continuation branch demonstrates independent value.
+Continuation may not be combined with reversal. No further continuation timing, session, or exit tuning is authorized on the current dataset.
 
 ## Next planned work package
 
-`DTR-NQ-WP-20260721-02 — Independent continuation engine`
+`DTR-NQ-WP-20260721-03 — IFVG entry-confirmation ablation`
 
-The continuation branch must use the locked gap-safe data contract and be evaluated independently before any adaptive routing or combination with the reversal candidate.
+It will test IFVG as an independently measurable confirmation layer against the frozen gap-safe reversal baseline. The held continuation lead may appear only as a secondary diagnostic and may not be retuned.
+
+## Open project limitations
+
+- continuous-contract rollover and back-adjustment methodology;
+- exact timestamp and daylight-saving semantics;
+- session-boundary and supplied VWAP reset verification;
+- absence of post-December-2025 paper-forward data.

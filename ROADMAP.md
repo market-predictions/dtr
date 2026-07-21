@@ -29,7 +29,7 @@ Assessment: `docs/DUKASCOPY_DATA_SOURCE_REVIEW_2026-07-21.md`
 
 ## Phase 1 — Python reversal baseline
 
-Status: **complete; frozen and gap-safe baselines locked**
+Status: **reference candidate frozen; gap-safe rerun pending local dataset execution**
 
 - [x] Implement the three DTR session ranges.
 - [x] Implement first one-sided sweep, reclaim, and protected-pivot logic.
@@ -45,13 +45,13 @@ Status: **complete; frozen and gap-safe baselines locked**
 - [x] Add deterministic artifact generation and frozen-baseline checks.
 - [x] Preserve `DTR_PY_NQ_CANDIDATE_0_1` as an explicit `observe_only` reference run.
 - [x] Add `DTR_PY_NQ_CANDIDATE_0_1_GAP_SAFE` with identical strategy parameters and `reject_unsafe` execution.
-- [x] Execute both manifests against the checksum-matched NQ dataset.
-- [x] Confirm the reference run reproduces 504 trades, 84.164359R net, and 14.107858R maximum drawdown.
-- [x] Lock the 491-trade gap-safe log, artifact hashes, funnel deltas, and regression tolerances.
+- [ ] Execute both manifests against the local NQ dataset.
+- [ ] Confirm the reference run reproduces 504 trades, 84.164359R net, and 14.107858R maximum drawdown.
+- [ ] Lock the gap-safe trade log, artifact hashes, funnel deltas, and regression tolerances.
 
 ## Phase 2 — Data integrity and reproducibility gate
 
-Status: **baseline-integrity gate complete; timestamp and rollover research remain open**
+Status: **implementation complete; source-data rerun and timestamp/rollover work remain**
 
 - [x] Classify maintenance, weekend, holiday, offset, missing-data, and unexplained timestamp gaps.
 - [x] Attach deterministic reset and unsafe-gap epochs to derived five-minute bars.
@@ -63,36 +63,39 @@ Status: **baseline-integrity gate complete; timestamp and rollover research rema
 - [x] Add focused tests for intra-bucket gaps, range contamination, signal-path resets, trade bridges, and policy separation.
 - [x] Record code commit, dataset hash, manifest hash, execution assumptions, and integrity counters in generated runs.
 - [x] Add an independent research-review checklist before candidate promotion.
-- [x] Run the reference and gap-safe manifests on the full NQ dataset and attribute every changed trade.
+- [ ] Run the reference and gap-safe manifests on the full local NQ dataset and compare every changed trade.
 - [ ] Detect probable contract-roll discontinuities and test state resets around them.
 - [ ] Confirm daylight-saving and bar-open/bar-close assumptions.
 - [ ] Verify session boundaries with targeted source-data fixtures.
 - [ ] Reconstruct and validate supplied RTH/ETH VWAP fields.
 
-Promotion gate passed on 2026-07-21. Phase 3 may begin under the locked gap-safe contract. Timestamp and rollover limitations remain open and must be isolated from continuation conclusions.
+Promotion gate: Phase 3 may begin only after the reference rerun passes and the gap-safe result has a versioned comparison report. Timestamp and rollover limitations may remain open only if they are explicitly isolated from the first continuation experiments.
 
 ## Phase 3 — Independent continuation engine
 
-Status: **authorized; next active work package**
+Status: **complete; no candidate promoted**
 
-The continuation branch will be developed and measured independently before combination with reversal.
+The continuation branch was implemented and measured independently before any combination with reversal.
 
-- [ ] Implement accepted range breakouts.
-- [ ] Test one-bar and two-bar acceptance.
-- [ ] Test immediate breakout and first-pullback entries.
-- [ ] Add displacement, VWAP, efficiency-ratio, and distance-from-range filters.
-- [ ] Add failed-breakout invalidation.
-- [ ] Optimize continuation-specific stops and exits.
-- [ ] Report performance by session, weekday, direction, and regime.
-- [ ] Require independently positive walk-forward evidence before combination.
+- [x] Implement accepted range breakouts.
+- [x] Test one-bar and two-bar acceptance.
+- [x] Test immediate breakout and first-pullback entries.
+- [x] Record displacement, VWAP, efficiency-ratio, ADX, volume, extension, and timing diagnostics.
+- [x] Add failed-breakout invalidation.
+- [x] Test continuation-specific stops and exits.
+- [x] Report performance by session, weekday, direction, entry route, and chronological period.
+- [x] Run timing-neighbourhood, cost, session-removal, bootstrap, and walk-forward stress.
+- [x] Perform independent review.
+
+Decision: `HOLD_FOR_FRESH_DATA`. All unfiltered variants are negative. `CONT_A2_PULLBACK_LATE60` is retained as a research lead only; it may not be combined with reversal or tuned further on the current sample.
 
 ## Phase 4 — Entry and context modules
 
-Status: **not started**
+Status: **next active phase**
 
 Order of research:
 
-1. IFVG entry confirmation.
+1. IFVG entry confirmation — next work package.
 2. CISD entry confirmation.
 3. First-pullback and hybrid entry routing.
 4. Session VWAP as information, score, soft gate, and hard gate.
