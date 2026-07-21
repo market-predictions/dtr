@@ -72,7 +72,8 @@ def test_bullish_cisd_sequence_and_last_candle_anchors_are_causal() -> None:
     assert annotation.sequence_confirmed
     assert annotation.last_candle_confirmed
     assert annotation.sequence_anchor == 100.0
-    assert annotation.last_anchor == 102.0
+    # Final candle of the bearish delivery run is index 2; its open is 101.
+    assert annotation.last_anchor == 101.0
     assert annotation.sequence_confirm_index == 3
     assert annotation.last_confirm_index == 4
     assert annotation.sequence_age_bars == 1
@@ -90,7 +91,8 @@ def test_bearish_cisd_is_directionally_symmetric() -> None:
     assert annotation.sequence_confirmed
     assert annotation.last_candle_confirmed
     assert annotation.sequence_anchor == 104.0
-    assert annotation.last_anchor == 102.0
+    # Final candle of the bullish delivery run is index 2; its open is 103.
+    assert annotation.last_anchor == 103.0
     assert annotation.sequence_confirm_index == 3
     assert annotation.last_confirm_index == 4
 
@@ -98,12 +100,12 @@ def test_bearish_cisd_is_directionally_symmetric() -> None:
 def test_newer_opposite_delivery_expires_unconfirmed_older_sequence() -> None:
     bars = _bars(
         [100.0, 101.0, 99.5, 102.0, 100.0, 99.0],
-        [99.0, 100.0, 101.0, 100.0, 99.0, 101.0],
+        [99.0, 100.0, 99.8, 100.0, 99.0, 103.0],
     )
     annotation = annotate_signal(bars, _signal(1, sweep=0, entry=5, bars=bars))
 
-    # The first bearish sequence cannot be confirmed after the newer bearish
-    # sequence begins. Only the latest sequence is eligible at the entry.
+    # The first bearish sequence remains unconfirmed before the newer bearish
+    # sequence begins. Only the newer sequence can confirm at the entry bar.
     assert annotation.sequence_confirmed
     assert annotation.sequence_start_index == 3
     assert annotation.sequence_end_index == 4
