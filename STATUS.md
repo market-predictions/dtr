@@ -4,11 +4,11 @@
 
 `DTR-NQ-WP-20260721-04 — CISD entry-confirmation ablation`
 
-Status: **complete; awaiting final CI and PR merge**
+Status: **complete; final CI passed; ready for PR merge**
 
 Branch: `agent/nq-cisd-ablation`
 
-PR: `#4 — Test CISD confirmation on frozen NQ reversal`
+PR: `#4 — Reject CISD confirmation after causal NQ ablation`
 
 Decision: `REJECT_NO_INCREMENTAL_VALUE`
 
@@ -60,15 +60,18 @@ CISD retest is retained as a diagnostic annotation only. It is not authorized as
 - final-candle anchor fixtures: **passed**;
 - stale confirmed/unconfirmed sequence expiry: **passed**;
 - reset-epoch fixtures: **passed**;
-- strict manifest tests: **passed locally**;
-- full local suite: **62 tests passed**;
+- strict manifest tests: **passed**;
+- full suite: **62 tests passed**;
 - frozen observe regression: **passed**;
 - exact changed-trade attribution: **complete**;
 - deterministic clean repeat: **52/52 artifacts byte-identical**;
 - cost stress: **complete**;
 - bootstrap and permutation analysis: **complete**;
 - independent adversarial review: **complete**;
-- GitHub CI on governance-complete head: **pending**.
+- pinned Ruff: **passed**;
+- pytest Python 3.11: **passed**;
+- pytest Python 3.12: **passed**;
+- GitHub CI run `29875052056`: **success**.
 
 ## Promotion restriction
 
