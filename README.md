@@ -78,7 +78,7 @@ The staged pack runner remains available for controlled NQ research:
 python scripts/run_research.py data/raw/NQ_Futures_-_1min_Bar_2022_2025.zip --pack bos
 ```
 
-Available packs are `baseline`, `bos`, `sweep`, `regime`, `timing`, `risk`, and `exit`. Ordinary research runs use the gap-safe execution path. No additional parameter optimization should be promoted until the reference and gap-safe full-dataset comparison is locked.
+Available packs are `baseline`, `bos`, `sweep`, `regime`, `timing`, `risk`, and `exit`. Ordinary research runs use the gap-safe execution path. The frozen reversal baseline is locked; new research proceeds through separate work packages.
 
 ## First research run
 
@@ -90,7 +90,8 @@ Methodology, results, limitations, and artifacts are documented in:
 - `configs/nq_candidate_0_1.yaml`
 - `configs/manifests/nq_candidate_0_1.yaml`
 - `configs/manifests/nq_candidate_0_1_gap_safe.yaml`
-- `results/2026-07-21/`
+- `docs/NQ_GAP_SAFE_COMPARISON_2026-07-21.md`
+- `results/2026-07-21/nq_candidate_0_1_gap_safe_summary.json`
 
 These are research findings, not production-performance claims. Continuous-contract rollover and exact timestamp semantics remain unresolved, and no post-December-2025 paper-forward sample exists yet.
 
@@ -112,4 +113,4 @@ Raw market datasets and generated bulk artifacts are not committed to normal Git
 
 ## Status
 
-**v0.2.2 — gap-safe execution implemented; full NQ reference-versus-sanitized rerun pending.**
+**v0.2.3 — gap-safe baseline locked; independent continuation research authorized.**

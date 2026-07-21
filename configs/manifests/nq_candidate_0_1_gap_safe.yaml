@@ -63,3 +63,11 @@ execution:
   same_minute_collision_policy: conservative_stop_first
   random_seed: 20260721
   gap_policy: reject_unsafe
+
+expected_baseline:
+  trades: 491
+  net_r: 88.49578342152539
+  max_drawdown_r: 14.107857513807524
+  tolerance_trades: 0
+  tolerance_net_r: 0.000001
+  tolerance_max_drawdown_r: 0.000001

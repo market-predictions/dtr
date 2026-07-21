@@ -4,7 +4,7 @@
 
 `DTR-NQ-WP-20260721-01 — Baseline integrity closure`
 
-Status: **implementation complete; full-dataset rerun pending**
+Status: **complete**
 
 Branch: `agent/nq-baseline-integrity-closure`
 
@@ -14,55 +14,69 @@ Draft PR: `#1 — Close NQ baseline integrity gate`
 
 `nq_futures_1m_2022_2025`
 
-The NQ dataset remains the sole optimization base for the current phase. Dukascopy and other feeds are deferred.
+Dataset SHA-256:
 
-## Current candidates
+`8d3f157a422636e5b8dda51cc3a3d9209c50cb53f9b279d3e14b627ce59370dc`
 
-### Frozen reference
+NQ remains the sole optimization base for the current phase. Dukascopy and other feeds are deferred.
+
+## Frozen reference
 
 `DTR_PY_NQ_CANDIDATE_0_1`
 
-Execution policy: `observe_only`
+- policy: `observe_only`;
+- trades: `504`;
+- net R: `84.16435914242919`;
+- maximum drawdown: `14.107857513807524R`;
+- regression: **passed**.
 
-Purpose: reproduce the historical 504-trade result and report integrity observations without changing the trade set.
-
-### Sanitized candidate
+## Gap-safe baseline
 
 `DTR_PY_NQ_CANDIDATE_0_1_GAP_SAFE`
 
-Execution policy: `reject_unsafe`
+- policy: `reject_unsafe`;
+- strategy parameters: **identical to the frozen reference**;
+- trades: `491`;
+- net R: `88.49578342152539`;
+- maximum drawdown: `14.107857513807524R`;
+- regression: **locked and passed**.
 
-Purpose: use identical strategy parameters while rejecting contaminated ranges, setup paths, and open-trade intervals.
+## Difference attribution
+
+- removed trades: `13`;
+- added trades: `0`;
+- contaminated session ranges: `9` trades;
+- unsafe gaps during open trades: `4` trades;
+- unexplained differences: `0`;
+- deterministic clean reruns: **byte-identical for all required artifacts**.
+
+Comparison report:
+
+`docs/NQ_GAP_SAFE_COMPARISON_2026-07-21.md`
+
+Compact machine-readable result:
+
+`results/2026-07-21/nq_candidate_0_1_gap_safe_summary.json`
 
 ## Validation status
 
-- Gap-safe implementation: **complete**
 - Independent adversarial review: **complete**
 - Pinned Ruff 0.15.22: **passed**
 - Pytest Python 3.11: **passed**
 - Pytest Python 3.12: **passed**
-- CI run: `29850412195` — **success**
-- Full reference manifest rerun: **pending local archive**
-- Full gap-safe manifest rerun: **pending local archive**
+- Frozen reference full-data rerun: **passed**
+- Gap-safe full-data rerun: **passed**
+- Trade-level attribution: **complete**
+- Artifact hash lock: **complete**
 
 ## Promotion state
 
-`PROMOTE_TO_FULL_DATASET_RERUN`
+`PROMOTE_TO_CONTINUATION_RESEARCH`
 
-This is not candidate-performance approval and does not yet authorize new parameter optimization.
+This closes the baseline-integrity gate. It does not authorize production use, performance claims, or combination with reversal before the continuation branch demonstrates independent value.
 
-## Immediate next action
+## Next planned work package
 
-Place the checksum-matched NQ archive at:
+`DTR-NQ-WP-20260721-02 — Independent continuation engine`
 
-`data/raw/NQ_Futures_-_1min_Bar_2022_2025.zip`
-
-Then execute the two commands in:
-
-`handovers/DTR-NQ-WP-20260721-01.md`
-
-The rerun must reproduce the frozen baseline, generate the gap-safe comparison, attribute every changed trade, and lock deterministic artifacts.
-
-## Next planned research phase
-
-Independent continuation engine, only after the reference-versus-gap-safe comparison receives a new promotion decision.
+The continuation branch must use the locked gap-safe data contract and be evaluated independently before any adaptive routing or combination with the reversal candidate.

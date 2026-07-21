@@ -18,17 +18,6 @@ jobs:
         with:
           show-progress: false
 
-      - name: Prepare source snapshot
-        run: git archive --format=tar.gz --output=dtr-source.tar.gz HEAD
-
-      - name: Upload source snapshot
-        uses: actions/upload-artifact@v4
-        with:
-          name: dtr-source-snapshot
-          path: dtr-source.tar.gz
-          if-no-files-found: error
-          retention-days: 1
-
       - name: Ruff
         id: ruff
         shell: bash

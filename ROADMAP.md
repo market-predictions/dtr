@@ -29,7 +29,7 @@ Assessment: `docs/DUKASCOPY_DATA_SOURCE_REVIEW_2026-07-21.md`
 
 ## Phase 1 — Python reversal baseline
 
-Status: **reference candidate frozen; gap-safe rerun pending local dataset execution**
+Status: **complete; frozen and gap-safe baselines locked**
 
 - [x] Implement the three DTR session ranges.
 - [x] Implement first one-sided sweep, reclaim, and protected-pivot logic.
@@ -45,13 +45,13 @@ Status: **reference candidate frozen; gap-safe rerun pending local dataset execu
 - [x] Add deterministic artifact generation and frozen-baseline checks.
 - [x] Preserve `DTR_PY_NQ_CANDIDATE_0_1` as an explicit `observe_only` reference run.
 - [x] Add `DTR_PY_NQ_CANDIDATE_0_1_GAP_SAFE` with identical strategy parameters and `reject_unsafe` execution.
-- [ ] Execute both manifests against the local NQ dataset.
-- [ ] Confirm the reference run reproduces 504 trades, 84.164359R net, and 14.107858R maximum drawdown.
-- [ ] Lock the gap-safe trade log, artifact hashes, funnel deltas, and regression tolerances.
+- [x] Execute both manifests against the checksum-matched NQ dataset.
+- [x] Confirm the reference run reproduces 504 trades, 84.164359R net, and 14.107858R maximum drawdown.
+- [x] Lock the 491-trade gap-safe log, artifact hashes, funnel deltas, and regression tolerances.
 
 ## Phase 2 — Data integrity and reproducibility gate
 
-Status: **implementation complete; source-data rerun and timestamp/rollover work remain**
+Status: **baseline-integrity gate complete; timestamp and rollover research remain open**
 
 - [x] Classify maintenance, weekend, holiday, offset, missing-data, and unexplained timestamp gaps.
 - [x] Attach deterministic reset and unsafe-gap epochs to derived five-minute bars.
@@ -63,17 +63,17 @@ Status: **implementation complete; source-data rerun and timestamp/rollover work
 - [x] Add focused tests for intra-bucket gaps, range contamination, signal-path resets, trade bridges, and policy separation.
 - [x] Record code commit, dataset hash, manifest hash, execution assumptions, and integrity counters in generated runs.
 - [x] Add an independent research-review checklist before candidate promotion.
-- [ ] Run the reference and gap-safe manifests on the full local NQ dataset and compare every changed trade.
+- [x] Run the reference and gap-safe manifests on the full NQ dataset and attribute every changed trade.
 - [ ] Detect probable contract-roll discontinuities and test state resets around them.
 - [ ] Confirm daylight-saving and bar-open/bar-close assumptions.
 - [ ] Verify session boundaries with targeted source-data fixtures.
 - [ ] Reconstruct and validate supplied RTH/ETH VWAP fields.
 
-Promotion gate: Phase 3 may begin only after the reference rerun passes and the gap-safe result has a versioned comparison report. Timestamp and rollover limitations may remain open only if they are explicitly isolated from the first continuation experiments.
+Promotion gate passed on 2026-07-21. Phase 3 may begin under the locked gap-safe contract. Timestamp and rollover limitations remain open and must be isolated from continuation conclusions.
 
 ## Phase 3 — Independent continuation engine
 
-Status: **next research phase after baseline-integrity rerun**
+Status: **authorized; next active work package**
 
 The continuation branch will be developed and measured independently before combination with reversal.
 

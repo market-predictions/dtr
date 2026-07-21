@@ -97,15 +97,51 @@ The reviewer assumes the apparent DTR edge is false until data integrity, reprod
 6. The gap-safe exclusion policy avoids fabricating execution through missing data, but it does not estimate what a real fill would have been.
 7. Legacy lint debt in the large engine and optimizer is explicitly quarantined for a separate cleanup work package.
 
-## Promotion decision
+## Full-dataset execution review
 
-`PROMOTE_TO_FULL_DATASET_RERUN`
+The checksum-matched archive reproduced the frozen reference exactly:
 
-This is **not** approval to:
+- trades: `504`;
+- net R: `84.16435914242919`;
+- maximum drawdown: `14.107857513807524R`.
 
-- promote the gap-safe candidate as profitable;
-- begin parameter retuning;
-- combine reversal and continuation;
-- make production-performance claims.
+The identical-parameter gap-safe run produced:
 
-The next promotion decision may be made only after both manifests run against the checksum-matched NQ archive and every changed trade is attributed.
+- trades: `491`;
+- net R: `88.49578342152539`;
+- maximum drawdown: `14.107857513807524R`.
+
+Every changed trade was attributed:
+
+- `9` contaminated session ranges;
+- `4` unsafe gaps during open trades;
+- `0` added trades;
+- `0` unexplained differences.
+
+Both manifests were rerun into clean directories. All required CSV, Parquet, funnel, attribution, and summary artifacts were byte-identical between first and second execution.
+
+### Interpretation challenge
+
+The 4.331424R increase in sanitized net R is not an optimization result. It arises from removing contaminated observations. The effect is not uniformly positive: Asia and London improve, while New York declines by 1.022007R because its two removed contaminated trades were net profitable. The later-research slice improves by only 0.134078R. Therefore the integrity correction should not be represented as stronger evidence of edge.
+
+## Remaining limitations
+
+1. Continuous-contract rollover and back-adjustment methodology remain unresolved.
+2. Timestamp meaning, daylight-saving transitions, session boundaries, and supplied VWAP resets remain provisional.
+3. The gap-safe policy excludes execution through missing data rather than estimating hypothetical fills.
+4. No post-December-2025 paper-forward sample is available.
+5. Legacy lint debt in the large engine and optimizer remains explicitly quarantined for a separate cleanup work package.
+
+## Final promotion decision
+
+`PROMOTE_TO_CONTINUATION_RESEARCH`
+
+This decision authorizes an independent continuation research branch under the locked gap-safe data contract. It does **not** approve:
+
+- production deployment;
+- parameter retuning of the reversal candidate;
+- combining reversal and continuation before independent evidence;
+- profitability claims;
+- cross-market extrapolation.
+
+The continuation branch must demonstrate independently positive walk-forward evidence and acceptable opportunity coverage before any adaptive routing or combination is considered.

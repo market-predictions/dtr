@@ -1,5 +1,43 @@
 # Changelog
 
+## v0.2.3 — 2026-07-21
+
+### Added
+
+- Full-dataset reference-versus-gap-safe comparison report.
+- Compact machine-readable comparison summary with locked artifact hashes.
+- Trade-level attribution for all 13 removed observations.
+- Expected baseline for `DTR_PY_NQ_CANDIDATE_0_1_GAP_SAFE`.
+- Final independent review and completed work-package handover.
+
+### Validated
+
+- Frozen reference reproduced exactly: 504 trades, 84.164359R net, 14.107858R maximum drawdown.
+- Gap-safe baseline: 491 trades, 88.495783R net, 14.107858R maximum drawdown.
+- Nine trades were removed for contaminated session ranges.
+- Four trades were removed for unsafe gaps during open positions.
+- No trades were added and no unexplained differences remained.
+- All required artifacts were byte-identical across clean reruns.
+
+### Decision
+
+- Close the baseline-integrity gate.
+- Promote the project to an independent continuation-engine work package.
+- Treat the 4.331424R sanitized improvement as a data-integrity consequence, not an optimization gain.
+
+### Known limitations
+
+- Continuous-contract rollover and adjustment methodology remain unresolved.
+- Timestamp, daylight-saving, session-boundary, and VWAP-reset semantics remain provisional.
+- No post-December-2025 paper-forward sample is available.
+- The gap-safe policy excludes missing-data execution rather than estimating hypothetical fills.
+
+### Next
+
+- Develop the continuation engine independently under `DTR-NQ-WP-20260721-02`.
+- Test accepted breakouts, immediate versus first-pullback entries, failed-breakout invalidation, and continuation-specific risk logic.
+- Require independently positive walk-forward evidence before any combination with reversal.
+
 ## v0.2.2 — 2026-07-21
 
 ### Added
