@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
-from typing import Any
+from typing import Any, Literal
 
 import numpy as np
 import pandas as pd
@@ -10,6 +10,8 @@ from dtr_lab.data.gaps import classify_gaps
 
 from . import engine as base
 
+GapPolicy = Literal["observe_only", "reject_unsafe"]
+
 # Capture the pre-integrity implementation once. The package initializer later routes the
 # public engine entry points through this module without creating recursive calls here.
 _BASE_RESAMPLE_5M = base.resample_5m
@@ -17,6 +19,7 @@ _BASE_BUILD_SESSION_TABLE = base.build_session_table
 _BASE_GENERATE_SIGNALS = base.generate_signals
 _BASE_PREPARE_MARKET_ARRAYS = base.prepare_market_arrays
 _BASE_SIMULATE_TRADE = base._simulate_trade_np
+_BASE_RUN_BACKTEST = base.run_backtest
 
 
 @dataclass(frozen=True)
@@ -25,6 +28,7 @@ class IntegrityCounters:
     sessions_range_gap_rejected: int = 0
     sessions_signal_path_truncated: int = 0
     skipped_unsafe_gap_bridge: int = 0
+    observed_unsafe_gap_bridges: int = 0
 
 
 class IntegrityFunnel:
@@ -48,6 +52,9 @@ class IntegrityFunnel:
                 self._counters.sessions_signal_path_truncated
             ),
             "skipped_unsafe_gap_bridge": self._counters.skipped_unsafe_gap_bridge,
+            "observed_unsafe_gap_bridges": (
+                self._counters.observed_unsafe_gap_bridges
+            ),
         }
 
 
@@ -56,6 +63,47 @@ def _data_fingerprint(frame: pd.DataFrame) -> tuple[int, int, int]:
     if timestamps.empty:
         return (0, 0, 0)
     return (len(frame), int(timestamps.iloc[0].value), int(timestamps.iloc[-1].value))
+
+
+def _bar_fingerprint(bars: pd.DataFrame) -> tuple[int, int, int]:
+    if bars.empty:
+        return (0, 0, 0)
+    timestamps = pd.to_datetime(bars["timestamp"], errors="raise")
+    return (len(bars), int(timestamps.iloc[0].value), int(timestamps.iloc[-1].value))
+
+
+def _session_fingerprint(sessions: pd.DataFrame) -> tuple[int, int]:
+    if sessions.empty:
+        return (0, 0)
+    columns = [
+        "session",
+        "session_date",
+        "range_start",
+        "range_end",
+        "break_end",
+        "post_start_index",
+    ]
+    work = sessions.loc[:, columns].copy()
+    original_end = (
+        sessions["integrity_original_post_end_index"]
+        if "integrity_original_post_end_index" in sessions.columns
+        else sessions["post_end_index"]
+    )
+    work["post_end_index"] = original_end.to_numpy()
+    digest = int(pd.util.hash_pandas_object(work, index=True).sum())
+    return (len(work), digest)
+
+
+def _integrity_fingerprint(
+    one_minute: pd.DataFrame,
+    bars: pd.DataFrame,
+    sessions: pd.DataFrame,
+) -> tuple[tuple[int, int, int], tuple[int, int, int], tuple[int, int]]:
+    return (
+        _data_fingerprint(one_minute),
+        _bar_fingerprint(bars),
+        _session_fingerprint(sessions),
+    )
 
 
 def _gap_table(one_minute: pd.DataFrame) -> pd.DataFrame:
@@ -121,9 +169,10 @@ def _sanitize_sessions(
     bars: pd.DataFrame,
     sessions: pd.DataFrame,
 ) -> pd.DataFrame:
-    fingerprint = _data_fingerprint(one_minute)
+    fingerprint = _integrity_fingerprint(one_minute, bars, sessions)
     if sessions.empty:
         work = sessions.copy()
+        work["integrity_original_post_end_index"] = pd.Series(dtype="int64")
         work["integrity_range_gap_rejected"] = pd.Series(dtype="bool")
         work["integrity_signal_path_truncated"] = pd.Series(dtype="bool")
         work.attrs["dtr_integrity_fingerprint"] = fingerprint
@@ -142,6 +191,7 @@ def _sanitize_sessions(
 
     if (
         sessions.attrs.get("dtr_integrity_fingerprint") == fingerprint
+        and "integrity_original_post_end_index" in sessions.columns
         and "integrity_range_gap_rejected" in sessions.columns
         and "integrity_signal_path_truncated" in sessions.columns
     ):
@@ -156,15 +206,19 @@ def _sanitize_sessions(
     bar_times = bars["timestamp"].to_numpy(dtype="datetime64[ns]")
 
     work = sessions.copy()
+    original_ends = (
+        work["integrity_original_post_end_index"].astype(int).tolist()
+        if "integrity_original_post_end_index" in work.columns
+        else work["post_end_index"].astype(int).tolist()
+    )
     range_rejected: list[bool] = []
     path_truncated: list[bool] = []
     adjusted_end: list[int] = []
 
-    for row in work.itertuples(index=False):
+    for row, original_end in zip(work.itertuples(index=False), original_ends, strict=True):
         range_start = pd.Timestamp(row.range_start)
         range_end = pd.Timestamp(row.range_end)
         break_end = pd.Timestamp(row.break_end)
-        original_end = int(row.post_end_index)
 
         in_range = (reset_times > range_start) & (reset_times < range_end)
         reject_range = bool(in_range.any())
@@ -191,10 +245,22 @@ def _sanitize_sessions(
         adjusted_end.append(new_end)
         path_truncated.append(truncated)
 
+    work["integrity_original_post_end_index"] = original_ends
     work["post_end_index"] = adjusted_end
     work["integrity_range_gap_rejected"] = range_rejected
     work["integrity_signal_path_truncated"] = path_truncated
-    work.attrs["dtr_integrity_fingerprint"] = fingerprint
+    work.attrs["dtr_integrity_fingerprint"] = _integrity_fingerprint(
+        one_minute,
+        bars,
+        work,
+    )
+    return work
+
+
+def _restore_reference_sessions(sessions: pd.DataFrame) -> pd.DataFrame:
+    work = sessions.copy()
+    if "integrity_original_post_end_index" in work.columns:
+        work["post_end_index"] = work["integrity_original_post_end_index"].astype(int)
     return work
 
 
@@ -224,6 +290,20 @@ def _first_unsafe_gap_between(
     return None
 
 
+def _count_unsafe_trade_bridges(trades: pd.DataFrame, unsafe_ns: np.ndarray) -> int:
+    if trades.empty or unsafe_ns.size == 0:
+        return 0
+    return sum(
+        _first_unsafe_gap_between(
+            unsafe_ns,
+            pd.Timestamp(row.entry_time),
+            pd.Timestamp(row.exit_time),
+        )
+        is not None
+        for row in trades.itertuples(index=False)
+    )
+
+
 def run_backtest(
     one_minute: pd.DataFrame,
     bars: pd.DataFrame,
@@ -231,7 +311,12 @@ def run_backtest(
     cfg: base.StrategyConfig,
     market_arrays: tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]
     | None = None,
+    *,
+    gap_policy: GapPolicy = "reject_unsafe",
 ) -> tuple[pd.DataFrame, IntegrityFunnel]:
+    if gap_policy not in ("observe_only", "reject_unsafe"):
+        raise ValueError(f"Unknown gap policy: {gap_policy}")
+
     safe_sessions = _sanitize_sessions(one_minute, bars, sessions)
     if safe_sessions.empty:
         eligible = pd.Series(False, index=safe_sessions.index, dtype=bool)
@@ -246,6 +331,26 @@ def run_backtest(
         & safe_sessions["integrity_signal_path_truncated"]
     )
 
+    gaps = _gap_table(one_minute)
+    unsafe_ns = _gap_ns(gaps, "reject_trade_bridge")
+
+    if gap_policy == "observe_only":
+        reference_sessions = _restore_reference_sessions(safe_sessions)
+        trades, funnel = _BASE_RUN_BACKTEST(
+            one_minute,
+            bars,
+            reference_sessions,
+            cfg,
+            market_arrays=market_arrays,
+        )
+        counters = IntegrityCounters(
+            sessions_raw=int(eligible.sum()),
+            sessions_range_gap_rejected=int(range_rejected.sum()),
+            sessions_signal_path_truncated=int(path_truncated.sum()),
+            observed_unsafe_gap_bridges=_count_unsafe_trade_bridges(trades, unsafe_ns),
+        )
+        return trades, IntegrityFunnel(funnel, counters)
+
     signal_sessions = safe_sessions.loc[
         ~safe_sessions["integrity_range_gap_rejected"]
     ].copy()
@@ -255,9 +360,6 @@ def run_backtest(
     one_times_ns, one_open, one_high, one_low, one_close = (
         market_arrays or prepare_market_arrays(one_minute)
     )
-    gaps = _gap_table(one_minute)
-    unsafe_ns = _gap_ns(gaps, "reject_trade_bridge")
-
     trades: list[base.Trade] = []
     next_free = pd.Timestamp.min
     bridge_rejections = 0
