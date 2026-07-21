@@ -125,6 +125,24 @@ def _gap_ns(gaps: pd.DataFrame, flag: str) -> np.ndarray:
     return pd.to_datetime(selected).to_numpy(dtype="datetime64[ns]").astype(np.int64)
 
 
+def _gap_intervals(gaps: pd.DataFrame, flag: str) -> tuple[np.ndarray, np.ndarray]:
+    if gaps.empty:
+        empty = np.array([], dtype=np.int64)
+        return empty, empty
+    selected = gaps.loc[gaps[flag], ["previous_timestamp", "current_timestamp"]]
+    previous_ns = (
+        pd.to_datetime(selected["previous_timestamp"])
+        .to_numpy(dtype="datetime64[ns]")
+        .astype(np.int64)
+    )
+    current_ns = (
+        pd.to_datetime(selected["current_timestamp"])
+        .to_numpy(dtype="datetime64[ns]")
+        .astype(np.int64)
+    )
+    return previous_ns, current_ns
+
+
 def resample_5m(one_minute: pd.DataFrame) -> pd.DataFrame:
     """Resample without filling gaps and attach deterministic reset metadata."""
 
@@ -200,11 +218,21 @@ def _sanitize_sessions(
         return sessions
 
     gaps = _gap_table(one_minute)
-    reset_times = (
-        pd.to_datetime(gaps.loc[gaps["reset_strategy_state"], "current_timestamp"])
+    reset_gaps = (
+        gaps.loc[
+            gaps["reset_strategy_state"],
+            ["previous_timestamp", "current_timestamp"],
+        ].copy()
         if not gaps.empty
-        else pd.Series(dtype="datetime64[ns]")
+        else pd.DataFrame(columns=["previous_timestamp", "current_timestamp"])
     )
+    if not reset_gaps.empty:
+        reset_gaps["previous_timestamp"] = pd.to_datetime(
+            reset_gaps["previous_timestamp"]
+        )
+        reset_gaps["current_timestamp"] = pd.to_datetime(
+            reset_gaps["current_timestamp"]
+        )
     bar_times = bars["timestamp"].to_numpy(dtype="datetime64[ns]")
 
     work = sessions.copy()
@@ -222,18 +250,29 @@ def _sanitize_sessions(
         range_end = pd.Timestamp(row.range_end)
         break_end = pd.Timestamp(row.break_end)
 
-        in_range = (reset_times > range_start) & (reset_times < range_end)
-        range_rejected.append(bool(in_range.any()))
+        range_overlap = (
+            (reset_gaps["previous_timestamp"] < range_end)
+            & (reset_gaps["current_timestamp"] > range_start)
+        )
+        range_rejected.append(bool(range_overlap.any()))
 
         new_end = original_end
         truncated = False
-        in_path = (reset_times >= range_end) & (reset_times < break_end)
-        if in_path.any():
-            first_gap = pd.Timestamp(reset_times.loc[in_path].iloc[0])
+        path_overlap = (
+            (reset_gaps["previous_timestamp"] < break_end)
+            & (reset_gaps["current_timestamp"] > range_end)
+        )
+        if path_overlap.any():
+            first_gap = reset_gaps.loc[path_overlap].iloc[0]
+            first_missing = max(
+                pd.Timestamp(first_gap["previous_timestamp"])
+                + pd.Timedelta(minutes=1),
+                range_end,
+            )
             gap_bar = int(
                 np.searchsorted(
                     bar_times,
-                    np.datetime64(first_gap),
+                    np.datetime64(first_missing),
                     side="right",
                 )
                 - 1
@@ -277,26 +316,33 @@ def prepare_market_arrays(
 
 
 def _first_unsafe_gap_between(
-    unsafe_ns: np.ndarray,
+    unsafe_previous_ns: np.ndarray,
+    unsafe_current_ns: np.ndarray,
     start: pd.Timestamp,
     end: pd.Timestamp,
 ) -> int | None:
-    if unsafe_ns.size == 0:
+    if unsafe_current_ns.size == 0:
         return None
     start_ns = np.datetime64(start, "ns").astype(np.int64)
     end_ns = np.datetime64(end, "ns").astype(np.int64)
-    idx = int(np.searchsorted(unsafe_ns, start_ns, side="left"))
-    if idx < len(unsafe_ns) and int(unsafe_ns[idx]) < end_ns:
-        return int(unsafe_ns[idx])
-    return None
+    overlap = (unsafe_previous_ns < end_ns) & (unsafe_current_ns > start_ns)
+    indexes = np.flatnonzero(overlap)
+    if indexes.size == 0:
+        return None
+    return int(unsafe_current_ns[int(indexes[0])])
 
 
-def _count_unsafe_trade_bridges(trades: pd.DataFrame, unsafe_ns: np.ndarray) -> int:
-    if trades.empty or unsafe_ns.size == 0:
+def _count_unsafe_trade_bridges(
+    trades: pd.DataFrame,
+    unsafe_previous_ns: np.ndarray,
+    unsafe_current_ns: np.ndarray,
+) -> int:
+    if trades.empty or unsafe_current_ns.size == 0:
         return 0
     return sum(
         _first_unsafe_gap_between(
-            unsafe_ns,
+            unsafe_previous_ns,
+            unsafe_current_ns,
             pd.Timestamp(row.entry_time),
             pd.Timestamp(row.exit_time),
         )
@@ -333,7 +379,9 @@ def run_backtest(
     )
 
     gaps = _gap_table(one_minute)
-    unsafe_ns = _gap_ns(gaps, "reject_trade_bridge")
+    unsafe_previous_ns, unsafe_current_ns = _gap_intervals(
+        gaps, "reject_trade_bridge"
+    )
 
     if gap_policy == "observe_only":
         reference_sessions = _restore_reference_sessions(safe_sessions)
@@ -348,7 +396,11 @@ def run_backtest(
             sessions_raw=int(eligible.sum()),
             sessions_range_gap_rejected=int(range_rejected.sum()),
             sessions_signal_path_truncated=int(path_truncated.sum()),
-            observed_unsafe_gap_bridges=_count_unsafe_trade_bridges(trades, unsafe_ns),
+            observed_unsafe_gap_bridges=_count_unsafe_trade_bridges(
+                trades,
+                unsafe_previous_ns,
+                unsafe_current_ns,
+            ),
         )
         return trades, IntegrityFunnel(funnel, counters)
 
@@ -383,7 +435,8 @@ def run_backtest(
             continue
 
         gap_ns = _first_unsafe_gap_between(
-            unsafe_ns,
+            unsafe_previous_ns,
+            unsafe_current_ns,
             signal.entry_time,
             trade.exit_time,
         )
