@@ -2,15 +2,13 @@
 
 ## Current work package
 
-`DTR-NQ-WP-20260721-04 — CISD entry-confirmation ablation`
+`DTR-NQ-WP-20260722-05 — Reversal entry-routing ablation`
 
-Status: **complete; final CI passed; ready for PR merge**
+Status: **claimed; causal design complete; implementation starting**
 
-Branch: `agent/nq-cisd-ablation`
+Branch: `agent/nq-entry-routing-ablation`
 
-PR: `#4 — Reject CISD confirmation after causal NQ ablation`
-
-Decision: `REJECT_NO_INCREMENTAL_VALUE`
+Predecessor: `DTR-NQ-WP-20260721-04` — complete and merged in PR #4
 
 ## Locked primary dataset
 
@@ -28,10 +26,9 @@ NQ remains the sole optimization base for the current phase.
 - expectancy: `0.180235811449135R`;
 - net R: `88.49578342152539R`;
 - profit factor: `1.3819983049452256`;
-- maximum drawdown: `14.107857513807524R`;
-- return-to-drawdown: `6.272801`.
+- maximum drawdown: `14.107857513807524R`.
 
-The baseline remains unchanged.
+Signal generation, stop construction, targets, and exits are frozen.
 
 ## Closed module decisions
 
@@ -39,49 +36,42 @@ The baseline remains unchanged.
 - IFVG confirmation: `REJECT_NO_INCREMENTAL_VALUE`;
 - CISD confirmation: `REJECT_NO_INCREMENTAL_VALUE`.
 
-None may be retuned or combined on the current NQ sample.
+None may be retuned or combined in the entry-routing work package.
 
-## CISD result
+## Current research question
 
-Broad CISD confirmation is inferior to the frozen baseline:
+Does a causal first-pullback entry or a predeclared signal-time hybrid router improve the frozen break-close reversal entry after no-fills, latency, actual stop distance, costs, and changed portfolio sequencing are included?
 
-- sequence confirm: 309 trades, 0.144100R expectancy, 4.464679 return/DD;
-- last-candle confirm: identical to sequence confirm;
-- recent ≤3 bars: 296 trades, 0.136305R expectancy;
-- recent ≤6 bars: 309 trades, 0.140105R expectancy.
+## Predeclared routes
 
-The retest portfolio has 75 trades and 0.256552R expectancy, but only 15.3% coverage and 3.728646 return/DD. Its frozen 73-trade cohort has a 0.130746R point-estimate uplift over the complement, but trade and month-block confidence intervals cross zero and the one-sided permutation p-value is 0.210289.
+- `ENTRY_BREAK_CLOSE`;
+- `ENTRY_FIRST_PULLBACK`;
+- `ENTRY_HYBRID_PREDECLARED`.
 
-CISD retest is retained as a diagnostic annotation only. It is not authorized as a filter or sizing rule.
+## Baseline pullback contract
 
-## Validation status
+- structural reference: frozen broken pivot/BOS level;
+- minimum band width: four ticks;
+- ATR band width: 0.10 ATR;
+- response: close back in the reversal direction after the first touch;
+- expiry: 12 five-minute bars;
+- maximum pre-touch extension: 1.50 times original signal risk;
+- hybrid immediate-entry threshold: extension no greater than 0.35 ATR;
+- no retrospective touch-price fills.
 
-- causal bullish/bearish implementation: **complete**;
-- final-candle anchor fixtures: **passed**;
-- stale confirmed/unconfirmed sequence expiry: **passed**;
-- reset-epoch fixtures: **passed**;
-- strict manifest tests: **passed**;
-- full suite: **62 tests passed**;
-- frozen observe regression: **passed**;
-- exact changed-trade attribution: **complete**;
-- deterministic clean repeat: **52/52 artifacts byte-identical**;
-- cost stress: **complete**;
-- bootstrap and permutation analysis: **complete**;
-- independent adversarial review: **complete**;
-- pinned Ruff: **passed**;
-- pytest Python 3.11: **passed**;
-- pytest Python 3.12: **passed**;
-- GitHub CI run `29875052056`: **success**.
+## Immediate implementation gate
+
+- implement causal signal-to-entry route state;
+- preserve the exact frozen break-close regression;
+- calculate route-specific entry-to-stop risk;
+- count touch, response, no-fill, expiry, invalidation, reset, and excessive-extension outcomes;
+- separate signal-level opportunity from implementable portfolio results;
+- attribute missed, delayed, replaced, retained, and newly enabled trades;
+- pass pinned Ruff and pytest on Python 3.11 and 3.12.
 
 ## Promotion restriction
 
-CISD may not be added to the reversal candidate, used for position sizing, combined with IFVG or continuation, tuned further on the current sample, or ported to Pine as a strategy rule.
-
-## Next planned work package
-
-`DTR-NQ-WP-20260722-05 — Reversal entry-routing ablation`
-
-It will compare the frozen break-close route with a causally defined first-pullback route and a predeclared hybrid router while preserving signal, stop, target, and exit logic.
+No route may be promoted from aggregate net R or entry-price improvement alone. Promotion requires chronological, coverage, cost, band/expiry neighbourhood, sequencing, and independent-review support.
 
 ## Open project limitations
 
