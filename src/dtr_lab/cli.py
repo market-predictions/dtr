@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Annotated
 
 import typer
 from rich.console import Console
@@ -15,8 +16,18 @@ console = Console()
 
 @app.command("audit")
 def audit_command(
-    path: Path = typer.Argument(..., exists=True, readable=True, help="CSV or ZIP market-data file"),
-    output: Path | None = typer.Option(None, "--output", "-o", help="Optional JSON output path"),
+    path: Annotated[
+        Path,
+        typer.Argument(
+            exists=True,
+            readable=True,
+            help="CSV or ZIP market-data file",
+        ),
+    ],
+    output: Annotated[
+        Path | None,
+        typer.Option("--output", "-o", help="Optional JSON output path"),
+    ] = None,
 ) -> None:
     """Validate a market-data file and print a compact audit."""
 
