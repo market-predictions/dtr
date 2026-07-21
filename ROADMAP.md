@@ -16,31 +16,20 @@ Status: **partially complete**
 
 ## Phase 0B — Provider-neutral market-data acquisition
 
-Status: **planned; non-blocking for the current NQ baseline**
+Status: **deferred; not part of the current NQ optimization phase**
 
-Decision: retain the existing NQ futures dataset as the frozen reference for the current reversal candidate. Introduce Dukascopy later as a secondary provider for longer-history and cross-market structural validation. Dukascopy index CFDs must not be presented as CME futures data.
+Decision: retain the existing NQ futures dataset as the sole optimization base for the current program. Dukascopy and other providers remain documented future options for longer-history and cross-market validation; no acquisition implementation is scheduled before the NQ roadmap reaches a significant research gate.
 
 Assessment: `docs/DUKASCOPY_DATA_SOURCE_REVIEW_2026-07-21.md`
 
 - [x] Review `giuse88/duka`, the underlying Dukascopy feed concept, current alternatives, and fit with the DTR architecture.
 - [x] Decide not to adopt the legacy `giuse88/duka` package as a production dependency.
-- [x] Define the preferred path: a Python adapter over approved official Dukascopy API access, with a pinned `dukascopy-node` run as an independent comparison oracle.
-- [ ] Confirm and document API access, automation permission, data-use terms, and any required key before bulk acquisition.
-- [ ] Define a provider interface and canonical schema that preserve provider, instrument type, UTC timestamps, bar semantics, bid/ask side, spread, volume meaning, point value, session calendar, and checksums.
-- [ ] Add live instrument-catalog discovery and freeze the metadata used by each acquisition manifest.
-- [ ] Implement resumable, rate-limited, cached, and checksum-verified one-minute acquisition without silently filling missing bars.
-- [ ] Add provider-specific data audits for price scale, duplicates, gaps, session breaks, timestamp boundaries, bid/ask consistency, and volume semantics.
-- [ ] Pilot `EURUSD`, `XAUUSD`, `USA500IDXUSD`, `USATECHIDXUSD`, and `USA30IDXUSD` when available in the live catalog.
-- [ ] Derive canonical five-minute bars from one-minute source data and verify aggregation boundaries.
-- [ ] Compare controlled pilot windows against an official Dukascopy/JForex reference and a pinned `dukascopy-node` result.
-- [ ] Register approved canonical datasets in `data/catalog.yaml`; keep raw responses and bulk data outside Git.
-- [ ] Promote Dukascopy to an approved research provider only after deterministic reruns reproduce canonical hashes and audit artifacts.
-
-This workstream may proceed in parallel after the current NQ integrity gate. It does not block the continuation engine, but it must pass before Dukascopy data is used for Phase 5 cross-market claims or parameter selection.
+- [x] Define a possible provider-neutral integration path for later use.
+- [ ] Resume only after an explicit future work-package decision.
 
 ## Phase 1 — Python reversal baseline
 
-Status: **research candidate available; reproducibility gate in progress**
+Status: **reference candidate frozen; gap-safe rerun pending local dataset execution**
 
 - [x] Implement the three DTR session ranges.
 - [x] Implement first one-sided sweep, reclaim, and protected-pivot logic.
@@ -54,25 +43,37 @@ Status: **research candidate available; reproducibility gate in progress**
 - [x] Add a strict YAML research-manifest schema.
 - [x] Add dataset checksum verification.
 - [x] Add deterministic artifact generation and frozen-baseline checks.
-- [ ] Run the manifest end-to-end in CI/local research infrastructure.
-- [ ] Lock generated artifact hashes and regression tolerances.
+- [x] Preserve `DTR_PY_NQ_CANDIDATE_0_1` as an explicit `observe_only` reference run.
+- [x] Add `DTR_PY_NQ_CANDIDATE_0_1_GAP_SAFE` with identical strategy parameters and `reject_unsafe` execution.
+- [ ] Execute both manifests against the local NQ dataset.
+- [ ] Confirm the reference run reproduces 504 trades, 84.164359R net, and 14.107858R maximum drawdown.
+- [ ] Lock the gap-safe trade log, artifact hashes, funnel deltas, and regression tolerances.
 
 ## Phase 2 — Data integrity and reproducibility gate
 
-Status: **in progress**
+Status: **implementation complete; source-data rerun and timestamp/rollover work remain**
 
-- [ ] Classify maintenance, weekend, holiday, rollover, and unexplained gaps.
-- [ ] Detect probable roll discontinuities and reset strategy state around unsafe gaps.
+- [x] Classify maintenance, weekend, holiday, offset, missing-data, and unexplained timestamp gaps.
+- [x] Attach deterministic reset and unsafe-gap epochs to derived five-minute bars.
+- [x] Reject session ranges containing reset boundaries under the gap-safe policy.
+- [x] Truncate sweep/reclaim/BOS/acceptance paths at the first reset boundary.
+- [x] Reject open trades that bridge unsafe gaps from primary performance results.
+- [x] Report observed unsafe bridges without changing the frozen reference result.
+- [x] Make gap policy explicit and versioned in every research manifest.
+- [x] Add focused tests for intra-bucket gaps, range contamination, signal-path resets, trade bridges, and policy separation.
+- [x] Record code commit, dataset hash, manifest hash, execution assumptions, and integrity counters in generated runs.
+- [x] Add an independent research-review checklist before candidate promotion.
+- [ ] Run the reference and gap-safe manifests on the full local NQ dataset and compare every changed trade.
+- [ ] Detect probable contract-roll discontinuities and test state resets around them.
 - [ ] Confirm daylight-saving and bar-open/bar-close assumptions.
 - [ ] Verify session boundaries with targeted source-data fixtures.
-- [ ] Reject trades that cross unexplained market-data gaps.
-- [ ] Generate every committed result from a versioned manifest.
-- [ ] Record code commit, dataset hash, manifest hash, and execution assumptions in every run.
-- [ ] Add an independent regression-review checklist before candidate promotion.
+- [ ] Reconstruct and validate supplied RTH/ETH VWAP fields.
 
-## Phase 3 — Continuation engine
+Promotion gate: Phase 3 may begin only after the reference rerun passes and the gap-safe result has a versioned comparison report. Timestamp and rollover limitations may remain open only if they are explicitly isolated from the first continuation experiments.
 
-Status: **not started**
+## Phase 3 — Independent continuation engine
+
+Status: **next research phase after baseline-integrity rerun**
 
 The continuation branch will be developed and measured independently before combination with reversal.
 
@@ -113,12 +114,9 @@ Status: **partially implemented**
 - [x] Bootstrap/Monte Carlo trade-sequence analysis.
 - [ ] Nested walk-forward selection with locked experiment manifests.
 - [ ] Regime-removal and session-removal stress tests.
-- [ ] Cross-market execution validation on additional licensed futures datasets.
-- [ ] Fixed-candidate structural-proxy validation on approved Dukascopy index CFDs; do not pool or label these results as NQ/ES/YM futures performance.
-- [ ] Cross-asset validation on approved FX and metals data using asset-specific sessions, spreads, point values, and cost models.
-- [ ] Compare a common overlap window across markets before using each instrument's longer independent history.
-- [ ] Permit asset-specific retuning only after the frozen candidate has been evaluated without retuning.
 - [ ] Frozen paper-forward test on post-December-2025 NQ data.
+- [ ] Cross-market execution validation on additional licensed futures datasets after the NQ program.
+- [ ] Cross-asset and structural-proxy validation only under a future approved provider work package.
 
 ## Phase 6 — Adaptive DTR model
 
