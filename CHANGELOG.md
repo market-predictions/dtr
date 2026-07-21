@@ -1,5 +1,39 @@
 # Changelog
 
+## Unreleased — 2026-07-21
+
+### Added
+
+- Dukascopy data-source viability review with technical, legal, provenance, and promotion gates.
+- Phase 0B provider-neutral market-data acquisition roadmap.
+- A staged pilot basket for FX, metals, and U.S. index-CFD structural proxies.
+- Cross-market sequencing that tests the frozen DTR candidate before allowing asset-specific retuning.
+
+### Decision
+
+- Keep the existing NQ futures dataset as the frozen primary baseline for the current reversal candidate.
+- Do not adopt the legacy `giuse88/duka` package as a production dependency.
+- Prefer a native Python adapter over approved official Dukascopy API access.
+- Use a pinned `dukascopy-node` result as an independent comparison oracle during the pilot.
+- Treat Dukascopy index CFDs as structural proxies rather than CME futures substitutes.
+
+### Why
+
+Dukascopy can provide broader history and cross-asset coverage, but provider, timestamp, bid/ask, spread, session, volume, and instrument semantics must remain explicit. Integrating the source through a provider-neutral contract adds cross-market research capacity without contaminating the frozen NQ baseline or implying that broker-CFD results validate futures execution.
+
+### Known limitations
+
+- Approved Dukascopy API access and automation/data-use rights have not yet been documented for this project.
+- No live acquisition pilot or canonical Dukascopy dataset has yet passed the DTR integrity gate.
+- Dukascopy index-CFD prices, activity volume, spreads, sessions, and contract semantics are not equivalent to CME futures.
+- Energy commodities and equities are deferred until the first pilot basket establishes reliable normalization.
+
+### Next
+
+- Confirm approved API access and applicable data-use terms.
+- Implement the provider interface, canonical schema, fixtures, caching, checksums, and provider-specific audits.
+- Run the controlled pilot after the current NQ data-integrity gate without interrupting the NQ reversal and continuation workstreams.
+
 ## v0.2.1 — 2026-07-21
 
 ### Added
