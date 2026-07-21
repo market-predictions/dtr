@@ -20,7 +20,10 @@ jobs:
         run: |
           cat .entry-routing-publish.part00 \
               .entry-routing-publish.part01 \
-              .entry-routing-publish.part02 \
+              .entry-routing-publish.part02a \
+              .entry-routing-publish.part02b \
+              .entry-routing-publish.part02c \
+              .entry-routing-publish.part02d \
               .entry-routing-publish.part03 \
             | base64 --decode > .entry-routing-publish.tar.gz
           echo "0b507e4d7e92e7c435b499ff70e51ab477a15a48a1d356102b29db683ce0401c  .entry-routing-publish.tar.gz" | sha256sum --check
@@ -30,7 +33,10 @@ jobs:
           rm .entry-routing-publish.tar.gz
           rm .entry-routing-publish.part00
           rm .entry-routing-publish.part01
-          rm .entry-routing-publish.part02
+          rm .entry-routing-publish.part02a
+          rm .entry-routing-publish.part02b
+          rm .entry-routing-publish.part02c
+          rm .entry-routing-publish.part02d
           rm .entry-routing-publish.part03
           rm .github/workflows/publish-entry-routing-package.yml
       - name: Commit reviewed package
