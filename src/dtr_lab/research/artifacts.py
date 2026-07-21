@@ -41,9 +41,38 @@ def current_commit() -> str:
         return "unknown"
 
 
+def _empty_trade_frame() -> pd.DataFrame:
+    return pd.DataFrame(
+        columns=[
+            "entry_time",
+            "exit_time",
+            "session",
+            "day_of_week",
+            "direction",
+            "pnl_r",
+            "holding_minutes",
+            "mfe_r",
+            "mae_r",
+        ]
+    )
+
+
+def normalize_trades(trades: pd.DataFrame) -> pd.DataFrame:
+    if trades.empty and "entry_time" not in trades.columns:
+        trades = _empty_trade_frame()
+    else:
+        trades = trades.copy()
+    if "entry_time" in trades.columns:
+        trades["entry_time"] = pd.to_datetime(trades["entry_time"])
+    if "exit_time" in trades.columns:
+        trades["exit_time"] = pd.to_datetime(trades["exit_time"])
+    return trades
+
+
 def period_metrics(
     trades: pd.DataFrame, manifest: ResearchManifest
 ) -> dict[str, dict[str, float]]:
+    trades = normalize_trades(trades)
     boundaries = {
         "development": (
             pd.Timestamp(manifest.periods.development_start),
@@ -68,6 +97,7 @@ def period_metrics(
 
 
 def attribution(trades: pd.DataFrame, column: str) -> pd.DataFrame:
+    trades = normalize_trades(trades)
     rows: list[dict[str, Any]] = []
     if trades.empty:
         return pd.DataFrame(columns=[column])
@@ -77,12 +107,15 @@ def attribution(trades: pd.DataFrame, column: str) -> pd.DataFrame:
 
 
 def halfyear_metrics(trades: pd.DataFrame) -> pd.DataFrame:
+    trades = normalize_trades(trades)
     if trades.empty:
         return pd.DataFrame(columns=["period"])
     work = trades.copy()
-    work["period"] = work["entry_time"].dt.to_period("2Q").astype(str)
+    year = work["entry_time"].dt.year.astype(str)
+    half = np.where(work["entry_time"].dt.month <= 6, "H1", "H2")
+    work["period"] = year + half
     rows: list[dict[str, Any]] = []
-    for period, subset in work.groupby("period"):
+    for period, subset in work.groupby("period", sort=True):
         rows.append({"period": period, **metrics(subset)})
     return pd.DataFrame(rows)
 
@@ -121,10 +154,7 @@ def write_run_artifacts(
 ) -> dict[str, Any]:
     output = Path(output_dir)
     output.mkdir(parents=True, exist_ok=True)
-    trades = trades.copy()
-    if not trades.empty:
-        trades["entry_time"] = pd.to_datetime(trades["entry_time"])
-        trades["exit_time"] = pd.to_datetime(trades["exit_time"])
+    trades = normalize_trades(trades)
     total_metrics = metrics(trades)
     verify_expected_baseline(total_metrics, manifest)
 
