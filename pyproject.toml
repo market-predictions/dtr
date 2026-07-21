@@ -35,7 +35,7 @@ dev = [
 ]
 
 [project.scripts]
-dtr-audit = "dtr_lab.cli:audit"
+dtr-audit = "dtr_lab.cli:app"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/dtr_lab"]
