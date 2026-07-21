@@ -19,7 +19,7 @@ jobs:
           show-progress: false
 
       - name: Prepare source snapshot
-        run: tar --exclude=.git --exclude=dtr-source.tar.gz -czf dtr-source.tar.gz .
+        run: git archive --format=tar.gz --output=dtr-source.tar.gz HEAD
 
       - name: Upload source snapshot
         uses: actions/upload-artifact@v4
