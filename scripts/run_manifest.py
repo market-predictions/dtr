@@ -3,8 +3,6 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from dtr_lab.research.artifacts import write_run_artifacts
-
 from dtr_lab.research import (
     build_session_table,
     load_manifest,
@@ -13,6 +11,7 @@ from dtr_lab.research import (
     run_backtest,
     verify_dataset,
 )
+from dtr_lab.research.artifacts import write_run_artifacts
 
 
 def main() -> None:
