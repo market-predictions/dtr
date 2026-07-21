@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "dtr-optimization-lab"
-version = "0.2.3"
+version = "0.3.1"
 description = "Python-first research and optimization framework for the DTR strategy"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -57,8 +57,3 @@ select = ["E", "F", "I", "B", "UP"]
 "src/dtr_lab/research/engine.py" = ["I001", "UP035", "B905"]
 "src/dtr_lab/research/integrity.py" = ["I001"]
 "src/dtr_lab/research/optimize.py" = ["E501"]
-
-[tool.mypy]
-python_version = "3.11"
-strict = true
-warn_unused_ignores = true
