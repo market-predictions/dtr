@@ -1,0 +1,77 @@
+{
+  "combination_with_reversal_authorized": false,
+  "dataset_sha256": "8d3f157a422636e5b8dda51cc3a3d9209c50cb53f9b279d3e14b627ce59370dc",
+  "decision": "HOLD_FOR_FRESH_DATA",
+  "reasons_for_hold": [
+    "Unfiltered continuation variants are negative overall.",
+    "The late-60 lead was selected after diagnostic screening on the same finite dataset.",
+    "Trade and month-block bootstrap intervals include zero.",
+    "Four-tick slippage turns the aggregate result negative.",
+    "No post-December-2025 paper-forward sample is available."
+  ],
+  "research_lead": {
+    "development_expectancy_r": 0.0522606597257729,
+    "expectancy_r": 0.1088950017879887,
+    "later_expectancy_r": 0.2307262687636912,
+    "max_drawdown_r": 8.003632558458511,
+    "month_block_bootstrap_95pct": [
+      -0.0971242469503799,
+      0.3238912033677575
+    ],
+    "name": "CONT_A2_PULLBACK_LATE60",
+    "net_r": 16.007565262834337,
+    "profit_factor": 1.2429596266510765,
+    "trade_bootstrap_95pct": [
+      -0.0728282787865893,
+      0.2926013637645008
+    ],
+    "trades": 147,
+    "validation_expectancy_r": 0.1710572318358503,
+    "walk_forward_test_expectancy_r": 0.11803963381648935,
+    "walk_forward_test_net_r": 8.380814000970744,
+    "walk_forward_test_trades": 71
+  },
+  "schema_version": 1,
+  "structural_baseline": {
+    "CONT_A1_IMMEDIATE": {
+      "development_expectancy_r": -0.2400360923383045,
+      "expectancy_r": -0.2071407898129898,
+      "max_drawdown_r": 425.67432306569486,
+      "net_r": -425.67432306569486,
+      "profit_factor": 0.6603241236228664,
+      "research_later_expectancy_r": -0.1673984908543467,
+      "trades": 2055,
+      "validation_expectancy_r": -0.1778748960442296
+    },
+    "CONT_A1_PULLBACK": {
+      "development_expectancy_r": -0.1474557075922214,
+      "expectancy_r": -0.1068320912881534,
+      "max_drawdown_r": 100.02826626449075,
+      "net_r": -96.1488821593379,
+      "profit_factor": 0.8133188370749241,
+      "research_later_expectancy_r": -0.0648549405890163,
+      "trades": 900,
+      "validation_expectancy_r": -0.0364034334187399
+    },
+    "CONT_A2_IMMEDIATE": {
+      "development_expectancy_r": -0.1282000626685148,
+      "expectancy_r": -0.0808361247914386,
+      "max_drawdown_r": 126.12543664347136,
+      "net_r": -117.69739769633436,
+      "profit_factor": 0.8553869450657058,
+      "research_later_expectancy_r": -0.0495546583104459,
+      "trades": 1456,
+      "validation_expectancy_r": -0.0042779170399161
+    },
+    "CONT_A2_PULLBACK": {
+      "development_expectancy_r": -0.1521465819239963,
+      "expectancy_r": -0.0755274953335397,
+      "max_drawdown_r": 52.90221897146151,
+      "net_r": -40.02957252677606,
+      "profit_factor": 0.8621265274643444,
+      "research_later_expectancy_r": 0.0037256562278876,
+      "trades": 530,
+      "validation_expectancy_r": 0.0303533798977805
+    }
+  }
+}

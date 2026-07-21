@@ -18,6 +18,22 @@ _engine.prepare_market_arrays = prepare_market_arrays
 _engine.resample_5m = resample_5m
 _engine.run_backtest = run_backtest
 
+from .continuation import (
+    ContinuationConfig,
+    ContinuationFunnel,
+    ContinuationSignal,
+    ContinuationTrade,
+    baseline_configs as continuation_baseline_configs,
+    evaluate_continuation_baselines,
+    generate_continuation_signals,
+    run_continuation_backtest,
+)
+from .continuation_manifest import (
+    ContinuationManifest,
+    load_continuation_manifest,
+    verify_continuation_dataset,
+)
+
 from .manifest import (
     ResearchManifest,
     file_sha256,
@@ -28,6 +44,17 @@ from .manifest import (
 from .optimize import candidate_grid, evaluate_configs
 
 __all__ = [
+    "ContinuationConfig",
+    "ContinuationFunnel",
+    "ContinuationManifest",
+    "ContinuationSignal",
+    "ContinuationTrade",
+    "continuation_baseline_configs",
+    "evaluate_continuation_baselines",
+    "generate_continuation_signals",
+    "load_continuation_manifest",
+    "run_continuation_backtest",
+    "verify_continuation_dataset",
     "IntegrityFunnel",
     "ResearchManifest",
     "StrategyConfig",

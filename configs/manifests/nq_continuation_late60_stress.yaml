@@ -1,0 +1,60 @@
+schema_version: 1
+run_id: nq_continuation_late60_stress_20260721
+
+dataset:
+  path: ../../data/raw/NQ_Futures_-_1min_Bar_2022_2025.zip
+  sha256: 8d3f157a422636e5b8dda51cc3a3d9209c50cb53f9b279d3e14b627ce59370dc
+  timestamp_semantics: provisional_bar_open
+  timezone_assumption: America/New_York
+  drop_incomplete_final_date: true
+
+periods:
+  development_start: 2023-01-01T00:00:00
+  development_end: 2024-07-01T00:00:00
+  validation_end: 2025-04-01T00:00:00
+  research_end: 2025-12-11T00:00:00
+
+shared_config:
+  sessions: [LONDON_2AM, NEW_YORK_9AM, ASIA_7PM]
+  weekdays: [0, 1, 2, 3, 4]
+  acceptance_bars: 2
+  entry_mode: pullback
+  break_buffer_ticks: 1
+  break_atr_frac: 0.0
+  pullback_window_bars: 12
+  pullback_band_pct: 0.10
+  pullback_band_ticks: 4
+  max_entry_extension_pct: 1.50
+  min_minutes_from_range_end: 60
+  stop_buffer_ticks: 4
+  stop_atr_frac: 0.10
+  tp1_rr: 1.0
+  runner_rr: 3.0
+  tp1_fraction: 0.50
+  move_runner_to_be: true
+  max_hold_bars: 72
+  slippage_ticks_each_side: 1.0
+  commission_per_side: 2.25
+  tick_size: 0.25
+  point_value: 20.0
+  conservative_intrabar: true
+  failed_breakout_exit: true
+
+variants:
+  - name: CONT_A2_PULLBACK_LATE60
+    overrides: {}
+  - name: CONT_A2_PULLBACK_LATE60_SLIP2
+    overrides:
+      slippage_ticks_each_side: 2.0
+  - name: CONT_A2_PULLBACK_LATE60_SLIP4
+    overrides:
+      slippage_ticks_each_side: 4.0
+  - name: CONT_A2_PULLBACK_LATE60_NOBE
+    overrides:
+      move_runner_to_be: false
+
+execution:
+  intrabar_source: 1min
+  same_minute_collision_policy: conservative_stop_first
+  random_seed: 20260721
+  gap_policy: reject_unsafe

@@ -4,11 +4,13 @@
 
 `DTR-NQ-WP-20260721-02 — Independent continuation engine`
 
-Status: **claimed; design and baseline implementation starting**
+Status: **complete; awaiting PR merge**
 
 Branch: `agent/nq-continuation-engine`
 
-Predecessor: `DTR-NQ-WP-20260721-01` — complete and merged in PR #1
+Draft PR: `#2 — Build independent NQ continuation engine`
+
+Decision: `HOLD_FOR_FRESH_DATA`
 
 ## Locked data and reversal baselines
 
@@ -30,25 +32,44 @@ Dataset SHA-256:
 - net R: `88.49578342152539`
 - maximum drawdown: `14.107857513807524R`
 
-Both are frozen. The continuation branch must not retune or modify them.
+Both remain frozen.
 
-## Current research question
+## Continuation result
 
-Does an accepted session-range breakout provide an independent, robust continuation edge after realistic costs, and is immediate or first-pullback entry the better decision route?
+The four unfiltered structural variants are negative. Immediate entry is decisively poor. Two-bar pullback is the least adverse unfiltered route.
 
-## Immediate implementation gate
+Held research lead:
 
-- create a separate continuation event-state module;
-- define upside/downside accepted breaks and failed-breakout invalidation;
-- implement one-bar and two-bar acceptance fixtures;
-- implement immediate and first-pullback entry fixtures;
-- preserve the locked `reject_unsafe` data contract;
-- instrument the unfiltered continuation funnel before optimization;
-- pass pinned Ruff and pytest on Python 3.11 and 3.12.
+`CONT_A2_PULLBACK_LATE60`
+
+- trades: `147`
+- expectancy: `0.108895R`
+- net R: `16.007565R`
+- profit factor: `1.242960`
+- maximum drawdown: `8.003633R`
+
+The lead remains held because bootstrap intervals include zero, four-tick slippage produces a negative aggregate result, and no fresh post-December-2025 sample exists.
+
+## Validation status
+
+- standalone continuation module: **complete**
+- strict continuation manifests: **complete**
+- structural fixtures: **passed**
+- full existing regression suite: **passed locally**
+- canonical baseline rerun: **byte-identical**
+- canonical late-60 stress rerun: **byte-identical**
+- independent adversarial review: **complete**
+- GitHub CI on final branch head: **pending**
 
 ## Promotion restriction
 
-No continuation candidate may be combined with reversal until it demonstrates independently positive chronological validation and walk-forward evidence with acceptable opportunity coverage and an independent review decision.
+Continuation may not be combined with reversal. No further continuation timing, session, or exit tuning is authorized on the current dataset.
+
+## Next planned work package
+
+`DTR-NQ-WP-20260721-03 — IFVG entry-confirmation ablation`
+
+It will test IFVG as an independently measurable confirmation layer against the frozen gap-safe reversal baseline. The held continuation lead may appear only as a secondary diagnostic and may not be retuned.
 
 ## Open project limitations
 

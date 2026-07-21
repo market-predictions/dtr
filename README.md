@@ -33,7 +33,7 @@ The current research engine implements the reversal branch with:
 - complete funnel counters and attribution;
 - deterministic gap classification and gap-safe setup/trade handling.
 
-Continuation, IFVG/CISD, H1Vol, Weekly VWAP, higher-timeframe scoring, and footprint logic remain separate work packages.
+The continuation engine is also implemented as a separate research branch. Its unfiltered variants failed; a late two-bar pullback is retained under `HOLD_FOR_FRESH_DATA`. IFVG/CISD, H1Vol, Weekly VWAP, higher-timeframe scoring, and footprint logic remain separate work packages.
 
 ## Reproducible research runs
 
@@ -70,6 +70,25 @@ python scripts/run_manifest.py configs/manifests/nq_candidate_0_1_gap_safe.yaml
 
 Each command verifies the dataset checksum and writes deterministic CSV, Parquet, JSON, funnel, and attribution artifacts under `reports/<run_id>/`.
 
+
+### Continuation structural baseline
+
+Run the four predeclared continuation variants with:
+
+```bash
+python scripts/run_continuation_manifest.py \
+  configs/manifests/nq_continuation_structural_baseline.yaml
+```
+
+Run the held late-pullback lead and key cost/exit stresses with:
+
+```bash
+python scripts/run_continuation_manifest.py \
+  configs/manifests/nq_continuation_late60_stress.yaml
+```
+
+The unfiltered continuation branch is negative. `CONT_A2_PULLBACK_LATE60` remains a research lead only and may not be combined with reversal until genuinely fresh data confirms it. See `docs/CONTINUATION_RESEARCH_2026-07-21.md`.
+
 ## Parameter research
 
 The staged pack runner remains available for controlled NQ research:
@@ -78,7 +97,7 @@ The staged pack runner remains available for controlled NQ research:
 python scripts/run_research.py data/raw/NQ_Futures_-_1min_Bar_2022_2025.zip --pack bos
 ```
 
-Available packs are `baseline`, `bos`, `sweep`, `regime`, `timing`, `risk`, and `exit`. Ordinary research runs use the gap-safe execution path. The frozen reversal baseline is locked; new research proceeds through separate work packages.
+Available packs are `baseline`, `bos`, `sweep`, `regime`, `timing`, `risk`, and `exit`. Ordinary research runs use the gap-safe execution path. No additional parameter optimization should be promoted until the reference and gap-safe full-dataset comparison is locked.
 
 ## First research run
 
@@ -90,8 +109,7 @@ Methodology, results, limitations, and artifacts are documented in:
 - `configs/nq_candidate_0_1.yaml`
 - `configs/manifests/nq_candidate_0_1.yaml`
 - `configs/manifests/nq_candidate_0_1_gap_safe.yaml`
-- `docs/NQ_GAP_SAFE_COMPARISON_2026-07-21.md`
-- `results/2026-07-21/nq_candidate_0_1_gap_safe_summary.json`
+- `results/2026-07-21/`
 
 These are research findings, not production-performance claims. Continuous-contract rollover and exact timestamp semantics remain unresolved, and no post-December-2025 paper-forward sample exists yet.
 
@@ -113,4 +131,4 @@ Raw market datasets and generated bulk artifacts are not committed to normal Git
 
 ## Status
 
-**v0.2.3 — gap-safe baseline locked; independent continuation research authorized.**
+**v0.2.2 — gap-safe execution implemented; full NQ reference-versus-sanitized rerun pending.**
