@@ -15,18 +15,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
-          cache: pip
-
-      - name: Install Ruff
-        run: python -m pip install --quiet "ruff>=0.6,<1"
+          show-progress: false
 
       - name: Ruff
-        run: ruff check .
+        run: pipx run ruff==0.15.22 check .
 
   test:
     needs: lint
@@ -39,6 +32,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          show-progress: false
 
       - name: Set up Python
         uses: actions/setup-python@v5
