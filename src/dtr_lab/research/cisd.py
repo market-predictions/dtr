@@ -242,36 +242,33 @@ def annotate_signal(bars: pd.DataFrame, signal: base.CandidateSignal) -> CISDAnn
     if not sequences:
         return CISDAnnotation(epoch=signal_epoch)
 
-    latest_sequence: tuple[CISDSequence, int] | None = None
-    latest_last: tuple[CISDSequence, int] | None = None
-    for position, sequence in enumerate(sequences):
-        expiry = (
-            sequences[position + 1].start_index - 1
-            if position + 1 < len(sequences)
-            else signal.entry_index
-        )
-        confirmation_start = sequence.end_index + 1
-        if confirmation_start > expiry:
-            continue
-        sequence_confirm = _first_confirmation(
-            bars,
-            signal.direction,
-            sequence.sequence_anchor,
-            confirmation_start,
-            expiry,
-        )
-        last_confirm = _first_confirmation(
-            bars,
-            signal.direction,
-            sequence.last_anchor,
-            confirmation_start,
-            expiry,
-        )
-        if sequence_confirm >= 0:
-            latest_sequence = (sequence, sequence_confirm)
-        if last_confirm >= 0:
-            latest_last = (sequence, last_confirm)
+    # Only the newest opposite-delivery sequence may be active at the entry
+    # decision. The start of a newer sequence expires every older sequence,
+    # including one that confirmed earlier, so stale structure cannot leak into
+    # the current decision state.
+    sequence = sequences[-1]
+    confirmation_start = sequence.end_index + 1
+    if confirmation_start > signal.entry_index:
+        return CISDAnnotation(epoch=signal_epoch)
+    sequence_confirm = _first_confirmation(
+        bars,
+        signal.direction,
+        sequence.sequence_anchor,
+        confirmation_start,
+        signal.entry_index,
+    )
+    last_confirm = _first_confirmation(
+        bars,
+        signal.direction,
+        sequence.last_anchor,
+        confirmation_start,
+        signal.entry_index,
+    )
 
+    latest_sequence = (
+        (sequence, sequence_confirm) if sequence_confirm >= 0 else None
+    )
+    latest_last = (sequence, last_confirm) if last_confirm >= 0 else None
     sequence_event = latest_sequence[0] if latest_sequence else None
     last_event = latest_last[0] if latest_last else None
     diagnostic_event = sequence_event or last_event
