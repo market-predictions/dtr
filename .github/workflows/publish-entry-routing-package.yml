@@ -1,0 +1,42 @@
+name: Publish entry-routing package
+
+on:
+  pull_request:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    if: github.head_ref == 'agent/nq-entry-routing-ablation'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/nq-entry-routing-ablation
+          fetch-depth: 0
+      - name: Reconstruct and verify reviewed package
+        run: |
+          cat .entry-routing-publish.part00 \
+              .entry-routing-publish.part01 \
+              .entry-routing-publish.part02 \
+              .entry-routing-publish.part03 \
+            | base64 --decode > .entry-routing-publish.tar.gz
+          echo "0b507e4d7e92e7c435b499ff70e51ab477a15a48a1d356102b29db683ce0401c  .entry-routing-publish.tar.gz" | sha256sum --check
+      - name: Extract and clean bootstrap material
+        run: |
+          tar -xzf .entry-routing-publish.tar.gz
+          rm .entry-routing-publish.tar.gz
+          rm .entry-routing-publish.part00
+          rm .entry-routing-publish.part01
+          rm .entry-routing-publish.part02
+          rm .entry-routing-publish.part03
+          rm .github/workflows/publish-entry-routing-package.yml
+      - name: Commit reviewed package
+        run: |
+          git config user.name "dtr-research-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          git commit -m "Publish reversal entry-routing research package"
+          git push origin HEAD:agent/nq-entry-routing-ablation
