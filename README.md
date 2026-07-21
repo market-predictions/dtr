@@ -41,7 +41,11 @@ The standalone continuation engine is implemented. All unfiltered variants faile
 
 The causal IFVG detector, manifest runner, fixtures, and evidence are implemented. The decision is `REJECT_NO_INCREMENTAL_VALUE`: all five predeclared implementable IFVG filters lower aggregate expectancy versus the frozen reversal baseline. IFVG remains available for diagnostics only.
 
-CISD is the next independent entry-confirmation work package.
+### CISD module
+
+The causal CISD detector, manifest runner, fixtures, and evidence are implemented. Broad sequence and final-candle confirmation reduce expectancy. A small retest cohort is positive but does not establish statistically reliable incremental or risk-adjusted value. Decision: `REJECT_NO_INCREMENTAL_VALUE`. CISD remains available for diagnostics only.
+
+Reversal first-pullback and hybrid entry routing is the next independent work package.
 
 ## Installation
 
@@ -84,6 +88,13 @@ python scripts/run_ifvg_manifest.py \
   configs/manifests/nq_ifvg_ablation.yaml
 ```
 
+### CISD ablation
+
+```bash
+python scripts/run_cisd_manifest.py \
+  configs/manifests/nq_cisd_ablation.yaml
+```
+
 Each manifest verifies the registered dataset checksum and writes deterministic research artifacts under `reports/<run_id>/`. Raw market data and bulk generated reports are excluded from Git.
 
 ## Evidence
@@ -94,7 +105,9 @@ Primary methodology and results are documented in:
 - `docs/NQ_GAP_SAFE_COMPARISON_2026-07-21.md`;
 - `docs/CONTINUATION_RESEARCH_2026-07-21.md`;
 - `docs/IFVG_ABLATION_RESEARCH_2026-07-21.md`;
-- `results/2026-07-21/`.
+- `docs/CISD_ABLATION_RESEARCH_2026-07-22.md`;
+- `results/2026-07-21/`;
+- `results/2026-07-22/`.
 
 These are research findings, not production-performance claims. Continuous-contract rollover, exact timestamp and daylight-saving semantics, session boundaries, and supplied VWAP reset semantics remain unresolved. No post-December-2025 paper-forward sample is included.
 
@@ -118,4 +131,4 @@ Raw market datasets and generated bulk artifacts are not committed to normal Git
 
 ## Status
 
-**v0.3.1 — gap-safe reversal baseline locked; continuation held for fresh data; IFVG rejected; CISD next.**
+**v0.3.2 — gap-safe reversal baseline locked; continuation held; IFVG and CISD rejected; entry routing next.**
