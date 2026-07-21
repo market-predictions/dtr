@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "dtr-optimization-lab"
-version = "0.1.0"
-description = "Python research, parity, and optimization framework for the DTR TradingView strategy"
+version = "0.2.0"
+description = "Python-first research and optimization framework for the DTR strategy"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "Proprietary research code" }
