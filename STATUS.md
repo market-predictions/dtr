@@ -4,11 +4,13 @@
 
 `DTR-NQ-WP-20260721-03 — IFVG entry-confirmation ablation`
 
-Status: **claimed; causal implementation starting**
+Status: **complete; awaiting final CI and PR merge**
 
 Branch: `agent/nq-ifvg-ablation`
 
-Predecessor: `DTR-NQ-WP-20260721-02` — complete and merged in PR #2
+PR: `#3 — Test IFVG confirmation on frozen NQ reversal`
+
+Decision: `REJECT_NO_INCREMENTAL_VALUE`
 
 ## Locked primary dataset
 
@@ -16,48 +18,58 @@ Dataset SHA-256:
 
 `8d3f157a422636e5b8dda51cc3a3d9209c50cb53f9b279d3e14b627ce59370dc`
 
+NQ remains the sole optimization base for the current phase. Other instruments and feeds are deferred.
+
 ## Frozen reversal baseline
 
 `DTR_PY_NQ_CANDIDATE_0_1_GAP_SAFE`
 
 - trades: `491`
 - net R: `88.49578342152539`
-- expectancy: `0.180236R`
+- expectancy: `0.180235811449135R`
+- profit factor: `1.3819983049452256`
 - maximum drawdown: `14.107857513807524R`
 
-No reversal parameter may change in this work package.
+The baseline remains unchanged.
 
 ## Held continuation result
 
-`CONT_A2_PULLBACK_LATE60` remains `HOLD_FOR_FRESH_DATA` and may not be retuned or combined with reversal. It may appear only as a secondary diagnostic after the primary reversal IFVG analysis is complete.
+`CONT_A2_PULLBACK_LATE60` remains `HOLD_FOR_FRESH_DATA`. It may not be retuned or combined with reversal on the current sample.
 
-## Current research question
+## IFVG result
 
-Does a causally known, directionally aligned inversion fair value gap improve the frozen reversal decisions enough to compensate for lost opportunity coverage and portfolio-sequence effects?
+All five predeclared implementable IFVG filters lower aggregate expectancy versus the frozen reversal baseline.
 
-## Immediate implementation gate
+- any aligned IFVG: 455 trades, 0.168419R expectancy;
+- recent ≤3 bars: 318 trades, 0.168385R;
+- recent ≤6 bars: 367 trades, 0.157503R;
+- recent ≤12 bars: 432 trades, 0.160347R;
+- post-inversion zone touch: 212 trades, 0.153369R.
 
-- implement causal bullish and bearish FVG recognition;
-- implement later-close inversion without lookahead;
-- partition FVG/IFVG state by reset epoch;
-- annotate frozen reversal signals with IFVG state;
-- separate frozen-cohort from implementable portfolio-filter analysis;
-- test long/short symmetry, age windows and post-inversion zone touch;
-- reconcile every added, removed and retained portfolio trade;
-- pass pinned Ruff and pytest on Python 3.11 and 3.12.
+Any aligned IFVG covers 92.7% of baseline trades and is weakly selective. Stricter filters lose substantial opportunity and enable a small number of later trades that are net negative. One-, two-, and four-tick cost stress preserves the rejection.
 
-## Predeclared variants
+## Validation status
 
-- `IFVG_OBSERVE`;
-- `IFVG_CONFIRM_ANY`;
-- `IFVG_CONFIRM_RECENT_3`;
-- `IFVG_CONFIRM_RECENT_6`;
-- `IFVG_CONFIRM_RECENT_12`;
-- `IFVG_ZONE_TOUCH`.
+- causal bullish/bearish IFVG implementation: **complete**;
+- no-lookahead and reset-epoch fixtures: **passed**;
+- frozen observe regression: **passed**;
+- exact changed-trade attribution: **complete**;
+- deterministic clean repeat: **52/52 artifacts byte-identical**;
+- pinned Ruff: **passed**;
+- pytest Python 3.11: **passed**;
+- pytest Python 3.12: **passed**;
+- GitHub CI implementation run `29860594349`: **success**;
+- independent adversarial review: **complete**.
 
 ## Promotion restriction
 
-No IFVG rule may be promoted from a single attractive in-sample result. Promotion requires chronological, coverage, neighbourhood, cost and attribution stability plus independent review.
+IFVG may not be added to the reversal candidate, combined with continuation, tuned further on the current NQ sample, or ported to Pine as a strategy rule.
+
+## Next planned work package
+
+`DTR-NQ-WP-20260721-04 — CISD entry-confirmation ablation`
+
+CISD will be defined causally and tested independently against the frozen 491-trade gap-safe reversal baseline. It must separate cohort association from implementable portfolio effects and stop when incremental value is absent.
 
 ## Open project limitations
 
