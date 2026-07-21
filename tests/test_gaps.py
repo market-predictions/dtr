@@ -9,22 +9,15 @@ def _frame(values: list[str]) -> pd.DataFrame:
     return pd.DataFrame({"timestamp_et": pd.to_datetime(values)})
 
 
-def test_classifies_daily_maintenance_and_weekend() -> None:
-    frame = _frame(
-        [
-            "2025-01-03 16:59",
-            "2025-01-03 17:00",
-            "2025-01-05 18:01",
-            "2025-01-05 18:02",
-            "2025-01-06 17:00",
-            "2025-01-06 18:01",
-        ]
-    )
-    gaps = classify_gaps(frame)
-    assert gaps["classification"].tolist() == [
-        "weekend_or_monday_holiday",
-        "daily_maintenance",
-    ]
+def test_classifies_daily_maintenance() -> None:
+    gaps = classify_gaps(_frame(["2025-01-06 17:00", "2025-01-06 18:01"]))
+    assert gaps["classification"].tolist() == ["daily_maintenance"]
+    assert not gaps["reject_trade_bridge"].any()
+
+
+def test_classifies_weekend_or_monday_holiday() -> None:
+    gaps = classify_gaps(_frame(["2025-01-03 17:00", "2025-01-05 18:01"]))
+    assert gaps["classification"].tolist() == ["weekend_or_monday_holiday"]
     assert not gaps["reject_trade_bridge"].any()
 
 
