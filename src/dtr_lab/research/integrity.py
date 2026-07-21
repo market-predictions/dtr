@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from typing import Any
 
 import numpy as np
@@ -121,6 +121,14 @@ def _sanitize_sessions(
     bars: pd.DataFrame,
     sessions: pd.DataFrame,
 ) -> pd.DataFrame:
+    fingerprint = _data_fingerprint(one_minute)
+    if sessions.empty:
+        work = sessions.copy()
+        work["integrity_range_gap_rejected"] = pd.Series(dtype="bool")
+        work["integrity_signal_path_truncated"] = pd.Series(dtype="bool")
+        work.attrs["dtr_integrity_fingerprint"] = fingerprint
+        return work
+
     required = {
         "range_start",
         "range_end",
@@ -132,7 +140,6 @@ def _sanitize_sessions(
     if missing:
         raise ValueError(f"Session table missing integrity columns: {sorted(missing)}")
 
-    fingerprint = _data_fingerprint(one_minute)
     if (
         sessions.attrs.get("dtr_integrity_fingerprint") == fingerprint
         and "integrity_range_gap_rejected" in sessions.columns
@@ -193,11 +200,6 @@ def _sanitize_sessions(
 
 def build_session_table(one_minute: pd.DataFrame, bars: pd.DataFrame) -> pd.DataFrame:
     sessions = _BASE_BUILD_SESSION_TABLE(one_minute, bars)
-    if sessions.empty:
-        sessions["integrity_range_gap_rejected"] = pd.Series(dtype="bool")
-        sessions["integrity_signal_path_truncated"] = pd.Series(dtype="bool")
-        sessions.attrs["dtr_integrity_fingerprint"] = _data_fingerprint(one_minute)
-        return sessions
     return _sanitize_sessions(one_minute, bars, sessions)
 
 
@@ -231,9 +233,12 @@ def run_backtest(
     | None = None,
 ) -> tuple[pd.DataFrame, IntegrityFunnel]:
     safe_sessions = _sanitize_sessions(one_minute, bars, sessions)
-    eligible = safe_sessions["session"].isin(cfg.sessions) & safe_sessions["weekday"].isin(
-        cfg.weekdays
-    )
+    if safe_sessions.empty:
+        eligible = pd.Series(False, index=safe_sessions.index, dtype=bool)
+    else:
+        eligible = safe_sessions["session"].isin(cfg.sessions) & safe_sessions[
+            "weekday"
+        ].isin(cfg.weekdays)
     range_rejected = eligible & safe_sessions["integrity_range_gap_rejected"]
     path_truncated = (
         eligible
@@ -244,7 +249,6 @@ def run_backtest(
     signal_sessions = safe_sessions.loc[
         ~safe_sessions["integrity_range_gap_rejected"]
     ].copy()
-    signals, funnel = _BASE_GENERATE_SIGNALS(signal_sessions, signal_sessions, cfg) if False else (None, None)
     # Keep the call explicit rather than routing through a monkey-patched public symbol.
     signals, funnel = _BASE_GENERATE_SIGNALS(bars, signal_sessions, cfg)
 
@@ -295,7 +299,7 @@ def run_backtest(
         sessions_signal_path_truncated=int(path_truncated.sum()),
         skipped_unsafe_gap_bridge=bridge_rejections,
     )
-    return pd.DataFrame([base.asdict(trade) for trade in trades]), IntegrityFunnel(
+    return pd.DataFrame([asdict(trade) for trade in trades]), IntegrityFunnel(
         funnel,
         counters,
     )
