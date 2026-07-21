@@ -4,11 +4,11 @@
 
 `DTR-NQ-WP-20260721-02 — Independent continuation engine`
 
-Status: **complete; awaiting final CI and PR merge**
+Status: **complete; ready for PR merge**
 
 Branch: `agent/nq-continuation-engine`
 
-Draft PR: `#2 — Build independent NQ continuation engine`
+PR: `#2 — Independent NQ continuation research`
 
 Decision: `HOLD_FOR_FRESH_DATA`
 
@@ -62,7 +62,10 @@ The lead remains held because bootstrap intervals include zero, four-tick slippa
 - reviewed package publication: **complete**
 - temporary publication material: **removed**
 - normal read-only CI workflow: **restored**
-- GitHub CI on connector-authored published head: **running**
+- pinned Ruff: **passed**
+- pytest Python 3.11: **passed**
+- pytest Python 3.12: **passed**
+- GitHub CI run `29858218752`: **success**
 
 ## Promotion restriction
 
