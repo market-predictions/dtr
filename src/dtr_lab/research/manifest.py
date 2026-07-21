@@ -40,7 +40,7 @@ class PeriodSpec(BaseModel):
     research_end: datetime
 
     @model_validator(mode="after")
-    def validate_order(self) -> "PeriodSpec":
+    def validate_order(self) -> PeriodSpec:
         values = (
             self.development_start,
             self.development_end,
