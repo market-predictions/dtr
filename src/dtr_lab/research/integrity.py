@@ -5,7 +5,6 @@ from typing import Any, Literal
 
 import numpy as np
 import pandas as pd
-
 from dtr_lab.data.gaps import classify_gaps
 
 from . import engine as base
@@ -169,8 +168,8 @@ def _sanitize_sessions(
     bars: pd.DataFrame,
     sessions: pd.DataFrame,
 ) -> pd.DataFrame:
-    fingerprint = _integrity_fingerprint(one_minute, bars, sessions)
     if sessions.empty:
+        fingerprint = _integrity_fingerprint(one_minute, bars, sessions)
         work = sessions.copy()
         work["integrity_original_post_end_index"] = pd.Series(dtype="int64")
         work["integrity_range_gap_rejected"] = pd.Series(dtype="bool")
@@ -179,6 +178,8 @@ def _sanitize_sessions(
         return work
 
     required = {
+        "session",
+        "session_date",
         "range_start",
         "range_end",
         "break_end",
@@ -189,6 +190,7 @@ def _sanitize_sessions(
     if missing:
         raise ValueError(f"Session table missing integrity columns: {sorted(missing)}")
 
+    fingerprint = _integrity_fingerprint(one_minute, bars, sessions)
     if (
         sessions.attrs.get("dtr_integrity_fingerprint") == fingerprint
         and "integrity_original_post_end_index" in sessions.columns
@@ -221,8 +223,7 @@ def _sanitize_sessions(
         break_end = pd.Timestamp(row.break_end)
 
         in_range = (reset_times > range_start) & (reset_times < range_end)
-        reject_range = bool(in_range.any())
-        range_rejected.append(reject_range)
+        range_rejected.append(bool(in_range.any()))
 
         new_end = original_end
         truncated = False
