@@ -1,0 +1,52 @@
+{
+  "run_date": "2026-07-21",
+  "candidate": "DTR_PY_NQ_CANDIDATE_0_1",
+  "config_path": "configs/nq_candidate_0_1.yaml",
+  "configurations_evaluated": 904,
+  "scope": "Reversal-only DTR Python research interpretation on NQ one-minute data",
+  "metrics": {
+    "trades": 504,
+    "expectancy_r": 0.1669927760762483,
+    "median_r": 0.09101268827348145,
+    "profit_factor": 1.3510592124242256,
+    "win_rate": 0.5059523809523809,
+    "max_drawdown_r": 14.107857513807524,
+    "net_r": 84.16435914242919,
+    "return_dd": 5.965778932772503,
+    "avg_hold_min": 209.79761904761904,
+    "mfe_r": 1.4861476834620715,
+    "mae_r": 0.7422590951384301
+  },
+  "funnel": {
+    "sessions": 1686,
+    "sweep_depth_pass": 1655,
+    "sweep_quality_pass": 1655,
+    "reclaim_pass": 1351,
+    "pivot_ready": 1282,
+    "bos_pass": 936,
+    "impulse_pass": 936,
+    "acceptance_pass": 601,
+    "trend_pass": 517,
+    "entry_signal": 517,
+    "skipped_position_open": 13,
+    "trades": 504
+  },
+  "monte_carlo": {
+    "iterations": 10000,
+    "trades_per_iteration": 504,
+    "net_r_p05": 37.42273005432154,
+    "net_r_p50": 84.19442415060558,
+    "net_r_p95": 131.9417431281776,
+    "max_dd_r_p50": 14.33843763403394,
+    "max_dd_r_p90": 22.0519009715269,
+    "max_dd_r_p95": 25.069674951408466,
+    "probability_net_positive": 0.9983
+  },
+  "limitations": [
+    "Not an exact Pine clone",
+    "Continuation and IFVG/CISD are not yet implemented",
+    "Continuous-contract rollover handling remains unresolved",
+    "The later 2025 period was inspected during candidate research and is not a pristine holdout",
+    "No post-December-2025 live paper-forward sample exists yet"
+  ]
+}
