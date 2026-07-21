@@ -2,80 +2,62 @@
 
 ## Current work package
 
-`DTR-NQ-WP-20260721-02 — Independent continuation engine`
+`DTR-NQ-WP-20260721-03 — IFVG entry-confirmation ablation`
 
-Status: **complete; ready for PR merge**
+Status: **claimed; causal implementation starting**
 
-Branch: `agent/nq-continuation-engine`
+Branch: `agent/nq-ifvg-ablation`
 
-PR: `#2 — Independent NQ continuation research`
+Predecessor: `DTR-NQ-WP-20260721-02` — complete and merged in PR #2
 
-Decision: `HOLD_FOR_FRESH_DATA`
-
-## Locked data and reversal baselines
+## Locked primary dataset
 
 Dataset SHA-256:
 
 `8d3f157a422636e5b8dda51cc3a3d9209c50cb53f9b279d3e14b627ce59370dc`
 
-### Observe-only reference
+## Frozen reversal baseline
 
-- candidate: `DTR_PY_NQ_CANDIDATE_0_1`
-- trades: `504`
-- net R: `84.16435914242919`
-- maximum drawdown: `14.107857513807524R`
+`DTR_PY_NQ_CANDIDATE_0_1_GAP_SAFE`
 
-### Gap-safe reversal baseline
-
-- candidate: `DTR_PY_NQ_CANDIDATE_0_1_GAP_SAFE`
 - trades: `491`
 - net R: `88.49578342152539`
+- expectancy: `0.180236R`
 - maximum drawdown: `14.107857513807524R`
 
-Both remain frozen.
+No reversal parameter may change in this work package.
 
-## Continuation result
+## Held continuation result
 
-The four unfiltered structural variants are negative. Immediate entry is decisively poor. Two-bar pullback is the least adverse unfiltered route.
+`CONT_A2_PULLBACK_LATE60` remains `HOLD_FOR_FRESH_DATA` and may not be retuned or combined with reversal. It may appear only as a secondary diagnostic after the primary reversal IFVG analysis is complete.
 
-Held research lead:
+## Current research question
 
-`CONT_A2_PULLBACK_LATE60`
+Does a causally known, directionally aligned inversion fair value gap improve the frozen reversal decisions enough to compensate for lost opportunity coverage and portfolio-sequence effects?
 
-- trades: `147`
-- expectancy: `0.108895R`
-- net R: `16.007565R`
-- profit factor: `1.242960`
-- maximum drawdown: `8.003633R`
+## Immediate implementation gate
 
-The lead remains held because bootstrap intervals include zero, four-tick slippage produces a negative aggregate result, and no fresh post-December-2025 sample exists.
+- implement causal bullish and bearish FVG recognition;
+- implement later-close inversion without lookahead;
+- partition FVG/IFVG state by reset epoch;
+- annotate frozen reversal signals with IFVG state;
+- separate frozen-cohort from implementable portfolio-filter analysis;
+- test long/short symmetry, age windows and post-inversion zone touch;
+- reconcile every added, removed and retained portfolio trade;
+- pass pinned Ruff and pytest on Python 3.11 and 3.12.
 
-## Validation status
+## Predeclared variants
 
-- standalone continuation module: **complete**
-- strict continuation manifests: **complete**
-- structural fixtures: **passed**
-- full existing regression suite: **passed locally**
-- canonical baseline rerun: **byte-identical**
-- canonical late-60 stress rerun: **byte-identical**
-- independent adversarial review: **complete**
-- reviewed package publication: **complete**
-- temporary publication material: **removed**
-- normal read-only CI workflow: **restored**
-- pinned Ruff: **passed**
-- pytest Python 3.11: **passed**
-- pytest Python 3.12: **passed**
-- GitHub CI run `29858218752`: **success**
+- `IFVG_OBSERVE`;
+- `IFVG_CONFIRM_ANY`;
+- `IFVG_CONFIRM_RECENT_3`;
+- `IFVG_CONFIRM_RECENT_6`;
+- `IFVG_CONFIRM_RECENT_12`;
+- `IFVG_ZONE_TOUCH`.
 
 ## Promotion restriction
 
-Continuation may not be combined with reversal. No further continuation timing, session, or exit tuning is authorized on the current dataset.
-
-## Next planned work package
-
-`DTR-NQ-WP-20260721-03 — IFVG entry-confirmation ablation`
-
-It will test IFVG as an independently measurable confirmation layer against the frozen gap-safe reversal baseline. The held continuation lead may appear only as a secondary diagnostic and may not be retuned.
+No IFVG rule may be promoted from a single attractive in-sample result. Promotion requires chronological, coverage, neighbourhood, cost and attribution stability plus independent review.
 
 ## Open project limitations
 
