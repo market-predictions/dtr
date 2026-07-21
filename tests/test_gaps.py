@@ -21,6 +21,12 @@ def test_classifies_weekend_or_monday_holiday() -> None:
     assert not gaps["reject_trade_bridge"].any()
 
 
+def test_classifies_delayed_weekend_reopen_as_unsafe() -> None:
+    gaps = classify_gaps(_frame(["2025-01-03 17:00", "2025-01-05 18:04"]))
+    assert gaps["classification"].tolist() == ["weekend_offset"]
+    assert gaps["reject_trade_bridge"].all()
+
+
 def test_classifies_missing_and_offset_gaps_as_unsafe() -> None:
     frame = _frame(
         [
