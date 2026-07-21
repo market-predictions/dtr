@@ -1,5 +1,39 @@
 # Changelog
 
+## v0.3.2 — 2026-07-22
+
+### Added
+
+- Causal bullish and bearish CISD sequence detector.
+- Explicit sequence-anchor and final-candle-anchor confirmation contracts.
+- Stale-state expiry when newer opposite delivery begins, including previously confirmed state.
+- Reset-epoch isolation, sequence timing, displacement, anchor-distance, and retest diagnostics.
+- Strict CISD manifest schema, checksum verification, canonical runner, fixtures, and compact evidence.
+- Cohort-versus-implementable portfolio attribution, cost stress, bootstrap, permutation, and timing-decomposition analysis.
+
+### Validated
+
+- Frozen 491-trade gap-safe reversal baseline reproduced exactly.
+- Two clean canonical runs produced 52 of 52 byte-identical artifacts.
+- Broad sequence and last-candle confirmation each reduced expectancy to 0.144100R.
+- Recent-three and recent-six variants were weaker than baseline.
+- The retest portfolio remained positive under cost stress but retained only 75 trades and had lower return-to-drawdown.
+- Incremental retest uplift confidence intervals crossed zero; one-sided permutation p-value was 0.210289.
+- Every removed and newly enabled portfolio trade was attributed.
+
+### Decision
+
+- Record `REJECT_NO_INCREMENTAL_VALUE`.
+- Retain CISD and the retest flag for diagnostics only.
+- Do not add a CISD filter or sizing rule, combine it with IFVG or continuation, tune it further on the current sample, or port it to Pine as strategy logic.
+- Advance to reversal entry-routing ablation.
+
+### Known limitations
+
+- Timestamp, daylight-saving, session-boundary, rollover, and supplied VWAP semantics remain provisional.
+- No pristine post-December-2025 NQ sample exists.
+- The rejection applies to the explicit causal contracts tested, not every discretionary interpretation of CISD.
+
 ## v0.3.1 — 2026-07-21
 
 ### Added

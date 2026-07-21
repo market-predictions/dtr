@@ -1,0 +1,55 @@
+{
+  "baseline": {
+    "expectancy_r": 0.180235811449135,
+    "max_drawdown_r": 14.107857513807524,
+    "net_r": 88.49578342152539,
+    "profit_factor": 1.3819983049452256,
+    "return_dd": 6.272801049692594,
+    "trades": 491
+  },
+  "dataset_sha256": "8d3f157a422636e5b8dda51cc3a3d9209c50cb53f9b279d3e14b627ce59370dc",
+  "decision": "REJECT_NO_INCREMENTAL_VALUE",
+  "determinism": {
+    "artifact_count": 52,
+    "identical_count": 52
+  },
+  "incremental_uncertainty": {
+    "month_block_uplift_hi95": 0.3829408479510301,
+    "month_block_uplift_lo95": -0.1028437199846976,
+    "permutation_one_sided_p": 0.2102894855257237,
+    "trade_bootstrap_uplift_hi95": 0.4561521375423106,
+    "trade_bootstrap_uplift_lo95": -0.1854669717259428
+  },
+  "restrictions": [
+    "no CISD hard filter",
+    "no CISD sizing rule",
+    "no combination with IFVG or continuation",
+    "no further CISD tuning on current sample",
+    "no Pine implementation"
+  ],
+  "retest_cohort": {
+    "complement_expectancy_r": 0.16079698243017315,
+    "coverage": 0.14867617107942974,
+    "expectancy_r": 0.29154307898236875,
+    "net_r": 21.28264476571292,
+    "trades": 73,
+    "uplift_r": 0.1307460965521956
+  },
+  "retest_portfolio": {
+    "expectancy_r": 0.2565518778900079,
+    "max_drawdown_r": 5.160423148594144,
+    "net_r": 19.241390841750597,
+    "profit_factor": 1.5816713997929364,
+    "return_dd": 3.728645943887864,
+    "trades": 75
+  },
+  "schema_version": 1,
+  "sequence_confirm": {
+    "expectancy_r": 0.144099576183656,
+    "max_drawdown_r": 9.973117685192598,
+    "net_r": 44.52676904074973,
+    "profit_factor": 1.3010414081461683,
+    "return_dd": 4.464678994699925,
+    "trades": 309
+  }
+}

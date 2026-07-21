@@ -2,13 +2,13 @@
 
 ## Current work package
 
-`DTR-NQ-WP-20260721-03 — IFVG entry-confirmation ablation`
+`DTR-NQ-WP-20260721-04 — CISD entry-confirmation ablation`
 
 Status: **complete; final CI passed; ready for PR merge**
 
-Branch: `agent/nq-ifvg-ablation`
+Branch: `agent/nq-cisd-ablation`
 
-PR: `#3 — Test IFVG confirmation on frozen NQ reversal`
+PR: `#4 — Reject CISD confirmation after causal NQ ablation`
 
 Decision: `REJECT_NO_INCREMENTAL_VALUE`
 
@@ -18,58 +18,70 @@ Dataset SHA-256:
 
 `8d3f157a422636e5b8dda51cc3a3d9209c50cb53f9b279d3e14b627ce59370dc`
 
-NQ remains the sole optimization base for the current phase. Other instruments and feeds are deferred.
+NQ remains the sole optimization base for the current phase.
 
 ## Frozen reversal baseline
 
 `DTR_PY_NQ_CANDIDATE_0_1_GAP_SAFE`
 
-- trades: `491`
-- net R: `88.49578342152539`
-- expectancy: `0.180235811449135R`
-- profit factor: `1.3819983049452256`
-- maximum drawdown: `14.107857513807524R`
+- trades: `491`;
+- expectancy: `0.180235811449135R`;
+- net R: `88.49578342152539R`;
+- profit factor: `1.3819983049452256`;
+- maximum drawdown: `14.107857513807524R`;
+- return-to-drawdown: `6.272801`.
 
 The baseline remains unchanged.
 
-## Held continuation result
+## Closed module decisions
 
-`CONT_A2_PULLBACK_LATE60` remains `HOLD_FOR_FRESH_DATA`. It may not be retuned or combined with reversal on the current sample.
+- continuation: `HOLD_FOR_FRESH_DATA`;
+- IFVG confirmation: `REJECT_NO_INCREMENTAL_VALUE`;
+- CISD confirmation: `REJECT_NO_INCREMENTAL_VALUE`.
 
-## IFVG result
+None may be retuned or combined on the current NQ sample.
 
-All five predeclared implementable IFVG filters lower aggregate expectancy versus the frozen reversal baseline.
+## CISD result
 
-- any aligned IFVG: 455 trades, 0.168419R expectancy;
-- recent ≤3 bars: 318 trades, 0.168385R;
-- recent ≤6 bars: 367 trades, 0.157503R;
-- recent ≤12 bars: 432 trades, 0.160347R;
-- post-inversion zone touch: 212 trades, 0.153369R.
+Broad CISD confirmation is inferior to the frozen baseline:
 
-Any aligned IFVG covers 92.7% of baseline trades and is weakly selective. Stricter filters lose substantial opportunity and enable a small number of later trades that are net negative. One-, two-, and four-tick cost stress preserves the rejection.
+- sequence confirm: 309 trades, 0.144100R expectancy, 4.464679 return/DD;
+- last-candle confirm: identical to sequence confirm;
+- recent ≤3 bars: 296 trades, 0.136305R expectancy;
+- recent ≤6 bars: 309 trades, 0.140105R expectancy.
+
+The retest portfolio has 75 trades and 0.256552R expectancy, but only 15.3% coverage and 3.728646 return/DD. Its frozen 73-trade cohort has a 0.130746R point-estimate uplift over the complement, but trade and month-block confidence intervals cross zero and the one-sided permutation p-value is 0.210289.
+
+CISD retest is retained as a diagnostic annotation only. It is not authorized as a filter or sizing rule.
 
 ## Validation status
 
-- causal bullish/bearish IFVG implementation: **complete**;
-- no-lookahead and reset-epoch fixtures: **passed**;
+- causal bullish/bearish implementation: **complete**;
+- final-candle anchor fixtures: **passed**;
+- stale confirmed/unconfirmed sequence expiry: **passed**;
+- reset-epoch fixtures: **passed**;
+- strict manifest tests: **passed**;
+- full suite: **62 tests passed**;
 - frozen observe regression: **passed**;
 - exact changed-trade attribution: **complete**;
 - deterministic clean repeat: **52/52 artifacts byte-identical**;
+- cost stress: **complete**;
+- bootstrap and permutation analysis: **complete**;
+- independent adversarial review: **complete**;
 - pinned Ruff: **passed**;
 - pytest Python 3.11: **passed**;
 - pytest Python 3.12: **passed**;
-- governance-complete CI run `29862841068`: **success**;
-- independent adversarial review: **complete**.
+- GitHub CI run `29875052056`: **success**.
 
 ## Promotion restriction
 
-IFVG may not be added to the reversal candidate, combined with continuation, tuned further on the current NQ sample, or ported to Pine as a strategy rule.
+CISD may not be added to the reversal candidate, used for position sizing, combined with IFVG or continuation, tuned further on the current sample, or ported to Pine as a strategy rule.
 
 ## Next planned work package
 
-`DTR-NQ-WP-20260721-04 — CISD entry-confirmation ablation`
+`DTR-NQ-WP-20260722-05 — Reversal entry-routing ablation`
 
-CISD will be defined causally and tested independently against the frozen 491-trade gap-safe reversal baseline. It must separate cohort association from implementable portfolio effects and stop when incremental value is absent.
+It will compare the frozen break-close route with a causally defined first-pullback route and a predeclared hybrid router while preserving signal, stop, target, and exit logic.
 
 ## Open project limitations
 

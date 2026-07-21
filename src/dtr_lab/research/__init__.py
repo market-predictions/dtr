@@ -18,6 +18,19 @@ _engine.prepare_market_arrays = prepare_market_arrays
 _engine.resample_5m = resample_5m
 _engine.run_backtest = run_backtest
 
+from .cisd import (
+    CISDAnnotation,
+    CISDFunnel,
+    CISDSequence,
+    CISDVariant,
+    PreparedCISD,
+    baseline_variants as cisd_baseline_variants,
+    compare_cisd_portfolios,
+    prepare_cisd_context,
+    run_cisd_backtest,
+    simulate_cisd_variant,
+)
+from .cisd_manifest import CISDManifest, load_cisd_manifest, verify_cisd_dataset
 from .continuation import (
     ContinuationConfig,
     ContinuationFunnel,
@@ -57,6 +70,11 @@ from .manifest import (
 from .optimize import candidate_grid, evaluate_configs
 
 __all__ = [
+    "CISDAnnotation",
+    "CISDFunnel",
+    "CISDManifest",
+    "CISDSequence",
+    "CISDVariant",
     "ContinuationConfig",
     "ContinuationFunnel",
     "ContinuationManifest",
@@ -68,11 +86,14 @@ __all__ = [
     "IFVGManifest",
     "IFVGVariant",
     "IntegrityFunnel",
+    "PreparedCISD",
     "PreparedIFVG",
     "ResearchManifest",
     "StrategyConfig",
     "build_session_table",
+    "cisd_baseline_variants",
     "candidate_grid",
+    "compare_cisd_portfolios",
     "compare_ifvg_portfolios",
     "continuation_baseline_configs",
     "detect_ifvg_events",
@@ -81,19 +102,24 @@ __all__ = [
     "file_sha256",
     "generate_continuation_signals",
     "ifvg_baseline_variants",
+    "load_cisd_manifest",
     "load_continuation_manifest",
     "load_ifvg_manifest",
     "load_manifest",
     "load_zip",
     "metrics",
+    "prepare_cisd_context",
     "prepare_ifvg_context",
     "prepare_market_arrays",
     "resample_5m",
     "resolve_dataset_path",
     "run_backtest",
+    "run_cisd_backtest",
     "run_continuation_backtest",
     "run_ifvg_backtest",
+    "simulate_cisd_variant",
     "simulate_ifvg_variant",
+    "verify_cisd_dataset",
     "verify_continuation_dataset",
     "verify_dataset",
     "verify_ifvg_dataset",

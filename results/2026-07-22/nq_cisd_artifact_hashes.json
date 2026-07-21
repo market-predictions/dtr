@@ -1,0 +1,7 @@
+{
+  "all_identical": true,
+  "artifact_count": 52,
+  "identical_count": 52,
+  "note": "Full generated artifacts remain outside Git; this digest locks the sorted relative-path/SHA-256 manifest.",
+  "sorted_hash_manifest_sha256": "09f81b6c116d1fba35910b84396c0ed0f68000e2302a91c2a5aeb18421478d5a"
+}
