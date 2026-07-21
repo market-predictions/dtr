@@ -14,6 +14,30 @@ Status: **partially complete**
 - [ ] Reconstruct and verify RTH/ETH session boundaries and VWAP resets.
 - [ ] Produce canonical one-minute and five-minute Parquet datasets with provenance metadata.
 
+## Phase 0B — Provider-neutral market-data acquisition
+
+Status: **planned; non-blocking for the current NQ baseline**
+
+Decision: retain the existing NQ futures dataset as the frozen reference for the current reversal candidate. Introduce Dukascopy later as a secondary provider for longer-history and cross-market structural validation. Dukascopy index CFDs must not be presented as CME futures data.
+
+Assessment: `docs/DUKASCOPY_DATA_SOURCE_REVIEW_2026-07-21.md`
+
+- [x] Review `giuse88/duka`, the underlying Dukascopy feed concept, current alternatives, and fit with the DTR architecture.
+- [x] Decide not to adopt the legacy `giuse88/duka` package as a production dependency.
+- [x] Define the preferred path: a Python adapter over approved official Dukascopy API access, with a pinned `dukascopy-node` run as an independent comparison oracle.
+- [ ] Confirm and document API access, automation permission, data-use terms, and any required key before bulk acquisition.
+- [ ] Define a provider interface and canonical schema that preserve provider, instrument type, UTC timestamps, bar semantics, bid/ask side, spread, volume meaning, point value, session calendar, and checksums.
+- [ ] Add live instrument-catalog discovery and freeze the metadata used by each acquisition manifest.
+- [ ] Implement resumable, rate-limited, cached, and checksum-verified one-minute acquisition without silently filling missing bars.
+- [ ] Add provider-specific data audits for price scale, duplicates, gaps, session breaks, timestamp boundaries, bid/ask consistency, and volume semantics.
+- [ ] Pilot `EURUSD`, `XAUUSD`, `USA500IDXUSD`, `USATECHIDXUSD`, and `USA30IDXUSD` when available in the live catalog.
+- [ ] Derive canonical five-minute bars from one-minute source data and verify aggregation boundaries.
+- [ ] Compare controlled pilot windows against an official Dukascopy/JForex reference and a pinned `dukascopy-node` result.
+- [ ] Register approved canonical datasets in `data/catalog.yaml`; keep raw responses and bulk data outside Git.
+- [ ] Promote Dukascopy to an approved research provider only after deterministic reruns reproduce canonical hashes and audit artifacts.
+
+This workstream may proceed in parallel after the current NQ integrity gate. It does not block the continuation engine, but it must pass before Dukascopy data is used for Phase 5 cross-market claims or parameter selection.
+
 ## Phase 1 — Python reversal baseline
 
 Status: **research candidate available; reproducibility gate in progress**
@@ -89,8 +113,11 @@ Status: **partially implemented**
 - [x] Bootstrap/Monte Carlo trade-sequence analysis.
 - [ ] Nested walk-forward selection with locked experiment manifests.
 - [ ] Regime-removal and session-removal stress tests.
-- [ ] Cross-market validation on additional futures datasets.
-- [ ] Cross-asset validation on FX only after an appropriate dataset is available.
+- [ ] Cross-market execution validation on additional licensed futures datasets.
+- [ ] Fixed-candidate structural-proxy validation on approved Dukascopy index CFDs; do not pool or label these results as NQ/ES/YM futures performance.
+- [ ] Cross-asset validation on approved FX and metals data using asset-specific sessions, spreads, point values, and cost models.
+- [ ] Compare a common overlap window across markets before using each instrument's longer independent history.
+- [ ] Permit asset-specific retuning only after the frozen candidate has been evaluated without retuning.
 - [ ] Frozen paper-forward test on post-December-2025 NQ data.
 
 ## Phase 6 — Adaptive DTR model
