@@ -4,7 +4,7 @@
 
 `DTR-NQ-WP-20260721-02 — Independent continuation engine`
 
-Status: **complete; awaiting PR merge**
+Status: **complete; awaiting final CI and PR merge**
 
 Branch: `agent/nq-continuation-engine`
 
@@ -59,7 +59,10 @@ The lead remains held because bootstrap intervals include zero, four-tick slippa
 - canonical baseline rerun: **byte-identical**
 - canonical late-60 stress rerun: **byte-identical**
 - independent adversarial review: **complete**
-- GitHub CI on final branch head: **pending**
+- reviewed package publication: **complete**
+- temporary publication material: **removed**
+- normal read-only CI workflow: **restored**
+- GitHub CI on connector-authored published head: **running**
 
 ## Promotion restriction
 
