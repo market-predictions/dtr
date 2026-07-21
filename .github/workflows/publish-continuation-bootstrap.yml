@@ -1,0 +1,31 @@
+name: Publish continuation package
+
+on:
+  push:
+    branches: [agent/nq-continuation-engine]
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    if: ${{ hashFiles('.dtr-continuation-publish.tar.gz') != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/nq-continuation-engine
+          fetch-depth: 0
+      - name: Extract reviewed continuation package
+        run: |
+          tar -xzf .dtr-continuation-publish.tar.gz
+          rm .dtr-continuation-publish.tar.gz
+          rm .github/workflows/publish-continuation-bootstrap.yml
+      - name: Commit published package
+        run: |
+          git config user.name "dtr-research-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          git commit -m "Publish independent continuation research package"
+          git push origin HEAD:agent/nq-continuation-engine
