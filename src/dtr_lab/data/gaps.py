@@ -10,6 +10,7 @@ class GapAuditSummary:
     total_gaps: int
     daily_maintenance: int
     weekend_or_monday_holiday: int
+    weekend_offset: int
     holiday_or_early_close: int
     maintenance_offset: int
     small_missing_data: int
@@ -39,10 +40,12 @@ def _classify_gap(previous: pd.Timestamp, current: pd.Timestamp, minutes: int) -
         and previous.hour == 17
         and current.weekday() in (6, 0)
         and current.hour == 18
-        and current.minute in (0, 1)
         and minutes >= 2_900
     ):
-        return "weekend_or_monday_holiday"
+        if current.minute in (0, 1):
+            return "weekend_or_monday_holiday"
+        if current.minute in (2, 3, 4, 5):
+            return "weekend_offset"
 
     if current.hour == 18 and current.minute == 1 and minutes >= 240:
         return "holiday_or_early_close"
@@ -96,6 +99,7 @@ def classify_gaps(
     ]
     gaps["reset_strategy_state"] = True
     unsafe = {
+        "weekend_offset",
         "maintenance_offset",
         "small_missing_data",
         "medium_missing_data",
@@ -113,6 +117,7 @@ def summarize_gaps(gaps: pd.DataFrame) -> GapAuditSummary:
         weekend_or_monday_holiday=int(
             counts.get("weekend_or_monday_holiday", 0)
         ),
+        weekend_offset=int(counts.get("weekend_offset", 0)),
         holiday_or_early_close=int(counts.get("holiday_or_early_close", 0)),
         maintenance_offset=int(counts.get("maintenance_offset", 0)),
         small_missing_data=int(counts.get("small_missing_data", 0)),
