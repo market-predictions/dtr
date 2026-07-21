@@ -1,0 +1,47 @@
+{
+  "dataset_sha256": "8d3f157a422636e5b8dda51cc3a3d9209c50cb53f9b279d3e14b627ce59370dc",
+  "final_incomplete_date_excluded": "2025-12-11",
+  "total_gaps": 909,
+  "daily_maintenance": 582,
+  "weekend_or_monday_holiday": 146,
+  "holiday_or_early_close": 33,
+  "weekend_offset": 1,
+  "maintenance_offset": 2,
+  "small_missing_data": 138,
+  "medium_missing_data": 5,
+  "unclassified_long_gap": 2,
+  "unsafe_gaps": 148,
+  "unsafe_policy": "Reset strategy state and reject trade bridging until the gap is reviewed or explicitly approved.",
+  "material_unsafe_gaps": [
+    {
+      "previous_timestamp": "2023-04-05T14:03:00",
+      "current_timestamp": "2023-04-05T20:01:00",
+      "gap_minutes": 358,
+      "classification": "unclassified_long_gap"
+    },
+    {
+      "previous_timestamp": "2024-03-27T16:59:00",
+      "current_timestamp": "2024-03-27T18:01:00",
+      "gap_minutes": 62,
+      "classification": "maintenance_offset"
+    },
+    {
+      "previous_timestamp": "2024-06-21T17:00:00",
+      "current_timestamp": "2024-06-23T18:04:00",
+      "gap_minutes": 2944,
+      "classification": "weekend_offset"
+    },
+    {
+      "previous_timestamp": "2025-04-02T17:00:00",
+      "current_timestamp": "2025-04-02T18:03:00",
+      "gap_minutes": 63,
+      "classification": "maintenance_offset"
+    },
+    {
+      "previous_timestamp": "2025-11-27T21:45:00",
+      "current_timestamp": "2025-11-28T08:31:00",
+      "gap_minutes": 646,
+      "classification": "unclassified_long_gap"
+    }
+  ]
+}
