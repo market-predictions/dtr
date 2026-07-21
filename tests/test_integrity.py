@@ -3,8 +3,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from dtr_lab.research import StrategyConfig, resample_5m, run_backtest
-from dtr_lab.research import engine, integrity
+from dtr_lab.research import StrategyConfig, engine, integrity, resample_5m, run_backtest
 
 
 def _one_minute(values: list[str]) -> pd.DataFrame:
