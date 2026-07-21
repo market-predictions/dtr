@@ -1,0 +1,87 @@
+schema_version: 1
+run_id: nq_ifvg_ablation_20260721
+candidate_name: DTR_PY_NQ_CANDIDATE_0_1_GAP_SAFE
+
+dataset:
+  path: ../../data/raw/NQ_Futures_-_1min_Bar_2022_2025.zip
+  sha256: 8d3f157a422636e5b8dda51cc3a3d9209c50cb53f9b279d3e14b627ce59370dc
+  timestamp_semantics: provisional_bar_open
+  timezone_assumption: America/New_York
+  drop_incomplete_final_date: true
+
+periods:
+  development_start: 2023-01-01T00:00:00
+  development_end: 2024-07-01T00:00:00
+  validation_end: 2025-04-01T00:00:00
+  research_end: 2025-12-11T00:00:00
+
+strategy:
+  sessions: [LONDON_2AM, NEW_YORK_9AM, ASIA_7PM]
+  weekdays: [1, 2, 3, 4]
+  min_sweep_range_pct: 0.04
+  min_sweep_ticks: 1
+  valid_sweep_threshold: 1
+  ideal_sweep_max_pct: 0.60
+  too_deep_sweep_pct: 1.20
+  volume_expand_mult: 1.00
+  atr_expand_mult: 1.00
+  reaction_bars: 10
+  pivot_len: 2
+  pivot_min_pct: 0.04
+  break_mode: wick
+  break_buffer_pct: 0.0
+  break_atr_frac: 0.0
+  impulse_mult: 0.90
+  require_impulse: true
+  acceptance_bars: 2
+  entry_mode: break_close
+  retest_band_pct: 0.05
+  signal_window_bars: 25
+  max_bars_from_sweep: 40
+  trend_filter: nontrend_er
+  er_length: 20
+  er_max: 0.35
+  adx_max: 22.0
+  stop_buffer_ticks: 8
+  stop_atr_frac: 0.05
+  tp1_rr: 1.25
+  runner_rr: 4.0
+  tp1_fraction: 0.50
+  move_runner_to_be: true
+  time_close_mode: everyday
+  time_close_hour: 16
+  time_close_minute: 0
+  max_hold_bars: 96
+  slippage_ticks_each_side: 1.0
+  commission_per_side: 2.25
+  tick_size: 0.25
+  point_value: 20.0
+  conservative_intrabar: true
+
+variants:
+  - name: IFVG_OBSERVE
+    policy: observe
+  - name: IFVG_CONFIRM_ANY
+    policy: confirm_any
+  - name: IFVG_CONFIRM_RECENT_3
+    policy: recent_3
+  - name: IFVG_CONFIRM_RECENT_6
+    policy: recent_6
+  - name: IFVG_CONFIRM_RECENT_12
+    policy: recent_12
+  - name: IFVG_ZONE_TOUCH
+    policy: zone_touch
+
+execution:
+  intrabar_source: 1min
+  same_minute_collision_policy: conservative_stop_first
+  random_seed: 20260721
+  gap_policy: reject_unsafe
+
+expected_observe:
+  trades: 491
+  net_r: 88.49578342152539
+  max_drawdown_r: 14.107857513807524
+  tolerance_trades: 0
+  tolerance_net_r: 0.000001
+  tolerance_max_drawdown_r: 0.000001

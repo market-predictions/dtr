@@ -18,18 +18,18 @@ Status: **partially complete**
 
 Status: **deferred; not part of the current NQ optimization phase**
 
-Decision: retain the existing NQ futures dataset as the sole optimization base for the current program. Dukascopy and other providers remain documented future options for longer-history and cross-market validation; no acquisition implementation is scheduled before the NQ roadmap reaches a significant research gate.
+Decision: retain the existing NQ futures dataset as the sole optimization base for the current program. Dukascopy and other providers remain documented future options; no acquisition implementation is scheduled before a future explicit work-package decision.
 
 Assessment: `docs/DUKASCOPY_DATA_SOURCE_REVIEW_2026-07-21.md`
 
-- [x] Review `giuse88/duka`, the underlying Dukascopy feed concept, current alternatives, and fit with the DTR architecture.
-- [x] Decide not to adopt the legacy `giuse88/duka` package as a production dependency.
+- [x] Review the legacy Duka package, underlying Dukascopy feed concept, current alternatives, and architectural fit.
+- [x] Decide not to adopt the legacy package as a production dependency.
 - [x] Define a possible provider-neutral integration path for later use.
 - [ ] Resume only after an explicit future work-package decision.
 
 ## Phase 1 — Python reversal baseline
 
-Status: **reference candidate frozen; gap-safe rerun pending local dataset execution**
+Status: **complete; reference and gap-safe baselines frozen**
 
 - [x] Implement the three DTR session ranges.
 - [x] Implement first one-sided sweep, reclaim, and protected-pivot logic.
@@ -40,18 +40,14 @@ Status: **reference candidate frozen; gap-safe rerun pending local dataset execu
 - [x] Implement one-minute intrabar execution with conservative collision handling.
 - [x] Build setup-funnel and attribution reporting.
 - [x] Produce the first NQ reversal research candidate.
-- [x] Add a strict YAML research-manifest schema.
-- [x] Add dataset checksum verification.
-- [x] Add deterministic artifact generation and frozen-baseline checks.
-- [x] Preserve `DTR_PY_NQ_CANDIDATE_0_1` as an explicit `observe_only` reference run.
-- [x] Add `DTR_PY_NQ_CANDIDATE_0_1_GAP_SAFE` with identical strategy parameters and `reject_unsafe` execution.
-- [ ] Execute both manifests against the local NQ dataset.
-- [ ] Confirm the reference run reproduces 504 trades, 84.164359R net, and 14.107858R maximum drawdown.
-- [ ] Lock the gap-safe trade log, artifact hashes, funnel deltas, and regression tolerances.
+- [x] Add strict YAML manifests, dataset checksum verification, deterministic artifacts, and regression checks.
+- [x] Preserve `DTR_PY_NQ_CANDIDATE_0_1` as the 504-trade observe-only reference.
+- [x] Add and execute `DTR_PY_NQ_CANDIDATE_0_1_GAP_SAFE` with identical strategy parameters.
+- [x] Lock the 491-trade gap-safe log, metrics, artifact hashes, funnel deltas, and regression tolerances.
 
 ## Phase 2 — Data integrity and reproducibility gate
 
-Status: **implementation complete; source-data rerun and timestamp/rollover work remain**
+Status: **baseline-integrity gate complete; timestamp and rollover research remain open**
 
 - [x] Classify maintenance, weekend, holiday, offset, missing-data, and unexplained timestamp gaps.
 - [x] Attach deterministic reset and unsafe-gap epochs to derived five-minute bars.
@@ -60,22 +56,18 @@ Status: **implementation complete; source-data rerun and timestamp/rollover work
 - [x] Reject open trades that bridge unsafe gaps from primary performance results.
 - [x] Report observed unsafe bridges without changing the frozen reference result.
 - [x] Make gap policy explicit and versioned in every research manifest.
-- [x] Add focused tests for intra-bucket gaps, range contamination, signal-path resets, trade bridges, and policy separation.
-- [x] Record code commit, dataset hash, manifest hash, execution assumptions, and integrity counters in generated runs.
-- [x] Add an independent research-review checklist before candidate promotion.
-- [ ] Run the reference and gap-safe manifests on the full local NQ dataset and compare every changed trade.
+- [x] Add focused tests for range contamination, signal-path resets, trade bridges, and policy separation.
+- [x] Record code, dataset, manifest, execution, and integrity provenance.
+- [x] Run reference and gap-safe manifests and attribute every changed trade.
+- [x] Complete independent review and deterministic clean-rerun hash lock.
 - [ ] Detect probable contract-roll discontinuities and test state resets around them.
 - [ ] Confirm daylight-saving and bar-open/bar-close assumptions.
 - [ ] Verify session boundaries with targeted source-data fixtures.
 - [ ] Reconstruct and validate supplied RTH/ETH VWAP fields.
 
-Promotion gate: Phase 3 may begin only after the reference rerun passes and the gap-safe result has a versioned comparison report. Timestamp and rollover limitations may remain open only if they are explicitly isolated from the first continuation experiments.
-
 ## Phase 3 — Independent continuation engine
 
 Status: **complete; no candidate promoted**
-
-The continuation branch was implemented and measured independently before any combination with reversal.
 
 - [x] Implement accepted range breakouts.
 - [x] Test one-bar and two-bar acceptance.
@@ -91,20 +83,23 @@ Decision: `HOLD_FOR_FRESH_DATA`. All unfiltered variants are negative. `CONT_A2_
 
 ## Phase 4 — Entry and context modules
 
-Status: **next active phase**
+Status: **active; IFVG complete and rejected, CISD next**
 
-Order of research:
+Research order and state:
 
-1. IFVG entry confirmation — next work package.
-2. CISD entry confirmation.
-3. First-pullback and hybrid entry routing.
-4. Session VWAP as information, score, soft gate, and hard gate.
-5. Weekly VWAP as information, score, soft gate, and hard gate.
-6. H1Vol conditioning.
-7. Higher-timeframe structure and context scoring.
-8. Footprint only when suitable historical order-flow data is available.
+1. [x] IFVG entry confirmation.
+   - Decision: `REJECT_NO_INCREMENTAL_VALUE`.
+   - Causal detector, manifest, tests, compact evidence, attribution, review, and handover retained.
+   - No IFVG rule may enter the reversal candidate or be tuned further on the current sample.
+2. [ ] CISD entry confirmation — next work package.
+3. [ ] First-pullback and hybrid entry routing.
+4. [ ] Session VWAP as information, score, soft gate, and hard gate.
+5. [ ] Weekly VWAP as information, score, soft gate, and hard gate.
+6. [ ] H1Vol conditioning.
+7. [ ] Higher-timeframe structure and context scoring.
+8. [ ] Footprint only when suitable historical order-flow data is available.
 
-Each module must demonstrate independent value and opportunity coverage before entering a composite model.
+Each module must demonstrate independent value, chronological stability, cost robustness, and acceptable opportunity coverage before entering a composite model. Rejected modules are not combined in search for a rescue effect.
 
 ## Phase 5 — Robustness and model selection
 
@@ -115,8 +110,9 @@ Status: **partially implemented**
 - [x] Transaction-cost and slippage stress.
 - [x] Initial parameter-neighbourhood analysis.
 - [x] Bootstrap/Monte Carlo trade-sequence analysis.
+- [x] Position-sequence attribution for filtered portfolios.
 - [ ] Nested walk-forward selection with locked experiment manifests.
-- [ ] Regime-removal and session-removal stress tests.
+- [ ] Regime-removal and session-removal stress tests for any future promoted candidate.
 - [ ] Frozen paper-forward test on post-December-2025 NQ data.
 - [ ] Cross-market execution validation on additional licensed futures datasets after the NQ program.
 - [ ] Cross-asset and structural-proxy validation only under a future approved provider work package.
@@ -126,8 +122,8 @@ Status: **partially implemented**
 Status: **not started**
 
 - [ ] Route reversal only in regimes where reversal has demonstrated edge.
-- [ ] Route continuation only in regimes where continuation has demonstrated edge.
-- [ ] Maintain a no-trade state when neither branch is qualified.
+- [ ] Route continuation only if fresh data promotes the held continuation lead.
+- [ ] Maintain a no-trade state when no branch is qualified.
 - [ ] Compare one universal model against session-specific and regime-specific models.
 - [ ] Select no more than three robust finalists.
 

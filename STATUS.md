@@ -2,80 +2,74 @@
 
 ## Current work package
 
-`DTR-NQ-WP-20260721-02 — Independent continuation engine`
+`DTR-NQ-WP-20260721-03 — IFVG entry-confirmation ablation`
 
-Status: **complete; ready for PR merge**
+Status: **complete; final CI passed; ready for PR merge**
 
-Branch: `agent/nq-continuation-engine`
+Branch: `agent/nq-ifvg-ablation`
 
-PR: `#2 — Independent NQ continuation research`
+PR: `#3 — Test IFVG confirmation on frozen NQ reversal`
 
-Decision: `HOLD_FOR_FRESH_DATA`
+Decision: `REJECT_NO_INCREMENTAL_VALUE`
 
-## Locked data and reversal baselines
+## Locked primary dataset
 
 Dataset SHA-256:
 
 `8d3f157a422636e5b8dda51cc3a3d9209c50cb53f9b279d3e14b627ce59370dc`
 
-### Observe-only reference
+NQ remains the sole optimization base for the current phase. Other instruments and feeds are deferred.
 
-- candidate: `DTR_PY_NQ_CANDIDATE_0_1`
-- trades: `504`
-- net R: `84.16435914242919`
-- maximum drawdown: `14.107857513807524R`
+## Frozen reversal baseline
 
-### Gap-safe reversal baseline
+`DTR_PY_NQ_CANDIDATE_0_1_GAP_SAFE`
 
-- candidate: `DTR_PY_NQ_CANDIDATE_0_1_GAP_SAFE`
 - trades: `491`
 - net R: `88.49578342152539`
+- expectancy: `0.180235811449135R`
+- profit factor: `1.3819983049452256`
 - maximum drawdown: `14.107857513807524R`
 
-Both remain frozen.
+The baseline remains unchanged.
 
-## Continuation result
+## Held continuation result
 
-The four unfiltered structural variants are negative. Immediate entry is decisively poor. Two-bar pullback is the least adverse unfiltered route.
+`CONT_A2_PULLBACK_LATE60` remains `HOLD_FOR_FRESH_DATA`. It may not be retuned or combined with reversal on the current sample.
 
-Held research lead:
+## IFVG result
 
-`CONT_A2_PULLBACK_LATE60`
+All five predeclared implementable IFVG filters lower aggregate expectancy versus the frozen reversal baseline.
 
-- trades: `147`
-- expectancy: `0.108895R`
-- net R: `16.007565R`
-- profit factor: `1.242960`
-- maximum drawdown: `8.003633R`
+- any aligned IFVG: 455 trades, 0.168419R expectancy;
+- recent ≤3 bars: 318 trades, 0.168385R;
+- recent ≤6 bars: 367 trades, 0.157503R;
+- recent ≤12 bars: 432 trades, 0.160347R;
+- post-inversion zone touch: 212 trades, 0.153369R.
 
-The lead remains held because bootstrap intervals include zero, four-tick slippage produces a negative aggregate result, and no fresh post-December-2025 sample exists.
+Any aligned IFVG covers 92.7% of baseline trades and is weakly selective. Stricter filters lose substantial opportunity and enable a small number of later trades that are net negative. One-, two-, and four-tick cost stress preserves the rejection.
 
 ## Validation status
 
-- standalone continuation module: **complete**
-- strict continuation manifests: **complete**
-- structural fixtures: **passed**
-- full existing regression suite: **passed locally**
-- canonical baseline rerun: **byte-identical**
-- canonical late-60 stress rerun: **byte-identical**
-- independent adversarial review: **complete**
-- reviewed package publication: **complete**
-- temporary publication material: **removed**
-- normal read-only CI workflow: **restored**
-- pinned Ruff: **passed**
-- pytest Python 3.11: **passed**
-- pytest Python 3.12: **passed**
-- GitHub CI run `29858218752`: **success**
+- causal bullish/bearish IFVG implementation: **complete**;
+- no-lookahead and reset-epoch fixtures: **passed**;
+- frozen observe regression: **passed**;
+- exact changed-trade attribution: **complete**;
+- deterministic clean repeat: **52/52 artifacts byte-identical**;
+- pinned Ruff: **passed**;
+- pytest Python 3.11: **passed**;
+- pytest Python 3.12: **passed**;
+- governance-complete CI run `29862841068`: **success**;
+- independent adversarial review: **complete**.
 
 ## Promotion restriction
 
-Continuation may not be combined with reversal. No further continuation timing, session, or exit tuning is authorized on the current dataset.
+IFVG may not be added to the reversal candidate, combined with continuation, tuned further on the current NQ sample, or ported to Pine as a strategy rule.
 
 ## Next planned work package
 
-`DTR-NQ-WP-20260721-03 — IFVG entry-confirmation ablation`
+`DTR-NQ-WP-20260721-04 — CISD entry-confirmation ablation`
 
-It will test IFVG as an independently measurable confirmation layer against the frozen gap-safe reversal baseline. The held continuation lead may appear only as a secondary diagnostic and may not be retuned.
+CISD will be defined causally and tested independently against the frozen 491-trade gap-safe reversal baseline. It must separate cohort association from implementable portfolio effects and stop when incremental value is absent.
 
 ## Open project limitations
 

@@ -1,0 +1,99 @@
+# NQ IFVG Entry-Confirmation Ablation — 2026-07-21
+
+## Decision
+
+`REJECT_NO_INCREMENTAL_VALUE`
+
+A causally recognized, directionally aligned inversion fair value gap does not improve the frozen NQ gap-safe reversal strategy. The detector and negative evidence are retained, but IFVG is not promoted as a confirmation filter and no further IFVG threshold tuning is authorized on the current sample.
+
+## Research contract
+
+- Primary baseline: `DTR_PY_NQ_CANDIDATE_0_1_GAP_SAFE`.
+- Dataset SHA-256: `8d3f157a422636e5b8dda51cc3a3d9209c50cb53f9b279d3e14b627ce59370dc`.
+- Frozen reversal parameters: unchanged.
+- Three-candle FVGs are known only after the third five-minute bar closes.
+- Inversion is known only after a later close crosses the far boundary.
+- The aligned IFVG must invert after the reversal sweep and no later than the existing entry decision.
+- Reset epochs invalidate pre-reset FVG and IFVG state.
+- Cohort association and implementable portfolio filtering are reported separately.
+
+## Frozen observe regression
+
+| Trades | Expectancy | Net R | Profit factor | Max drawdown |
+|---:|---:|---:|---:|---:|
+| 491 | 0.180236R | 88.495783R | 1.381998 | 14.107858R |
+
+The observe-only IFVG manifest reproduced the locked gap-safe reversal baseline exactly.
+
+## Implementable portfolio results
+
+| Variant | Trades | Coverage | Expectancy | Net R | PF | Max DD | Removed | Added |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| Observe | 491 | 100.0% | 0.180236R | 88.495783R | 1.381998 | 14.107858R | 0 | 0 |
+| Any aligned IFVG | 455 | 92.7% | 0.168419R | 76.630748R | 1.357596 | 13.074524R | 36 | 0 |
+| Recent ≤3 bars | 318 | 64.8% | 0.168385R | 53.546587R | 1.352743 | 15.746542R | 178 | 5 |
+| Recent ≤6 bars | 367 | 74.7% | 0.157503R | 57.803535R | 1.331256 | 14.906541R | 128 | 4 |
+| Recent ≤12 bars | 432 | 88.0% | 0.160347R | 69.269811R | 1.337520 | 13.509227R | 60 | 1 |
+| Post-inversion zone touch | 212 | 43.2% | 0.153369R | 32.514138R | 1.315137 | 8.986900R | 281 | 2 |
+
+Every predeclared rule lowers aggregate expectancy and return-to-drawdown versus the frozen baseline. Lower drawdown in some filtered variants is explained by substantially lower opportunity coverage and does not improve the risk-adjusted result.
+
+## Chronological result
+
+| Variant | Development exp. | Validation exp. | Later-research exp. |
+|---|---:|---:|---:|
+| Observe | 0.195723R | 0.169159R | 0.177012R |
+| Any aligned IFVG | 0.187845R | 0.184314R | 0.119648R |
+| Recent ≤3 | 0.222110R | 0.197357R | 0.044450R |
+| Recent ≤6 | 0.167484R | 0.238456R | 0.063801R |
+| Recent ≤12 | 0.172897R | 0.222269R | 0.080036R |
+| Zone touch | 0.185312R | 0.122212R | 0.115359R |
+
+The recent variants look acceptable in development or validation but deteriorate materially in the later-research slice. This is incompatible with promotion as an incremental confirmation layer.
+
+## Cohort versus portfolio interpretation
+
+- 455 of 491 baseline trades already have an aligned IFVG, so `CONFIRM_ANY` is weakly selective.
+- The confirmed baseline cohort has 0.168419R expectancy, below the 0.180236R total baseline.
+- The 36 unconfirmed trades have 0.329584R expectancy, but this small cohort is chronologically unstable: validation is approximately flat and later research contains only nine trades.
+- The frozen recent-three cohort has 0.182110R expectancy, only 0.001874R above baseline. Its later-research expectancy is 0.064705R.
+- Implementing the recent-three filter enables five later signals because earlier positions are removed. Those newly enabled trades lose 3.453931R in aggregate, reducing portfolio expectancy to 0.168385R.
+- Other strict filters also enable a small number of later trades; the added trades are net negative in every case.
+
+This distinction prevents a conditional subset from being misrepresented as an implementable portfolio improvement.
+
+## Age-neighbourhood interpretation
+
+The predeclared three-, six-, and twelve-bar windows do not form a stable improvement plateau. Diagnostic age buckets are non-monotonic across periods. In particular, the one-to-three-bar cohort is positive in development and validation but approximately flat to negative in later research. No post-hoc age bucket is promoted.
+
+## Cost stress
+
+At one-, two-, and four-tick slippage, every IFVG-filtered portfolio remains inferior to the corresponding unfiltered baseline. At four ticks:
+
+- Observe: 0.144529R expectancy, 70.963686R net.
+- Any IFVG: 0.132566R, 60.317609R.
+- Recent ≤3: 0.132516R, 42.140061R.
+- Recent ≤6: 0.121998R, 44.773304R.
+- Recent ≤12: 0.125006R, 54.002495R.
+- Zone touch: 0.102470R, 21.723740R.
+
+Cost stress does not alter the ranking or create an IFVG advantage.
+
+## Determinism and attribution
+
+- Canonical manifest: `configs/manifests/nq_ifvg_ablation.yaml`.
+- Observe regression: passed.
+- Two clean canonical runs produced 52 byte-identical files.
+- The exact removed and newly enabled trade artifact is generated by the canonical runner; its SHA-256 is locked in `results/2026-07-21/nq_ifvg_ablation_summary.json`.
+- A compact aggregate is committed in `results/2026-07-21/nq_ifvg_changed_trade_summary.csv`.
+- No unexplained trade differences remain.
+
+## Strategic conclusion
+
+IFVG is common inside the existing reversal signal architecture rather than a discriminating source of additional edge. Requiring it discards profitable opportunity and, under stricter filters, changes position sequencing in ways that add losing trades. The correct decision is to preserve the causal implementation and negative result, stop this line of IFVG tuning, and advance to a separately defined CISD ablation.
+
+## Remaining limitations
+
+- Timestamp, daylight-saving, session-boundary, continuous-contract rollover, and supplied VWAP semantics remain provisional.
+- No post-December-2025 paper-forward sample exists.
+- This result rejects IFVG under the stated causal definition and frozen reversal architecture; it does not claim that every discretionary IFVG interpretation is universally useless.
