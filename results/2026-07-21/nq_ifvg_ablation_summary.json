@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "decision": "REJECT_NO_INCREMENTAL_VALUE",
+  "dataset_sha256": "8d3f157a422636e5b8dda51cc3a3d9209c50cb53f9b279d3e14b627ce59370dc",
+  "manifest_sha256": "ac5a356b447862063985cbf6c5d8c2a0fe9d013233b50220e51b9944abdac54c",
+  "observe_regression": {
+    "trades": 491,
+    "expectancy_r": 0.180235811449135,
+    "net_r": 88.49578342152539,
+    "profit_factor": 1.3819983049452256,
+    "max_drawdown_r": 14.107857513807524
+  },
+  "determinism": {
+    "clean_repeat_byte_identical": true,
+    "artifact_count": 52,
+    "changed_trade_attribution_sha256": "2fa4893cba4f12b890cf7e7e6b6923a0303110ad3e0eff2f9fcc434c3b44bd49"
+  },
+  "variants": {
+    "IFVG_CONFIRM_ANY": {"trades": 455, "expectancy_r": 0.1684192255060299, "net_r": 76.63074760524371, "portfolio_removed": 36, "portfolio_added": 0},
+    "IFVG_CONFIRM_RECENT_3": {"trades": 318, "expectancy_r": 0.1683854938560174, "net_r": 53.54658704621353, "portfolio_removed": 178, "portfolio_added": 5},
+    "IFVG_CONFIRM_RECENT_6": {"trades": 367, "expectancy_r": 0.1575028211555424, "net_r": 57.80353536408406, "portfolio_removed": 128, "portfolio_added": 4},
+    "IFVG_CONFIRM_RECENT_12": {"trades": 432, "expectancy_r": 0.1603467854143801, "net_r": 69.26981129901229, "portfolio_removed": 60, "portfolio_added": 1},
+    "IFVG_ZONE_TOUCH": {"trades": 212, "expectancy_r": 0.1533685776380642, "net_r": 32.51413845926964, "portfolio_removed": 281, "portfolio_added": 2}
+  },
+  "interpretation": [
+    "Every predeclared IFVG portfolio filter lowered aggregate expectancy versus the frozen baseline.",
+    "Any aligned IFVG covered 92.7% of baseline trades and was weakly selective.",
+    "Recent and zone-touch rules lost substantial coverage without stable later-research improvement.",
+    "Position-sequence changes enabled later trades in strict filters; those added trades were net negative.",
+    "One-, two-, and four-tick slippage preserve the rejection."
+  ]
+}
