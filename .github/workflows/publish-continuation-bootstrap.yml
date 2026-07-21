@@ -9,7 +9,6 @@ permissions:
 
 jobs:
   publish:
-    if: ${{ hashFiles('.dtr-continuation-publish.tar.gz') != '' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout branch
@@ -17,10 +16,23 @@ jobs:
         with:
           ref: agent/nq-continuation-engine
           fetch-depth: 0
+      - name: Reconstruct and verify reviewed package
+        shell: bash
+        run: |
+          cat .dtr-continuation-publish.part1 \
+              .dtr-continuation-publish.part2 \
+              .dtr-continuation-publish.part3 \
+              .dtr-continuation-publish.part4 \
+            | base64 --decode > .dtr-continuation-publish.tar.gz
+          echo "1ffd3485cc40b1a01a4d595b4fecc92cf0c87cbb934188402277b0ce8518b240  .dtr-continuation-publish.tar.gz" | sha256sum --check
       - name: Extract reviewed continuation package
         run: |
           tar -xzf .dtr-continuation-publish.tar.gz
           rm .dtr-continuation-publish.tar.gz
+          rm .dtr-continuation-publish.part1
+          rm .dtr-continuation-publish.part2
+          rm .dtr-continuation-publish.part3
+          rm .dtr-continuation-publish.part4
           rm .github/workflows/publish-continuation-bootstrap.yml
       - name: Commit published package
         run: |
