@@ -2,81 +2,57 @@
 
 ## Current work package
 
-`DTR-NQ-WP-20260721-01 — Baseline integrity closure`
+`DTR-NQ-WP-20260721-02 — Independent continuation engine`
 
-Status: **complete**
+Status: **claimed; design and baseline implementation starting**
 
-Branch: `agent/nq-baseline-integrity-closure`
+Branch: `agent/nq-continuation-engine`
 
-Draft PR: `#1 — Close NQ baseline integrity gate`
+Predecessor: `DTR-NQ-WP-20260721-01` — complete and merged in PR #1
 
-## Current primary dataset
-
-`nq_futures_1m_2022_2025`
+## Locked data and reversal baselines
 
 Dataset SHA-256:
 
 `8d3f157a422636e5b8dda51cc3a3d9209c50cb53f9b279d3e14b627ce59370dc`
 
-NQ remains the sole optimization base for the current phase. Dukascopy and other feeds are deferred.
+### Observe-only reference
 
-## Frozen reference
+- candidate: `DTR_PY_NQ_CANDIDATE_0_1`
+- trades: `504`
+- net R: `84.16435914242919`
+- maximum drawdown: `14.107857513807524R`
 
-`DTR_PY_NQ_CANDIDATE_0_1`
+### Gap-safe reversal baseline
 
-- policy: `observe_only`;
-- trades: `504`;
-- net R: `84.16435914242919`;
-- maximum drawdown: `14.107857513807524R`;
-- regression: **passed**.
+- candidate: `DTR_PY_NQ_CANDIDATE_0_1_GAP_SAFE`
+- trades: `491`
+- net R: `88.49578342152539`
+- maximum drawdown: `14.107857513807524R`
 
-## Gap-safe baseline
+Both are frozen. The continuation branch must not retune or modify them.
 
-`DTR_PY_NQ_CANDIDATE_0_1_GAP_SAFE`
+## Current research question
 
-- policy: `reject_unsafe`;
-- strategy parameters: **identical to the frozen reference**;
-- trades: `491`;
-- net R: `88.49578342152539`;
-- maximum drawdown: `14.107857513807524R`;
-- regression: **locked and passed**.
+Does an accepted session-range breakout provide an independent, robust continuation edge after realistic costs, and is immediate or first-pullback entry the better decision route?
 
-## Difference attribution
+## Immediate implementation gate
 
-- removed trades: `13`;
-- added trades: `0`;
-- contaminated session ranges: `9` trades;
-- unsafe gaps during open trades: `4` trades;
-- unexplained differences: `0`;
-- deterministic clean reruns: **byte-identical for all required artifacts**.
+- create a separate continuation event-state module;
+- define upside/downside accepted breaks and failed-breakout invalidation;
+- implement one-bar and two-bar acceptance fixtures;
+- implement immediate and first-pullback entry fixtures;
+- preserve the locked `reject_unsafe` data contract;
+- instrument the unfiltered continuation funnel before optimization;
+- pass pinned Ruff and pytest on Python 3.11 and 3.12.
 
-Comparison report:
+## Promotion restriction
 
-`docs/NQ_GAP_SAFE_COMPARISON_2026-07-21.md`
+No continuation candidate may be combined with reversal until it demonstrates independently positive chronological validation and walk-forward evidence with acceptable opportunity coverage and an independent review decision.
 
-Compact machine-readable result:
+## Open project limitations
 
-`results/2026-07-21/nq_candidate_0_1_gap_safe_summary.json`
-
-## Validation status
-
-- Independent adversarial review: **complete**
-- Pinned Ruff 0.15.22: **passed**
-- Pytest Python 3.11: **passed**
-- Pytest Python 3.12: **passed**
-- Frozen reference full-data rerun: **passed**
-- Gap-safe full-data rerun: **passed**
-- Trade-level attribution: **complete**
-- Artifact hash lock: **complete**
-
-## Promotion state
-
-`PROMOTE_TO_CONTINUATION_RESEARCH`
-
-This closes the baseline-integrity gate. It does not authorize production use, performance claims, or combination with reversal before the continuation branch demonstrates independent value.
-
-## Next planned work package
-
-`DTR-NQ-WP-20260721-02 — Independent continuation engine`
-
-The continuation branch must use the locked gap-safe data contract and be evaluated independently before any adaptive routing or combination with the reversal candidate.
+- continuous-contract rollover and back-adjustment methodology;
+- exact timestamp and daylight-saving semantics;
+- session-boundary and supplied VWAP reset verification;
+- absence of post-December-2025 paper-forward data.
