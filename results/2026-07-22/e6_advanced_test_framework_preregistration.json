@@ -1,0 +1,103 @@
+{
+  "work_package": "DTR-NQ-WP-20260722-10",
+  "date": "2026-07-22",
+  "decision_state": "FRAMEWORK_FROZEN_EXECUTION_NOT_STARTED",
+  "working_baseline": {
+    "id": "E6_EXCLUDE_NEAR_PRIOR_DAY_DIRECTIONAL_EXTREME",
+    "weekdays": [1, 2, 3, 4],
+    "sessions": ["ASIA_7PM", "LONDON_2AM", "NEW_YORK_9AM"],
+    "rule": "exclude directional session-range extreme within 0.25 completed-D1 ATR of corresponding prior-day extreme",
+    "trades": 304,
+    "net_r": 48.937550,
+    "expectancy_r": 0.160979,
+    "max_drawdown_r": 8.632571,
+    "return_dd": 5.668942
+  },
+  "non_selectable_control": {
+    "id": "DTR_CAUSAL_BAR_CLOSE_RANGE_SHIFT_MINUS1",
+    "trades": 477,
+    "net_r": 42.577515,
+    "expectancy_r": 0.089261
+  },
+  "frozen_candidate_families": {
+    "path_quality": [
+      {
+        "id": "P1_TOTAL_PATH_LE_12_BARS",
+        "definition": "entry_index - sweep_index <= 12"
+      },
+      {
+        "id": "P2_BOS_QUALITY_2_OF_3",
+        "definition": "at least two of body_fraction>=0.60, directional_close_location>=0.75, true_range>=ATR14"
+      },
+      {
+        "id": "P3_ENTRY_EXTENSION_LE_0_35R",
+        "definition": "abs(entry_price_raw-pivot)/initial_risk_points <= 0.35"
+      }
+    ],
+    "reward_space": [
+      {
+        "id": "R1_CLEAR_TO_TP1",
+        "definition": "nearest known directionally-ahead structural level clearance >= 1.25R"
+      },
+      {
+        "id": "R2_CLEAR_TO_RUNNER",
+        "definition": "nearest known directionally-ahead structural level clearance >= 2.50R",
+        "shadow_unless_trades_at_least": 250
+      }
+    ],
+    "sequencing": [
+      {
+        "id": "S1_FIRST_TRADE_PER_ETH_DATE",
+        "definition": "first eligible E6 trade per ETH market date"
+      },
+      {
+        "id": "S2_COOLDOWN_60_MIN",
+        "definition": "reject entries within 60 minutes after any exit"
+      },
+      {
+        "id": "S3_SESSION_SLEEVES",
+        "definition": "independent session sleeves with one-third risk budget per sleeve"
+      }
+    ]
+  },
+  "only_authorized_interaction": {
+    "id": "I1_BOS_QUALITY_AND_TP1_CLEARANCE",
+    "parents": ["P2_BOS_QUALITY_2_OF_3", "R1_CLEAR_TO_TP1"],
+    "status": "SHADOW_ONLY"
+  },
+  "diagnostic_blocks": [
+    "E6_KEPT_VS_REJECTED_MECHANISM",
+    "OFFICIAL_EVENT_HOLIDAY_ROLL_ATTRIBUTION",
+    "FIXED_FRACTION_EQUITY_AND_RISK_STRESS"
+  ],
+  "cost_scenarios_ticks_each_side": [1, 2, 4],
+  "fixed_fraction_risk_scenarios": [0.005, 0.01, 0.015],
+  "sample_classification": {
+    "fresh_oos_candidate_min_trades": 250,
+    "shadow_min_trades": 180,
+    "effect_expectancy_uplift_r": 0.03,
+    "drawdown_ratio_max": 0.80,
+    "return_dd_ratio_min": 1.15,
+    "familywise_incremental_p_max": 0.05,
+    "max_session_net_share": 0.60,
+    "max_halfyear_net_share": 0.60
+  },
+  "locks": [
+    "no_e6_threshold_change",
+    "no_weekday_or_session_search",
+    "no_entry_stop_target_or_exit_change",
+    "no_neighbor_threshold_search",
+    "no_data_selected_interaction",
+    "no_historical_pine_or_deployment_promotion",
+    "unfiltered_control_and_e6_must_reproduce_exactly"
+  ],
+  "execution_order": [
+    "BLOCK_0_REGRESSION",
+    "BLOCK_1_E6_MECHANISM",
+    "BLOCKS_2_3_PATH_AND_REWARD",
+    "INDEPENDENT_REVIEW_CHECKPOINT",
+    "BLOCK_4_SEQUENCING",
+    "BLOCK_5_EVENT_ROLL_ATTRIBUTION",
+    "BLOCK_6_RISK_STRESS"
+  ]
+}
