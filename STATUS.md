@@ -2,13 +2,13 @@
 
 ## Current stacked work package
 
-`DTR-NQ-WP-20260722-16 — E6 no-FOMC risk recalibration`
+`DTR-CROSSMARKET-WP-20260722-18 — NQ versus USA500 parallel replication framework`
 
-Status: **complete; independent review and deterministic repeat passed**
+Status: **framework complete; execution, independent review, deterministic repeat and CI pending final publication gate**
 
-Decision state: `NO_FOMC_RISK_RECALIBRATION_COMPLETE_NO_SIZING_AUTHORIZATION`
+Decision state: `PARTIAL_COST_FRAGILE_REPLICATION`
 
-Base dependency: `DTR-NQ-WP-20260722-15 — Promote E6 no-FOMC working baseline` remains a stacked draft on PR #15.
+Base dependency: `DTR-ESPROXY-WP-20260722-17 — Dukascopy USA500 proxy qualification` remains a stacked draft on PR #17.
 
 ## Baseline hierarchy
 
@@ -20,14 +20,13 @@ Base dependency: `DTR-NQ-WP-20260722-15 — Promote E6 no-FOMC working baseline`
 - 86.004761R net;
 - 0.173747R expectancy.
 
-### Mandatory non-selectable control
+### Timing-corrected non-selectable control
 
 `DTR_CAUSAL_BAR_CLOSE_RANGE_SHIFT_MINUS1`
 
 - 477 trades;
 - 42.577515R net;
-- 0.089261R expectancy;
-- 16.426493R maximum drawdown.
+- 0.089261R expectancy.
 
 ### Frozen E6 comparator
 
@@ -38,7 +37,7 @@ Base dependency: `DTR-NQ-WP-20260722-15 — Promote E6 no-FOMC working baseline`
 - 0.160979R expectancy;
 - 8.632571R maximum drawdown.
 
-### Current working research baseline
+### Current NQ working research baseline
 
 `E6_NO_FOMC_DAY`
 
@@ -48,43 +47,52 @@ Base dependency: `DTR-NQ-WP-20260722-15 — Promote E6 no-FOMC working baseline`
 - 9.151061R maximum drawdown;
 - 5.844496 return/DD.
 
-## No-FOMC risk recalibration
+## Cross-market framework
 
-Observed $100,000 account under normal costs:
+The provider-neutral framework now:
 
-- 0.50% risk: $129,885 final equity; 4.51% maximum drawdown.
-- 1.00% risk: $166,725 final equity; 8.87% maximum drawdown.
-- 1.50% risk: $211,540 final equity; 13.09% maximum drawdown.
+- normalizes NQ and Dukascopy USA500 proxy data to canonical bar-open Eastern Time;
+- runs original E6 and E6 no-FOMC through one frozen signal/execution contract;
+- preserves instrument-specific data-integrity and execution economics;
+- reports opportunity, trade, session, year, direction, cost and uncertainty evidence separately;
+- prohibits pooled returns and proxy-specific tuning.
 
-Observed account under severe four-tick-per-side costs:
+## NQ versus USA500 result
 
-- 0.50% risk: $120,388 final equity; 5.10% maximum drawdown.
-- 1.00% risk: $143,251 final equity; 10.01% maximum drawdown.
-- 1.50% risk: $168,498 final equity; 14.73% maximum drawdown.
+| Instrument | Arm | Trades | Net R | Expectancy | Max DD | 2-tick expectancy |
+|---|---|---:|---:|---:|---:|---:|
+| NQ | E6 | 304 | 48.94R | 0.161R | 8.63R | 0.143R |
+| NQ | E6 no-FOMC | 291 | 53.48R | 0.184R | 9.15R | 0.166R |
+| USA500 proxy | E6 | 281 | 13.33R | 0.047R | 17.38R | -0.012R |
+| USA500 proxy | E6 no-FOMC | 268 | 12.98R | 0.048R | 16.30R | -0.011R |
 
-Resampled conclusion:
+Decision: the proxy is positive at one tick per side but not robust to two ticks. Classification: `PARTIAL_COST_FRAGILE_REPLICATION`.
 
-- 0.50% remains the most resilient tested envelope.
-- 1.00% remains the middle paper-research envelope; under severe costs, 20% drawdown probability is approximately 7.1–10.1%.
-- 1.50% remains aggressive; under severe costs, 20% drawdown probability is approximately 36.6–42.9% and 30% drawdown probability is approximately 5.6–8.2%.
+## Attribution
 
-No live sizing recommendation follows.
+- Proxy London: 107 trades, +31.13R, 0.291R expectancy.
+- Proxy Asia: 67 trades, -7.23R.
+- Proxy New York: 107 trades, -10.57R.
+- Proxy E6 date-block 95% expectancy interval: approximately -0.097R to +0.197R.
+- The no-FOMC overlay improved NQ by +4.55R but reduced proxy total return by 0.35R after exact resequencing.
+
+No London-only rule, proxy filter or FOMC redefinition is authorized.
 
 ## Next evidence gate
 
-- qualify Dukascopy `USA500.IDX/USD` as an S&P 500 CFD proxy, not ES futures;
-- audit historical depth, sessions, timestamps, missing bars, spreads, and discontinuities before performance inspection;
-- then run unchanged original E6 and E6 no-FOMC replication side by side;
-- retain qualified fresh NQ and longer contract-audited NQ as parallel priorities.
+- materially longer USA500 proxy replication using the unchanged framework;
+- actual contract-audited ES futures data if available;
+- qualified fresh post-2025 NQ data;
+- materially longer contract-audited NQ history.
 
 ## Existing unresolved gates
 
 - authoritative NQ timestamp metadata: `UNRESOLVED`;
-- continuous-contract methodology: `UNRESOLVED`;
-- qualified fresh OOS comparison: `NOT_RUN`;
-- Dukascopy USA500 proxy qualification: `NOT_RUN`;
+- NQ continuous-contract methodology: `UNRESOLVED`;
+- qualified fresh NQ OOS comparison: `NOT_RUN`;
+- actual ES futures replication: `NOT_RUN`;
 - Python/Pine parity: `NOT_RUN`.
 
 ## Scope restrictions
 
-No additional FOMC buffer search, risk-fraction optimization, dynamic sizing, ES-proxy parameter adaptation, Pine port, live sizing recommendation, leverage increase, or deployment is authorized.
+No proxy-specific threshold, session, weekday, cost selection, FOMC rule change, pooled NQ/proxy portfolio, dynamic sizing, Pine port, live sizing recommendation, leverage increase or deployment is authorized.

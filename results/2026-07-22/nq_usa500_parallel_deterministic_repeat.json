@@ -1,0 +1,17 @@
+{
+  "decision": "DETERMINISTIC_REPEAT_PASS",
+  "all_identical": true,
+  "files_compared": 10,
+  "hashes": {
+    "NQ__E6__trades.csv": "f35deddd3d9bf0252904991fee6ae02e1cd96bec2e1beda22e4109df16f82a6a",
+    "NQ__E6_NO_FOMC_DAY__trades.csv": "399c6c3538374efa2f17b9b0f4120dc4bcc3a329bb628dd569da7645dca1d3f8",
+    "USA500_PROXY__E6__trades.csv": "ea644679df48b6648acd9e5e69826d888add452830d49a118e306fde93d06841",
+    "USA500_PROXY__E6_NO_FOMC_DAY__trades.csv": "378efd1d8817db1d8ca5429092b2136d65a111816bee0dde86e38b3b0935b92d",
+    "parallel_summary.csv": "d924a578fc559d92e0fcd1d303b751e6b855b4b5a320f251e8af29a961d0cf16",
+    "parallel_inference.csv": "3f9756173073a17c181d721854965442d23760335113f91de65d95df2491dc13",
+    "parallel_breakdown.csv": "d7ba9460f32d23b5df10e8d1df3ab9f9a44a6ec89a354ece60b47fb538f2083f",
+    "parallel_data_audit.csv": "eed131568bd689321bd1fadf6e21e9ce78bc0458d0db9bf2c665a7043c1abb11",
+    "fomc_changed_trade_attribution.csv": "1da183ac5d08e530154eac7d885a509d04fc2e589485f0e111feee6da8c920c5",
+    "decision.json": "19078c3535ef46fc1e1b1153e106d4125a9a556b33383b83a72136d77e096343"
+  }
+}

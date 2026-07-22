@@ -1,0 +1,107 @@
+{
+  "study_id": "DTR-CROSSMARKET-WP-20260722-18",
+  "status": "FROZEN_BEFORE_PROXY_PERFORMANCE_INSPECTION",
+  "primary_period_et": {
+    "start_inclusive": "2022-12-26T18:00:00",
+    "end_inclusive": "2025-12-10T23:58:00"
+  },
+  "instruments": {
+    "NQ": {
+      "source": "registered NQ futures one-minute archive",
+      "source_sha256": "8d3f157a422636e5b8dda51cc3a3d9209c50cb53f9b279d3e14b627ce59370dc",
+      "timestamp_adapter": "parse ET vendor labels; remove incomplete final source date; shift labels back one minute to canonical bar-open ET",
+      "tick_size": 0.25,
+      "point_value": 20.0,
+      "commission_per_side": 2.25,
+      "classification": "NQ futures research"
+    },
+    "USA500_PROXY": {
+      "source": "Dukascopy USA500.IDX/USD active one-minute bid candles",
+      "source_sha256": "199d63e6f284eb1ffb93003e9020bf2852f5d96bf78f0efe50c3bdd09c11a47b",
+      "timestamp_adapter": "milliseconds UTC bar-open labels converted to America/New_York and made timezone-naive only after conversion",
+      "tick_size": 0.25,
+      "point_value": 50.0,
+      "commission_per_side": 2.25,
+      "classification": "bid-CFD S&P 500 proxy with synthetic ES-equivalent execution economics",
+      "range_minimum_active_coverage": 0.95,
+      "short_quote_absence_minutes_not_reset": 5,
+      "limitations": [
+        "not CME ES futures",
+        "bid-only prices",
+        "Dukascopy feed volume rather than CME volume",
+        "no futures roll behaviour",
+        "no reconstructed historical spread"
+      ]
+    }
+  },
+  "arms": {
+    "E6": "exclude near prior-day directional extreme at the frozen 0.25 prior-day ATR threshold",
+    "E6_NO_FOMC_DAY": "E6 plus reject entries whose ET calendar date is an official FOMC statement date"
+  },
+  "strategy_lock": {
+    "sessions": ["ASIA_7PM", "LONDON_2AM", "NEW_YORK_9AM"],
+    "weekdays": [1, 2, 3, 4],
+    "global_one_position": true,
+    "all_signal_entry_stop_target_exit_parameters": "identical to frozen NQ E6 engine",
+    "execution_slippage_ticks_each_side": [1, 2, 4]
+  },
+  "nq_regression_gates": {
+    "E6": {
+      "trades": 304,
+      "net_r": 48.93754952687199,
+      "expectancy_r": 0.16097878133839472,
+      "max_drawdown_r": 8.632571354238342
+    },
+    "E6_NO_FOMC_DAY": {
+      "trades": 291,
+      "net_r": 53.48334196741127,
+      "expectancy_r": 0.18379155315261606,
+      "max_drawdown_r": 9.151060839915637
+    }
+  },
+  "official_fomc_statement_dates": [
+    "2023-02-01", "2023-03-22", "2023-05-03", "2023-06-14", "2023-07-26", "2023-09-20", "2023-11-01", "2023-12-13",
+    "2024-01-31", "2024-03-20", "2024-05-01", "2024-06-12", "2024-07-31", "2024-09-18", "2024-11-07", "2024-12-18",
+    "2025-01-29", "2025-03-19", "2025-05-07", "2025-06-18", "2025-07-30", "2025-09-17", "2025-10-29", "2025-12-10"
+  ],
+  "required_metrics": [
+    "eligible_session_opportunities",
+    "candidate_signals",
+    "executed_trades",
+    "trades_per_100_eligible_sessions",
+    "net_r",
+    "expectancy_r",
+    "median_r",
+    "profit_factor",
+    "win_rate",
+    "max_drawdown_r",
+    "return_dd",
+    "mfe_r",
+    "mae_r",
+    "one_two_four_tick_expectancy",
+    "year_session_direction_breakdown",
+    "date_block_uncertainty",
+    "FOMC_changed_trade_attribution"
+  ],
+  "usa500_e6_replication_rule": {
+    "DIRECTIONAL_REPLICATION_SUPPORTED": "normal net R > 0, normal expectancy > 0, profit factor > 1, positive net R in at least two years, and two-tick expectancy > 0",
+    "PARTIAL_COST_FRAGILE_REPLICATION": "normal net R > 0 and expectancy > 0 but at least one support gate fails",
+    "NO_REPLICATION": "normal net R <= 0 or expectancy <= 0"
+  },
+  "inference": {
+    "method": "independent ET-market-date block bootstrap by instrument and arm",
+    "iterations": 20000,
+    "seed": 20260722,
+    "purpose": "descriptive uncertainty and directional transfer classification only"
+  },
+  "restrictions": [
+    "no proxy-specific parameter tuning",
+    "no timestamp shifting after inspection",
+    "no session or weekday change",
+    "no E6 threshold change",
+    "no FOMC rule redefinition",
+    "no pooled NQ-USA500 portfolio",
+    "no dollar return comparison across instruments",
+    "no live sizing, Pine or deployment authorization"
+  ]
+}
