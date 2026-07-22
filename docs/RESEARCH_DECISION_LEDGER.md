@@ -15,7 +15,7 @@ This ledger is the durable entry point for completed DTR research decisions. Det
    - Original E6: 304 trades; 48.937550R; 0.160979R expectancy.
    - Original E6 remains the mandatory control for the user-mandated no-FOMC overlay.
 
-4. **Current working baseline**
+4. **Current NQ working baseline**
    - `E6_NO_FOMC_DAY`: 291 trades; 53.483342R; 0.183792R expectancy; 9.151061R maximum drawdown.
    - Classification: user-mandated risk-policy overlay, not statistically proven promotion.
 
@@ -23,11 +23,14 @@ This ledger is the durable entry point for completed DTR research decisions. Det
    - 0.50% and 1.00% remain paper-research envelopes only.
    - 1.50% remains classified as aggressive.
 
+6. **Cross-market evidence**
+   - Dukascopy USA500 is a bid-CFD S&P 500 proxy, not ES futures.
+   - Initial E6 proxy result: 281 trades; 13.330895R; 0.047441R expectancy.
+   - Classification: `PARTIAL_COST_FRAGILE_REPLICATION`.
+
 ## DTR-NQ-WP-20260722-08 — Advanced context robustness
 
 Decision: `NO_HISTORICAL_PROMOTION_CONTINUE_FRESH_OOS_RESEARCH`.
-
-Authoritative files include `docs/DTR_ADVANCED_CONTEXT_RESEARCH_2026-07-22.md` and `handovers/DTR-NQ-WP-20260722-08.md`.
 
 Conclusion: E5 and E6 are coherent historical challengers, but their incremental advantage remains unresolved. Do not retune them on the same sample.
 
@@ -76,12 +79,7 @@ Conclusion:
 
 Decision: `PROMOTE_E6_NO_FOMC_DAY_AS_WORKING_BASELINE`.
 
-Authoritative files:
-
-- `docs/E6_NO_FOMC_BASELINE_DECISION_2026-07-22.md`
-- `results/2026-07-22/e6_no_fomc_baseline.json`
-- `handovers/DTR-NQ-WP-20260722-15.md`
-- `changelogs/DTR-NQ-WP-20260722-15.md`
+Authoritative files include `docs/E6_NO_FOMC_BASELINE_DECISION_2026-07-22.md`, `results/2026-07-22/e6_no_fomc_baseline.json`, and `handovers/DTR-NQ-WP-20260722-15.md`.
 
 Conclusion:
 
@@ -93,31 +91,65 @@ Conclusion:
 
 Decision: `NO_FOMC_RISK_RECALIBRATION_COMPLETE_NO_SIZING_AUTHORIZATION`.
 
-Authoritative files:
-
-- `docs/E6_NO_FOMC_RISK_RECALIBRATION_RESEARCH_2026-07-22.md`
-- `results/2026-07-22/e6_no_fomc_risk_recalibration_preregistration.json`
-- `results/2026-07-22/e6_no_fomc_risk_recalibration_historical.csv`
-- `results/2026-07-22/e6_no_fomc_risk_recalibration_summary.json`
-- `reviews/DTR-NQ-WP-20260722-16-independent-review.md`
-- `handovers/DTR-NQ-WP-20260722-16.md`
-- `changelogs/DTR-NQ-WP-20260722-16.md`
-
 Conclusion:
 
 - Normal-cost final equity at 0.50% / 1.00% / 1.50% risk: $129,885 / $166,725 / $211,540.
 - Normal-cost maximum drawdown: 4.51% / 8.87% / 13.09%.
 - Severe-cost 1.00% risk retained approximately 7.1–10.1% probability of reaching 20% drawdown.
 - Severe-cost 1.50% risk retained approximately 36.6–42.9% probability of reaching 20% drawdown and 5.6–8.2% probability of reaching 30% drawdown.
-- The no-FOMC policy improves growth and severe-cost resilience, but does not change the risk hierarchy.
 - No live sizing, leverage, Pine, or deployment authorization follows.
+
+## DTR-ESPROXY-WP-20260722-17 — USA500 data acquisition and qualification
+
+Decision: `QUALIFIED_WITH_PROXY_LIMITATIONS`.
+
+Authoritative files:
+
+- `docs/USA500_DUKASCOPY_PROXY_QUALIFICATION_2026-07-22.md`
+- `results/2026-07-22/usa500_dukascopy_proxy_qualification.json`
+- `handovers/DTR-ESPROXY-WP-20260722-17.md`
+
+Conclusion:
+
+- 1,348,078 active one-minute bid candles were retained after removing synthetic zero-volume placeholders.
+- Timestamps, ordering, OHLC integrity and frozen session coverage passed.
+- The data is a Dukascopy CFD proxy and cannot validate CME ES prices, volume, spread or roll behavior.
+- Raw data remains outside Git and must be deleted after research use.
+
+## DTR-CROSSMARKET-WP-20260722-18 — NQ versus USA500 parallel replication
+
+Decision: `PARTIAL_COST_FRAGILE_REPLICATION`.
+
+Authoritative files:
+
+- `results/2026-07-22/nq_usa500_parallel_preregistration.json`
+- `src/dtr_lab/research/cross_market.py`
+- `scripts/run_nq_usa500_parallel.py`
+- `docs/NQ_USA500_PARALLEL_REPLICATION_2026-07-22.md`
+- `results/2026-07-22/nq_usa500_parallel_summary.csv`
+- `results/2026-07-22/nq_usa500_parallel_inference.csv`
+- `results/2026-07-22/nq_usa500_parallel_session_breakdown.csv`
+- `results/2026-07-22/nq_usa500_parallel_independent_review.json`
+- `results/2026-07-22/nq_usa500_parallel_deterministic_repeat.json`
+- `handovers/DTR-CROSSMARKET-WP-20260722-18.md`
+
+Conclusion:
+
+- The parallel framework reproduced NQ E6 and NQ E6 no-FOMC exactly.
+- USA500 E6 produced 281 trades, +13.330895R, 0.047441R expectancy and 17.377216R maximum drawdown.
+- USA500 E6 expectancy became -0.011853R at two ticks per side.
+- The date-block 95% proxy expectancy interval crossed zero broadly.
+- Proxy performance was concentrated in London: +31.13R, versus -7.23R in Asia and -10.57R in New York.
+- The no-FOMC overlay improved NQ by +4.55R but reduced proxy total return by 0.35R after resequencing.
+- Do not create a London-only proxy rule, modify E6, pool instruments, or claim ES futures validation.
 
 ## Current forward decision
 
-The next valid work is data acquisition and qualification rather than further NQ in-sample tuning:
+The initial provider-neutral cross-market framework is complete. Valid next evidence is:
 
-- qualified fresh NQ data;
-- materially longer contract-audited NQ history; or
-- Dukascopy `USA500.IDX/USD` as a separately labelled S&P 500 CFD proxy.
+- materially longer USA500 proxy history with no framework changes;
+- actual contract-audited ES futures data;
+- qualified fresh post-2025 NQ data; or
+- materially longer contract-audited NQ history.
 
-The Dukascopy proxy must pass history, session, timestamp, missing-bar, spread, and discontinuity audits before any performance result is inspected. It must not be described as exchange-traded ES futures data, and original E6 must remain a control beside the no-FOMC baseline.
+Do not tune the proxy to rescue the weak or cost-fragile result.
