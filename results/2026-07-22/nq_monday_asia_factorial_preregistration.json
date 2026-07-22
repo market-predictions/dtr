@@ -1,0 +1,14 @@
+{
+  "study_id": "DTR_NQ_MONDAY_ASIA_FACTORIAL_20260722",
+  "status": "FROZEN_BEFORE_RESULTS",
+  "baseline": "DTR_CAUSAL_BAR_CLOSE_RANGE_SHIFT_MINUS1",
+  "arms": {
+    "A0_CURRENT": {"weekdays": [1, 2, 3, 4], "sessions": ["ASIA_7PM", "LONDON_2AM", "NEW_YORK_9AM"]},
+    "A1_ADD_MONDAY": {"weekdays": [0, 1, 2, 3, 4], "sessions": ["ASIA_7PM", "LONDON_2AM", "NEW_YORK_9AM"]},
+    "A2_REMOVE_ASIA": {"weekdays": [1, 2, 3, 4], "sessions": ["LONDON_2AM", "NEW_YORK_9AM"]},
+    "A3_ADD_MONDAY_REMOVE_ASIA": {"weekdays": [0, 1, 2, 3, 4], "sessions": ["LONDON_2AM", "NEW_YORK_9AM"]}
+  },
+  "layers": ["UNFILTERED", "E5_EXCLUDE_COMPRESSED_RANGE", "E6_EXCLUDE_NEAR_PRIOR_DAY_DIRECTIONAL_EXTREME"],
+  "primary_contrasts": ["A1-A0", "A2-A0", "A3-A2", "A3-A1", "A3-A0"],
+  "restrictions": ["no threshold changes", "no session subset beyond fixed arms", "no weekday subset beyond fixed arms", "historical diagnostic only"]
+}
