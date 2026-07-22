@@ -1,0 +1,49 @@
+{
+  "study_id": "DTR-ESPROXY-WP-20260722-17",
+  "decision": "QUALIFIED_WITH_PROXY_LIMITATIONS",
+  "downloader": {
+    "repository": "Leo4815162342/dukascopy-node",
+    "version": "1.49.0"
+  },
+  "instrument": {
+    "id": "usa500idxusd",
+    "name": "USA500.IDX/USD",
+    "asset_classification": "S&P 500 index CFD proxy",
+    "not_equivalent_to": "CME ES futures"
+  },
+  "request": {
+    "timeframe": "m1",
+    "price_type": "bid",
+    "from": "2022-01-01",
+    "to_exclusive": "2026-01-01"
+  },
+  "download": {
+    "rows_before_cleaning": 1747387,
+    "synthetic_flat_zero_rows_removed": 399309,
+    "active_rows": 1348078,
+    "active_first_utc": "2022-01-02T23:00:00Z",
+    "active_last_utc": "2025-12-31T21:13:00Z",
+    "duplicate_timestamps": 0,
+    "strictly_increasing": true,
+    "ohlc_integrity_pass": true,
+    "active_csv_sha256": "199d63e6f284eb1ffb93003e9020bf2852f5d96bf78f0efe50c3bdd09c11a47b",
+    "active_gzip_sha256": "0b8fbc0f58071058f8719eae56098a841123234f5bc893764e9611f0ddbec7ae"
+  },
+  "coverage": {
+    "london_range_median_completeness": 1.0,
+    "london_dates_at_least_95pct_complete": 724,
+    "new_york_range_median_completeness": 1.0,
+    "new_york_dates_at_least_95pct_complete": 823,
+    "tuesday_friday_dates_evaluated": 834,
+    "full_holiday_closures_identified": 7
+  },
+  "limitations": [
+    "bid CFD prices rather than CME futures trade prices",
+    "Dukascopy feed volume rather than CME centralized volume",
+    "matching ask candles were not acquired",
+    "historical midpoint and observed spread cannot be reconstructed",
+    "continuous futures roll behavior is absent",
+    "raw data is temporary and must be deleted after use"
+  ],
+  "next_authorized_test": "Run original E6 and E6_NO_FOMC_DAY unchanged and side by side as a separately labelled bid-CFD proxy replication."
+}
