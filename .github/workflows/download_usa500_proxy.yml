@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   download:
-    name: USA500 M1 ${{ matrix.year }}
+    name: USA500 M1 ASK ${{ matrix.year }}
     runs-on: ubuntu-latest
     timeout-minutes: 120
     strategy:
@@ -42,7 +42,7 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Download one-minute bid candles
+      - name: Download one-minute ask candles
         shell: bash
         run: |
           set -euo pipefail
@@ -52,13 +52,13 @@ jobs:
             -from "${{ matrix.year }}-01-01" \
             -to "${{ matrix.next_year }}-01-01" \
             -t m1 \
-            -p bid \
+            -p ask \
             -v \
             -vu units \
             -fl \
             -f csv \
             -dir temporary-data \
-            -fn "usa500idxusd_m1_bid_${{ matrix.year }}" \
+            -fn "usa500idxusd_m1_ask_${{ matrix.year }}" \
             -bs 20 \
             -bp 250 \
             -r 5 \
@@ -83,7 +83,7 @@ jobs:
       - name: Upload temporary data artifact
         uses: actions/upload-artifact@v4
         with:
-          name: usa500idxusd-m1-bid-${{ matrix.year }}
+          name: usa500idxusd-m1-ask-${{ matrix.year }}
           path: |
             temporary-data/*.csv.gz
             temporary-data/metadata.txt
