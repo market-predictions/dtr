@@ -1,9 +1,9 @@
 name: Selection source snapshot
 
 on:
-  push:
+  pull_request:
     branches:
-      - agent/nq-selection-robustness
+      - main
     paths:
       - .github/workflows/selection-source-snapshot.yml
 
