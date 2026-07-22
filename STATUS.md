@@ -2,68 +2,97 @@
 
 ## Current stacked work package
 
-`DTR-NQ-WP-20260722-09 — Monday inclusion × Asia exclusion factorial research`
+`DTR-NQ-WP-20260722-10 — E6 advanced test framework and preregistration`
 
-Status: **research complete; independent review passed; publication branch active**
+Status: **framework frozen; execution not started**
 
-Decision state: `RETAIN_TUE_FRI_AND_ASIA`
+Decision state: `FRAMEWORK_FROZEN_EXECUTION_NOT_STARTED`
 
-Base dependency: `DTR-NQ-WP-20260722-08 — Advanced Context Robustness` remains open and draft on PR #8.
+Base dependency: `DTR-NQ-WP-20260722-09 — Monday inclusion × Asia exclusion` remains a stacked draft on PR #9.
 
-## Active timing-corrected exploratory baseline
+## Baseline hierarchy
+
+### Execution regression benchmark
+
+`DTR_PY_NQ_CANDIDATE_0_1_CAUSAL_GAP`
+
+- 495 trades;
+- 86.004761R net;
+- 0.173747R expectancy.
+
+Purpose: detect unintended engine changes.
+
+### Mandatory non-selectable control
 
 `DTR_CAUSAL_BAR_CLOSE_RANGE_SHIFT_MINUS1`
 
 - 477 trades;
-- 0.089261R expectancy;
 - 42.577515R net;
-- PF 1.178993;
-- maximum drawdown 16.426493R;
-- return/DD 2.592003.
+- 0.089261R expectancy;
+- 16.426493R maximum drawdown.
 
-The uploaded source archive reproduced the registered checksum and the baseline, E5 and E6 references exactly.
+Purpose: remain visible beside every E6-derived result.
 
-## Monday × Asia factorial result
+### Working advanced-test baseline
 
-Four frozen arms were run on the unfiltered strategy and repeated under E5 and E6:
+`E6_EXCLUDE_NEAR_PRIOR_DAY_DIRECTIONAL_EXTREME`
 
-- A0: Tuesday–Friday, Asia + London + New York;
-- A1: Monday–Friday, Asia + London + New York;
-- A2: Tuesday–Friday, London + New York;
-- A3: Monday–Friday, London + New York.
+- 304 trades;
+- 48.937550R net;
+- 0.160979R expectancy;
+- 8.632571R maximum drawdown;
+- 5.668942 return/DD.
 
-Primary unfiltered results:
+E6 is a research baseline only. It does not replace the control and is not deployable.
 
-- A0: 477 trades, 42.577515R, 0.089261R expectancy;
-- A1: 604 trades, 44.648086R, 0.073921R expectancy;
-- A2: 349 trades, 27.826440R, 0.079732R expectancy;
-- A3: 433 trades, 21.620906R, 0.049933R expectancy.
+## Frozen advanced-test programme
 
-Findings:
+### Block 1 — E6 mechanism
 
-- removing Asia reduced net R under unfiltered, E5 and E6;
-- adding Monday did not produce a consistent improvement;
-- Monday was positive only under E6, and that contribution was concentrated in Asia Monday;
-- adding Monday while removing Asia was inferior under all three layers;
-- all 12 metric reconstructions, arm contracts and position-overlap checks passed independent review.
+Diagnostic comparison of E6-kept and E6-rejected trades, including MFE, MAE, target/stop path, latency, BOS quality, friction and reward-space geometry. This block cannot select a filter.
 
-Decision: retain Tuesday–Friday and all three sessions. E6+Monday may remain shadow-only coverage research.
+### Blocks 2–3 — Selectable candidate families
 
-## Frozen fresh-OOS challengers
+Path quality:
 
-- Arm 0: unfiltered timing-corrected baseline.
-- Arm A: exclude initial ranges below the 33.3rd trailing same-session range/D1-ATR percentile.
-- Arm B: exclude setups within 0.25 previous-day ATR of the prior-day directional extreme.
-- Arm C: apply A and B together; shadow-only.
+- P1: sweep-to-entry path no longer than 12 five-minute bars;
+- P2: BOS quality score at least two of three;
+- P3: entry extension no greater than 0.35R from pivot.
 
-The Monday/Asia study does not alter the primary fresh-OOS specification. An E6+Monday series may be recorded separately as a non-decision shadow diagnostic.
+Reward space:
 
-## Selection work package status
+- R1: nearest known structural level is at least 1.25R ahead;
+- R2: nearest known structural level is at least 2.50R ahead; shadow unless at least 250 trades.
 
-- original staged 904 chronology: `EXACT_RECONSTRUCTION_BLOCKED`;
-- explicit causal execution contract: implemented on PR #7;
-- current-code causal 904 universe: paused pending final timestamp-alignment decision;
-- no claim that the Monday/Asia study repairs historical selection contamination.
+Only authorized interaction: P2 + R1, shadow-only.
+
+### Block 4 — Portfolio sequencing
+
+- first trade per ETH date;
+- 60-minute post-exit cooldown;
+- independently risk-normalized session sleeves.
+
+### Blocks 5–6 — Diagnostics
+
+- official FOMC, CPI, NFP, expiration, early-close and rollover attribution;
+- 0.50%, 1.00% and 1.50% fixed-fraction equity stress under one-, two- and four-tick-each-side assumptions.
+
+## Historical decision boundary
+
+No historical result can replace E6 or authorize Pine. A rule may only be classified as:
+
+- `FRESH_OOS_CHALLENGER`;
+- `SHADOW_ONLY`;
+- `REJECT`;
+- `DIAGNOSTIC_ONLY`.
+
+At least 250 trades, material effect, return/DD improvement, cost robustness, temporal stability, concentration control and familywise incremental significance are required for fresh-OOS challenger status.
+
+## Previous Monday × Asia decision
+
+Decision: `RETAIN_TUE_FRI_AND_ASIA`.
+
+The advanced-test framework retains Tuesday–Friday and Asia, London and New York. It does not reopen weekday or session selection.
 
 ## Existing unresolved gates
 
@@ -75,4 +104,4 @@ The Monday/Asia study does not alter the primary fresh-OOS specification. An E6+
 
 ## Scope restrictions
 
-No fresh 2026 performance inspection, threshold retuning, new weekday/session search, Pine port, sizing recommendation, leverage increase or deployment is authorized.
+No E6 threshold change, neighboring-threshold search, weekday/session search, additional interaction, Pine port, sizing recommendation, leverage increase or deployment is authorized.
