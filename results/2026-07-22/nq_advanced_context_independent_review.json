@@ -1,0 +1,141 @@
+{
+  "review_id": "DTR_ADVANCED_CONTEXT_INDEPENDENT_REVIEW_20260722",
+  "causality": {
+    "signals": 492,
+    "sessions": 1666,
+    "d1_after_range_start": 0,
+    "h4_after_range_start": 0,
+    "week_after_range_start": 0,
+    "range_end_after_entry": 0
+  },
+  "baseline_manual_metrics": {
+    "trades": 477,
+    "net_r": 42.57751500303384,
+    "expectancy_r": 0.08926103774220931,
+    "profit_factor": 1.178993059960674,
+    "max_drawdown_r": 16.426493058604258,
+    "return_dd": 2.59200273918063
+  },
+  "metric_reconstruction_checks": 12,
+  "all_metric_reconstructions_passed": true,
+  "paired_bootstrap": [
+    {
+      "candidate": "I1_NOT_COMPRESSED_AND_NOT_NEAR_PRIOR_DAY",
+      "type": "interaction",
+      "metrics_verified": true,
+      "observed_net_delta_r": 14.196618740992392,
+      "lo95_net_delta_r": -23.19523775501691,
+      "hi95_net_delta_r": 51.371373299371136,
+      "prob_delta_positive": 0.7764
+    },
+    {
+      "candidate": "I4_NOT_D1_COUNTERTREND_AND_NOT_COMPRESSED",
+      "type": "interaction",
+      "metrics_verified": true,
+      "observed_net_delta_r": 13.206620664252116,
+      "lo95_net_delta_r": -24.45651314886411,
+      "hi95_net_delta_r": 50.469939684497106,
+      "prob_delta_positive": 0.75905
+    },
+    {
+      "candidate": "I6_NOT_MIDDLE_D1_VOL_AND_NOT_COMPRESSED",
+      "type": "interaction",
+      "metrics_verified": true,
+      "observed_net_delta_r": 9.780320977753096,
+      "lo95_net_delta_r": -25.141729818591084,
+      "hi95_net_delta_r": 44.65285162427954,
+      "prob_delta_positive": 0.70915
+    },
+    {
+      "candidate": "E5_EXCLUDE_COMPRESSED_RANGE",
+      "type": "broad",
+      "metrics_verified": true,
+      "observed_net_delta_r": 6.886908358963292,
+      "lo95_net_delta_r": -20.11052047864546,
+      "hi95_net_delta_r": 33.5717469034137,
+      "prob_delta_positive": 0.6969
+    },
+    {
+      "candidate": "E6_EXCLUDE_NEAR_PRIOR_DAY_DIRECTIONAL_EXTREME",
+      "type": "broad",
+      "metrics_verified": true,
+      "observed_net_delta_r": 6.360034523838156,
+      "lo95_net_delta_r": -25.09854418983278,
+      "hi95_net_delta_r": 36.970624117550166,
+      "prob_delta_positive": 0.6615
+    },
+    {
+      "candidate": "E4_EXCLUDE_MIDDLE_D1_VOLATILITY",
+      "type": "broad",
+      "metrics_verified": true,
+      "observed_net_delta_r": 6.352339134092492,
+      "lo95_net_delta_r": -19.276828942353816,
+      "hi95_net_delta_r": 31.855534192097046,
+      "prob_delta_positive": 0.6871
+    },
+    {
+      "candidate": "I2_MIXED_NEUTRAL_CONFLUENCE_AND_NOT_COMPRESSED",
+      "type": "interaction",
+      "metrics_verified": true,
+      "observed_net_delta_r": 5.877453807331979,
+      "lo95_net_delta_r": -32.665565051898156,
+      "hi95_net_delta_r": 44.37614058311425,
+      "prob_delta_positive": 0.62145
+    },
+    {
+      "candidate": "E3_KEEP_MIXED_OR_NEUTRAL_CONFLUENCE",
+      "type": "broad",
+      "metrics_verified": true,
+      "observed_net_delta_r": 4.919046180149046,
+      "lo95_net_delta_r": -28.52825019113281,
+      "hi95_net_delta_r": 38.381977487256485,
+      "prob_delta_positive": 0.61905
+    },
+    {
+      "candidate": "E2_EXCLUDE_H4_COUNTERTREND",
+      "type": "broad",
+      "metrics_verified": true,
+      "observed_net_delta_r": 0.9228772759134329,
+      "lo95_net_delta_r": -26.968464208917766,
+      "hi95_net_delta_r": 28.691540737314103,
+      "prob_delta_positive": 0.53135
+    },
+    {
+      "candidate": "I3_MIXED_NEUTRAL_CONFLUENCE_AND_NOT_NEAR_PRIOR_DAY",
+      "type": "interaction",
+      "metrics_verified": true,
+      "observed_net_delta_r": -1.3691680139855418,
+      "lo95_net_delta_r": -42.559002179049735,
+      "hi95_net_delta_r": 39.15997624551275,
+      "prob_delta_positive": 0.47475
+    },
+    {
+      "candidate": "I5_NOT_D1_COUNTERTREND_AND_NOT_NEAR_PRIOR_DAY",
+      "type": "interaction",
+      "metrics_verified": true,
+      "observed_net_delta_r": -2.8634487981443772,
+      "lo95_net_delta_r": -41.99009353528322,
+      "hi95_net_delta_r": 35.26137871857088,
+      "prob_delta_positive": 0.45165
+    },
+    {
+      "candidate": "E1_EXCLUDE_D1_COUNTERTREND",
+      "type": "broad",
+      "metrics_verified": true,
+      "observed_net_delta_r": -3.2271236019851948,
+      "lo95_net_delta_r": -34.25412544399985,
+      "hi95_net_delta_r": 26.53484160457294,
+      "prob_delta_positive": 0.4287
+    }
+  ],
+  "hashes": {
+    "univariate_results.csv": "3d3a16175be0470ff6cee380188533f0614a41a49682ae2b37351fcb2b3a74ce",
+    "broad_exclusion_results.csv": "02de3fd33effc0828c442ff103f4a43b0276f751c9826d5fe85e18c690810485",
+    "interaction_results.csv": "d4ba2e18a6087383b6b97076579fa1d69981b70a248640de75f206477dfc8bde",
+    "adversarial_threshold_sensitivity.csv": "f69fec5b241931bbb0803a85ababb18ce65abbb9aefdadb2bf11247a0d7b31da",
+    "broad_exclusion_preregistration.json": "54f03c484ffd48b329386e33805b4817b66faa130fad43a357d7efa33e6540c8",
+    "interaction_preregistration.json": "bd5c77643ac9168e796dc0f198bfb0af19c01e23c126fe7d404b35012963bcad",
+    "adversarial_threshold_preregistration.json": "db436db7102b74e7085adb4ecbfb0420ab930d2a7c8b4e153180989d096ef665"
+  },
+  "conclusion": "NO_HISTORICAL_PROMOTION; E5 and E6 are the strongest single-factor fresh-OOS challengers; I1 remains an under-sampled interaction challenger only."
+}

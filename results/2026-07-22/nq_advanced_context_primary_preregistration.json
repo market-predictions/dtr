@@ -1,0 +1,138 @@
+{
+  "study_id": "DTR_ADVANCED_CONTEXT_20260722",
+  "status": "PREREGISTERED_BEFORE_CONTEXT_RESULTS",
+  "baseline": {
+    "id": "DTR_CAUSAL_BAR_CLOSE_RANGE_SHIFT_MINUS1",
+    "timestamp_interpretation": "vendor one-minute labels are bar-close; subtract one minute before resampling",
+    "session_ranges_half_open": {
+      "LONDON_2AM": ["01:11", "02:12"],
+      "NEW_YORK_9AM": ["08:11", "09:12"],
+      "ASIA_7PM": ["19:00", "20:01"]
+    },
+    "trade_search_deadlines": {
+      "LONDON_2AM": "06:00",
+      "NEW_YORK_9AM": "14:00",
+      "ASIA_7PM": "23:45"
+    },
+    "expected_metrics": {
+      "trades": 477,
+      "net_r": 42.577515003033874,
+      "expectancy_r": 0.0892610377422093,
+      "profit_factor": 1.178993059960674,
+      "max_drawdown_r": 16.426493058604258,
+      "return_dd": 2.5920027391806317
+    }
+  },
+  "scope_locks": [
+    "No change to entry, BOS, sweep, stop, target, cost, or exit parameters.",
+    "No additional session-time search.",
+    "All higher-timeframe features use only completed bars available before range_start.",
+    "Weekday and session cells are attribution diagnostics, not selectable filters.",
+    "No interaction tests until the corresponding univariate families are complete.",
+    "Historical results cannot authorize deployment because the timing baseline was selected in-sample."
+  ],
+  "observation_units": {
+    "primary": "eligible session opportunity, including zero return when no retained trade is taken",
+    "secondary": "completed trade"
+  },
+  "families": [
+    {
+      "id": "F1_D1_DIRECTION",
+      "features": ["previous completed ETH-day EMA20/EMA50 ordering", "EMA20 five-day ATR-normalized slope"],
+      "categories": ["aligned", "countertrend", "neutral"],
+      "hypothesis": "HTF directional context changes reversal quality; no direction is assumed superior ex ante."
+    },
+    {
+      "id": "F2_H4_DIRECTION",
+      "features": ["last completed 4H EMA20/EMA50 ordering", "4H EMA20 slope"],
+      "categories": ["aligned", "countertrend", "neutral"],
+      "hypothesis": "The immediately preceding completed 4H trend state contains incremental information."
+    },
+    {
+      "id": "F3_DIRECTION_CONFLUENCE",
+      "features": ["D1 direction", "4H direction"],
+      "categories": ["both_aligned", "mixed", "both_countertrend", "one_or_both_neutral"],
+      "hypothesis": "Agreement between independent completed HTFs is more informative than either alone."
+    },
+    {
+      "id": "F4_D1_VOLATILITY",
+      "features": ["previous completed ETH-day ATR20 percentile over trailing 126 days", "20-day realized-volatility percentile over trailing 126 days"],
+      "categories": ["low_0_33", "middle_33_67", "high_67_100"],
+      "hypothesis": "The reversal edge is regime-dependent and may degrade in extreme volatility."
+    },
+    {
+      "id": "F5_HTF_TREND_STRENGTH",
+      "features": ["previous completed D1 ADX14", "last completed 4H ADX14", "last completed 4H ER20"],
+      "categories": ["nontrend", "transition", "strong_trend"],
+      "hypothesis": "The existing 5-minute nontrend filter may require confirmation from a higher timeframe."
+    },
+    {
+      "id": "F6_RANGE_VOLATILITY_FIT",
+      "features": ["initial range divided by prior D1 ATR20", "same-session rolling percentile of range/ATR"],
+      "categories": ["compressed", "normal", "expanded"],
+      "hypothesis": "Very small ranges create noise sweeps while very large ranges impair reward-to-risk."
+    },
+    {
+      "id": "F7_VOLATILITY_TRANSITION",
+      "features": ["ATR20 versus five completed days earlier", "RV20 versus five completed days earlier"],
+      "categories": ["contracting", "stable", "expanding"],
+      "hypothesis": "A transition into expansion differs from a mature high-volatility regime."
+    },
+    {
+      "id": "F8_PRIOR_DAY_LOCATION",
+      "features": ["directional distance from range edge to prior-day high or low", "range midpoint location inside prior-day range"],
+      "categories": ["near_directional_extreme_le_0_25ATR", "inside_midrange", "outside_prior_range"],
+      "hypothesis": "Sweeps near established daily liquidity levels are more meaningful than isolated intraday sweeps."
+    },
+    {
+      "id": "F9_PRIOR_WEEK_LOCATION",
+      "features": ["directional distance to previous completed week high or low", "position relative to previous week midpoint"],
+      "categories": ["near_directional_extreme_le_0_40ATR", "inside_week", "outside_week"],
+      "hypothesis": "Weekly extremes provide higher-timeframe liquidity context."
+    },
+    {
+      "id": "F10_OVERNIGHT_GAP",
+      "features": ["range opening price minus previous ETH-day close, normalized by ATR", "gap direction relative to trade direction"],
+      "categories": ["mean_reversion_aligned", "continuation_aligned", "small_gap_abs_lt_0_10ATR"],
+      "hypothesis": "A reversal that closes an overnight displacement differs from one extending it."
+    },
+    {
+      "id": "F11_VOLUME_CONTEXT",
+      "features": ["initial-range volume relative to trailing same-session median", "entry-bar relative volume"],
+      "categories": ["low", "normal", "high"],
+      "hypothesis": "Participation may separate meaningful liquidity events from thin-market noise."
+    },
+    {
+      "id": "F12_VWAP_AND_VALUE_LOCATION",
+      "features": ["range midpoint relative to completed ETH VWAP at range end", "entry direction relative to VWAP"],
+      "categories": ["reversion_toward_value", "extension_away_from_value", "crossing_value"],
+      "hypothesis": "The DTR reversal may work best when it returns toward established session value."
+    }
+  ],
+  "interaction_gate": {
+    "maximum_interactions": 6,
+    "requirements": [
+      "Both parent families show stable directional effects in at least four of six half-years.",
+      "Each parent retains at least 55 percent of baseline trades or 250 trades, whichever is lower.",
+      "Interaction definition is fixed before its result is inspected."
+    ]
+  },
+  "evaluation": {
+    "periods": ["2023", "2024", "2025", "six half-year blocks"],
+    "statistics": [
+      "trades", "eligible_sessions", "net_r", "expectancy_r_per_trade", "r_per_100_sessions",
+      "profit_factor", "max_drawdown_r", "return_dd", "two_tick_cost_expectancy",
+      "month_block_interval", "session_date_block_interval", "familywise_max_t_p_value"
+    ],
+    "promotion_requirements": [
+      "Retain at least 250 trades and at least 50 percent of baseline eligible sessions.",
+      "Improve expectancy by at least 0.03R or reduce max drawdown by at least 20 percent without reducing expectancy.",
+      "Improve return/DD by at least 15 percent.",
+      "Positive net R in 2023, 2024, and 2025, or two positive years with the third no worse than -5R.",
+      "Positive aggregate expectancy under two-tick slippage each side.",
+      "No single session or half-year contributes more than 60 percent of retained net R.",
+      "Survive family-level joint resampling; otherwise remain diagnostic only."
+    ]
+  },
+  "decision_states": ["REJECT", "DIAGNOSTIC_ONLY", "HOLD_FOR_FRESH_OOS", "PROMOTE_TO_FROZEN_PAPER_RESEARCH"]
+}

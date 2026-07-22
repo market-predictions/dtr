@@ -1,0 +1,16 @@
+{
+  "study_id": "DTR_ADVANCED_CONTEXT_ADVERSARIAL_THRESHOLD_20260722",
+  "status": "FROZEN_BEFORE_THRESHOLD_SENSITIVITY_RESULTS",
+  "purpose": "Robustness only. These variants cannot be selected as a new optimum and cannot change the frozen 0.25 ATR or 33.333% definitions.",
+  "single_factor_sensitivities": {
+    "exclude_compressed_range": [0.25, 0.3333333333333333, 0.40],
+    "exclude_near_prior_day_directional_extreme_atr": [0.20, 0.25, 0.30]
+  },
+  "interaction_grid": "All 3x3 combinations are reported as a stability surface; no best cell may be promoted.",
+  "required_reporting": [
+    "trades, expectancy, net R, drawdown, return/DD and two-tick expectancy for every cell",
+    "calendar-year net R for every cell",
+    "minimum and maximum results across the surface",
+    "whether the sign and economic direction are stable around the frozen thresholds"
+  ]
+}

@@ -1,0 +1,273 @@
+{
+  "study_id": "DTR_ADVANCED_CONTEXT_20260722",
+  "decision": "NO_HISTORICAL_PROMOTION_CONTINUE_FRESH_OOS_RESEARCH",
+  "baseline": {
+    "baseline_id": "DTR_CAUSAL_BAR_CLOSE_RANGE_SHIFT_MINUS1",
+    "timestamp_shift_minutes": -1,
+    "session_specs": {
+      "LONDON_2AM": [
+        [
+          1,
+          11
+        ],
+        [
+          2,
+          12
+        ],
+        [
+          6,
+          0
+        ]
+      ],
+      "NEW_YORK_9AM": [
+        [
+          8,
+          11
+        ],
+        [
+          9,
+          12
+        ],
+        [
+          14,
+          0
+        ]
+      ],
+      "ASIA_7PM": [
+        [
+          19,
+          0
+        ],
+        [
+          20,
+          1
+        ],
+        [
+          23,
+          45
+        ]
+      ]
+    },
+    "metrics": {
+      "trades": 477,
+      "expectancy_r": 0.0892610377422093,
+      "median_r": -0.22781155015197568,
+      "profit_factor": 1.178993059960674,
+      "win_rate": 0.48846960167714887,
+      "max_drawdown_r": 16.426493058604258,
+      "net_r": 42.577515003033874,
+      "return_dd": 2.5920027391806317,
+      "avg_hold_min": 204.92872117400418,
+      "mfe_r": 1.3923261067184651,
+      "mae_r": 0.7371610809538426
+    },
+    "funnel": {
+      "sessions": 1666,
+      "sweep_depth_pass": 1638,
+      "sweep_quality_pass": 1638,
+      "reclaim_pass": 1333,
+      "pivot_ready": 1252,
+      "bos_pass": 985,
+      "impulse_pass": 917,
+      "acceptance_pass": 589,
+      "trend_pass": 492,
+      "entry_signal": 492,
+      "skipped_position_open": 15,
+      "trades": 477,
+      "sessions_raw": 1685,
+      "sessions_range_gap_rejected": 19,
+      "sessions_signal_path_truncated": 30,
+      "skipped_unsafe_gap_bridge": 0,
+      "observed_unsafe_gap_bridges": 0,
+      "gap_liquidations": 5
+    },
+    "trade_csv_sha256": "dc1e3e5903159cece1866cc2eaf6ce33d68b65aae44148bc334c4c7762f2c37f"
+  },
+  "official_states": {
+    "univariate": {
+      "REJECT": 37
+    },
+    "broad": {
+      "DIAGNOSTIC_ONLY": 4,
+      "REJECT": 2
+    },
+    "interactions": {
+      "REJECT": 6
+    }
+  },
+  "fresh_oos_challengers": [
+    {
+      "rule_id": "E5_EXCLUDE_COMPRESSED_RANGE",
+      "qualifying_signals": 343,
+      "eligible_sessions": 1666,
+      "r_per_100_sessions": 2.969053022929001,
+      "trades": 335,
+      "expectancy_r": 0.1476549951104391,
+      "median_r": 0.0556786703601108,
+      "profit_factor": 1.3056839534256472,
+      "win_rate": 0.5014925373134328,
+      "max_drawdown_r": 9.470456769762505,
+      "net_r": 49.46442336199716,
+      "return_dd": 5.223024038283806,
+      "avg_hold_min": 211.01194029850743,
+      "mfe_r": 1.4275081193255414,
+      "mae_r": 0.7330075229769378,
+      "two_tick_expectancy_r": 0.1315092695755665,
+      "four_tick_expectancy_r": 0.0992178185058211,
+      "month_bootstrap_lo95": 0.021430006346293,
+      "month_bootstrap_hi95": 0.2757701126120301,
+      "date_bootstrap_lo95": 0.0087667064325111,
+      "date_bootstrap_hi95": 0.2847937179724363,
+      "session_max_net_share": 0.5964953353487452,
+      "halfyear_max_net_share": 0.3823951474984605,
+      "net_2023": 6.912579596570021,
+      "net_2024": 20.899099228147104,
+      "net_2025": 21.53034689497991,
+      "net_2023H1": 3.1215311664293885,
+      "net_2023H2": 3.791048430140633,
+      "net_2024H1": 18.9149554674372,
+      "net_2024H2": 1.9841437607099053,
+      "net_2025H1": 7.377778708446396,
+      "net_2025H2": 14.15256818653351,
+      "edge_t_per_session": 2.118879796992274,
+      "familywise_edge_p": 0.0448955104489551,
+      "incremental_t_per_session": 0.4908612525882698,
+      "familywise_incremental_p": 0.7362263773622638,
+      "gate_sample": true,
+      "gate_effect": true,
+      "gate_return_dd": true,
+      "gate_years": true,
+      "gate_cost": true,
+      "gate_concentration": true,
+      "gate_familywise_edge": true,
+      "gate_familywise_incremental": false,
+      "decision": "DIAGNOSTIC_ONLY",
+      "halfyears_expectancy_above_baseline": 4.0,
+      "interaction_parent_eligible": true
+    },
+    {
+      "rule_id": "E6_EXCLUDE_NEAR_PRIOR_DAY_DIRECTIONAL_EXTREME",
+      "qualifying_signals": 310,
+      "eligible_sessions": 1666,
+      "r_per_100_sessions": 2.9374279427894385,
+      "trades": 304,
+      "expectancy_r": 0.1609787813383947,
+      "median_r": 0.3502552552552552,
+      "profit_factor": 1.3400098796793345,
+      "win_rate": 0.5164473684210527,
+      "max_drawdown_r": 8.632571354238342,
+      "net_r": 48.93754952687205,
+      "return_dd": 5.668942371712356,
+      "avg_hold_min": 203.6019736842105,
+      "mfe_r": 1.4586332931118855,
+      "mae_r": 0.7238620328444894,
+      "two_tick_expectancy_r": 0.1432406608852879,
+      "four_tick_expectancy_r": 0.1077644199790744,
+      "month_bootstrap_lo95": 0.0295220943326478,
+      "month_bootstrap_hi95": 0.3054048734297654,
+      "date_bootstrap_lo95": 0.0174608474075131,
+      "date_bootstrap_hi95": 0.3041224884027581,
+      "session_max_net_share": 0.4331923701595261,
+      "halfyear_max_net_share": 0.3963113513383093,
+      "net_2023": 12.808495581639798,
+      "net_2024": 23.26470212568401,
+      "net_2025": 12.74195417724808,
+      "net_2023H1": 6.2542738362592685,
+      "net_2023H2": 6.554221745380529,
+      "net_2024H1": 19.3945063841801,
+      "net_2024H2": 3.870195741503913,
+      "net_2025H1": 2.2727108899257065,
+      "net_2025H2": 10.469243287322376,
+      "edge_t_per_session": 2.2050500879433548,
+      "familywise_edge_p": 0.0365963403659634,
+      "incremental_t_per_session": 0.4028366243900859,
+      "familywise_incremental_p": 0.7746225377462254,
+      "gate_sample": true,
+      "gate_effect": true,
+      "gate_return_dd": true,
+      "gate_years": true,
+      "gate_cost": true,
+      "gate_concentration": true,
+      "gate_familywise_edge": true,
+      "gate_familywise_incremental": false,
+      "decision": "DIAGNOSTIC_ONLY",
+      "halfyears_expectancy_above_baseline": 5.0,
+      "interaction_parent_eligible": true
+    }
+  ],
+  "shadow_interaction": {
+    "interaction_id": "I1_NOT_COMPRESSED_AND_NOT_NEAR_PRIOR_DAY",
+    "parent_a": "E5_EXCLUDE_COMPRESSED_RANGE",
+    "parent_b": "E6_EXCLUDE_NEAR_PRIOR_DAY_DIRECTIONAL_EXTREME",
+    "qualifying_signals": 225,
+    "eligible_sessions": 1666,
+    "r_per_100_sessions": 3.4078111491012164,
+    "trades": 220,
+    "expectancy_r": 0.2580642442910283,
+    "median_r": 0.564020391987318,
+    "profit_factor": 1.590426713633556,
+    "win_rate": 0.55,
+    "max_drawdown_r": 8.554419048870862,
+    "net_r": 56.774133744026265,
+    "return_dd": 6.636819335092095,
+    "avg_hold_min": 211.0090909090909,
+    "mfe_r": 1.509567570142499,
+    "mae_r": 0.6960665304387524,
+    "two_tick_expectancy_r": 0.2407415666805889,
+    "four_tick_expectancy_r": 0.20609621145971,
+    "month_bootstrap_lo95": 0.1053402634277668,
+    "month_bootstrap_hi95": 0.4178372090507239,
+    "date_bootstrap_lo95": 0.0895736467559554,
+    "date_bootstrap_hi95": 0.4280994185082283,
+    "session_max_net_share": 0.4525189774748568,
+    "halfyear_max_net_share": 0.3204575539851577,
+    "net_2023": 8.837322569504801,
+    "net_2024": 21.28269602586893,
+    "net_2025": 26.53171750635241,
+    "net_2023H1": 2.955679026197928,
+    "net_2023H2": 5.881643543306873,
+    "net_2024H1": 18.193700029236854,
+    "net_2024H2": 3.088995996632067,
+    "net_2025H1": 11.563707324800076,
+    "net_2025H2": 14.96801018155233,
+    "edge_t_per_session": 2.9179147179749334,
+    "familywise_edge_p": 0.0040995900409959,
+    "incremental_t_per_session": 0.7476341308702924,
+    "familywise_incremental_p": 0.4918508149185081,
+    "gate_sample": false,
+    "gate_effect": true,
+    "gate_return_dd": true,
+    "gate_years": true,
+    "gate_cost": true,
+    "gate_concentration": true,
+    "gate_familywise_edge": true,
+    "gate_familywise_incremental": false,
+    "decision": "REJECT",
+    "halfyears_expectancy_above_baseline": 4.0
+  },
+  "threshold_sensitivity": {
+    "trade_range": [
+      180,
+      269
+    ],
+    "expectancy_range": [
+      0.2246981999946799,
+      0.2744989043765437
+    ],
+    "net_r_range": [
+      41.726339771681715,
+      68.01077221645468
+    ],
+    "drawdown_range": [
+      7.338826258873571,
+      10.93979612565957
+    ],
+    "return_dd_range": [
+      4.877752601702317,
+      8.04178520640103
+    ],
+    "all_two_tick_positive": true,
+    "all_calendar_years_positive": true
+  },
+  "independent_review": "NO_HISTORICAL_PROMOTION; E5 and E6 are the strongest single-factor fresh-OOS challengers; I1 remains an under-sampled interaction challenger only."
+}
