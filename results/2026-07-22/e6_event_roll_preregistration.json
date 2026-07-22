@@ -1,0 +1,42 @@
+{
+  "baseline": "E6_EXCLUDE_NEAR_PRIOR_DAY_DIRECTIONAL_EXTREME",
+  "baseline_expected": {
+    "expectancy_r": 0.16097878133839472,
+    "max_drawdown_r": 8.632571354238342,
+    "net_r": 48.93754952687199,
+    "trades": 304
+  },
+  "classification": {
+    "early_close": "entry_time calendar date equals official early-close date",
+    "event_day": "entry_time calendar date equals official event date",
+    "expiration_week": "expiration date plus five preceding observed trading dates",
+    "holiday_shortened": "entry_time calendar date equals listed shortened holiday session date",
+    "pre_post": "entry_time compared with official event timestamp in ET wall time",
+    "roll_discontinuity": "largest absolute maintenance-gap close-to-reopen move within each official roll window; attribution is diagnostic",
+    "roll_window": "official roll date plus two preceding and two following observed trading dates"
+  },
+  "classification_rule": {
+    "DESCRIPTIVE_ONLY": "fewer than 10 executed trades, or structurally non-selectable roll-discontinuity evidence",
+    "NO_CLEAR_PATTERN": "all other categories with at least 10 trades",
+    "WATCH_RISK": "at least 10 trades; negative expectancy; expectancy at least 0.10R below the off-category cohort; negative two-tick-each-side expectancy; and at least two of: stop-first rate at least 5 percentage points worse, TP1 hit rate at least 5 points worse, or negative net R in at least two calendar years"
+  },
+  "data_sha256": "8d3f157a422636e5b8dda51cc3a3d9209c50cb53f9b279d3e14b627ce59370dc",
+  "dates": {
+    "CPI": ["2023-01-12","2023-02-14","2023-03-14","2023-04-12","2023-05-10","2023-06-13","2023-07-12","2023-08-10","2023-09-13","2023-10-12","2023-11-14","2023-12-12","2024-01-11","2024-02-13","2024-03-12","2024-04-10","2024-05-15","2024-06-12","2024-07-11","2024-08-14","2024-09-11","2024-10-10","2024-11-13","2024-12-11","2025-01-15","2025-02-12","2025-03-12","2025-04-10","2025-05-13","2025-06-11","2025-07-15","2025-08-12","2025-09-11","2025-10-24"],
+    "EARLY_CLOSE": ["2023-07-03","2023-11-24","2024-07-03","2024-11-29","2024-12-24","2025-01-09","2025-07-03","2025-11-28"],
+    "EXPIRATION": ["2023-03-17","2023-06-16","2023-09-15","2023-12-15","2024-03-15","2024-06-21","2024-09-20","2024-12-20","2025-03-21","2025-06-20","2025-09-19","2025-12-19"],
+    "FOMC": ["2023-02-01","2023-03-22","2023-05-03","2023-06-14","2023-07-26","2023-09-20","2023-11-01","2023-12-13","2024-01-31","2024-03-20","2024-05-01","2024-06-12","2024-07-31","2024-09-18","2024-11-07","2024-12-18","2025-01-29","2025-03-19","2025-05-07","2025-06-18","2025-07-30","2025-09-17","2025-10-29","2025-12-10"],
+    "HOLIDAY_SHORTENED": ["2023-01-16","2023-02-20","2023-04-07","2023-05-29","2023-06-19","2023-07-04","2023-09-04","2023-11-23","2023-12-25","2024-01-15","2024-02-19","2024-03-29","2024-05-27","2024-06-19","2024-07-04","2024-09-02","2024-11-28","2024-12-25","2025-01-01","2025-01-20","2025-02-17","2025-04-18","2025-05-26","2025-06-19","2025-07-04","2025-09-01","2025-11-27","2025-12-25"],
+    "NFP": ["2023-01-06","2023-02-03","2023-03-10","2023-04-07","2023-05-05","2023-06-02","2023-07-07","2023-08-04","2023-09-01","2023-10-06","2023-11-03","2023-12-08","2024-01-05","2024-02-02","2024-03-08","2024-04-05","2024-05-03","2024-06-07","2024-07-05","2024-08-02","2024-09-06","2024-10-04","2024-11-01","2024-12-06","2025-01-10","2025-02-07","2025-03-07","2025-04-04","2025-05-02","2025-06-06","2025-07-03","2025-08-01","2025-09-05","2025-11-20"],
+    "ROLL": ["2023-03-13","2023-06-12","2023-09-11","2023-12-11","2024-03-11","2024-06-17","2024-09-16","2024-12-16","2025-03-17","2025-06-16","2025-09-15","2025-12-15"]
+  },
+  "decision_state": "PREREGISTERED_EXECUTION_NOT_STARTED",
+  "event_times_et": {"CPI": "08:30", "FOMC": "14:00", "NFP": "08:30"},
+  "inference": {"iterations": 20000, "method": "paired date-block bootstrap", "purpose": "descriptive uncertainty only; no promotion or exclusion", "seed": 20260722, "unit": "ETH market date"},
+  "metrics": ["trades","net_r","expectancy_r","median_r","profit_factor","win_rate","max_drawdown_r","return_dd","mfe_r","mae_r","stop_first_rate","tp1_rate","tp2_rate","normal_cost_expectancy","two_tick_each_side_expectancy","year_session_direction_breakdown"],
+  "next_decision": "Classify each category as NO_CLEAR_PATTERN, WATCH_RISK, or DESCRIPTIVE_ONLY. No filter can be created from this sample.",
+  "restrictions": ["diagnostic_only","no_event_exclusion","no_threshold_search","no_combining_event_categories","no_E6_change","no_Pine_or_deployment_change"],
+  "sample_flags": {"anecdotal_below": 10, "low_sample_below": 30},
+  "sources": {"cme_holiday_hours": "https://www.cmegroup.com/trading-hours.html", "cme_roll_dates": "https://www.cmegroup.com/trading/equity-index/rolldates.html", "cpi_archive": "https://www.bls.gov/bls/news-release/cpi.htm", "employment_archive": "https://www.bls.gov/bls/news-release/empsit.htm", "fomc": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm"},
+  "study_id": "DTR-NQ-WP-20260722-13"
+}

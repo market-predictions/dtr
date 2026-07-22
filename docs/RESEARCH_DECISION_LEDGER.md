@@ -12,18 +12,16 @@ This ledger is the durable entry point for completed DTR research decisions. Det
 2. **Advanced-context research comparator** — `DTR_CAUSAL_BAR_CLOSE_RANGE_SHIFT_MINUS1`
    - 477 trades; 42.577515R; 0.089261R expectancy.
    - Purpose: fixed comparator for the timing-corrected historical context program.
-   - It was selected after timing sensitivity inspection and remains exploratory.
 
 3. **Frozen challengers**
    - E5: `E5_EXCLUDE_COMPRESSED_RANGE` — 335 trades; 49.464423R; 0.147655R expectancy.
    - E6: `E6_EXCLUDE_NEAR_PRIOR_DAY_DIRECTIONAL_EXTREME` — 304 trades; 48.937550R; 0.160979R expectancy.
-   - Purpose: unchanged fresh-OOS challengers. Neither replaces the comparator until it passes fresh-data and data-validity gates.
+   - Neither replaces the comparator until fresh-data and data-validity gates pass.
 
-4. **Shadow-only challengers**
-   - E5+E6 interaction — 220 historical trades; under the frozen 250-trade historical gate.
-   - E6+Monday — historical coverage diagnostic only; lower expectancy and drawdown efficiency than E6 A0.
-   - P2 BOS quality and P3 entry-extension rules — historical E6 diagnostics only; neither improved portfolio-level E6 performance.
-   - R2 runner clearance and I1 BOS-quality/TP1-clearance interaction — predeclared low-sample shadows only.
+4. **Shadow and risk-watch evidence**
+   - E5+E6 and E6+Monday remain shadow-only.
+   - P2, P3, R2 and I1 remain historical diagnostics only.
+   - FOMC-pre and expiration/roll-overlap are fixed risk-watch cohorts only.
 
 ## DTR-NQ-WP-20260722-08 — Advanced context robustness
 
@@ -37,18 +35,7 @@ Authoritative files:
 - `results/2026-07-22/advanced_context_independent_review.json`
 - `handovers/DTR-NQ-WP-20260722-08.md`
 
-Reusable conclusion:
-
-- E5 and E6 are coherent historical challengers.
-- Their historical paired incremental advantage versus the unfiltered comparator remains unresolved.
-- No additional threshold search, context-family expansion, or historical promotion is permitted on the same sample.
-
-Reopen only when at least one of the following changes:
-
-- qualified untouched post-2025 NQ data becomes available;
-- a materially longer, contract-audited NQ history is acquired;
-- unchanged cross-market replication data, such as ES, is available;
-- timestamp or continuous-contract methodology is authoritatively resolved.
+Reusable conclusion: E5 and E6 are coherent historical challengers, but their incremental advantage remains unresolved. Do not retune them on the same sample.
 
 ## DTR-NQ-WP-20260722-09 — Monday inclusion × Asia exclusion
 
@@ -57,22 +44,11 @@ Decision: `RETAIN_TUE_FRI_AND_ASIA`.
 Authoritative files:
 
 - `docs/MONDAY_ASIA_FACTORIAL_RESEARCH_2026-07-22.md`
-- `results/2026-07-22/nq_monday_asia_factorial_preregistration.json`
 - `results/2026-07-22/nq_monday_asia_factorial_results.csv`
-- `results/2026-07-22/nq_monday_asia_factorial_interaction.csv`
-- `results/2026-07-22/nq_monday_asia_factorial_paired_bootstrap.csv`
 - `results/2026-07-22/nq_monday_asia_factorial_independent_review.json`
-- `reviews/DTR-NQ-WP-20260722-09-independent-review.md`
 - `handovers/DTR-NQ-WP-20260722-09.md`
 
-Reusable conclusion:
-
-- Adding Monday is not a stable broad improvement.
-- Removing Asia reduces net performance under the unfiltered, E5 and E6 layers.
-- The positive E6 Monday extension is dominated by Monday Asia and does not support replacing Asia.
-- The combined Monday/no-Asia arm is rejected.
-
-Do not rerun this factorial merely to reconsider the same hypothesis. Reopen only with new data, corrected execution semantics, or a separately preregistered cross-market/long-history replication.
+Reusable conclusion: adding Monday is not a stable improvement, removing Asia is harmful, and the combined arm is rejected. Reopen only on new or cross-market data.
 
 ## DTR-NQ-WP-20260722-10 — E6 advanced test framework
 
@@ -82,14 +58,9 @@ Authoritative files:
 
 - `docs/E6_ADVANCED_TEST_FRAMEWORK_2026-07-22.md`
 - `results/2026-07-22/e6_advanced_test_framework_preregistration.json`
-- `workpackages/DTR-NQ-WP-20260722-10.md`
 - `handovers/DTR-NQ-WP-20260722-10.md`
 
-Reusable framework decision:
-
-- E6 is the working baseline for the bounded historical research programme.
-- The 477-trade unfiltered timing-corrected comparator remains a mandatory non-selectable control.
-- Historical evidence can nominate a fresh-OOS challenger but cannot replace E6 or authorize Pine.
+Reusable conclusion: E6 is the working historical baseline, while the unfiltered comparator remains mandatory. Historical work cannot authorize Pine or deployment.
 
 ## DTR-NQ-WP-20260722-11 — E6 mechanism, path and reward-space execution
 
@@ -97,24 +68,12 @@ Decision: `RETAIN_E6_NO_NEW_FILTER_ADVANCE_TO_SEQUENCING`.
 
 Authoritative files:
 
-- `results/2026-07-22/e6_blocks_0_3_execution_preregistration.json`
 - `docs/E6_ADVANCED_BLOCKS_0_3_RESEARCH_2026-07-22.md`
 - `results/2026-07-22/e6_blocks_0_3_candidate_results.csv`
-- `results/2026-07-22/e6_blocks_0_3_candidate_inference.csv`
 - `results/2026-07-22/e6_blocks_0_3_independent_review.json`
-- `results/2026-07-22/e6_blocks_0_3_deterministic_repeat.json`
-- `reviews/DTR-NQ-WP-20260722-11-independent-review.md`
 - `handovers/DTR-NQ-WP-20260722-11.md`
 
-Reusable conclusion:
-
-- E6's mechanism is `SUPPORTED`: near-prior-day-extreme setups had materially worse expectancy and path outcomes.
-- P1 and R1 are rejected.
-- P2 and P3 remain shadow-only; P3 is the only secondary long-history/cross-market replication hypothesis.
-- R2 and I1 remain predeclared low-sample shadow diagnostics only.
-- No rule qualified as `FRESH_OOS_CHALLENGER`.
-
-Do not rerun or retune P1–P3, R1–R2 or I1 on the 2023–2025 NQ sample.
+Reusable conclusion: E6's mechanism is supported. No path or clearance rule improved the portfolio; P3 remains only a long-history/cross-market replication hypothesis. Do not retune P1–P3, R1–R2 or I1 on 2023–2025.
 
 ## DTR-NQ-WP-20260722-12 — E6 portfolio sequencing
 
@@ -123,35 +82,41 @@ Decision: `RETAIN_S0_GLOBAL_SEQUENCING`.
 Authoritative files:
 
 - `docs/E6_SEQUENCING_RESEARCH_2026-07-22.md`
-- `results/2026-07-22/e6_sequencing_preregistration.json`
 - `results/2026-07-22/e6_sequencing_results.csv`
-- `results/2026-07-22/e6_sequencing_inference.csv`
-- `results/2026-07-22/e6_sequencing_changed_trades.csv`
-- `results/2026-07-22/e6_sequencing_concurrency.json`
 - `results/2026-07-22/e6_sequencing_independent_review.json`
-- `results/2026-07-22/e6_sequencing_deterministic_repeat.json`
-- `reviews/DTR-NQ-WP-20260722-12-independent-review.md`
 - `handovers/DTR-NQ-WP-20260722-12.md`
+
+Reusable conclusion: first-trade-only, 60-minute cooldown and one-third-risk session sleeves were inferior. Do not search alternate cooldowns, daily limits or sleeve weights on the current sample.
+
+## DTR-NQ-WP-20260722-13 — E6 event, holiday and rollover attribution
+
+Decision: `RETAIN_E6_NO_EVENT_EXCLUSION_WATCH_FOMC_PRE_AND_ROLL_EXPIRY_OVERLAP`.
+
+Authoritative files:
+
+- `results/2026-07-22/e6_event_roll_preregistration.json`
+- `docs/E6_EVENT_ROLL_ATTRIBUTION_RESEARCH_2026-07-22.md`
+- `results/2026-07-22/e6_event_roll_results.csv`
+- `results/2026-07-22/e6_event_roll_inference.csv`
+- `results/2026-07-22/e6_event_roll_overlap_decomposition.csv`
+- `results/2026-07-22/e6_event_roll_discontinuities.csv`
+- `results/2026-07-22/e6_event_roll_summary.json`
+- `results/2026-07-22/e6_event_roll_independent_review.json`
+- `results/2026-07-22/e6_event_roll_deterministic_repeat.json`
+- `reviews/DTR-NQ-WP-20260722-13-independent-review.md`
+- `handovers/DTR-NQ-WP-20260722-13.md`
 
 Reusable conclusion:
 
-- S1 first-trade-per-ETH-date removed 45 trades that earned 7.20R and did not improve expectancy.
-- S2 60-minute cooldown removed four trades that earned 1.20R and did not reduce drawdown.
-- S3 session sleeves added only six trades, those trades lost 2.19R, and fixed one-third sizing materially underused risk because overlap was rare.
-- All alternatives had negative observed incremental risk-normalized net R versus S0.
-- Independent review and deterministic repeat passed.
+- FOMC day was weak at 14 trades and -5.56R; the loss was concentrated in nine pre-statement entries worth -7.62R.
+- CPI showed no clear adverse pattern; NFP was too small and not adverse overall.
+- Expiration-week and roll-window weakness came from the same 18-trade intersection, which lost 5.20R.
+- Expiration-only and roll-only cohorts were positive, so separate exclusions are unsupported.
+- No roll window exceeded the frozen 99th-percentile maintenance-gap threshold.
+- No event exclusion or E6 change is authorized.
 
-Do not search alternative cooldowns, daily trade limits, sleeve weights or dynamic reallocation on the 2023–2025 sample. Reopen sequencing only with new data or a separately preregistered portfolio architecture based on an external operational requirement.
+Do not search alternate release buffers, expiration-week lengths, roll-window lengths, holiday sets or event combinations on 2023–2025. Reopen the two risk-watch cohorts only on longer, fresh or cross-market data with unchanged definitions.
 
 ## Current forward decision
 
-The primary fresh-data evidence remains:
-
-- Arm 0: unfiltered timing-corrected comparator.
-- Arm A: E5 compressed-range exclusion.
-- Arm B: E6 prior-day-extreme exclusion.
-- Arm C: E5+E6 shadow only.
-
-While fresh data is unavailable, the next authorized historical work is diagnostic Block 5 event, holiday and rollover attribution. It may explain risk concentration but cannot create an exclusion rule from the current sample.
-
-The repository must retain the unfiltered comparator alongside E5 and E6 until fresh data establishes whether either challenger adds genuine incremental value.
+The primary fresh-data evidence remains Arms 0/A/B with shadow Arm C. While fresh data is unavailable, proceed to fixed-fraction equity and execution-cost stress for unchanged E6. The repository must retain the unfiltered comparator alongside E5 and E6 until fresh evidence establishes incremental value.

@@ -2,13 +2,13 @@
 
 ## Current stacked work package
 
-`DTR-NQ-WP-20260722-12 — E6 portfolio sequencing`
+`DTR-NQ-WP-20260722-13 — E6 event, holiday and rollover attribution`
 
-Status: **research complete; independent review passed; publication branch active**
+Status: **research complete; independent review and deterministic repeat passed**
 
-Decision state: `RETAIN_S0_GLOBAL_SEQUENCING`
+Decision state: `RETAIN_E6_NO_EVENT_EXCLUSION_WATCH_FOMC_PRE_AND_ROLL_EXPIRY_OVERLAP`
 
-Base dependency: `DTR-NQ-WP-20260722-11 — E6 mechanism, path and reward-space execution` remains a stacked draft on PR #11.
+Base dependency: `DTR-NQ-WP-20260722-12 — E6 portfolio sequencing` remains a stacked draft on PR #12.
 
 ## Baseline hierarchy
 
@@ -19,8 +19,6 @@ Base dependency: `DTR-NQ-WP-20260722-11 — E6 mechanism, path and reward-space 
 - 495 trades;
 - 86.004761R net;
 - 0.173747R expectancy.
-
-Purpose: detect unintended engine changes.
 
 ### Mandatory non-selectable control
 
@@ -41,47 +39,36 @@ Purpose: detect unintended engine changes.
 - 8.632571R maximum drawdown;
 - 5.668942 return/DD.
 
-E6 is a research baseline only. It does not replace the control and is not deployable.
+E6 remains research-only and unchanged.
 
-## Completed E6 Blocks 0–3
+## Completed advanced blocks
 
-E6's prior-day-extreme exclusion mechanism is `SUPPORTED`. The rejected near-extreme cohort had materially lower expectancy, more stop-first outcomes and fewer target hits. P1–P3, R1–R2 and I1 did not improve the full E6 portfolio; no new filter advanced.
+- Blocks 0–3: E6 mechanism supported; no additional path or reward-space filter advanced.
+- Block 4: retain current one-open-position global sequencing.
+- Block 5: official event, holiday, expiration and rollover attribution complete.
 
-Decision: `RETAIN_E6_NO_NEW_FILTER_ADVANCE_TO_SEQUENCING`.
+## Block 5 findings
 
-## Completed Block 4 — Portfolio sequencing
+- FOMC day: 14 trades, -5.56R. Weakness was concentrated before the 14:00 ET statement: nine trades, -7.62R.
+- CPI day: 18 trades, +1.76R; no clear adverse pattern.
+- NFP day: nine trades, +1.37R; insufficient sample and no clear adverse pattern.
+- Expiration week: 27 trades, -2.09R.
+- Roll window: 25 trades, -0.58R.
+- The expiration and roll weakness came from the same 18-trade intersection, which lost 5.20R. Expiration-only and roll-only cohorts were positive.
+- No customary roll-date trades occurred because roll dates are Mondays and E6 trades Tuesday–Friday.
+- No roll window exceeded the frozen 99th-percentile maintenance-gap threshold.
+- Independent reconstruction and deterministic repeat passed.
 
-| Arm | Trades | Risk-normalized net R | Expectancy | Max DD | Return/DD | Decision |
-|---|---:|---:|---:|---:|---:|---|
-| S0 current global | 304 | 48.94R | 0.161R | 8.63R | 5.67 | Retain |
-| S1 first per ETH date | 259 | 41.73R | 0.161R | 8.76R | 4.77 | Reject |
-| S2 60-minute cooldown | 300 | 47.73R | 0.159R | 8.63R | 5.53 | Reject |
-| S3 one-third-risk session sleeves | 310 | 15.58R | 0.151R raw | 3.19R | 4.89 | Reject |
-
-Findings:
-
-- first-trade-only removed 45 trades that earned 7.20R;
-- the cooldown removed four trades that earned 1.20R and did not reduce drawdown;
-- session sleeves enabled only six extra trades, which lost 2.19R;
-- cross-session overlap was rare: 12 trades participated and maximum concurrency was two;
-- permanently dividing risk into thirds underused capital and reduced risk-normalized return;
-- all three alternatives had negative observed incremental net R versus S0;
-- independent reconstruction and deterministic repeat passed.
-
-Decision: retain one global open position at a time. Do not search alternate cooldowns, daily trade limits, sleeve weights or dynamic reallocation on the current sample.
+Decision: retain E6 unchanged. Preserve FOMC-pre and expiration/roll-overlap only as fixed risk-watch cohorts for longer or fresh data. Do not create an event exclusion from 2023–2025.
 
 ## Next authorized work
 
-Block 5 diagnostic attribution:
+Block 6 fixed-fraction equity and execution-cost stress for unchanged E6:
 
-- official FOMC announcement dates;
-- CPI release dates;
-- Employment Situation/NFP dates;
-- quarterly equity-index futures expiration and the preceding five business days;
-- early-close and shortened-session dates;
-- detected contract-roll discontinuity windows.
-
-This block is attribution-only and cannot create a historical exclusion filter.
+- 0.50%, 1.00% and 1.50% current-equity risk;
+- normal, two-tick-per-side and four-tick-per-side execution;
+- date-block and month-block resampling;
+- final-equity, drawdown, losing-streak and time-under-water distributions.
 
 ## Existing unresolved gates
 
@@ -93,4 +80,4 @@ This block is attribution-only and cannot create a historical exclusion filter.
 
 ## Scope restrictions
 
-No E6 threshold change, neighboring-threshold search, weekday/session search, sequencing retune, additional interaction, Pine port, sizing recommendation, leverage increase or deployment is authorized.
+No E6 threshold change, event-window search, event exclusion, weekday/session search, sequencing retune, additional interaction, Pine port, sizing recommendation, leverage increase or deployment is authorized.

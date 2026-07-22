@@ -1,0 +1,24 @@
+{
+  "archive_sha256": "8d3f157a422636e5b8dda51cc3a3d9209c50cb53f9b279d3e14b627ce59370dc",
+  "baseline": {"trades": 304, "net_r": 48.937549526883004, "expectancy_r": 0.16097878133843094, "max_drawdown_r": 8.632571354234003, "return_dd": 5.668942371716474},
+  "decision": "RETAIN_E6_NO_EVENT_EXCLUSION_WATCH_FOMC_PRE_AND_ROLL_EXPIRY_OVERLAP",
+  "findings": {
+    "fomc_day": {"trades": 14, "net_r": -5.558986884983001, "expectancy_r": -0.39707049178450005, "classification": "WATCH_RISK"},
+    "fomc_pre": {"trades": 9, "net_r": -7.618852964020001, "expectancy_r": -0.8465392182244446, "classification": "DESCRIPTIVE_ONLY"},
+    "fomc_post": {"trades": 5, "net_r": 2.0598660790370005, "expectancy_r": 0.4119732158074001, "classification": "DESCRIPTIVE_ONLY"},
+    "cpi_day": {"trades": 18, "net_r": 1.7580679104219996, "expectancy_r": 0.09767043946788886, "classification": "NO_CLEAR_PATTERN"},
+    "nfp_day": {"trades": 9, "net_r": 1.3704940632130005, "expectancy_r": 0.15227711813477784, "classification": "DESCRIPTIVE_ONLY"},
+    "expiration_week": {"trades": 27, "net_r": -2.0858621308149994, "expectancy_r": -0.07725415299314813, "classification": "WATCH_RISK"},
+    "roll_window": {"trades": 25, "net_r": -0.5758652580270003, "expectancy_r": -0.02303461032108001, "classification": "WATCH_RISK"}
+  },
+  "expiration_roll_overlap": {
+    "expiration_only": {"trades": 9, "net_r": 3.1133044978910003, "expectancy_r": 0.3459227219878889},
+    "roll_only": {"trades": 7, "net_r": 4.623301370679, "expectancy_r": 0.6604716243827143},
+    "intersection": {"trades": 18, "net_r": -5.199166628706001, "expectancy_r": -0.28884259048366673},
+    "neither": {"trades": 270, "net_r": 46.400110287019004, "expectancy_r": 0.17185226032229262}
+  },
+  "independent_review": "PASS",
+  "deterministic_repeat": "PASS",
+  "next_authorized_work": "Block 6 fixed-fraction equity and execution-cost stress for unchanged E6.",
+  "restrictions": ["no event exclusion", "no alternate event windows", "no E6 change", "no Pine or deployment authorization"]
+}
