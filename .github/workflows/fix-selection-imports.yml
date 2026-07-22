@@ -1,0 +1,46 @@
+name: Fix selection imports
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/fix-selection-imports.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+      - name: Apply exact import patch
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('src/dtr_lab/research/selection.py')
+          text = path.read_text()
+          old = '''from dataclasses import dataclass
+          import hashlib
+          import json
+          from typing import Iterable, Literal
+          '''.replace('          ', '')
+          new = '''import hashlib
+          import json
+          from collections.abc import Iterable
+          from dataclasses import dataclass
+          from typing import Literal
+          '''.replace('          ', '')
+          if text.count(old) != 1:
+              raise SystemExit('expected import block not found exactly once')
+          path.write_text(text.replace(old, new, 1))
+          PY
+          rm .github/workflows/fix-selection-imports.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --check
+          git commit -m "Fix selection inference imports"
+          git push origin "HEAD:${{ github.event.pull_request.head.ref }}"
