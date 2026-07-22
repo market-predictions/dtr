@@ -7,8 +7,8 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-
 import run_nq_usa500_parallel as parallel
+
 from dtr_lab.research import engine
 from dtr_lab.research.cross_market import cost_stress_expectancy
 from dtr_lab.research.proxy_validation import (
