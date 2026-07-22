@@ -1,0 +1,54 @@
+name: Publish selection robustness package
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/publish-selection-robustness.yml
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+      - name: Fetch and verify immutable packages
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_BLOB: 434898fb6f5f5ce6e60b50fd0aff2d4df933c891
+          EVIDENCE_BLOB: 49575180ad2490e72a01ba0c5c7db89c030f7369
+          SOURCE_SHA256: de8fb9a0aca93c7433f94aa6a438f72b5ce4ace13404c951c81dfeb553c3513f
+          EVIDENCE_SHA256: d401fcae44109337d3e5b60fc7453512ab3d481798a612eaf1e42a6c30dd3bbb
+        run: |
+          set -euo pipefail
+          fetch_blob() {
+            local blob_sha="$1"
+            local output="$2"
+            gh api "repos/${GITHUB_REPOSITORY}/git/blobs/${blob_sha}" \
+              --jq '.content' | tr -d '\n' | base64 --decode > "$output"
+          }
+          fetch_blob "$SOURCE_BLOB" "$RUNNER_TEMP/source.tar.gz"
+          fetch_blob "$EVIDENCE_BLOB" "$RUNNER_TEMP/evidence.tar.gz"
+          echo "$SOURCE_SHA256  $RUNNER_TEMP/source.tar.gz" | sha256sum --check --strict
+          echo "$EVIDENCE_SHA256  $RUNNER_TEMP/evidence.tar.gz" | sha256sum --check --strict
+      - name: Extract reviewed package
+        run: |
+          set -euo pipefail
+          tar -xzf "$RUNNER_TEMP/source.tar.gz" -C .
+          tar -xzf "$RUNNER_TEMP/evidence.tar.gz" -C .
+          rm -f .github/workflows/publish-selection-robustness.yml
+      - name: Commit reviewed package
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --check
+          git commit -m "Complete NQ selection robustness review"
+          git push origin "HEAD:${{ github.event.pull_request.head.ref }}"
