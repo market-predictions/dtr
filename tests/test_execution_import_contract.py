@@ -35,5 +35,11 @@ def test_canonical_gap_policy_defaults_to_causal_liquidation() -> None:
     integrity = importlib.import_module("dtr_lab.research.integrity")
     optimize = importlib.import_module("dtr_lab.research.optimize")
 
-    assert inspect.signature(integrity.run_backtest).parameters["gap_policy"].default == "liquidate_unsafe"
-    assert inspect.signature(optimize.evaluate_configs).parameters["gap_policy"].default == "liquidate_unsafe"
+    integrity_default = inspect.signature(integrity.run_backtest).parameters[
+        "gap_policy"
+    ].default
+    optimizer_default = inspect.signature(optimize.evaluate_configs).parameters[
+        "gap_policy"
+    ].default
+    assert integrity_default == "liquidate_unsafe"
+    assert optimizer_default == "liquidate_unsafe"
