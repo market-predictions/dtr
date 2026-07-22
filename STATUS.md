@@ -4,7 +4,7 @@
 
 `DTR-NQ-WP-20260722-06 — Baseline validity reset`
 
-Status: **complete locally; awaiting GitHub CI and merge**
+Status: **complete; source and compact evidence published; final GitHub CI and merge pending**
 
 Decision: `CONTINUE_RESEARCH_DO_NOT_DEPLOY`
 
@@ -39,7 +39,7 @@ Decision: `CONTINUE_RESEARCH_DO_NOT_DEPLOY`
 - continuation: `HOLD_FOR_FRESH_DATA`;
 - IFVG: `REJECT_NO_INCREMENTAL_VALUE`;
 - CISD: `REJECT_NO_INCREMENTAL_VALUE`;
-- entry routing: `REJECT_NO_INCREMENTAL_VALUE`, PR #5 draft pending rebase.
+- entry routing: `REJECT_NO_INCREMENTAL_VALUE`, PR #5 draft pending supersession decision.
 
 ## Reproducibility
 
@@ -49,7 +49,17 @@ Decision: `CONTINUE_RESEARCH_DO_NOT_DEPLOY`
 - CISD: 52/52;
 - continuation structural: 30/30;
 - continuation late-60: 30/30;
-- entry routing: 33/33.
+- entry routing: 33/33;
+- source publication archive: checksum verified and self-cleaned;
+- evidence publication archive: checksum verified and self-cleaned.
+
+## Remaining closure gates
+
+- pinned Ruff on the exact connector-authored final head;
+- pytest on Python 3.11 and 3.12;
+- final adversarial PR review;
+- squash merge of PR #6;
+- retire or rebuild PR #5 against the accepted causal benchmark.
 
 ## Deployment restriction
 
