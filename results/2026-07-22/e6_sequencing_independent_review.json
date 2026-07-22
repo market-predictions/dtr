@@ -1,0 +1,45 @@
+{
+  "decision": "INDEPENDENT_REVIEW_PASS",
+  "archive_sha256": "8d3f157a422636e5b8dda51cc3a3d9209c50cb53f9b279d3e14b627ce59370dc",
+  "signal_diagnostics_sha256": "39b48d9e6219357907eac1bf65d81d2dff392d1d172916008ad20365665693ad",
+  "metrics_reconstructed": ["S0_GLOBAL", "S1_FIRST_PER_ETH_DATE", "S2_COOLDOWN_60", "S3_SESSION_SLEEVES"],
+  "global_overlap_absent": true,
+  "session_sleeve_overlap_within_sleeve_absent": true,
+  "s1_daily_contract_verified": true,
+  "s2_cooldown_contract_verified": true,
+  "s3_risk_cap_verified": true,
+  "changed_trade_contract_verified": true,
+  "s3_concurrency": {
+    "max_concurrent_positions": 2,
+    "max_planned_risk_units": 0.6666666666666666,
+    "trades_participating_in_overlap": 12
+  },
+  "independent_bootstrap_seed": 20260723,
+  "independent_inference": [
+    {
+      "arm": "S1_FIRST_PER_ETH_DATE",
+      "incremental_net_r": -7.202801630019694,
+      "ci95_low_net_r": -24.37467450864644,
+      "ci95_high_net_r": 8.40784828106523,
+      "probability_improvement": 0.19215,
+      "familywise_p": 1.0
+    },
+    {
+      "arm": "S2_COOLDOWN_60",
+      "incremental_net_r": -1.2030030725685799,
+      "ci95_low_net_r": -8.041988827589902,
+      "ci95_high_net_r": 4.0335135781018465,
+      "probability_improvement": 0.3599,
+      "familywise_p": 1.0
+    },
+    {
+      "arm": "S3_SESSION_SLEEVES",
+      "incremental_net_r": -33.35613574080886,
+      "ci95_low_net_r": -63.12095982348285,
+      "ci95_high_net_r": -4.176330492550692,
+      "probability_improvement": 0.013,
+      "familywise_p": 1.0
+    }
+  ],
+  "conclusion": "All sequencing arms are inferior to S0 on observed risk-normalized portfolio net R; retain current global sequencing."
+}
