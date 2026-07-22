@@ -1,16 +1,16 @@
 name: Temporary USATECH throttled acquisition
 
 on:
-  pull_request:
-    paths:
-      - .github/workflows/temporary_download_usatech_proxy.yml
-      - temporary-usatech-download-trigger.txt
   push:
     branches:
       - agent/roadmap-correction-six-step
     paths:
       - .github/workflows/temporary_download_usatech_proxy.yml
       - temporary-usatech-download-trigger.txt
+
+concurrency:
+  group: usatech-acquisition
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -26,7 +26,7 @@ jobs:
         with:
           node-version: '22'
       - name: Cool down provider rate limit
-        run: sleep 480
+        run: sleep 600
       - name: Download yearly bid candles sequentially
         shell: bash
         run: |
