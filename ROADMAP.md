@@ -32,7 +32,7 @@ Decision: `CONTINUE_RESEARCH_DO_NOT_DEPLOY`.
 
 ## Phase 2 — Independent modules and context
 
-Status: **module reruns complete; E6 advanced framework frozen**
+Status: **E6 mechanism/path/reward-space research complete; sequencing next**
 
 - [x] Continuation: `HOLD_FOR_FRESH_DATA`.
 - [x] IFVG: `REJECT_NO_INCREMENTAL_VALUE`.
@@ -43,13 +43,15 @@ Status: **module reruns complete; E6 advanced framework frozen**
 - [x] Freeze compressed-range E5 and prior-day-proximity E6 as fresh-OOS challengers.
 - [x] Retain Tuesday–Friday and Asia, London and New York after factorial testing.
 - [x] Freeze the E6 advanced-test framework and machine-readable preregistration.
-- [ ] Execute Block 0 exact regression and Block 1 E6 mechanism audit.
-- [ ] Execute frozen path-quality family P1–P3.
-- [ ] Execute frozen reward-space family R1–R2 and shadow interaction I1.
-- [ ] Complete independent reconstruction checkpoint before sequencing research.
+- [x] Execute Block 0 exact regression and Block 1 E6 mechanism audit.
+- [x] Classify the E6 mechanism as `SUPPORTED` without changing the 0.25 ATR threshold.
+- [x] Execute frozen path-quality family P1–P3.
+- [x] Execute frozen reward-space family R1–R2 and shadow interaction I1.
+- [x] Complete independent reconstruction and deterministic-repeat checkpoint.
+- [x] Record no new `FRESH_OOS_CHALLENGER`; retain E6 unchanged.
 - [ ] Execute frozen sequencing family S1–S3.
 - [ ] Complete official-event, holiday and rollover attribution.
-- [ ] Complete fixed-fraction equity and cost stress for E6 and surviving challengers.
+- [ ] Complete fixed-fraction equity and cost stress for E6 and surviving sequencing challengers.
 - [ ] Footprint only with suitable historical order-flow data.
 
 Historical work may nominate fresh-OOS challengers only. It cannot replace E6 or authorize Pine.
@@ -63,7 +65,7 @@ Status: **baseline and context challengers preregistered; data not acquired**
 - [ ] Acquire qualified NQ one-minute data through at least 2026-07-21.
 - [ ] Freeze dataset checksum and audit before performance inspection.
 - [ ] Run Arms 0/A/B with zero parameter changes.
-- [ ] Add at most one E6-derived advanced challenger only if it passes the frozen historical nomination gates.
+- [ ] Add at most one E6-derived advanced challenger only if a future frozen block passes the nomination gates.
 - [ ] Report paired per-session differences, return, funnel, concentration, costs, and roll attribution.
 - [ ] Extend forward rather than retune when the sample is underpowered or ambiguous.
 
@@ -78,7 +80,8 @@ Status: **original reconstruction blocked; explicit current-code primitives impl
 - [x] Cost, block-bootstrap, concentration, and rollover stress.
 - [x] Classify original staged 904 reconstruction as blocked by missing leaderboards and stage bases.
 - [x] Implement aligned session/date return matrices, stream hashes, duplicate detection, max-t, best-mean and reselection primitives.
-- [ ] Apply joint market-date max-t inference to each E6 advanced-test family.
+- [x] Apply joint market-date max-t inference to E6 path and reward-space families.
+- [ ] Apply the same frozen inference to sequencing S1–S3.
 - [ ] Complete the separately labelled current-code causal universe only after timestamp alignment is finalized.
 - [ ] Run nested walk-forward only under a preregistered candidate set.
 
