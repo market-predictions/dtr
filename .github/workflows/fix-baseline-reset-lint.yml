@@ -1,0 +1,94 @@
+name: Fix baseline reset lint
+
+on:
+  pull_request:
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: github.head_ref == 'agent/nq-baseline-validity-reset'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/nq-baseline-validity-reset
+          fetch-depth: 0
+      - name: Apply exact lint-only replacements
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path: str, old: str, new: str) -> None:
+              target = Path(path)
+              text = target.read_text(encoding="utf-8")
+              if text.count(old) != 1:
+                  raise RuntimeError(f"Expected exactly one match in {path}: {old!r}")
+              target.write_text(text.replace(old, new), encoding="utf-8")
+
+          replace_once(
+              "scripts/run_baseline_validity_review.py",
+              "    quarterly_roll_candidates,\n    leave_one_group_out,\n",
+              "    leave_one_group_out,\n    quarterly_roll_candidates,\n",
+          )
+          replace_once(
+              "scripts/run_baseline_validity_review.py",
+              '        rows.append({"gap_policy": policy, **metrics(trades), **{f"funnel_{k}": v for k, v in funnel.as_dict().items()}})\n',
+              '''        rows.append(\n            {\n                "gap_policy": policy,\n                **metrics(trades),\n                **{f"funnel_{key}": value for key, value in funnel.as_dict().items()},\n            }\n        )\n''',
+          )
+          for path in (
+              "src/dtr_lab/research/uncertainty.py",
+              "src/dtr_lab/research/validity.py",
+          ):
+              replace_once(
+                  path,
+                  "from dataclasses import dataclass\nfrom typing import Iterable\n",
+                  "from collections.abc import Iterable\nfrom dataclasses import dataclass\n",
+              )
+          replace_once(
+              "src/dtr_lab/research/uncertainty.py",
+              "def _percentile_interval(samples: np.ndarray, estimate: float, iterations: int, seed: int) -> IntervalEstimate:\n",
+              "def _percentile_interval(\n    samples: np.ndarray, estimate: float, iterations: int, seed: int\n) -> IntervalEstimate:\n",
+          )
+          replace_once(
+              "src/dtr_lab/research/uncertainty.py",
+              '    groups = [group[value_column].to_numpy(float) for _, group in frame.groupby(block_column, sort=True)]\n',
+              '''    groups = [\n        group[value_column].to_numpy(float)\n        for _, group in frame.groupby(block_column, sort=True)\n    ]\n''',
+          )
+          replace_once(
+              "src/dtr_lab/research/validity.py",
+              '                calculated = (price * one_minute["volume"]).groupby(trade_date).cumsum() / denominator\n',
+              '''                calculated = (\n                    (price * one_minute["volume"]).groupby(trade_date).cumsum()\n                    / denominator\n                )\n''',
+          )
+          replace_once(
+              "src/dtr_lab/research/validity.py",
+              '            row[f"excluded_{column}"] = int(value) if isinstance(value, (int, np.integer)) else value\n',
+              '''            row[f"excluded_{column}"] = (\n                int(value) if isinstance(value, (int, np.integer)) else value\n            )\n''',
+          )
+          replace_once(
+              "tests/test_session_builder_equivalence.py",
+              '    one = one.loc[~one["timestamp"].isin(pd.to_datetime(["2025-01-06 08:12", "2025-01-07 01:45"]))].reset_index(drop=True)\n',
+              '''    removed = pd.to_datetime(["2025-01-06 08:12", "2025-01-07 01:45"])\n    one = one.loc[~one["timestamp"].isin(removed)].reset_index(drop=True)\n''',
+          )
+          replace_once(
+              "tests/test_uncertainty.py",
+              "from dtr_lab.research.uncertainty import block_bootstrap_mean, sign_flip_p_value, trade_bootstrap_mean\n",
+              '''from dtr_lab.research.uncertainty import (\n    block_bootstrap_mean,\n    sign_flip_p_value,\n    trade_bootstrap_mean,\n)\n''',
+          )
+          replace_once(
+              "tests/test_validity.py",
+              '    market_dates = pd.to_datetime(["2024-03-05", "2024-03-06", "2024-03-07", "2024-03-08", "2024-03-11"])\n',
+              '''    market_dates = pd.to_datetime(\n        ["2024-03-05", "2024-03-06", "2024-03-07", "2024-03-08", "2024-03-11"]\n    )\n''',
+          )
+          PY
+          python -m compileall -q scripts src tests
+          rm .github/workflows/fix-baseline-reset-lint.yml
+      - name: Commit lint fixes
+        run: |
+          git config user.name "dtr-research-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          git commit -m "Fix baseline reset Ruff findings"
+          git push origin HEAD:agent/nq-baseline-validity-reset
