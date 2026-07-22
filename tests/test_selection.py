@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pandas as pd
+import pytest
 
 from dtr_lab.research.selection import (
     align_candidate_returns,
@@ -79,11 +80,27 @@ def test_familywise_test_is_deterministic() -> None:
 
 
 def test_bootstrap_reselection_reports_winner_instability() -> None:
-    matrix = align_candidate_returns(_trades(), observation_unit="session")
+    index = pd.MultiIndex.from_tuples(
+        [
+            (pd.Timestamp("2025-01-02"), "LONDON"),
+            (pd.Timestamp("2025-01-03"), "LONDON"),
+            (pd.Timestamp("2025-01-06"), "LONDON"),
+            (pd.Timestamp("2025-01-07"), "LONDON"),
+        ],
+        names=["session_date", "session"],
+    )
+    matrix = pd.DataFrame(
+        {
+            "A": [1.0, 1.0, -0.5, -0.5],
+            "B": [-0.5, -0.5, 1.0, 1.0],
+            "C": [0.1, 0.1, 0.1, 0.1],
+        },
+        index=index,
+    )
     result = bootstrap_reselection(
         matrix, selected_candidate="A", iterations=1_000, seed=17
     )
-    assert result.frequencies["A"] + result.frequencies["B"] + result.frequencies["C"] == 1.0
+    assert sum(result.frequencies.values()) == pytest.approx(1.0)
     assert result.selected_frequency < 1.0
     assert result.winner_change_probability > 0.0
-    assert result.effective_selected_candidates >= 1.0
+    assert result.effective_selected_candidates > 1.0
