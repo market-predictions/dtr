@@ -70,6 +70,7 @@ def test_post_entry_close_inside_exits_failed_breakout() -> None:
 
     trade = continuation._simulate_continuation_trade(
         times_ns,
+        np.full(len(times), 101.0),
         high,
         low,
         close,
@@ -152,7 +153,51 @@ def test_open_trade_crossing_unsafe_gap_is_rejected(monkeypatch) -> None:
         bars,
         pd.DataFrame(),
         ContinuationConfig(),
+        gap_policy="reject_unsafe",
     )
 
     assert trades.empty
     assert funnel.skipped_unsafe_gap_bridge == 1
+
+
+def test_continuation_gap_liquidates_at_worse_of_stop_and_resume_open() -> None:
+    signal = _signal()
+    cfg = ContinuationConfig(
+        stop_buffer_ticks=4,
+        stop_atr_frac=0.0,
+        slippage_ticks_each_side=0.0,
+        failed_breakout_exit=False,
+    )
+    times = pd.to_datetime(
+        [
+            "2025-01-07 09:35",
+            "2025-01-07 09:36",
+            "2025-01-07 09:42",
+            "2025-01-07 09:43",
+        ]
+    )
+    times_ns = times.to_numpy(dtype="datetime64[ns]").astype(np.int64)
+    open_ = np.array([101.0, 101.0, 98.0, 98.0])
+    high = np.array([101.2, 101.2, 98.5, 98.5])
+    low = np.array([100.8, 100.8, 97.5, 97.5])
+    close = np.array([101.0, 101.0, 98.0, 98.0])
+    bars = pd.DataFrame({"bar_end": [pd.Timestamp("2025-01-07 09:40")], "atr14": [2.0]})
+    trade = continuation._simulate_continuation_trade(
+        times_ns,
+        open_,
+        high,
+        low,
+        close,
+        bars,
+        signal,
+        cfg,
+        {pd.Timestamp("2025-01-07 09:40").value},
+        unsafe_previous_ns=np.array([pd.Timestamp("2025-01-07 09:36").value]),
+        unsafe_current_ns=np.array([pd.Timestamp("2025-01-07 09:42").value]),
+        gap_policy="liquidate",
+    )
+    assert trade is not None
+    assert trade.exit_reason == "GAP_LIQUIDATION"
+    assert trade.exit_time == pd.Timestamp("2025-01-07 09:42")
+    assert trade.gap_liquidation_price == 98.0
+    assert trade.pnl_r < -1.0

@@ -9,7 +9,7 @@ from dtr_lab.data.gaps import classify_gaps
 
 from . import engine as base
 
-GapPolicy = Literal["observe_only", "reject_unsafe"]
+GapPolicy = Literal["observe_only", "reject_unsafe", "liquidate_unsafe"]
 
 # Capture the pre-integrity implementation once. The package initializer later routes the
 # public engine entry points through this module without creating recursive calls here.
@@ -28,6 +28,7 @@ class IntegrityCounters:
     sessions_signal_path_truncated: int = 0
     skipped_unsafe_gap_bridge: int = 0
     observed_unsafe_gap_bridges: int = 0
+    gap_liquidations: int = 0
 
 
 class IntegrityFunnel:
@@ -54,6 +55,7 @@ class IntegrityFunnel:
             "observed_unsafe_gap_bridges": (
                 self._counters.observed_unsafe_gap_bridges
             ),
+            "gap_liquidations": self._counters.gap_liquidations,
         }
 
 
@@ -359,9 +361,9 @@ def run_backtest(
     market_arrays: tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]
     | None = None,
     *,
-    gap_policy: GapPolicy = "reject_unsafe",
+    gap_policy: GapPolicy = "liquidate_unsafe",
 ) -> tuple[pd.DataFrame, IntegrityFunnel]:
-    if gap_policy not in ("observe_only", "reject_unsafe"):
+    if gap_policy not in ("observe_only", "reject_unsafe", "liquidate_unsafe"):
         raise ValueError(f"Unknown gap policy: {gap_policy}")
 
     safe_sessions = _sanitize_sessions(one_minute, bars, sessions)
@@ -407,7 +409,6 @@ def run_backtest(
     signal_sessions = safe_sessions.loc[
         ~safe_sessions["integrity_range_gap_rejected"]
     ].copy()
-    # Keep the call explicit rather than routing through a monkey-patched public symbol.
     signals, funnel = _BASE_GENERATE_SIGNALS(bars, signal_sessions, cfg)
 
     one_times_ns, one_open, one_high, one_low, one_close = (
@@ -416,35 +417,56 @@ def run_backtest(
     trades: list[base.Trade] = []
     next_free = pd.Timestamp.min
     bridge_rejections = 0
+    gap_liquidations = 0
 
     for signal in signals:
         if signal.entry_time < next_free:
             funnel.skipped_position_open += 1
             continue
-        trade = _BASE_SIMULATE_TRADE(
-            one_times_ns,
-            one_open,
-            one_high,
-            one_low,
-            one_close,
-            bars,
-            signal,
-            cfg,
-        )
+        if gap_policy == "liquidate_unsafe":
+            trade = _BASE_SIMULATE_TRADE(
+                one_times_ns,
+                one_open,
+                one_high,
+                one_low,
+                one_close,
+                bars,
+                signal,
+                cfg,
+                unsafe_previous_ns=unsafe_previous_ns,
+                unsafe_current_ns=unsafe_current_ns,
+                gap_policy="liquidate",
+            )
+        else:
+            # Historical noncausal policy retained only to reproduce the suspended
+            # 491-trade benchmark and attribute the validity correction.
+            trade = _BASE_SIMULATE_TRADE(
+                one_times_ns,
+                one_open,
+                one_high,
+                one_low,
+                one_close,
+                bars,
+                signal,
+                cfg,
+            )
         if trade is None:
             continue
 
-        gap_ns = _first_unsafe_gap_between(
-            unsafe_previous_ns,
-            unsafe_current_ns,
-            signal.entry_time,
-            trade.exit_time,
-        )
-        if gap_ns is not None:
-            bridge_rejections += 1
-            next_free = max(next_free, pd.Timestamp(gap_ns))
-            continue
+        if gap_policy == "reject_unsafe":
+            gap_ns = _first_unsafe_gap_between(
+                unsafe_previous_ns,
+                unsafe_current_ns,
+                signal.entry_time,
+                trade.exit_time,
+            )
+            if gap_ns is not None:
+                bridge_rejections += 1
+                next_free = max(next_free, pd.Timestamp(gap_ns))
+                continue
 
+        if trade.exit_reason == "GAP_LIQUIDATION":
+            gap_liquidations += 1
         trades.append(trade)
         next_free = trade.exit_time
 
@@ -454,8 +476,10 @@ def run_backtest(
         sessions_range_gap_rejected=int(range_rejected.sum()),
         sessions_signal_path_truncated=int(path_truncated.sum()),
         skipped_unsafe_gap_bridge=bridge_rejections,
+        gap_liquidations=gap_liquidations,
     )
     return pd.DataFrame([asdict(trade) for trade in trades]), IntegrityFunnel(
         funnel,
         counters,
     )
+

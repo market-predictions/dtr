@@ -35,7 +35,7 @@ class ContinuationExecutionSpec(BaseModel):
         "conservative_stop_first"
     )
     random_seed: int = 20260721
-    gap_policy: Literal["reject_unsafe"] = "reject_unsafe"
+    gap_policy: Literal["reject_unsafe", "liquidate_unsafe"] = "liquidate_unsafe"
 
 
 class ContinuationManifest(BaseModel):

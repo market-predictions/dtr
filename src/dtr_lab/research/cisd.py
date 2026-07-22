@@ -10,7 +10,6 @@ from . import engine as base
 from .integrity import (
     _BASE_GENERATE_SIGNALS,
     _BASE_SIMULATE_TRADE,
-    _first_unsafe_gap_between,
     _gap_intervals,
     _gap_table,
     _sanitize_sessions,
@@ -128,6 +127,7 @@ class CISDFunnel:
     signals_filtered: int = 0
     skipped_position_open: int = 0
     skipped_unsafe_gap_bridge: int = 0
+    gap_liquidations: int = 0
     trades: int = 0
 
     def as_dict(self) -> dict[str, int]:
@@ -438,7 +438,7 @@ def simulate_cisd_variant(
     last_confirmed = 0
     filtered = 0
     skipped_position = 0
-    bridge_rejections = 0
+    gap_liquidations = 0
 
     for signal, annotation in zip(prepared.signals, prepared.annotations, strict=True):
         sequence_confirmed += int(annotation.sequence_confirmed)
@@ -458,19 +458,14 @@ def simulate_cisd_variant(
             bars,
             signal,
             cfg,
+            unsafe_previous_ns=unsafe_previous_ns,
+            unsafe_current_ns=unsafe_current_ns,
+            gap_policy="liquidate",
         )
         if trade is None:
             continue
-        gap_ns = _first_unsafe_gap_between(
-            unsafe_previous_ns,
-            unsafe_current_ns,
-            signal.entry_time,
-            trade.exit_time,
-        )
-        if gap_ns is not None:
-            bridge_rejections += 1
-            next_free = max(next_free, pd.Timestamp(gap_ns))
-            continue
+        if trade.exit_reason == "GAP_LIQUIDATION":
+            gap_liquidations += 1
         rows.append(_trade_row(trade, annotation))
         next_free = trade.exit_time
 
@@ -482,7 +477,8 @@ def simulate_cisd_variant(
         last_candle_confirmed=last_confirmed,
         signals_filtered=filtered,
         skipped_position_open=skipped_position,
-        skipped_unsafe_gap_bridge=bridge_rejections,
+        skipped_unsafe_gap_bridge=0,
+        gap_liquidations=gap_liquidations,
         trades=len(rows),
     )
     return trades, funnel, pd.DataFrame(signal_rows)

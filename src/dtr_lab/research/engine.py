@@ -97,6 +97,10 @@ class Trade:
     holding_minutes: int
     sweep_score: int
     day_of_week: int
+    gap_previous_timestamp: pd.Timestamp | None = None
+    gap_current_timestamp: pd.Timestamp | None = None
+    gap_minutes: int = 0
+    gap_liquidation_price: float = np.nan
 
 
 @dataclass
@@ -204,12 +208,20 @@ def _ts_on_date(day: pd.Timestamp, hm: tuple[int, int]) -> pd.Timestamp:
 
 
 def build_session_table(one_minute: pd.DataFrame, bars: pd.DataFrame) -> pd.DataFrame:
+    """Build session ranges with exact half-open windows using binary search.
+
+    Input timestamps are sorted and unique. Binary search therefore preserves the
+    legacy ``[start, end)`` semantics while avoiding a full-length boolean mask for
+    every date/session pair.
+    """
     first_day = one_minute["timestamp"].min().normalize()
     last_day = one_minute["timestamp"].max().normalize()
     days = pd.date_range(first_day, last_day, freq="D")
+    one_times = one_minute["timestamp"].to_numpy(dtype="datetime64[ns]")
+    one_high = one_minute["high"].to_numpy(float)
+    one_low = one_minute["low"].to_numpy(float)
     bar_times = bars["timestamp"].to_numpy(dtype="datetime64[ns]")
     rows: list[dict[str, object]] = []
-    one = one_minute.set_index("timestamp")
     for day in days:
         for name, (start_hm, end_hm, break_hm) in SESSION_SPECS.items():
             start = _ts_on_date(day, start_hm)
@@ -217,13 +229,24 @@ def build_session_table(one_minute: pd.DataFrame, bars: pd.DataFrame) -> pd.Data
             break_end = _ts_on_date(day, break_hm)
             if break_end <= end:
                 break_end += pd.Timedelta(days=1)
-            window = one.loc[(one.index >= start) & (one.index < end)]
-            if len(window) < 20:
+            start64 = np.datetime64(start.to_datetime64())
+            end64 = np.datetime64(end.to_datetime64())
+            j0 = int(np.searchsorted(one_times, start64, side="left"))
+            j1 = int(np.searchsorted(one_times, end64, side="left"))
+            if j1 - j0 < 20:
                 continue
-            i0 = int(np.searchsorted(bar_times, np.datetime64(end), side="left"))
-            i1 = int(np.searchsorted(bar_times, np.datetime64(break_end), side="left"))
+            i0 = int(np.searchsorted(bar_times, end64, side="left"))
+            i1 = int(
+                np.searchsorted(
+                    bar_times,
+                    np.datetime64(break_end.to_datetime64()),
+                    side="left",
+                )
+            )
             if i0 >= len(bars) or i1 <= i0:
                 continue
+            range_high = float(np.max(one_high[j0:j1]))
+            range_low = float(np.min(one_low[j0:j1]))
             rows.append(
                 {
                     "session": name,
@@ -231,9 +254,9 @@ def build_session_table(one_minute: pd.DataFrame, bars: pd.DataFrame) -> pd.Data
                     "range_start": start,
                     "range_end": end,
                     "break_end": break_end,
-                    "range_high": float(window["high"].max()),
-                    "range_low": float(window["low"].min()),
-                    "range_size": float(window["high"].max() - window["low"].min()),
+                    "range_high": range_high,
+                    "range_low": range_low,
+                    "range_size": range_high - range_low,
                     "post_start_index": i0,
                     "post_end_index": min(i1, len(bars)),
                     "weekday": int(day.weekday()),
@@ -359,6 +382,7 @@ def generate_signals(
         pivot = np.nan
         pivot_ready_time = -1
         bos_idx = -1
+        bos_detected = False
         for i in range(max(sweep_idx + 2 * cfg.pivot_len, reclaim_idx), last):
             candidate_idx = i - cfg.pivot_len
             if direction > 0 and _pivot_high(high, candidate_idx, cfg.pivot_len):
@@ -373,10 +397,6 @@ def generate_signals(
                     pivot, pivot_ready_time = low[candidate_idx], i
             if not np.isfinite(pivot) or i < pivot_ready_time:
                 continue
-            # Opposite range side invalidates the reversal before entry.
-            if (direction > 0 and high[i] > rh) or (direction < 0 and low[i] < rl):
-                # This is not necessarily invalid in Pine, but is a conservative research gate.
-                pass
             buffer = max(
                 rs * cfg.break_buffer_pct,
                 (atr[i] * cfg.break_atr_frac if np.isfinite(atr[i]) else 0.0),
@@ -395,6 +415,7 @@ def generate_signals(
                 )
             if not broke:
                 continue
+            bos_detected = True
             if cfg.require_impulse:
                 impulse = (
                     np.isfinite(median_range[i])
@@ -412,11 +433,11 @@ def generate_signals(
         if not np.isfinite(pivot):
             continue
         funnel.pivot_ready += 1
+        if bos_detected:
+            funnel.bos_pass += 1
         if bos_idx < 0:
             continue
-        funnel.bos_pass += 1
-        if not cfg.require_impulse or True:
-            funnel.impulse_pass += 1
+        funnel.impulse_pass += 1
 
         accept_idx = bos_idx
         if cfg.acceptance_bars > 1:
@@ -500,7 +521,14 @@ def _simulate_trade_np(
     bars: pd.DataFrame,
     sig: CandidateSignal,
     cfg: StrategyConfig,
+    *,
+    unsafe_previous_ns: np.ndarray | None = None,
+    unsafe_current_ns: np.ndarray | None = None,
+    gap_policy: str = "observe",
 ) -> Trade | None:
+    if gap_policy not in ("observe", "liquidate"):
+        raise ValueError(f"Unknown trade gap policy: {gap_policy}")
+
     atr = float(bars.iloc[sig.entry_index]["atr14"])
     if not np.isfinite(atr):
         return None
@@ -523,8 +551,37 @@ def _simulate_trade_np(
     hard_end = max_end if time_close is None else min(max_end, time_close)
     start_ns = np.datetime64(start, "ns").astype(np.int64)
     end_ns = np.datetime64(hard_end, "ns").astype(np.int64)
+
+    unsafe_previous = (
+        np.asarray(unsafe_previous_ns, dtype=np.int64)
+        if unsafe_previous_ns is not None
+        else np.array([], dtype=np.int64)
+    )
+    unsafe_current = (
+        np.asarray(unsafe_current_ns, dtype=np.int64)
+        if unsafe_current_ns is not None
+        else np.array([], dtype=np.int64)
+    )
+    if unsafe_previous.size != unsafe_current.size:
+        raise ValueError("Unsafe gap interval arrays must have equal length")
+
+    gap_index = -1
+    gap_resume_ns: int | None = None
+    scan_end_ns = end_ns
+    if gap_policy == "liquidate" and unsafe_current.size:
+        # A gap is actionable only when its resume timestamp becomes observable. Entry at the
+        # resume timestamp occurs after the gap is known and therefore does not bridge it.
+        relevant = (unsafe_current > start_ns) & (unsafe_previous < end_ns)
+        indexes = np.flatnonzero(relevant)
+        if indexes.size:
+            gap_index = int(indexes[0])
+            gap_resume_ns = int(unsafe_current[gap_index])
+            # If a gap crosses the scheduled close or max-hold boundary, include the first
+            # observable post-gap bar so liquidation remains causal rather than disappearing.
+            scan_end_ns = max(scan_end_ns, gap_resume_ns)
+
     j0 = int(np.searchsorted(one_times_ns, start_ns, side="left"))
-    j1 = int(np.searchsorted(one_times_ns, end_ns, side="right"))
+    j1 = int(np.searchsorted(one_times_ns, scan_end_ns, side="right"))
     if j0 >= j1:
         return None
     remaining = 1.0
@@ -536,13 +593,45 @@ def _simulate_trade_np(
     last_idx = j1 - 1
     exit_time = pd.Timestamp(one_times_ns[last_idx]) + pd.Timedelta(minutes=1)
     exit_reason = "MAX_HOLD"
+    gap_previous_timestamp: pd.Timestamp | None = None
+    gap_current_timestamp: pd.Timestamp | None = None
+    gap_minutes = 0
+    gap_liquidation_price = np.nan
     time_close_ns = (
         None if time_close is None else np.datetime64(time_close, "ns").astype(np.int64)
     )
     max_end_ns = np.datetime64(max_end, "ns").astype(np.int64)
 
     for j in range(j0, j1):
-        minute_end_ns = one_times_ns[j] + 60_000_000_000
+        current_ns = int(one_times_ns[j])
+        if gap_resume_ns is not None and current_ns >= gap_resume_ns:
+            open_px = float(one_open[j])
+            if sig.direction > 0:
+                mfe = max(mfe, open_px - entry)
+                mae = max(mae, entry - open_px)
+                stop_execution = runner_stop - slip
+                post_gap_execution = open_px - slip
+                px = min(stop_execution, post_gap_execution)
+            else:
+                mfe = max(mfe, entry - open_px)
+                mae = max(mae, open_px - entry)
+                stop_execution = runner_stop + slip
+                post_gap_execution = open_px + slip
+                px = max(stop_execution, post_gap_execution)
+            realized_points += remaining * sig.direction * (px - entry)
+            remaining = 0.0
+            exit_time = pd.Timestamp(current_ns)
+            exit_reason = "GAP_LIQUIDATION"
+            gap_previous_timestamp = pd.Timestamp(int(unsafe_previous[gap_index]))
+            gap_current_timestamp = pd.Timestamp(int(unsafe_current[gap_index]))
+            gap_minutes = int(
+                (int(unsafe_current[gap_index]) - int(unsafe_previous[gap_index]))
+                // 60_000_000_000
+            )
+            gap_liquidation_price = float(px)
+            break
+
+        minute_end_ns = current_ns + 60_000_000_000
         if sig.direction > 0:
             mfe = max(mfe, one_high[j] - entry)
             mae = max(mae, entry - one_low[j])
@@ -625,8 +714,11 @@ def _simulate_trade_np(
         holding_minutes=int((exit_time - sig.entry_time).total_seconds() // 60),
         sweep_score=sig.sweep_score,
         day_of_week=sig.day_of_week,
+        gap_previous_timestamp=gap_previous_timestamp,
+        gap_current_timestamp=gap_current_timestamp,
+        gap_minutes=gap_minutes,
+        gap_liquidation_price=float(gap_liquidation_price),
     )
-
 
 def prepare_market_arrays(
     one_minute: pd.DataFrame,

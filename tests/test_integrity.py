@@ -147,7 +147,7 @@ def test_signal_path_stops_before_first_reset_boundary() -> None:
     assert int(sanitized.iloc[0]["post_end_index"]) == expected_end
 
 
-def test_open_trade_bridging_unsafe_gap_is_excluded(monkeypatch) -> None:
+def test_legacy_open_trade_gap_rejection_is_reproducible(monkeypatch) -> None:
     one = _range(
         "2025-01-07 09:00",
         "2025-01-07 10:05",
@@ -211,7 +211,13 @@ def test_open_trade_bridging_unsafe_gap_is_excluded(monkeypatch) -> None:
         lambda *args, **kwargs: trade,
     )
 
-    trades, funnel = run_backtest(one, bars, sessions, StrategyConfig(name="test"))
+    trades, funnel = run_backtest(
+        one,
+        bars,
+        sessions,
+        StrategyConfig(name="test"),
+        gap_policy="reject_unsafe",
+    )
 
     assert trades.empty
     assert funnel.as_dict()["skipped_unsafe_gap_bridge"] == 1

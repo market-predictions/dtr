@@ -1,5 +1,45 @@
 # Changelog
 
+## v0.4.0 — 2026-07-22
+
+### Corrected
+
+- Replaced retrospective post-entry gap rejection with causal first-observable conservative liquidation.
+- Added gap-through-stop execution, resume-time portfolio sequencing, and explicit gap metadata.
+- Refroze the active NQ reversal benchmark at 495 trades, 0.173747R expectancy, 86.004761R net, PF 1.366383, and 14.107858R maximum drawdown.
+- Separated raw BOS detections from impulse-qualified BOS in the funnel and removed misleading dead invalidation wording.
+- Replaced the quadratic session-window scan with an exact searchsorted-equivalent builder.
+
+### Added
+
+- Timestamp/VWAP hypothesis tests, rollover sensitivity, roll discontinuity diagnostics, session×weekday attribution, and leave-one-group-out concentration tests.
+- Fixed-seed trade, month-block, and session-date bootstrap code plus selection-pressure primitives.
+- Deterministic baseline validity runner and compact evidence package.
+- No-retune causal reruns for continuation, IFVG, CISD, and entry routing.
+- Fresh 2026 NQ out-of-sample preregistration.
+
+### Validated
+
+- Historical observe-only 504-trade and retrospective 491-trade references remain reproducible.
+- Corrected benchmark clean repeat is exact; baseline validity artifacts are 15/15 byte-identical.
+- IFVG 52/52, CISD 52/52, continuation structural 30/30, continuation late-60 30/30, and entry routing 33/33 artifacts are byte-identical.
+- Local suite: 75 tests passed before final GitHub CI.
+
+### Decisions
+
+- Baseline: `CONTINUE_RESEARCH_DO_NOT_DEPLOY`.
+- Continuation: `HOLD_FOR_FRESH_DATA`.
+- IFVG: `REJECT_NO_INCREMENTAL_VALUE`.
+- CISD: `REJECT_NO_INCREMENTAL_VALUE`.
+- Entry routing: `REJECT_NO_INCREMENTAL_VALUE`, pending PR #5 rebase/publication.
+
+### Known limits
+
+- Bar-open versus bar-close semantics remain unresolved.
+- Continuous-contract roll/adjustment methodology remains unresolved.
+- The 904-configuration selection process lacks an aligned return matrix for familywise correction.
+- No qualified pristine 2026 OOS test or Python/Pine parity run has been completed.
+
 ## v0.3.2 — 2026-07-22
 
 ### Added
