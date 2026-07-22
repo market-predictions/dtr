@@ -15,6 +15,11 @@
     "roll_discontinuity": "largest absolute maintenance-gap close-to-reopen move within each official roll window; attribution is diagnostic",
     "roll_window": "official roll date plus two preceding and two following observed trading dates"
   },
+  "classification_rule": {
+    "DESCRIPTIVE_ONLY": "fewer than 10 executed trades, or structurally non-selectable roll-discontinuity evidence",
+    "NO_CLEAR_PATTERN": "all other categories with at least 10 trades",
+    "WATCH_RISK": "at least 10 trades; negative expectancy; expectancy at least 0.10R below the off-category cohort; negative two-tick-each-side expectancy; and at least two of: stop-first rate at least 5 percentage points worse, TP1 hit rate at least 5 points worse, or negative net R in at least two calendar years"
+  },
   "data_sha256": "8d3f157a422636e5b8dda51cc3a3d9209c50cb53f9b279d3e14b627ce59370dc",
   "dates": {
     "CPI": ["2023-01-12","2023-02-14","2023-03-14","2023-04-12","2023-05-10","2023-06-13","2023-07-12","2023-08-10","2023-09-13","2023-10-12","2023-11-14","2023-12-12","2024-01-11","2024-02-13","2024-03-12","2024-04-10","2024-05-15","2024-06-12","2024-07-11","2024-08-14","2024-09-11","2024-10-10","2024-11-13","2024-12-11","2025-01-15","2025-02-12","2025-03-12","2025-04-10","2025-05-13","2025-06-11","2025-07-15","2025-08-12","2025-09-11","2025-10-24"],
