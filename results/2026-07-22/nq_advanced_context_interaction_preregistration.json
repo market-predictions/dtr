@@ -1,0 +1,54 @@
+{
+  "study_id": "DTR_ADVANCED_CONTEXT_INTERACTIONS_20260722",
+  "status": "FROZEN_BEFORE_INTERACTION_RESULTS",
+  "baseline_id": "DTR_CAUSAL_BAR_CLOSE_RANGE_SHIFT_MINUS1",
+  "parent_rules_source": "broad_exclusion_preregistration.json",
+  "maximum_interactions": 6,
+  "interactions": [
+    {
+      "id": "I1_NOT_COMPRESSED_AND_NOT_NEAR_PRIOR_DAY",
+      "parents": ["E5_EXCLUDE_COMPRESSED_RANGE", "E6_EXCLUDE_NEAR_PRIOR_DAY_DIRECTIONAL_EXTREME"],
+      "rationale": "Combines initial-range quality with daily-range location."
+    },
+    {
+      "id": "I2_MIXED_NEUTRAL_CONFLUENCE_AND_NOT_COMPRESSED",
+      "parents": ["E3_KEEP_MIXED_OR_NEUTRAL_CONFLUENCE", "E5_EXCLUDE_COMPRESSED_RANGE"],
+      "rationale": "Combines HTF directional state with initial-range quality."
+    },
+    {
+      "id": "I3_MIXED_NEUTRAL_CONFLUENCE_AND_NOT_NEAR_PRIOR_DAY",
+      "parents": ["E3_KEEP_MIXED_OR_NEUTRAL_CONFLUENCE", "E6_EXCLUDE_NEAR_PRIOR_DAY_DIRECTIONAL_EXTREME"],
+      "rationale": "Combines HTF directional state with daily-range location."
+    },
+    {
+      "id": "I4_NOT_D1_COUNTERTREND_AND_NOT_COMPRESSED",
+      "parents": ["E1_EXCLUDE_D1_COUNTERTREND", "E5_EXCLUDE_COMPRESSED_RANGE"],
+      "rationale": "Combines daily directional alignment with range quality."
+    },
+    {
+      "id": "I5_NOT_D1_COUNTERTREND_AND_NOT_NEAR_PRIOR_DAY",
+      "parents": ["E1_EXCLUDE_D1_COUNTERTREND", "E6_EXCLUDE_NEAR_PRIOR_DAY_DIRECTIONAL_EXTREME"],
+      "rationale": "Combines daily direction with prior-day location."
+    },
+    {
+      "id": "I6_NOT_MIDDLE_D1_VOL_AND_NOT_COMPRESSED",
+      "parents": ["E4_EXCLUDE_MIDDLE_D1_VOLATILITY", "E5_EXCLUDE_COMPRESSED_RANGE"],
+      "rationale": "Combines daily volatility regime with range-to-volatility fit."
+    }
+  ],
+  "unavailable_handling": "Pass through unavailable warm-up observations for both parents.",
+  "evaluation": {
+    "joint_resampling_iterations": 10000,
+    "requirements": [
+      "At least 250 executed trades.",
+      "Expectancy improves by at least 0.03R, or drawdown falls by at least 20% without lower expectancy.",
+      "Return/DD improves by at least 15%.",
+      "Calendar-year stability requirement from the primary preregistration.",
+      "Positive two-tick-each-side stressed expectancy.",
+      "Session and half-year concentration each <=60%.",
+      "Familywise edge p <=0.05.",
+      "Familywise incremental per-session p <=0.10."
+    ]
+  },
+  "interpretation_lock": "No third factor, threshold tuning, session filtering, weekday filtering, or alternative interaction may be added after results are inspected."
+}

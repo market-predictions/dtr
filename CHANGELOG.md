@@ -1,5 +1,38 @@
 # Changelog
 
+## Unreleased — 2026-07-22 advanced context research
+
+### Added
+
+- Timing-corrected exploratory baseline `DTR_CAUSAL_BAR_CLOSE_RANGE_SHIFT_MINUS1` at 477 trades, 42.577515R net, 0.089261R expectancy, and 16.426493R maximum drawdown.
+- Causal D1, H4 and weekly context features for direction, volatility, trend strength, range quality, location, gap, volume and VWAP research.
+- Twelve univariate families, six frozen broad exclusions and six capped two-factor interactions.
+- Familywise edge tests, paired per-session incremental tests, cost stress, period stability and concentration diagnostics.
+- Fixed threshold-sensitivity surface that cannot select a replacement threshold.
+- Independent reconstruction, causality audit, paired date-block bootstrap and deterministic repeat evidence.
+- Supplementary fresh-OOS preregistration for unfiltered Arm 0, compressed-range Arm A, prior-day-proximity Arm B and shadow combined Arm C.
+
+### Research result
+
+- No context filter passed the complete historical promotion gate.
+- Excluding compressed ranges retained 335 trades, produced 49.464423R at 0.147655R expectancy, and reduced drawdown to 9.470457R.
+- Excluding setups within 0.25 D1 ATR of the prior-day directional extreme retained 304 trades, produced 48.937550R at 0.160979R expectancy, and reduced drawdown to 8.632571R.
+- The combined frozen interaction produced 56.774134R at 0.258064R expectancy and 8.554419R drawdown, but retained only 220 trades.
+- Paired incremental bootstrap intervals include zero for every broad rule and interaction.
+
+### Decision
+
+- Record `NO_HISTORICAL_PROMOTION_CONTINUE_FRESH_OOS_RESEARCH`.
+- Retain Arm A and Arm B as independent fresh-OOS challengers.
+- Keep the combined Arm C shadow-only.
+- Do not implement context filters in Pine or increase risk based on historical drawdown improvements.
+
+### Known limits
+
+- The 42.58R baseline was selected after historical timing sensitivity.
+- Authoritative timestamp and continuous-contract metadata remain unresolved.
+- No qualified untouched 2026 result or Python/Pine parity evidence exists.
+
 ## v0.4.0 — 2026-07-22
 
 ### Corrected

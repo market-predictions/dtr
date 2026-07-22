@@ -1,0 +1,53 @@
+{
+  "study_id": "DTR_ADVANCED_CONTEXT_20260722",
+  "baseline": {
+    "trades": 477,
+    "expectancy_r": 0.0892610377422093,
+    "median_r": -0.22781155015197568,
+    "profit_factor": 1.178993059960674,
+    "win_rate": 0.48846960167714887,
+    "max_drawdown_r": 16.426493058604258,
+    "net_r": 42.577515003033874,
+    "return_dd": 2.5920027391806317,
+    "avg_hold_min": 204.92872117400418,
+    "mfe_r": 1.3923261067184651,
+    "mae_r": 0.7371610809538426
+  },
+  "baseline_signals": 492,
+  "baseline_qualifying_signals": 492,
+  "eligible_sessions": 1666,
+  "funnel_before_position_overlap": {
+    "sessions": 1666,
+    "sweep_depth_pass": 1638,
+    "sweep_quality_pass": 1638,
+    "reclaim_pass": 1333,
+    "pivot_ready": 1252,
+    "bos_pass": 985,
+    "impulse_pass": 917,
+    "acceptance_pass": 589,
+    "trend_pass": 492,
+    "entry_signal": 492,
+    "skipped_position_open": 0,
+    "trades": 0
+  },
+  "feature_thresholds": {
+    "volatility_percentile": [
+      0.3333333333333333,
+      0.6666666666666666
+    ],
+    "trend_strength_nontrend": "D1 ADX<20 and H4 ADX<20 and H4 ER20<0.25",
+    "trend_strength_strong": "(D1 ADX>=25 and H4 ADX>=25) or H4 ER20>=0.35",
+    "volatility_transition": "mean(ATR20 change5,RV20 change5) below -5% / above +5%",
+    "prior_day_near": "0.25 D1 ATR",
+    "prior_week_near": "0.40 D1 ATR",
+    "small_gap": "0.10 D1 ATR",
+    "volume_score": "sqrt(range volume ratio * entry relative volume), low<0.85, high>1.15"
+  },
+  "files": {
+    "univariate_results.csv": "3d3a16175be0470ff6cee380188533f0614a41a49682ae2b37351fcb2b3a74ce",
+    "family_best.csv": "298a2075be8c1c16ca249a65bf58cfc47982a2c9f0a5787b74490dc6c080c68b",
+    "signal_context.csv": "fcfa6d48a8b05eab45a38db1aeedfc0899e9c959cbdc317fc958441fe17fa46c",
+    "signal_independent_trades.csv": "81f0fd4732192f9f63ed4516572cf67497ff9aad8c5aaa31c4ec09c6c6c50c85",
+    "session_context.csv": "717bce8ad78a947f25e643282f368452c23356f0bb5dcb1cd71dfd1ddee485f8"
+  }
+}

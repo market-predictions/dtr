@@ -9,59 +9,64 @@ Status: **active; deployment-blocking**
 - [x] Identify and correct retrospective post-entry gap rejection.
 - [x] Refreeze the causal 495-trade benchmark.
 - [x] Add timestamp/VWAP hypothesis tests.
+- [x] Run maintenance-boundary census; internal evidence strongly supports bar-close labels.
+- [x] Run fixed nearby timing sensitivity without changing strategy logic.
 - [x] Add rollover sensitivity and discontinuity diagnostics.
 - [x] Add deterministic uncertainty and concentration evidence.
-- [ ] Resolve bar-open versus bar-close semantics from authoritative metadata or a qualified replacement dataset.
+- [ ] Resolve timestamp semantics from authoritative metadata or a qualified replacement dataset.
 - [ ] Resolve continuous-contract roll and adjustment methodology.
 - [ ] Build canonical qualified one-minute and five-minute datasets with provenance.
 
 ## Phase 1 — Reversal baseline
 
-Status: **corrected historical research benchmark complete**
+Status: **causal reference complete; timing-corrected exploratory baseline added**
 
 - [x] Implement session, sweep, reclaim, protected pivot, BOS, impulse, acceptance, regime, entry, stop, target, and time-exit logic.
 - [x] Use one-minute execution with conservative collision handling.
 - [x] Correct BOS/impulse funnel instrumentation.
-- [x] Lock `DTR_PY_NQ_CANDIDATE_0_1_CAUSAL_GAP` at 495 trades.
-- [ ] Complete multiple-testing-aware historical selection analysis.
+- [x] Lock `DTR_PY_NQ_CANDIDATE_0_1_CAUSAL_GAP` at 495 trades as the historical causal regression reference.
+- [x] Freeze `DTR_CAUSAL_BAR_CLOSE_RANGE_SHIFT_MINUS1` at 477 trades as the exploratory timestamp-corrected comparator.
+- [ ] Complete current-code causal selection inference after timestamp scope is finalized.
 
 Decision: `CONTINUE_RESEARCH_DO_NOT_DEPLOY`.
 
-## Phase 2 — Independent modules
+## Phase 2 — Independent modules and context
 
-Status: **no-retune corrected-baseline reruns complete**
+Status: **no-retune module reruns and advanced context study complete**
 
 - [x] Continuation: `HOLD_FOR_FRESH_DATA`.
 - [x] IFVG: `REJECT_NO_INCREMENTAL_VALUE`.
 - [x] CISD: `REJECT_NO_INCREMENTAL_VALUE`.
-- [x] Entry routing: corrected local rerun confirms `REJECT_NO_INCREMENTAL_VALUE`; PR #5 must be rebased and closed.
-- [ ] Session VWAP context only after timestamp semantics are resolved.
-- [ ] Weekly VWAP context only after timestamp semantics are resolved.
-- [ ] H1Vol and higher-timeframe context only after fresh baseline evidence.
+- [x] Entry routing: `REJECT_NO_INCREMENTAL_VALUE`.
+- [x] D1/H4 direction, volatility, trend strength, range quality, prior-day/week location, overnight gap, volume and VWAP context.
+- [x] Reject historical promotion of all context filters.
+- [x] Freeze compressed-range and prior-day-proximity rules as fresh-OOS challengers.
 - [ ] Footprint only with suitable historical order-flow data.
 
 ## Phase 3 — Fresh out-of-sample evidence
 
-Status: **preregistered; data not acquired**
+Status: **baseline and context challengers preregistered; data not acquired**
 
 - [x] Commit the 2026 OOS data qualification and pass/fail specification.
+- [x] Define Arms 0/A/B and shadow Arm C before fresh performance inspection.
 - [ ] Acquire qualified NQ one-minute data through at least 2026-07-21.
 - [ ] Freeze dataset checksum and audit before performance inspection.
-- [ ] Run the corrected manifest with zero parameter changes.
-- [ ] Report return, funnel, concentration, costs, and roll attribution.
+- [ ] Run Arms 0/A/B with zero parameter changes.
+- [ ] Report paired per-session differences, return, funnel, concentration, costs, and roll attribution.
 - [ ] Extend forward rather than retune when the sample is underpowered or ambiguous.
 
 Passing authorizes continued paper research only.
 
 ## Phase 4 — Model-selection robustness
 
-Status: **partially implemented**
+Status: **original reconstruction blocked; explicit current-code primitives implemented**
 
 - [x] Historical chronological slices.
 - [x] Historical rolling walk-forward procedure.
 - [x] Cost, block-bootstrap, concentration, and rollover stress.
-- [ ] Reconstruct an aligned candidate-return matrix or rerun a fully locked selection procedure.
-- [ ] Apply multiple-testing-aware selection inference.
+- [x] Classify original staged 904 reconstruction as blocked by missing leaderboards and stage bases.
+- [x] Implement aligned session/date return matrices, stream hashes, duplicate detection, max-t, best-mean and reselection primitives.
+- [ ] Complete the separately labelled current-code causal universe only after timestamp alignment is finalized.
 - [ ] Run nested walk-forward only under a preregistered candidate set.
 
 ## Phase 5 — Pine and execution parity

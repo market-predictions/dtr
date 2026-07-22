@@ -1,0 +1,54 @@
+{
+  "study_id": "DTR_ADVANCED_CONTEXT_BROAD_EXCLUSIONS_20260722",
+  "status": "FROZEN_BEFORE_BROAD_EXCLUSION_RESULTS",
+  "relationship_to_primary_preregistration": "Exploratory extension. The original category-only filters were too narrow to meet the retained-sample gate. These rules exclude only one materially weak regime and pass unavailable warm-up observations through unchanged.",
+  "baseline_id": "DTR_CAUSAL_BAR_CLOSE_RANGE_SHIFT_MINUS1",
+  "rules": [
+    {
+      "id": "E1_EXCLUDE_D1_COUNTERTREND",
+      "mask": "F1_D1_DIRECTION != countertrend",
+      "rationale": "The countertrend category was negative in aggregate; retain aligned and neutral states."
+    },
+    {
+      "id": "E2_EXCLUDE_H4_COUNTERTREND",
+      "mask": "F2_H4_DIRECTION != countertrend",
+      "rationale": "The H4 countertrend category was negative; retain aligned and neutral states."
+    },
+    {
+      "id": "E3_KEEP_MIXED_OR_NEUTRAL_CONFLUENCE",
+      "mask": "F3_DIRECTION_CONFLUENCE in {mixed, one_or_both_neutral}",
+      "rationale": "Both-countertrend was negative and both-aligned was near zero; retain only mixed or neutral confluence."
+    },
+    {
+      "id": "E4_EXCLUDE_MIDDLE_D1_VOLATILITY",
+      "mask": "F4_D1_VOLATILITY != middle_33_67",
+      "rationale": "The middle volatility tercile was negative while low and high terciles were positive."
+    },
+    {
+      "id": "E5_EXCLUDE_COMPRESSED_RANGE",
+      "mask": "F6_RANGE_VOLATILITY_FIT != compressed",
+      "rationale": "Compressed initial ranges were materially negative; retain normal and expanded ranges."
+    },
+    {
+      "id": "E6_EXCLUDE_NEAR_PRIOR_DAY_DIRECTIONAL_EXTREME",
+      "mask": "F8_PRIOR_DAY_LOCATION != near_directional_extreme_le_0_25ATR",
+      "rationale": "Contrary to the initial hypothesis, near-prior-day directional extremes were materially negative."
+    }
+  ],
+  "unavailable_handling": "Pass through unavailable warm-up observations; do not convert feature warm-up into a historical filter.",
+  "evaluation": {
+    "family_size": 6,
+    "joint_resampling_iterations": 10000,
+    "hard_requirements": [
+      "At least 250 executed trades.",
+      "Expectancy improves by at least 0.03R, or drawdown falls by at least 20% without lower expectancy.",
+      "Return/DD improves by at least 15%.",
+      "Positive in all three calendar years, or two positive with the third no worse than -5R.",
+      "Two-tick-each-side stressed expectancy remains positive.",
+      "No session or half-year contributes more than 60% of net R.",
+      "Familywise edge p <= 0.05.",
+      "Familywise incremental per-session p <= 0.10."
+    ]
+  },
+  "interpretation_lock": "A pass authorizes only HOLD_FOR_FRESH_OOS. It does not validate the timing-selected baseline or authorize deployment."
+}
