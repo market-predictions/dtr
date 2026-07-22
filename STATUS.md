@@ -2,13 +2,13 @@
 
 ## Current stacked work package
 
-`DTR-NQ-WP-20260722-11 — E6 mechanism, path and reward-space execution`
+`DTR-NQ-WP-20260722-12 — E6 portfolio sequencing`
 
 Status: **research complete; independent review passed; publication branch active**
 
-Decision state: `RETAIN_E6_NO_NEW_FILTER_ADVANCE_TO_SEQUENCING`
+Decision state: `RETAIN_S0_GLOBAL_SEQUENCING`
 
-Base dependency: `DTR-NQ-WP-20260722-10 — E6 advanced test framework` remains a stacked draft on PR #10.
+Base dependency: `DTR-NQ-WP-20260722-11 — E6 mechanism, path and reward-space execution` remains a stacked draft on PR #11.
 
 ## Baseline hierarchy
 
@@ -45,52 +45,43 @@ E6 is a research baseline only. It does not replace the control and is not deplo
 
 ## Completed E6 Blocks 0–3
 
-### Mechanism audit
+E6's prior-day-extreme exclusion mechanism is `SUPPORTED`. The rejected near-extreme cohort had materially lower expectancy, more stop-first outcomes and fewer target hits. P1–P3, R1–R2 and I1 did not improve the full E6 portfolio; no new filter advanced.
 
-Decision: `SUPPORTED`.
+Decision: `RETAIN_E6_NO_NEW_FILTER_ADVANCE_TO_SEQUENCING`.
 
-Compared with the 182 signals rejected near the prior-day directional extreme, the 296 E6-kept signals with available context had:
+## Completed Block 4 — Portfolio sequencing
 
-- +0.224414R higher expectancy;
-- 7.1 percentage points fewer stop-first outcomes;
-- higher MFE;
-- higher TP1 and TP2 hit rates;
-- higher expectancy in all three tested years and all three sessions.
+| Arm | Trades | Risk-normalized net R | Expectancy | Max DD | Return/DD | Decision |
+|---|---:|---:|---:|---:|---:|---|
+| S0 current global | 304 | 48.94R | 0.161R | 8.63R | 5.67 | Retain |
+| S1 first per ETH date | 259 | 41.73R | 0.161R | 8.76R | 4.77 | Reject |
+| S2 60-minute cooldown | 300 | 47.73R | 0.159R | 8.63R | 5.53 | Reject |
+| S3 one-third-risk session sleeves | 310 | 15.58R | 0.151R raw | 3.19R | 4.89 | Reject |
 
-The mechanism is consistent with increased continuation or failed-reversal risk near the prior-day directional extreme. The 0.25 ATR threshold remains frozen.
+Findings:
 
-### Candidate result
+- first-trade-only removed 45 trades that earned 7.20R;
+- the cooldown removed four trades that earned 1.20R and did not reduce drawdown;
+- session sleeves enabled only six extra trades, which lost 2.19R;
+- cross-session overlap was rare: 12 trades participated and maximum concurrency was two;
+- permanently dividing risk into thirds underused capital and reduced risk-normalized return;
+- all three alternatives had negative observed incremental net R versus S0;
+- independent reconstruction and deterministic repeat passed.
 
-- P1 path ≤12 bars: 93 trades; `REJECT`.
-- P2 BOS quality 2/3: 225 trades; `SHADOW_ONLY`.
-- P3 entry extension ≤0.35R: 208 trades; `SHADOW_ONLY`.
-- R1 clear to TP1: 99 trades; `REJECT`.
-- R2 clear to runner: 46 trades; predeclared `SHADOW_ONLY` diagnostic.
-- I1 P2 + R1: 76 trades; predeclared `SHADOW_ONLY` interaction.
-
-Every candidate produced less total return than E6 after complete portfolio resequencing. All paired confidence intervals crossed zero and all selectable familywise incremental p-values were 1.0. No candidate qualified as `FRESH_OOS_CHALLENGER`.
-
-### Verification
-
-- archive checksum matched;
-- 477-trade control and 304-trade E6 regressions exact;
-- all metrics, costs, masks and changed trades independently reconstructed;
-- D1 and weekly context timestamps causal;
-- sweep ≤ reclaim ≤ BOS ≤ entry ordering verified;
-- no overlapping positions;
-- independent bootstrap agreed;
-- 17 runner artifacts identical across two complete executions.
+Decision: retain one global open position at a time. Do not search alternate cooldowns, daily trade limits, sleeve weights or dynamic reallocation on the current sample.
 
 ## Next authorized work
 
-Block 4 portfolio sequencing:
+Block 5 diagnostic attribution:
 
-- S0: current global one-position sequencing;
-- S1: first eligible E6 trade per ETH market date;
-- S2: 60-minute cooldown after exit;
-- S3: independent Asia, London and New York sleeves with one-third risk per sleeve.
+- official FOMC announcement dates;
+- CPI release dates;
+- Employment Situation/NFP dates;
+- quarterly equity-index futures expiration and the preceding five business days;
+- early-close and shortened-session dates;
+- detected contract-roll discontinuity windows.
 
-Blocks 0–3 may not be retuned or combined further on the 2023–2025 sample.
+This block is attribution-only and cannot create a historical exclusion filter.
 
 ## Existing unresolved gates
 
@@ -102,4 +93,4 @@ Blocks 0–3 may not be retuned or combined further on the 2023–2025 sample.
 
 ## Scope restrictions
 
-No E6 threshold change, neighboring-threshold search, weekday/session search, additional interaction, Pine port, sizing recommendation, leverage increase or deployment is authorized.
+No E6 threshold change, neighboring-threshold search, weekday/session search, sequencing retune, additional interaction, Pine port, sizing recommendation, leverage increase or deployment is authorized.

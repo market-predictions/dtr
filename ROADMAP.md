@@ -32,7 +32,7 @@ Decision: `CONTINUE_RESEARCH_DO_NOT_DEPLOY`.
 
 ## Phase 2 — Independent modules and context
 
-Status: **E6 mechanism/path/reward-space research complete; sequencing next**
+Status: **E6 mechanism, filters and sequencing complete; event attribution next**
 
 - [x] Continuation: `HOLD_FOR_FRESH_DATA`.
 - [x] IFVG: `REJECT_NO_INCREMENTAL_VALUE`.
@@ -48,10 +48,11 @@ Status: **E6 mechanism/path/reward-space research complete; sequencing next**
 - [x] Execute frozen path-quality family P1–P3.
 - [x] Execute frozen reward-space family R1–R2 and shadow interaction I1.
 - [x] Complete independent reconstruction and deterministic-repeat checkpoint.
-- [x] Record no new `FRESH_OOS_CHALLENGER`; retain E6 unchanged.
-- [ ] Execute frozen sequencing family S1–S3.
+- [x] Record no new filter `FRESH_OOS_CHALLENGER`; retain E6 unchanged.
+- [x] Execute frozen sequencing family S1–S3.
+- [x] Retain S0 global sequencing; reject first-trade-only, cooldown and one-third-risk session sleeves.
 - [ ] Complete official-event, holiday and rollover attribution.
-- [ ] Complete fixed-fraction equity and cost stress for E6 and surviving sequencing challengers.
+- [ ] Complete fixed-fraction equity and cost stress for E6.
 - [ ] Footprint only with suitable historical order-flow data.
 
 Historical work may nominate fresh-OOS challengers only. It cannot replace E6 or authorize Pine.
@@ -81,7 +82,7 @@ Status: **original reconstruction blocked; explicit current-code primitives impl
 - [x] Classify original staged 904 reconstruction as blocked by missing leaderboards and stage bases.
 - [x] Implement aligned session/date return matrices, stream hashes, duplicate detection, max-t, best-mean and reselection primitives.
 - [x] Apply joint market-date max-t inference to E6 path and reward-space families.
-- [ ] Apply the same frozen inference to sequencing S1–S3.
+- [x] Apply the same frozen inference to sequencing S1–S3.
 - [ ] Complete the separately labelled current-code causal universe only after timestamp alignment is finalized.
 - [ ] Run nested walk-forward only under a preregistered candidate set.
 

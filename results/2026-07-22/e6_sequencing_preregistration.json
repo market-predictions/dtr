@@ -1,0 +1,69 @@
+{
+  "work_package": "DTR-NQ-WP-20260722-12",
+  "title": "E6 portfolio sequencing study",
+  "decision_state": "PREREGISTERED_EXECUTION_NOT_STARTED",
+  "frozen_before_results": true,
+  "base_commit": "f2b60958ff9b15459a469da4b1474ac08039cc85",
+  "dataset_sha256": "8d3f157a422636e5b8dda51cc3a3d9209c50cb53f9b279d3e14b627ce59370dc",
+  "baseline": {
+    "name": "E6_EXCLUDE_NEAR_PRIOR_DAY_DIRECTIONAL_EXTREME",
+    "expected_trades": 304,
+    "expected_net_r": 48.937550,
+    "expected_expectancy_r": 0.160979,
+    "expected_max_drawdown_r": 8.632571,
+    "calendar": "Tuesday-Friday",
+    "sessions": ["ASIA_7PM", "LONDON_2AM", "NEW_YORK_9AM"],
+    "costs": {"slippage_ticks_each_side": 1, "commission_per_side_usd": 2.25}
+  },
+  "eth_market_date": "entry before 18:00 ET maps to the same calendar date; entry at or after 18:00 ET maps to the next calendar date",
+  "arms": {
+    "S0_GLOBAL": "Current global one-open-position sequencing",
+    "S1_FIRST_PER_ETH_DATE": "Chronological processing; execute the first E6 signal that is executable while flat for each ETH market date, then reject all later signals assigned to that ETH date",
+    "S2_COOLDOWN_60": "Current global sequencing plus a fixed 60-minute cooldown after every exit",
+    "S3_SESSION_SLEEVES": "Independent one-open-position state for Asia, London and New York; each executed trade contributes one-third of normal portfolio risk"
+  },
+  "s3_comparison_contract": {
+    "raw_metrics": "Report unscaled trade count, expectancy, win rate and profit factor",
+    "portfolio_metrics": "Compare net return, drawdown, return/DD, yearly returns and paired ETH-date returns after multiplying every trade R by one-third",
+    "maximum_planned_risk": "At most one-third risk in each of three sleeves, for one full risk unit when all sleeves overlap"
+  },
+  "cost_stress_ticks_each_side": [1, 2, 4],
+  "inference": {
+    "unit": "ETH market date",
+    "bootstrap_iterations": 20000,
+    "primary_seed": 20260722,
+    "independent_seed": 20260723,
+    "familywise_method": "joint date-block max-t across S1-S3",
+    "paired_against": "S0_GLOBAL"
+  },
+  "required_outputs": [
+    "trades and sequencing rejections by arm",
+    "raw and risk-normalized metrics",
+    "normal and stressed cost expectancy",
+    "year, half-year, session and direction attribution",
+    "paired ETH-date confidence intervals",
+    "familywise adjusted inference",
+    "overlap and concurrent-risk audit",
+    "changed-trade attribution",
+    "independent reconstruction",
+    "deterministic repeat hashes"
+  ],
+  "classification": {
+    "fresh_oos_challenger": "At least 250 executed trades; material portfolio improvement; return/DD at least 1.15x S0; positive two-tick-each-side expectancy; acceptable yearly stability and concentration; familywise adjusted p <= 0.05; no unresolved implementation discrepancy",
+    "shadow_only": "Coherent but incomplete or underpowered effect",
+    "reject": "No meaningful portfolio benefit, materially worse efficiency, weak cost robustness, excessive concentration or implementation artifact",
+    "diagnostic_only": "Non-selectable descriptive evidence"
+  },
+  "tie_breaker": [
+    "higher familywise-adjusted paired net improvement",
+    "higher risk-normalized return/DD",
+    "lower risk-normalized maximum drawdown",
+    "simpler operational rule"
+  ],
+  "restrictions": [
+    "No signal, E6 threshold, weekday, session, entry, stop, target or exit change",
+    "No alternative cooldown, daily trade count, sleeve weight or dynamic risk reallocation",
+    "No combination with P1-P3, R1-R2 or I1",
+    "No Pine, sizing or deployment promotion from historical evidence"
+  ]
+}
