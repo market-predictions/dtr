@@ -4,7 +4,7 @@
 
 `DTR-NQ-WP-20260722-08 — Advanced Context Robustness`
 
-Status: **research complete; deterministic evidence and independent review ready for stacked publication**
+Status: **research complete; stacked draft PR #8 published; final CI verification pending**
 
 Decision state: `NO_HISTORICAL_PROMOTION_CONTINUE_FRESH_OOS_RESEARCH`
 
