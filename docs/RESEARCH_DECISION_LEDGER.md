@@ -65,22 +65,14 @@ Authoritative files:
 - `reviews/DTR-NQ-WP-20260722-09-independent-review.md`
 - `handovers/DTR-NQ-WP-20260722-09.md`
 
-Frozen four-arm design:
-
-- A0: Tuesday–Friday; Asia, London and New York.
-- A1: Monday–Friday; Asia, London and New York.
-- A2: Tuesday–Friday; London and New York.
-- A3: Monday–Friday; London and New York.
-
 Reusable conclusion:
 
 - Adding Monday is not a stable broad improvement.
 - Removing Asia reduces net performance under the unfiltered, E5 and E6 layers.
 - The positive E6 Monday extension is dominated by Monday Asia and does not support replacing Asia.
 - The combined Monday/no-Asia arm is rejected.
-- No Pine, sizing, execution or primary OOS-arm change follows from this study.
 
-Do not rerun this factorial merely to reconsider the same hypothesis. Reopen only with new data, corrected execution semantics, or a separately preregistered cross-market/long-history replication. Do not change thresholds after seeing the existing result.
+Do not rerun this factorial merely to reconsider the same hypothesis. Reopen only with new data, corrected execution semantics, or a separately preregistered cross-market/long-history replication.
 
 ## DTR-NQ-WP-20260722-10 — E6 advanced test framework
 
@@ -97,12 +89,7 @@ Reusable framework decision:
 
 - E6 is the working baseline for the bounded historical research programme.
 - The 477-trade unfiltered timing-corrected comparator remains a mandatory non-selectable control.
-- Authorized selectable families are P1–P3 path quality, R1–R2 reward space and S1–S3 sequencing.
-- The only authorized interaction is P2 + R1 and it is shadow-only.
-- Mechanism, event/roll and fixed-fraction risk blocks are diagnostic and cannot create filters from descriptive buckets.
 - Historical evidence can nominate a fresh-OOS challenger but cannot replace E6 or authorize Pine.
-
-Do not alter E6's 0.25 D1-ATR threshold, search neighboring thresholds, reopen weekday/session selection or add interactions after results. Any extension requires a new preregistration and a separate work package.
 
 ## DTR-NQ-WP-20260722-11 — E6 mechanism, path and reward-space execution
 
@@ -112,13 +99,8 @@ Authoritative files:
 
 - `results/2026-07-22/e6_blocks_0_3_execution_preregistration.json`
 - `docs/E6_ADVANCED_BLOCKS_0_3_RESEARCH_2026-07-22.md`
-- `results/2026-07-22/e6_blocks_0_3_mechanism_decision.json`
-- `results/2026-07-22/e6_blocks_0_3_mechanism_summary.csv`
-- `results/2026-07-22/e6_blocks_0_3_mechanism_strata.csv`
 - `results/2026-07-22/e6_blocks_0_3_candidate_results.csv`
 - `results/2026-07-22/e6_blocks_0_3_candidate_inference.csv`
-- `results/2026-07-22/e6_blocks_0_3_changed_trade_attribution.csv`
-- `results/2026-07-22/e6_blocks_0_3_independent_bootstrap.csv`
 - `results/2026-07-22/e6_blocks_0_3_independent_review.json`
 - `results/2026-07-22/e6_blocks_0_3_deterministic_repeat.json`
 - `reviews/DTR-NQ-WP-20260722-11-independent-review.md`
@@ -126,15 +108,40 @@ Authoritative files:
 
 Reusable conclusion:
 
-- E6's mechanism is `SUPPORTED`: near-prior-day-extreme setups had 0.224414R lower expectancy, a 7.1-point higher stop-first rate, lower MFE and lower TP1/TP2 hit rates.
-- The kept cohort had higher expectancy in all three tested years and all three sessions.
+- E6's mechanism is `SUPPORTED`: near-prior-day-extreme setups had materially worse expectancy and path outcomes.
 - P1 and R1 are rejected.
 - P2 and P3 remain shadow-only; P3 is the only secondary long-history/cross-market replication hypothesis.
 - R2 and I1 remain predeclared low-sample shadow diagnostics only.
-- Every candidate produced less total return than E6 after portfolio resequencing; all paired intervals crossed zero and no rule qualified as `FRESH_OOS_CHALLENGER`.
-- Blocks 0–3 reproduced deterministically and passed independent review.
+- No rule qualified as `FRESH_OOS_CHALLENGER`.
 
-Do not rerun or retune P1–P3, R1–R2 or I1 on the 2023–2025 NQ sample. Reopen P3 only with new, materially longer or cross-market data using the frozen 0.35R rule.
+Do not rerun or retune P1–P3, R1–R2 or I1 on the 2023–2025 NQ sample.
+
+## DTR-NQ-WP-20260722-12 — E6 portfolio sequencing
+
+Decision: `RETAIN_S0_GLOBAL_SEQUENCING`.
+
+Authoritative files:
+
+- `docs/E6_SEQUENCING_RESEARCH_2026-07-22.md`
+- `results/2026-07-22/e6_sequencing_preregistration.json`
+- `results/2026-07-22/e6_sequencing_results.csv`
+- `results/2026-07-22/e6_sequencing_inference.csv`
+- `results/2026-07-22/e6_sequencing_changed_trades.csv`
+- `results/2026-07-22/e6_sequencing_concurrency.json`
+- `results/2026-07-22/e6_sequencing_independent_review.json`
+- `results/2026-07-22/e6_sequencing_deterministic_repeat.json`
+- `reviews/DTR-NQ-WP-20260722-12-independent-review.md`
+- `handovers/DTR-NQ-WP-20260722-12.md`
+
+Reusable conclusion:
+
+- S1 first-trade-per-ETH-date removed 45 trades that earned 7.20R and did not improve expectancy.
+- S2 60-minute cooldown removed four trades that earned 1.20R and did not reduce drawdown.
+- S3 session sleeves added only six trades, those trades lost 2.19R, and fixed one-third sizing materially underused risk because overlap was rare.
+- All alternatives had negative observed incremental risk-normalized net R versus S0.
+- Independent review and deterministic repeat passed.
+
+Do not search alternative cooldowns, daily trade limits, sleeve weights or dynamic reallocation on the 2023–2025 sample. Reopen sequencing only with new data or a separately preregistered portfolio architecture based on an external operational requirement.
 
 ## Current forward decision
 
@@ -145,11 +152,6 @@ The primary fresh-data evidence remains:
 - Arm B: E6 prior-day-extreme exclusion.
 - Arm C: E5+E6 shadow only.
 
-While fresh data is unavailable, the next authorized historical work is the separately frozen E6 sequencing family:
-
-- S0 current global sequencing;
-- S1 first trade per ETH market date;
-- S2 60-minute post-exit cooldown;
-- S3 risk-normalized Asia, London and New York session sleeves.
+While fresh data is unavailable, the next authorized historical work is diagnostic Block 5 event, holiday and rollover attribution. It may explain risk concentration but cannot create an exclusion rule from the current sample.
 
 The repository must retain the unfiltered comparator alongside E5 and E6 until fresh data establishes whether either challenger adds genuine incremental value.
