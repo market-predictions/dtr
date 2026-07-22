@@ -1,0 +1,21 @@
+{
+  "archive_sha256": "8d3f157a422636e5b8dda51cc3a3d9209c50cb53f9b279d3e14b627ce59370dc",
+  "candidate_reopen_gaps": 765,
+  "normal_prior_close_gaps": 735,
+  "modal_pair": "17:00→18:01",
+  "normal_modal_pair": "17:00→18:01",
+  "normal_17_00_to_18_01": 732,
+  "normal_16_59_to_18_00": 0,
+  "any_18_00_reopen": 0,
+  "pair_counts": {
+    "17:00→18:01": 732,
+    "13:00→18:01": 21,
+    "13:15→18:01": 7,
+    "09:15→18:01": 1,
+    "16:59→18:01": 1,
+    "17:00→18:04": 1,
+    "09:30→18:01": 1,
+    "17:00→18:03": 1
+  },
+  "decision": "SUPPORT_BAR_CLOSE_RETAIN_SHIFT_MINUS_ONE"
+}
