@@ -2,13 +2,13 @@
 
 ## Current stacked work package
 
-`DTR-NQ-WP-20260722-10 — E6 advanced test framework and preregistration`
+`DTR-NQ-WP-20260722-11 — E6 mechanism, path and reward-space execution`
 
-Status: **framework frozen; execution not started**
+Status: **research complete; independent review passed; publication branch active**
 
-Decision state: `FRAMEWORK_FROZEN_EXECUTION_NOT_STARTED`
+Decision state: `RETAIN_E6_NO_NEW_FILTER_ADVANCE_TO_SEQUENCING`
 
-Base dependency: `DTR-NQ-WP-20260722-09 — Monday inclusion × Asia exclusion` remains a stacked draft on PR #9.
+Base dependency: `DTR-NQ-WP-20260722-10 — E6 advanced test framework` remains a stacked draft on PR #10.
 
 ## Baseline hierarchy
 
@@ -31,8 +31,6 @@ Purpose: detect unintended engine changes.
 - 0.089261R expectancy;
 - 16.426493R maximum drawdown.
 
-Purpose: remain visible beside every E6-derived result.
-
 ### Working advanced-test baseline
 
 `E6_EXCLUDE_NEAR_PRIOR_DAY_DIRECTIONAL_EXTREME`
@@ -45,54 +43,54 @@ Purpose: remain visible beside every E6-derived result.
 
 E6 is a research baseline only. It does not replace the control and is not deployable.
 
-## Frozen advanced-test programme
+## Completed E6 Blocks 0–3
 
-### Block 1 — E6 mechanism
+### Mechanism audit
 
-Diagnostic comparison of E6-kept and E6-rejected trades, including MFE, MAE, target/stop path, latency, BOS quality, friction and reward-space geometry. This block cannot select a filter.
+Decision: `SUPPORTED`.
 
-### Blocks 2–3 — Selectable candidate families
+Compared with the 182 signals rejected near the prior-day directional extreme, the 296 E6-kept signals with available context had:
 
-Path quality:
+- +0.224414R higher expectancy;
+- 7.1 percentage points fewer stop-first outcomes;
+- higher MFE;
+- higher TP1 and TP2 hit rates;
+- higher expectancy in all three tested years and all three sessions.
 
-- P1: sweep-to-entry path no longer than 12 five-minute bars;
-- P2: BOS quality score at least two of three;
-- P3: entry extension no greater than 0.35R from pivot.
+The mechanism is consistent with increased continuation or failed-reversal risk near the prior-day directional extreme. The 0.25 ATR threshold remains frozen.
 
-Reward space:
+### Candidate result
 
-- R1: nearest known structural level is at least 1.25R ahead;
-- R2: nearest known structural level is at least 2.50R ahead; shadow unless at least 250 trades.
+- P1 path ≤12 bars: 93 trades; `REJECT`.
+- P2 BOS quality 2/3: 225 trades; `SHADOW_ONLY`.
+- P3 entry extension ≤0.35R: 208 trades; `SHADOW_ONLY`.
+- R1 clear to TP1: 99 trades; `REJECT`.
+- R2 clear to runner: 46 trades; predeclared `SHADOW_ONLY` diagnostic.
+- I1 P2 + R1: 76 trades; predeclared `SHADOW_ONLY` interaction.
 
-Only authorized interaction: P2 + R1, shadow-only.
+Every candidate produced less total return than E6 after complete portfolio resequencing. All paired confidence intervals crossed zero and all selectable familywise incremental p-values were 1.0. No candidate qualified as `FRESH_OOS_CHALLENGER`.
 
-### Block 4 — Portfolio sequencing
+### Verification
 
-- first trade per ETH date;
-- 60-minute post-exit cooldown;
-- independently risk-normalized session sleeves.
+- archive checksum matched;
+- 477-trade control and 304-trade E6 regressions exact;
+- all metrics, costs, masks and changed trades independently reconstructed;
+- D1 and weekly context timestamps causal;
+- sweep ≤ reclaim ≤ BOS ≤ entry ordering verified;
+- no overlapping positions;
+- independent bootstrap agreed;
+- 17 runner artifacts identical across two complete executions.
 
-### Blocks 5–6 — Diagnostics
+## Next authorized work
 
-- official FOMC, CPI, NFP, expiration, early-close and rollover attribution;
-- 0.50%, 1.00% and 1.50% fixed-fraction equity stress under one-, two- and four-tick-each-side assumptions.
+Block 4 portfolio sequencing:
 
-## Historical decision boundary
+- S0: current global one-position sequencing;
+- S1: first eligible E6 trade per ETH market date;
+- S2: 60-minute cooldown after exit;
+- S3: independent Asia, London and New York sleeves with one-third risk per sleeve.
 
-No historical result can replace E6 or authorize Pine. A rule may only be classified as:
-
-- `FRESH_OOS_CHALLENGER`;
-- `SHADOW_ONLY`;
-- `REJECT`;
-- `DIAGNOSTIC_ONLY`.
-
-At least 250 trades, material effect, return/DD improvement, cost robustness, temporal stability, concentration control and familywise incremental significance are required for fresh-OOS challenger status.
-
-## Previous Monday × Asia decision
-
-Decision: `RETAIN_TUE_FRI_AND_ASIA`.
-
-The advanced-test framework retains Tuesday–Friday and Asia, London and New York. It does not reopen weekday or session selection.
+Blocks 0–3 may not be retuned or combined further on the 2023–2025 sample.
 
 ## Existing unresolved gates
 
