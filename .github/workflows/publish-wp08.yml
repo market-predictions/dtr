@@ -25,8 +25,8 @@ jobs:
         run: |
           set -euo pipefail
           cat .github/wp08-payload/chunk-* > /tmp/wp08-payload.b64
-          test "$(wc -c < /tmp/wp08-payload.b64)" -eq 73913
-          echo 'c43ad84fb9ff6d1a941dcddf405e604c04f5cabc924d056d0dde4c398e5bfa50  /tmp/wp08-payload.b64' | sha256sum --check -
+          test "$(wc -c < /tmp/wp08-payload.b64)" -eq 73904
+          echo '98f3ba86affe92ad5b34d6a2936adbc3c0979e9e337a3e3a896a307c0ff443b5  /tmp/wp08-payload.b64' | sha256sum --check -
       - name: Decode payload
         run: |
           set -euo pipefail
