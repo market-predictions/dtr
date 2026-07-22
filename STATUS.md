@@ -2,13 +2,13 @@
 
 ## Current stacked work package
 
-`DTR-NQ-WP-20260722-15 — Promote E6 no-FOMC working baseline`
+`DTR-NQ-WP-20260722-16 — E6 no-FOMC risk recalibration`
 
-Status: **completed and documented**
+Status: **complete; independent review and deterministic repeat passed**
 
-Decision state: `PROMOTE_E6_NO_FOMC_DAY_AS_WORKING_BASELINE`
+Decision state: `NO_FOMC_RISK_RECALIBRATION_COMPLETE_NO_SIZING_AUTHORIZATION`
 
-Base dependency: `DTR-NQ-WP-20260722-14 — E6 fixed-fraction equity and execution-cost stress` remains a stacked draft on PR #14.
+Base dependency: `DTR-NQ-WP-20260722-15 — Promote E6 no-FOMC working baseline` remains a stacked draft on PR #15.
 
 ## Baseline hierarchy
 
@@ -36,14 +36,11 @@ Base dependency: `DTR-NQ-WP-20260722-14 — E6 fixed-fraction equity and executi
 - 304 trades;
 - 48.937550R net;
 - 0.160979R expectancy;
-- 8.632571R maximum drawdown;
-- 5.668942 return/DD.
+- 8.632571R maximum drawdown.
 
 ### Current working research baseline
 
 `E6_NO_FOMC_DAY`
-
-Rule: reject entries whose Eastern Time calendar date equals an official FOMC statement date, then rerun the one-global-position sequencing.
 
 - 291 trades;
 - 53.483342R net;
@@ -51,34 +48,43 @@ Rule: reject entries whose Eastern Time calendar date equals an official FOMC st
 - 9.151061R maximum drawdown;
 - 5.844496 return/DD.
 
-At 1% current-equity risk, the historical account path grew $100,000 to approximately $166,725 with an 8.87% maximum drawdown.
+## No-FOMC risk recalibration
 
-This is a user-mandated risk-policy baseline change. Original E6 remains the frozen comparator because the FOMC sample is limited and the rule was not statistically promoted.
+Observed $100,000 account under normal costs:
 
-## Completed E6 advanced programme
+- 0.50% risk: $129,885 final equity; 4.51% maximum drawdown.
+- 1.00% risk: $166,725 final equity; 8.87% maximum drawdown.
+- 1.50% risk: $211,540 final equity; 13.09% maximum drawdown.
 
-- Blocks 0–3: mechanism supported; no additional path or reward-space filter advanced.
-- Block 4: retain current one-open-position global sequencing.
-- Block 5: FOMC risk identified; CPI/NFP did not justify exclusions; expiration/roll weakness came from one shared cohort.
-- Block 6: fixed-fraction equity and cost stress complete.
-- Baseline policy override: no entries on official FOMC statement dates.
+Observed account under severe four-tick-per-side costs:
+
+- 0.50% risk: $120,388 final equity; 5.10% maximum drawdown.
+- 1.00% risk: $143,251 final equity; 10.01% maximum drawdown.
+- 1.50% risk: $168,498 final equity; 14.73% maximum drawdown.
+
+Resampled conclusion:
+
+- 0.50% remains the most resilient tested envelope.
+- 1.00% remains the middle paper-research envelope; under severe costs, 20% drawdown probability is approximately 7.1–10.1%.
+- 1.50% remains aggressive; under severe costs, 20% drawdown probability is approximately 36.6–42.9% and 30% drawdown probability is approximately 5.6–8.2%.
+
+No live sizing recommendation follows.
 
 ## Next evidence gate
 
-Use `E6_NO_FOMC_DAY` as the working baseline for subsequent research, while retaining original E6 as a control. Highest-value next evidence:
-
-- qualified fresh post-2025 NQ data;
-- materially longer contract-audited NQ history; or
-- unchanged ES replication.
+- qualify Dukascopy `USA500.IDX/USD` as an S&P 500 CFD proxy, not ES futures;
+- audit historical depth, sessions, timestamps, missing bars, spreads, and discontinuities before performance inspection;
+- then run unchanged original E6 and E6 no-FOMC replication side by side;
+- retain qualified fresh NQ and longer contract-audited NQ as parallel priorities.
 
 ## Existing unresolved gates
 
-- authoritative timestamp metadata or qualified replacement dataset: `UNRESOLVED`;
+- authoritative NQ timestamp metadata: `UNRESOLVED`;
 - continuous-contract methodology: `UNRESOLVED`;
-- original 904-search familywise adjustment: `UNRESOLVED_EXACT_RECONSTRUCTION_BLOCKED`;
-- qualified fresh OOS comparison of original E6 versus E6 no-FOMC: `NOT_RUN`;
+- qualified fresh OOS comparison: `NOT_RUN`;
+- Dukascopy USA500 proxy qualification: `NOT_RUN`;
 - Python/Pine parity: `NOT_RUN`.
 
 ## Scope restrictions
 
-No additional FOMC buffer search, alternate event-day definition, E6 threshold change, weekday/session search, sequencing retune, risk-fraction optimization, dynamic sizing, Pine port, live sizing recommendation, leverage increase or deployment is authorized.
+No additional FOMC buffer search, risk-fraction optimization, dynamic sizing, ES-proxy parameter adaptation, Pine port, live sizing recommendation, leverage increase, or deployment is authorized.
