@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   acquire:
-    name: Throttled USATECH M1 BID 2022-2026
+    name: Patched throttled USATECH M1 BID 2022-2026
     runs-on: ubuntu-latest
     timeout-minutes: 300
     steps:
@@ -25,6 +25,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Install and patch temporary downloader
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm init -y >/dev/null 2>&1
+          npm install --no-audit --no-fund dukascopy-node@1.49.0
+          MATCHES="$(grep -RIl 'pauseBetweenRetriesMs = pauseBetweenRetriesMs' node_modules/dukascopy-node || true)"
+          test -n "$MATCHES"
+          while IFS= read -r FILE; do
+            sed -i 's/pauseBetweenRetriesMs = pauseBetweenRetriesMs/this.pauseBetweenRetriesMs = pauseBetweenRetriesMs/g' "$FILE"
+          done <<< "$MATCHES"
+          grep -R 'this.pauseBetweenRetriesMs = pauseBetweenRetriesMs' node_modules/dukascopy-node | head
       - name: Cool down provider rate limit
         run: sleep 600
       - name: Download yearly bid candles sequentially
@@ -36,17 +48,17 @@ jobs:
           download_year() {
             LABEL="$1"; FROM="$2"; TO="$3"
             OUT="temporary-data/usatechidxusd_m1_bid_${LABEL}"
-            for ATTEMPT in 1 2 3 4 5 6; do
-              echo "[$LABEL] attempt $ATTEMPT"
+            for ATTEMPT in 1 2 3 4; do
+              echo "[$LABEL] whole-command attempt $ATTEMPT"
               set +e
-              npx --yes dukascopy-node@1.49.0 \
+              ./node_modules/.bin/dukascopy-node \
                 -i usatechidxusd \
                 -from "$FROM" \
                 -to "$TO" \
                 -t m1 -p bid -v -vu units -fl -f csv \
                 -dir temporary-data \
                 -fn "usatechidxusd_m1_bid_${LABEL}" \
-                -bs 20 -bp 1200 -r 10 -rp 5000 \
+                -bs 1 -bp 1500 -r 12 -rp 5000 \
                 > "logs/${LABEL}_attempt_${ATTEMPT}.log" 2>&1
               STATUS=$?
               set -e
@@ -56,20 +68,20 @@ jobs:
               fi
               cat "logs/${LABEL}_attempt_${ATTEMPT}.log"
               rm -f "${OUT}.csv"
-              sleep $((ATTEMPT * 180))
+              sleep $((ATTEMPT * 300))
             done
             echo "[$LABEL] exhausted retries" >&2
             return 1
           }
 
           download_year 2022 2022-01-01 2023-01-01
-          sleep 120
+          sleep 180
           download_year 2023 2023-01-01 2024-01-01
-          sleep 120
+          sleep 180
           download_year 2024 2024-01-01 2025-01-01
-          sleep 120
+          sleep 180
           download_year 2025 2025-01-01 2026-01-01
-          sleep 120
+          sleep 180
           download_year 2026_YTD 2026-01-01 2026-07-23
 
       - name: Audit and compress yearly files
