@@ -80,13 +80,37 @@ Reusable conclusion:
 
 Do not rerun this factorial merely to reconsider the same hypothesis. Reopen only with new data, corrected execution semantics, or a separately preregistered cross-market/long-history replication. Do not change thresholds after seeing the existing result.
 
+## DTR-NQ-WP-20260722-10 — E6 advanced test framework
+
+Decision: `FRAMEWORK_FROZEN_EXECUTION_NOT_STARTED`.
+
+Authoritative files:
+
+- `docs/E6_ADVANCED_TEST_FRAMEWORK_2026-07-22.md`
+- `results/2026-07-22/e6_advanced_test_framework_preregistration.json`
+- `workpackages/DTR-NQ-WP-20260722-10.md`
+- `handovers/DTR-NQ-WP-20260722-10.md`
+
+Reusable framework decision:
+
+- E6 is the working baseline for the next bounded historical research programme.
+- The 477-trade unfiltered timing-corrected comparator remains a mandatory non-selectable control.
+- Authorized selectable families are P1–P3 path quality, R1–R2 reward space and S1–S3 sequencing.
+- The only authorized interaction is P2 + R1 and it is shadow-only.
+- Mechanism, event/roll and fixed-fraction risk blocks are diagnostic and cannot create filters from descriptive buckets.
+- Historical evidence can nominate a fresh-OOS challenger but cannot replace E6 or authorize Pine.
+
+Do not alter E6's 0.25 D1-ATR threshold, search neighboring thresholds, reopen weekday/session selection or add interactions after results. Any extension requires a new preregistration and a separate work package.
+
 ## Current forward decision
 
-The primary next evidence is unchanged fresh out-of-sample comparison:
+The primary fresh-data evidence remains:
 
 - Arm 0: unfiltered timing-corrected comparator.
 - Arm A: E5 compressed-range exclusion.
 - Arm B: E6 prior-day-extreme exclusion.
 - Arm C: E5+E6 shadow only.
+
+While fresh data is unavailable, the next authorized historical work is the frozen E6 advanced programme beginning with exact regression and the non-selectable E6 mechanism audit.
 
 The repository must retain the unfiltered comparator alongside E5 and E6 until fresh data establishes whether either challenger adds genuine incremental value.
