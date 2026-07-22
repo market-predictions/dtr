@@ -6,6 +6,7 @@ on:
       - agent/roadmap-correction-six-step
     paths:
       - .github/workflows/temporary_format_six_step.yml
+      - scripts/run_nq_usatech_proxy_validation.py
 
 permissions:
   contents: write
