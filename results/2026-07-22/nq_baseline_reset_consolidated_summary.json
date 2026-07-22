@@ -1,0 +1,100 @@
+{
+  "corrected_baseline": {
+    "avg_hold_min": 208.989898989899,
+    "expectancy_r": 0.17374699261769797,
+    "mae_r": 0.7366467155159919,
+    "max_drawdown_r": 14.10785751380752,
+    "median_r": 0.17774647887323944,
+    "mfe_r": 1.493334414523369,
+    "net_r": 86.00476134576057,
+    "profit_factor": 1.3663829114407133,
+    "return_dd": 6.096231214526141,
+    "trades": 495,
+    "win_rate": 0.509090909090909
+  },
+  "decision": "CONTINUE_RESEARCH_DO_NOT_DEPLOY",
+  "determinism": {
+    "baseline_validity": "15/15",
+    "cisd": "52/52",
+    "continuation_late60": "30/30",
+    "continuation_structural": "30/30",
+    "entry_routing": "33/33",
+    "ifvg": "52/52"
+  },
+  "evidence_hierarchy": {
+    "corrected_causal": {
+      "avg_hold_min": 208.989898989899,
+      "expectancy_r": 0.17374699261769797,
+      "mae_r": 0.7366467155159919,
+      "max_drawdown_r": 14.10785751380752,
+      "median_r": 0.17774647887323944,
+      "mfe_r": 1.493334414523369,
+      "net_r": 86.00476134576057,
+      "profit_factor": 1.3663829114407133,
+      "return_dd": 6.096231214526141,
+      "trades": 495,
+      "win_rate": 0.509090909090909
+    },
+    "historical_observe": {
+      "avg_hold_min": 209.79761904761904,
+      "expectancy_r": 0.1669927760762483,
+      "mae_r": 0.7422590951384301,
+      "max_drawdown_r": 14.107857513807524,
+      "median_r": 0.09101268827348145,
+      "mfe_r": 1.4861476834620715,
+      "net_r": 84.16435914242919,
+      "profit_factor": 1.3510592124242256,
+      "return_dd": 5.965778932772503,
+      "trades": 504,
+      "win_rate": 0.5059523809523809
+    },
+    "historical_walk_forward": {
+      "folds": 4,
+      "selected_config_count": 4,
+      "status": "HISTORICAL_PROCEDURE_EVIDENCE_NOT_PRISTINE_HOLDOUT",
+      "test_expectancy_r": 0.15121661892967514,
+      "test_net_r": 43.70160287067611,
+      "test_trades": 289,
+      "weak_fold_count_below_0_06R": 2
+    },
+    "suspended_retrospective_reject": {
+      "avg_hold_min": 209.9450101832994,
+      "expectancy_r": 0.180235811449135,
+      "mae_r": 0.7385582542543464,
+      "max_drawdown_r": 14.107857513807524,
+      "median_r": 0.2051912568306011,
+      "mfe_r": 1.500891476648658,
+      "net_r": 88.49578342152539,
+      "profit_factor": 1.3819983049452256,
+      "return_dd": 6.272801049692594,
+      "trades": 491,
+      "win_rate": 0.5112016293279023
+    }
+  },
+  "module_decisions": {
+    "cisd": "REJECT_NO_INCREMENTAL_VALUE",
+    "continuation": "HOLD_FOR_FRESH_DATA",
+    "entry_routing": "REJECT_NO_INCREMENTAL_VALUE_PENDING_PR5_REBASE",
+    "ifvg": "REJECT_NO_INCREMENTAL_VALUE"
+  },
+  "restrictions": [
+    "no deployment",
+    "no Pine strategy port",
+    "no fresh-data inspection before preregistration",
+    "no module retuning on current sample"
+  ],
+  "schema_version": 1,
+  "validity_gates": {
+    "fresh_oos": "NOT_RUN_PREREGISTRATION_REQUIRED",
+    "multiple_testing": "UNRESOLVED_NO_ALIGNED_904_CANDIDATE_RETURN_MATRIX",
+    "pine_parity": "NOT_RUN",
+    "rollover": "SENSITIVITY_ONLY_CONTRACT_METADATA_UNRESOLVED",
+    "timestamp": {
+      "best_price_basis": "hlc3",
+      "best_rmse": 2.8839140462578317e-06,
+      "decision": "UNRESOLVED",
+      "equivalent_best_hypotheses": 3,
+      "explanation": "Vendor ETH VWAP is reproduced by cumulative HLC3 times volume, but the absence of 18:00 observations makes bar-open and bar-close label hypotheses observationally equivalent under plausible reset alignment."
+    }
+  }
+}

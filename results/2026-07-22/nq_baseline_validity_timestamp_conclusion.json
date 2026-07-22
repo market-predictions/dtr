@@ -1,0 +1,7 @@
+{
+  "best_price_basis": "hlc3",
+  "best_rmse": 2.8839140462578317e-06,
+  "decision": "UNRESOLVED",
+  "equivalent_best_hypotheses": 3,
+  "explanation": "Vendor ETH VWAP is reproduced by cumulative HLC3 times volume, but the absence of 18:00 observations makes bar-open and bar-close label hypotheses observationally equivalent under plausible reset alignment."
+}

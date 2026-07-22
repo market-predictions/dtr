@@ -1,0 +1,122 @@
+[
+  {
+    "path": "results/2026-07-22/nq_baseline_reset_consolidated_summary.json",
+    "sha256": "369effac217e65970fff082a8963e0b2607664db3c1e8f1bb5d0de4bc5f5be6a"
+  },
+  {
+    "path": "results/2026-07-22/nq_baseline_validity_artifact_hashes.json",
+    "sha256": "4a2217dc46dbb964256762a6b36772da91ce4e1d1f1b3bbea449e8e615139cc6"
+  },
+  {
+    "path": "results/2026-07-22/nq_baseline_validity_gap_liquidations.csv",
+    "sha256": "05599072bbb81a7bb84cf743f376c7bc45d6a360f7636a7e23bc63404f53f409"
+  },
+  {
+    "path": "results/2026-07-22/nq_baseline_validity_leave_one_cell_out.csv",
+    "sha256": "8ff362d30a477969c5bad17185560f712da234e7d6d0f105d90fe3a5e6caccbe"
+  },
+  {
+    "path": "results/2026-07-22/nq_baseline_validity_leave_one_session_out.csv",
+    "sha256": "25b449066691b299584878f7084fea44a304c7a7ceb202fcfb94aee090b8e43f"
+  },
+  {
+    "path": "results/2026-07-22/nq_baseline_validity_leave_one_weekday_out.csv",
+    "sha256": "a8a8fd43e58672bae501ecdb0f4353134819e40a8a57234b461d29339f12b5e7"
+  },
+  {
+    "path": "results/2026-07-22/nq_baseline_validity_policy_comparison.csv",
+    "sha256": "c529d58ed377cff395a863300ab1fa826c278705ecc6f756f0bbcd83bf757ede"
+  },
+  {
+    "path": "results/2026-07-22/nq_baseline_validity_rollover_candidates.csv",
+    "sha256": "5bfcc2bff7bf8f1b07c3ca97f0040c3fb91c31014c8d5a6ba6b8d7e220dfb0d1"
+  },
+  {
+    "path": "results/2026-07-22/nq_baseline_validity_rollover_discontinuity.csv",
+    "sha256": "73a9846762f762797cfd1975a79d250c87bdad9df8db068fddc5d406e2bd34f2"
+  },
+  {
+    "path": "results/2026-07-22/nq_baseline_validity_rollover_stress.csv",
+    "sha256": "84706ac723fa8331ed98f7ba6f068a3f65bf0ba3547ae367426d4f4666af2399"
+  },
+  {
+    "path": "results/2026-07-22/nq_baseline_validity_rollover_trade_attribution.csv",
+    "sha256": "e24a34c928e3e8525ece2ab5810afbffc2f79c6a40dc77c74fbde96bd3170ca4"
+  },
+  {
+    "path": "results/2026-07-22/nq_baseline_validity_session_weekday.csv",
+    "sha256": "e8f7912d2ddaf9ebab0a547997b67e311164c1a61d0f8f7187a493dedb69a77a"
+  },
+  {
+    "path": "results/2026-07-22/nq_baseline_validity_summary.json",
+    "sha256": "26e70c2e03e1b4dadfb2dab732e56d0bc3ba359fb252446b8b659de61d48a6a8"
+  },
+  {
+    "path": "results/2026-07-22/nq_baseline_validity_timestamp_conclusion.json",
+    "sha256": "277532829431dc8089bc38ec625e1cbdce8b1d3e68ba363b54949a61f7571dd6"
+  },
+  {
+    "path": "results/2026-07-22/nq_baseline_validity_timestamp_vwap_hypotheses.csv",
+    "sha256": "96e25637e6130d07be5a7bd959ad2e8cbbac26d8df0f90d25fd57cdb289e67a3"
+  },
+  {
+    "path": "results/2026-07-22/nq_baseline_validity_trade_set_comparison.json",
+    "sha256": "f1087bd87124b98c67430134b1dcf4154f86a9e9b742c0fd2f5bffcaa80aca2d"
+  },
+  {
+    "path": "results/2026-07-22/nq_baseline_validity_uncertainty.json",
+    "sha256": "c730c2bd68ee7af4d01510f3a9e798f21e0de27872d566a5280f9adcfecd8818"
+  },
+  {
+    "path": "results/2026-07-22/nq_cisd_ablation_summary.json",
+    "sha256": "81d8fa7ee19982d51d29f91bc737524e1a4f6c80916499703b2bd7dbc1cb1482"
+  },
+  {
+    "path": "results/2026-07-22/nq_cisd_artifact_hashes.json",
+    "sha256": "31e2eae9b07cc2afaf49ab54817170284c655a9f1e79fd67527a3f5f7955137b"
+  },
+  {
+    "path": "results/2026-07-22/nq_cisd_bootstrap.csv",
+    "sha256": "6bf69b7f2ecbc18ee3b52abf7b9241fdfd9b9764e8d4fa44263c334b4110f3c1"
+  },
+  {
+    "path": "results/2026-07-22/nq_cisd_causal_rerun_summary.csv",
+    "sha256": "e33ad3be65973a56a125bf46973c03982b7ae620ce0142fcabe58c2c7dea468d"
+  },
+  {
+    "path": "results/2026-07-22/nq_cisd_changed_trade_summary.csv",
+    "sha256": "8075a22ab75b7365b7188180468c542fe7be5da8ae0d51b3917d6ad8d8f527b3"
+  },
+  {
+    "path": "results/2026-07-22/nq_cisd_cohort_summary.csv",
+    "sha256": "ced0c0cc6897c199871edad6c6e7a583515b61bfff66f7de0b360976f587bbd0"
+  },
+  {
+    "path": "results/2026-07-22/nq_cisd_cost_stress.csv",
+    "sha256": "1466daf68df4f6713449e1d7a3442d4f30e15b028994ccaebc8849b462bb2da4"
+  },
+  {
+    "path": "results/2026-07-22/nq_cisd_period_cohort.csv",
+    "sha256": "35be12b4ef4e63fb6b98268dba233628e8321e2c220f5cbc23d48b18213364ea"
+  },
+  {
+    "path": "results/2026-07-22/nq_cisd_portfolio_summary.csv",
+    "sha256": "201e5ddc664adb36da6efed4df4b288526aeacc2b2acdf0539b35f851395d904"
+  },
+  {
+    "path": "results/2026-07-22/nq_cisd_retest_timing_summary.csv",
+    "sha256": "b9c1b22beffac274188b1ab5b99b60c3294673b3ec11d66cdb444ae8ae3208ed"
+  },
+  {
+    "path": "results/2026-07-22/nq_continuation_causal_rerun_summary.csv",
+    "sha256": "6a59ce82b27a530e33f881c3144da6cf31c6dc7b392d3332f6db9517c50695bc"
+  },
+  {
+    "path": "results/2026-07-22/nq_entry_routing_causal_rerun_summary.csv",
+    "sha256": "e14849b699a87a836489f5895bc21ea51bd5a0cb55d3c1b665837958e521ed87"
+  },
+  {
+    "path": "results/2026-07-22/nq_ifvg_causal_rerun_summary.csv",
+    "sha256": "0ea45844ab5c85ae0ef07ddee7e85917da737418b6462df6d6030e167e595875"
+  }
+]
