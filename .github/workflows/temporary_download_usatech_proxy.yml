@@ -19,9 +19,10 @@ jobs:
   bid:
     name: USATECH M1 BID ${{ matrix.label }}
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 150
     strategy:
       fail-fast: false
+      max-parallel: 1
       matrix:
         include:
           - {label: 2022, from: 2022-01-01, to: 2023-01-01}
@@ -34,11 +35,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Download bid candles with auditable flat placeholders
+      - name: Download bid candles serially
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p temporary-data
+          sleep 20
           npx --yes dukascopy-node@1.49.0 \
             -i usatechidxusd \
             -from "${{ matrix.from }}" \
@@ -46,7 +48,7 @@ jobs:
             -t m1 -p bid -v -vu units -fl -f csv \
             -dir temporary-data \
             -fn "usatechidxusd_m1_bid_${{ matrix.label }}" \
-            -bs 20 -bp 300 -r 6 -rp 1500
+            -bs 5 -bp 1000 -r 10 -rp 3000
       - name: Audit and compress
         shell: bash
         run: |
@@ -69,10 +71,11 @@ jobs:
   ask:
     name: USATECH M1 ASK ${{ matrix.label }}
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 150
     continue-on-error: true
     strategy:
       fail-fast: false
+      max-parallel: 1
       matrix:
         include:
           - {label: 2022, from: 2022-01-01, to: 2023-01-01}
@@ -85,11 +88,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Download ask candles with auditable flat placeholders
+      - name: Download ask candles serially
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p temporary-data
+          sleep 20
           npx --yes dukascopy-node@1.49.0 \
             -i usatechidxusd \
             -from "${{ matrix.from }}" \
@@ -97,7 +101,7 @@ jobs:
             -t m1 -p ask -v -vu units -fl -f csv \
             -dir temporary-data \
             -fn "usatechidxusd_m1_ask_${{ matrix.label }}" \
-            -bs 20 -bp 300 -r 6 -rp 1500
+            -bs 5 -bp 1000 -r 10 -rp 3000
       - name: Audit and compress
         shell: bash
         run: |
