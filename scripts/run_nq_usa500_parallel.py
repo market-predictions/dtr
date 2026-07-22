@@ -19,7 +19,6 @@ from dtr_lab.research.cross_market import (
     build_covered_session_table,
     classify_proxy_gaps,
     classify_proxy_replication,
-    cost_stress_expectancy,
     date_block_bootstrap,
     e6_mask,
     load_usa500_proxy,
@@ -297,6 +296,8 @@ def run_instrument(
     config: engine.StrategyConfig,
     minimum_range_coverage: float,
     proxy_gap_policy: bool,
+    include_unfiltered: bool = False,
+    fomc_dates: set[pd.Timestamp] = FOMC_DATES,
 ) -> dict[str, object]:
     gaps = (
         classify_proxy_gaps(one_minute)
@@ -331,11 +332,13 @@ def run_instrument(
         eligible,
         pd.DataFrame(signal_rows),
     )
+    e6 = e6_mask(signal_features)
     masks = {
-        "E6": e6_mask(signal_features),
-        "E6_NO_FOMC_DAY": e6_mask(signal_features)
-        & no_fomc_mask(signal_features, FOMC_DATES),
+        "E6": e6,
+        "E6_NO_FOMC_DAY": e6 & no_fomc_mask(signal_features, fomc_dates),
     }
+    if include_unfiltered:
+        masks = {"UNFILTERED": pd.Series(True, index=signal_features.index), **masks}
     eligible_count = int(
         eligible.loc[
             eligible["weekday"].isin(config.weekdays)
@@ -452,24 +455,95 @@ def main() -> None:
             )
     pd.DataFrame(inference).to_csv(args.out / "parallel_inference.csv", index=False)
 
+    data_audit = pd.DataFrame(
+        [
+            {
+                "instrument": "NQ",
+                "source_sha256": NQ_SPEC.source_sha256,
+                "rows": len(nq["bars"]),
+                "eligible_sessions": len(nq["eligible_sessions"]),
+                "range_rejections": int(
+                    nq["sessions"]["integrity_range_gap_rejected"].sum()
+                ),
+                "signal_path_truncations": int(
+                    nq["sessions"]["integrity_signal_path_truncated"].sum()
+                ),
+                "gaps": len(nq["gaps"]),
+                "source_classification": NQ_SPEC.source_classification,
+            },
+            {
+                "instrument": "USA500_PROXY",
+                "source_sha256": USA500_PROXY_SPEC.source_sha256,
+                "rows": len(proxy["bars"]),
+                "eligible_sessions": len(proxy["eligible_sessions"]),
+                "range_rejections": int(
+                    proxy["sessions"]["integrity_range_gap_rejected"].sum()
+                ),
+                "signal_path_truncations": int(
+                    proxy["sessions"]["integrity_signal_path_truncated"].sum()
+                ),
+                "gaps": len(proxy["gaps"]),
+                "source_classification": USA500_PROXY_SPEC.source_classification,
+            },
+        ]
+    )
+    data_audit.to_csv(args.out / "parallel_data_audit.csv", index=False)
+
+    breakdowns: list[dict[str, object]] = []
+    for instrument_name, result in (("NQ", nq), ("USA500_PROXY", proxy)):
+        for arm in ("E6", "E6_NO_FOMC_DAY"):
+            trades = result["trades"][arm].copy()
+            if trades.empty:
+                continue
+            trades["entry_year"] = pd.to_datetime(trades["entry_time"]).dt.year
+            for dimension, column in (
+                ("year", "entry_year"),
+                ("session", "session"),
+                ("direction", "direction"),
+            ):
+                for value, group in trades.groupby(column, sort=True):
+                    metrics = engine.metrics(group)
+                    breakdowns.append(
+                        {
+                            "instrument": instrument_name,
+                            "arm": arm,
+                            "dimension": dimension,
+                            "value": value,
+                            **metrics,
+                        }
+                    )
+    pd.DataFrame(breakdowns).to_csv(args.out / "parallel_breakdown.csv", index=False)
+
     decision = {
         "study_id": "DTR-CROSSMARKET-WP-20260722-18",
         "decision": classification,
-        "nq_regression": "PASS",
-        "proxy_is_not_es_futures": True,
+        "proxy_not_es_futures": True,
+        "nq_regression_exact": True,
+        "no_pooling": True,
+        "no_proxy_specific_tuning": True,
+        "proxy_e6": proxy_e6.to_dict(),
         "restrictions": [
-            "no pooled portfolio",
-            "no proxy-specific tuning",
-            "no CME ES execution claim",
-            "no live sizing, Pine or deployment authorization",
+            "no proxy promotion",
+            "no London-only rule",
+            "no FOMC redefinition",
+            "no live sizing",
+            "no Pine or deployment authorization",
         ],
     }
     (args.out / "decision.json").write_text(
-        json.dumps(decision, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
+        json.dumps(decision, indent=2, default=str)
+    )
+
+    hashes = {
+        path.name: file_sha256(path)
+        for path in sorted(args.out.iterdir())
+        if path.is_file()
+    }
+    (args.out / "artifact_hashes.json").write_text(
+        json.dumps(hashes, indent=2, sort_keys=True)
     )
     print(summary.to_string(index=False))
-    print(json.dumps(decision, indent=2, sort_keys=True))
+    print(json.dumps(decision, indent=2, default=str))
 
 
 if __name__ == "__main__":
