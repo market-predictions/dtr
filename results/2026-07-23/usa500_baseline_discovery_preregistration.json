@@ -1,0 +1,73 @@
+{
+  "study_id": "DTR-USA500-WP-20260723-20",
+  "frozen_before_strategy_run": true,
+  "data": {
+    "instrument": "Dukascopy USA500.IDX/USD bid CFD proxy",
+    "source_sha256": "199d63e6f284eb1ffb93003e9020bf2852f5d96bf78f0efe50c3bdd09c11a47b",
+    "period": "2022-01-02T23:00:00Z through 2025-12-31T21:13:00Z",
+    "classification": "retrospective exploratory development; not CME ES futures OOS"
+  },
+  "core_logic": {
+    "source": "frozen timing-corrected DTR core configuration used by the NQ scientific reference",
+    "mutable_parameters": ["weekday universe", "session universe", "one fixed context exclusion", "one fixed event-day policy"],
+    "prohibited": ["core entry retuning", "stop retuning", "target retuning", "session-time retuning", "cost fitting", "gap-policy retuning", "context threshold search", "interactions"]
+  },
+  "stage_1_arms": {
+    "P0_TUE_FRI_ALL": {"weekdays": [1, 2, 3, 4], "sessions": ["ASIA_7PM", "LONDON_2AM", "NEW_YORK_9AM"]},
+    "P1_MON_FRI_ALL": {"weekdays": [0, 1, 2, 3, 4], "sessions": ["ASIA_7PM", "LONDON_2AM", "NEW_YORK_9AM"]},
+    "P2_TUE_FRI_NO_ASIA": {"weekdays": [1, 2, 3, 4], "sessions": ["LONDON_2AM", "NEW_YORK_9AM"]},
+    "P3_MON_FRI_NO_ASIA": {"weekdays": [0, 1, 2, 3, 4], "sessions": ["LONDON_2AM", "NEW_YORK_9AM"]}
+  },
+  "stage_1_gate": {
+    "positive_at_ticks_each_side": [1, 2],
+    "return_dd_improvement_min": 0.15,
+    "drawdown_reduction_min": 0.20,
+    "minimum_positive_years": 3,
+    "minimum_year_net_r": -5.0,
+    "maximum_single_year_positive_net_share": 0.70,
+    "minimum_trades": 250,
+    "alternative_minimum_trade_retention": 0.65,
+    "paired_date_block_mean_difference_positive": true,
+    "crossing_zero_interval_classification": "exploratory"
+  },
+  "stage_2_candidates": {
+    "C1_EXCLUDE_COMPRESSED_RANGE": "same-session trailing 126-observation percentile, exclude below 1/3, prior observations only, min history 40",
+    "C2_EXCLUDE_NEAR_PRIOR_DAY_EXTREME": "directional distance greater than 0.25 completed prior-day ATR",
+    "C3_PATH_LE_12_BARS": "sweep to entry at most 12 five-minute bars",
+    "C4_ENTRY_EXTENSION_LE_0_35R": "absolute entry raw to protected pivot distance at most 0.35 initial R",
+    "C5_BOS_QUALITY_2_OF_3": "BOS body >=0.60, directional close location >=0.75, true range/ATR >=1.0; at least two",
+    "C6_CLEAR_TO_TP1": "nearest predefined structural level ahead at least TP1 distance"
+  },
+  "stage_2_gate": {
+    "minimum_trade_retention": 0.60,
+    "positive_at_two_ticks": true,
+    "return_dd_improvement_min": 0.15,
+    "minimum_positive_years": 3,
+    "minimum_year_net_r": -5.0,
+    "paired_date_block_mean_difference_positive": true,
+    "maximum_advancing_single_factor_candidates": 1,
+    "interactions_allowed": false
+  },
+  "stage_3_events": ["FOMC statement dates", "CPI release dates", "NFP release dates", "monthly option-expiration Friday", "quarterly roll/expiration cohort"],
+  "stage_3_gate": {
+    "minimum_removed_trades": 8,
+    "net_r_improvement_required": true,
+    "return_dd_improvement_required": true,
+    "two_tick_expectancy_not_worse": true,
+    "single_date_dominance_prohibited": true,
+    "buffers_allowed": false
+  },
+  "costs": {
+    "normal_ticks_each_side": 1,
+    "moderate_ticks_each_side": 2,
+    "severe_ticks_each_side": 4,
+    "commission_per_side_usd": 2.25
+  },
+  "resampling": {
+    "date_block_iterations": 20000,
+    "month_block_iterations": 20000,
+    "independent_seed_family_required": true
+  },
+  "controls": ["NQ_E6_TRANSFER", "NQ_E6_NO_FOMC_TRANSFER"],
+  "deployment_authorized": false
+}
