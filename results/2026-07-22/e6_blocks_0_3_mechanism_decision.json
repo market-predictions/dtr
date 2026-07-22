@@ -1,0 +1,17 @@
+{
+  "classification": "SUPPORTED",
+  "kept_minus_rejected_expectancy_r": 0.22441391244149214,
+  "rejected_minus_kept_stop_first_rate": 0.07053757053757059,
+  "rejected_minus_kept_mae_r": 0.050195726204935176,
+  "adverse_marker_count": 3,
+  "adverse_markers": {
+    "mfe_lower_0_10": true,
+    "tp1_lower_5pp": true,
+    "tp2_lower_3pp": true,
+    "mae15_higher_0_05": false,
+    "mae30_higher_0_08": false,
+    "clearance_lower_0_25": false
+  },
+  "years_with_kept_higher_expectancy": 3,
+  "sessions_with_kept_higher_expectancy": 3
+}
