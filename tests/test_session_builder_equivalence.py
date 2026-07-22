@@ -62,7 +62,8 @@ def test_searchsorted_session_builder_matches_legacy_windows() -> None:
         }
     )
     # Remove edge and interior bars to exercise search boundaries and incomplete windows.
-    one = one.loc[~one["timestamp"].isin(pd.to_datetime(["2025-01-06 08:12", "2025-01-07 01:45"]))].reset_index(drop=True)
+    removed = pd.to_datetime(["2025-01-06 08:12", "2025-01-07 01:45"])
+    one = one.loc[~one["timestamp"].isin(removed)].reset_index(drop=True)
     bars = resample_5m(one)
     actual = build_session_table(one, bars).reset_index(drop=True)
     expected = _legacy_build(one, bars).reset_index(drop=True)

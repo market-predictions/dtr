@@ -3,7 +3,11 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from dtr_lab.research.uncertainty import block_bootstrap_mean, sign_flip_p_value, trade_bootstrap_mean
+from dtr_lab.research.uncertainty import (
+    block_bootstrap_mean,
+    sign_flip_p_value,
+    trade_bootstrap_mean,
+)
 
 
 def test_trade_bootstrap_is_deterministic() -> None:

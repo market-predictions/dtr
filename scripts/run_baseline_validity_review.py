@@ -26,8 +26,8 @@ from dtr_lab.research.uncertainty import (
 from dtr_lab.research.validity import (
     attach_roll_market_dates,
     compare_trade_sets,
-    quarterly_roll_candidates,
     leave_one_group_out,
+    quarterly_roll_candidates,
     rollover_discontinuity_diagnostics,
     rollover_stress,
     rollover_trade_attribution,
@@ -74,7 +74,13 @@ def main() -> None:
     for policy in ("observe_only", "reject_unsafe", "liquidate_unsafe"):
         trades, funnel = run_backtest(one, bars, sessions, config, gap_policy=policy)
         runs[policy] = (trades, funnel)
-        rows.append({"gap_policy": policy, **metrics(trades), **{f"funnel_{k}": v for k, v in funnel.as_dict().items()}})
+        rows.append(
+            {
+                "gap_policy": policy,
+                **metrics(trades),
+                **{f"funnel_{key}": value for key, value in funnel.as_dict().items()},
+            }
+        )
     comparison = pd.DataFrame(rows)
     comparison.to_csv(output / "baseline_policy_comparison.csv", index=False)
 

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable
 
 import numpy as np
 import pandas as pd
@@ -54,7 +54,10 @@ def timestamp_vwap_hypotheses(one_minute: pd.DataFrame) -> tuple[pd.DataFrame, T
             trade_date = (interval_open - pd.Timedelta(minutes=reset_minute)).dt.normalize()
             denominator = one_minute["volume"].groupby(trade_date).cumsum()
             for price_name, price in prices.items():
-                calculated = (price * one_minute["volume"]).groupby(trade_date).cumsum() / denominator
+                calculated = (
+                    (price * one_minute["volume"]).groupby(trade_date).cumsum()
+                    / denominator
+                )
                 error = calculated - vendor
                 rows.append(
                     {
@@ -249,7 +252,9 @@ def leave_one_group_out(
         row: dict[str, object] = {}
         for column, value in zip(group_columns, values, strict=True):
             mask &= trades[column] == value
-            row[f"excluded_{column}"] = int(value) if isinstance(value, (int, np.integer)) else value
+            row[f"excluded_{column}"] = (
+                int(value) if isinstance(value, (int, np.integer)) else value
+            )
         kept = trades.loc[~mask]
         row.update(
             {

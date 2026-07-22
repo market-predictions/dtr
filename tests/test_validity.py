@@ -14,7 +14,9 @@ def test_quarterly_roll_candidates_use_thursday_before_expiry_week() -> None:
 
 def test_roll_adjacent_dates_use_market_sequence_not_calendar_days() -> None:
     candidates = pd.DataFrame({"nearest_market_date": [pd.Timestamp("2024-03-07")]})
-    market_dates = pd.to_datetime(["2024-03-05", "2024-03-06", "2024-03-07", "2024-03-08", "2024-03-11"])
+    market_dates = pd.to_datetime(
+        ["2024-03-05", "2024-03-06", "2024-03-07", "2024-03-08", "2024-03-11"]
+    )
     excluded = roll_adjacent_dates(candidates, market_dates, window_sessions=1)
     assert excluded == {
         pd.Timestamp("2024-03-06"),

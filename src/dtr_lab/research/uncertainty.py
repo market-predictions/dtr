@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable
 
 import numpy as np
 import pandas as pd
@@ -25,7 +25,9 @@ class IntervalEstimate:
         }
 
 
-def _percentile_interval(samples: np.ndarray, estimate: float, iterations: int, seed: int) -> IntervalEstimate:
+def _percentile_interval(
+    samples: np.ndarray, estimate: float, iterations: int, seed: int
+) -> IntervalEstimate:
     return IntervalEstimate(
         estimate=float(estimate),
         lo95=float(np.quantile(samples, 0.025)),
@@ -58,7 +60,10 @@ def block_bootstrap_mean(
         raise ValueError("At least one observation is required")
     if value_column not in frame or block_column not in frame:
         raise ValueError("Missing value or block column")
-    groups = [group[value_column].to_numpy(float) for _, group in frame.groupby(block_column, sort=True)]
+    groups = [
+        group[value_column].to_numpy(float)
+        for _, group in frame.groupby(block_column, sort=True)
+    ]
     if not groups:
         raise ValueError("At least one block is required")
     rng = np.random.default_rng(seed)
