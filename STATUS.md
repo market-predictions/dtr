@@ -2,13 +2,13 @@
 
 ## Current stacked work package
 
-`DTR-NQ-WP-20260722-13 — E6 event, holiday and rollover attribution`
+`DTR-NQ-WP-20260722-14 — E6 fixed-fraction equity and execution-cost stress`
 
 Status: **research complete; independent review and deterministic repeat passed**
 
-Decision state: `RETAIN_E6_NO_EVENT_EXCLUSION_WATCH_FOMC_PRE_AND_ROLL_EXPIRY_OVERLAP`
+Decision state: `EQUITY_COST_STRESS_COMPLETE_NO_SIZING_AUTHORIZATION`
 
-Base dependency: `DTR-NQ-WP-20260722-12 — E6 portfolio sequencing` remains a stacked draft on PR #12.
+Base dependency: `DTR-NQ-WP-20260722-13 — E6 event, holiday and rollover attribution` remains a stacked draft on PR #13.
 
 ## Baseline hierarchy
 
@@ -41,34 +41,43 @@ Base dependency: `DTR-NQ-WP-20260722-12 — E6 portfolio sequencing` remains a s
 
 E6 remains research-only and unchanged.
 
-## Completed advanced blocks
+## Completed E6 advanced programme
 
-- Blocks 0–3: E6 mechanism supported; no additional path or reward-space filter advanced.
+- Blocks 0–3: mechanism supported; no additional path or reward-space filter advanced.
 - Block 4: retain current one-open-position global sequencing.
-- Block 5: official event, holiday, expiration and rollover attribution complete.
+- Block 5: preserve FOMC-pre and expiration/roll overlap only as future risk-watch cohorts; no event exclusion.
+- Block 6: fixed-fraction equity and cost stress complete.
 
-## Block 5 findings
+## Block 6 findings
 
-- FOMC day: 14 trades, -5.56R. Weakness was concentrated before the 14:00 ET statement: nine trades, -7.62R.
-- CPI day: 18 trades, +1.76R; no clear adverse pattern.
-- NFP day: nine trades, +1.37R; insufficient sample and no clear adverse pattern.
-- Expiration week: 27 trades, -2.09R.
-- Roll window: 25 trades, -0.58R.
-- The expiration and roll weakness came from the same 18-trade intersection, which lost 5.20R. Expiration-only and roll-only cohorts were positive.
-- No customary roll-date trades occurred because roll dates are Mondays and E6 trades Tuesday–Friday.
-- No roll window exceeded the frozen 99th-percentile maintenance-gap threshold.
+Observed $100,000 account under normal costs:
+
+- 0.50% risk: $126,940 final equity; 4.3% maximum drawdown.
+- 1.00% risk: $159,185 final equity; 8.4% maximum drawdown.
+- 1.50% risk: $197,231 final equity; 12.4% maximum drawdown.
+
+Observed account under severe four-tick-per-side costs:
+
+- 0.50% risk: $117,082 final equity; 5.3% maximum drawdown.
+- 1.00% risk: $135,430 final equity; 10.3% maximum drawdown.
+- 1.50% risk: $154,787 final equity; 15.2% maximum drawdown.
+
+Resampled conclusion:
+
+- 0.50% is the most drawdown-resilient tested envelope.
+- 1.00% is a middle research envelope but can produce 20% drawdowns when execution is poor.
+- 1.50% is aggressive; under severe costs approximately 45–55% of resamples reached 20% drawdown and approximately 9–14% reached 30% drawdown.
 - Independent reconstruction and deterministic repeat passed.
 
-Decision: retain E6 unchanged. Preserve FOMC-pre and expiration/roll-overlap only as fixed risk-watch cohorts for longer or fresh data. Do not create an event exclusion from 2023–2025.
+Decision: preserve 0.50% and 1.00% only as paper-research envelopes. Do not treat 1.50% as a balanced default. No live sizing recommendation follows.
 
-## Next authorized work
+## Next evidence gate
 
-Block 6 fixed-fraction equity and execution-cost stress for unchanged E6:
+The bounded E6 historical programme is complete. Highest-value next evidence:
 
-- 0.50%, 1.00% and 1.50% current-equity risk;
-- normal, two-tick-per-side and four-tick-per-side execution;
-- date-block and month-block resampling;
-- final-equity, drawdown, losing-streak and time-under-water distributions.
+- qualified fresh post-2025 NQ data;
+- materially longer contract-audited NQ history; or
+- unchanged ES replication.
 
 ## Existing unresolved gates
 
@@ -80,4 +89,4 @@ Block 6 fixed-fraction equity and execution-cost stress for unchanged E6:
 
 ## Scope restrictions
 
-No E6 threshold change, event-window search, event exclusion, weekday/session search, sequencing retune, additional interaction, Pine port, sizing recommendation, leverage increase or deployment is authorized.
+No E6 threshold change, event-window search, event exclusion, weekday/session search, sequencing retune, additional interaction, risk-fraction optimization, dynamic sizing, Pine port, live sizing recommendation, leverage increase or deployment is authorized.
