@@ -1,0 +1,25 @@
+{
+  "decision": "INDEPENDENT_REVIEW_PASS",
+  "archive_sha256": "8d3f157a422636e5b8dda51cc3a3d9209c50cb53f9b279d3e14b627ce59370dc",
+  "baseline_regression_exact": true,
+  "all_category_masks_exact": true,
+  "all_metrics_exact": true,
+  "all_classifications_exact": true,
+  "official_timestamp_contracts_verified": true,
+  "expiration_and_roll_window_contracts_verified": true,
+  "roll_discontinuities_reconstructed": true,
+  "independent_bootstrap_seed": 20260822,
+  "fomc_decomposition": {
+    "day": {"trades": 14, "net_r": -5.558986884983001, "expectancy_r": -0.39707049178450005},
+    "pre": {"trades": 9, "net_r": -7.618852964020001, "expectancy_r": -0.8465392182244446},
+    "post": {"trades": 5, "net_r": 2.0598660790370005, "expectancy_r": 0.4119732158074001}
+  },
+  "overlap_decomposition": {
+    "expiration_only": {"trades": 9, "net_r": 3.1133044978910003, "expectancy_r": 0.3459227219878889},
+    "roll_only": {"trades": 7, "net_r": 4.623301370679, "expectancy_r": 0.6604716243827143},
+    "intersection": {"trades": 18, "net_r": -5.199166628706001, "expectancy_r": -0.28884259048366673},
+    "neither": {"trades": 270, "net_r": 46.400110287019004, "expectancy_r": 0.17185226032229262}
+  },
+  "roll_day_zero_trade_explanation": "Customary index roll dates are Mondays; frozen E6 trades Tuesday-Friday.",
+  "conclusion": "FOMC-day risk is concentrated before the announcement. Expiration-week and roll-window weakness is concentrated in their shared cohort. No historical exclusion is authorized."
+}
