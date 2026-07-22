@@ -23,33 +23,25 @@ jobs:
 
           selection = Path('src/dtr_lab/research/selection.py')
           text = selection.read_text()
-          old = '''        payload = {
-              "candidate_id": str(column),
-              "index": [str(value) for value in index_payload],
-              "returns": [float(value) for value in matrix[column].to_numpy(float)],
-          }
-          '''.replace('          ', '')
-          new = '''        payload = {
-              "index": [str(value) for value in index_payload],
-              "returns": [float(value) for value in matrix[column].to_numpy(float)],
-          }
-          '''.replace('          ', '')
-          if text.count(old) != 1:
-              raise SystemExit('selection hash block not found exactly once')
-          selection.write_text(text.replace(old, new, 1))
+          needle = '            "candidate_id": str(column),\n'
+          if text.count(needle) != 1:
+              raise SystemExit('candidate id hash line not found exactly once')
+          selection.write_text(text.replace(needle, '', 1))
 
           test = Path('tests/test_integrity.py')
           text = test.read_text()
-          old = '''def test_public_engine_entry_points_are_integrity_safe() -> None:
-              assert engine.resample_5m is resample_5m
-              assert engine.run_backtest is run_backtest
-          '''.replace('              ', '')
-          new = '''def test_public_package_entry_points_are_integrity_safe_without_engine_mutation() -> None:
-              assert resample_5m is integrity.resample_5m
-              assert run_backtest is integrity.run_backtest
-              assert engine.resample_5m is not resample_5m
-              assert engine.run_backtest is not run_backtest
-          '''.replace('              ', '')
+          old = (
+              'def test_public_engine_entry_points_are_integrity_safe() -> None:\n'
+              '    assert engine.resample_5m is resample_5m\n'
+              '    assert engine.run_backtest is run_backtest\n'
+          )
+          new = (
+              'def test_public_package_entry_points_are_integrity_safe_without_engine_mutation() -> None:\n'
+              '    assert resample_5m is integrity.resample_5m\n'
+              '    assert run_backtest is integrity.run_backtest\n'
+              '    assert engine.resample_5m is not resample_5m\n'
+              '    assert engine.run_backtest is not run_backtest\n'
+          )
           if text.count(old) != 1:
               raise SystemExit('legacy engine identity test not found exactly once')
           test.write_text(text.replace(old, new, 1))
