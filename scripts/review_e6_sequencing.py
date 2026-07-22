@@ -29,14 +29,15 @@ def main() -> None:
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     signals = run.load_signals(args.signals)
-    arms = {name: run.sequence(signals, name)[0] for name in ("S0_GLOBAL", "S1_FIRST_PER_ETH_DATE", "S2_COOLDOWN_60", "S3_SESSION_SLEEVES")}
+    names = ("S0_GLOBAL", "S1_FIRST_PER_ETH_DATE", "S2_COOLDOWN_60", "S3_SESSION_SLEEVES")
+    arms = {name: run.sequence(signals, name)[0] for name in names}
     published = pd.read_csv(args.results / "sequencing_results.csv").set_index("arm")
     for name, frame in arms.items():
         rebuilt = run.metrics(name, frame)
         for key in ("trades", "portfolio_net_r", "raw_expectancy_r", "portfolio_max_drawdown_r", "portfolio_return_dd"):
             if not np.isclose(float(rebuilt[key]), float(published.loc[name, key]), atol=1e-9, rtol=0.0):
                 raise AssertionError(f"{name} {key} mismatch")
-    if not all(no_overlap(arms[name], False) for name in ("S0_GLOBAL", "S1_FIRST_PER_ETH_DATE", "S2_COOLDOWN_60")):
+    if not all(no_overlap(arms[name], False) for name in names[:3]):
         raise AssertionError("Global overlap found")
     if not no_overlap(arms["S3_SESSION_SLEEVES"], True):
         raise AssertionError("Within-sleeve overlap found")
@@ -54,9 +55,9 @@ def main() -> None:
     review = {
         "decision": "INDEPENDENT_REVIEW_PASS",
         "metrics_reconstructed": list(arms),
-        "sequencing_contracts_verified": true,
+        "sequencing_contracts_verified": True,
         "independent_inference": paired.to_dict(orient="records"),
-        "conclusion": "Retain S0 global sequencing."
+        "conclusion": "Retain S0 global sequencing.",
     }
     args.output.write_text(json.dumps(review, indent=2, sort_keys=True))
 
