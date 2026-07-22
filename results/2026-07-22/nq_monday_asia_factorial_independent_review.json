@@ -1,0 +1,22 @@
+{
+  "review_id": "DTR_NQ_MONDAY_ASIA_FACTORIAL_INDEPENDENT_REVIEW_20260722",
+  "dataset_sha256": "8d3f157a422636e5b8dda51cc3a3d9209c50cb53f9b279d3e14b627ce59370dc",
+  "portfolio_metric_reconstructions": 12,
+  "all_metric_reconstructions_passed": true,
+  "all_weekday_session_contracts_passed": true,
+  "all_position_overlap_checks_passed": true,
+  "frozen_regressions": {
+    "unfiltered_a0": true,
+    "e5_a0": true,
+    "e6_a0": true
+  },
+  "independent_date_block_checks": {
+    "unfiltered_add_monday": {"delta_r": 2.070571, "lo95": -25.000297, "hi95": 29.701270, "prob_positive": 0.5577},
+    "unfiltered_remove_asia": {"delta_r": -14.751075, "lo95": -45.325728, "hi95": 14.939603, "prob_positive": 0.1659},
+    "unfiltered_combined": {"delta_r": -20.956609, "lo95": -57.679018, "hi95": 16.540696, "prob_positive": 0.1352},
+    "e5_combined": {"delta_r": -28.242025, "lo95": -59.232199, "hi95": 2.885683, "prob_positive": 0.0372},
+    "e6_add_monday": {"delta_r": 9.426207, "lo95": -12.493914, "hi95": 32.815693, "prob_positive": 0.7921},
+    "e6_remove_asia_mon_fri": {"delta_r": -28.927936, "lo95": -57.426898, "hi95": -0.718647, "prob_positive": 0.0222}
+  },
+  "conclusion": "DO_NOT_REMOVE_ASIA; DO_NOT_PROMOTE_MONDAY; retain Tuesday-Friday and all three sessions; E6 plus Monday may remain shadow coverage research only."
+}
