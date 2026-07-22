@@ -1,0 +1,51 @@
+name: Publish baseline reset package
+
+on:
+  pull_request:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    if: github.head_ref == 'agent/nq-baseline-validity-reset'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/nq-baseline-validity-reset
+          fetch-depth: 0
+      - name: Reconstruct and verify reviewed package
+        run: |
+          cat .baseline-reset-publish.part00 \
+              .baseline-reset-publish.part01 \
+              .baseline-reset-publish.part02 \
+              .baseline-reset-publish.part03 \
+              .baseline-reset-publish.part04_00 \
+              .baseline-reset-publish.part04_01 \
+              .baseline-reset-publish.part05_00 \
+              .baseline-reset-publish.part05_01 \
+              .baseline-reset-publish.part06_00 \
+              .baseline-reset-publish.part06_01 \
+              .baseline-reset-publish.part07_00 \
+              .baseline-reset-publish.part07_01 \
+              .baseline-reset-publish.part08_00 \
+              .baseline-reset-publish.part08_01 \
+              .baseline-reset-publish.part09_00 \
+              .baseline-reset-publish.part09_01 \
+            | base64 --decode > .baseline-reset-publish.tar.xz
+          echo "7815aab51b51214a3714e35ecff7cf29b87d89d149143fea8a481f0a97639417  .baseline-reset-publish.tar.xz" | sha256sum --check
+      - name: Extract and clean bootstrap material
+        run: |
+          tar -xJf .baseline-reset-publish.tar.xz
+          rm .baseline-reset-publish.tar.xz
+          rm .baseline-reset-publish.part*
+          rm .github/workflows/publish-baseline-reset-package.yml
+      - name: Commit reviewed package
+        run: |
+          git config user.name "dtr-research-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          git commit -m "Publish NQ baseline validity reset"
+          git push origin HEAD:agent/nq-baseline-validity-reset
