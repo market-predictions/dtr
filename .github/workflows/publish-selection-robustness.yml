@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - .github/workflows/publish-selection-robustness.yml
+      - .selection/**
 
 permissions:
   contents: write
@@ -18,60 +19,17 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
-      - name: Fetch and verify immutable packages
-        env:
-          GH_TOKEN: ${{ github.token }}
-          SOURCE_BLOB: 434898fb6f5f5ce6e60b50fd0aff2d4df933c891
-          EVIDENCE_BLOB: 49575180ad2490e72a01ba0c5c7db89c030f7369
-          SOURCE_SHA256: de8fb9a0aca93c7433f94aa6a438f72b5ce4ace13404c951c81dfeb553c3513f
-          EVIDENCE_SHA256: d401fcae44109337d3e5b60fc7453512ab3d481798a612eaf1e42a6c30dd3bbb
+      - name: Verify staged packages
         run: |
           set -euo pipefail
-          python - <<'PY'
-          import base64
-          import hashlib
-          import json
-          import os
-          from pathlib import Path
-          from urllib.request import Request, urlopen
-
-          repository = os.environ["GITHUB_REPOSITORY"]
-          token = os.environ["GH_TOKEN"]
-          runner_temp = Path(os.environ["RUNNER_TEMP"])
-
-          packages = (
-              ("SOURCE_BLOB", "SOURCE_SHA256", runner_temp / "source.tar.gz"),
-              ("EVIDENCE_BLOB", "EVIDENCE_SHA256", runner_temp / "evidence.tar.gz"),
-          )
-          for blob_key, digest_key, output in packages:
-              blob_sha = os.environ[blob_key]
-              expected = os.environ[digest_key]
-              request = Request(
-                  f"https://api.github.com/repos/{repository}/git/blobs/{blob_sha}",
-                  headers={
-                      "Accept": "application/vnd.github+json",
-                      "Authorization": f"Bearer {token}",
-                      "X-GitHub-Api-Version": "2022-11-28",
-                  },
-              )
-              with urlopen(request) as response:
-                  payload = json.load(response)
-              if payload.get("encoding") != "base64":
-                  raise RuntimeError(f"Unexpected blob encoding for {blob_sha}")
-              content = base64.b64decode(payload["content"], validate=False)
-              actual = hashlib.sha256(content).hexdigest()
-              if actual != expected:
-                  raise RuntimeError(
-                      f"SHA-256 mismatch for {blob_sha}: {actual} != {expected}"
-                  )
-              output.write_bytes(content)
-              print(f"verified {output.name}: {actual}")
-          PY
+          echo "de8fb9a0aca93c7433f94aa6a438f72b5ce4ace13404c951c81dfeb553c3513f  .selection/source.tar.gz" | sha256sum --check --strict
+          echo "d401fcae44109337d3e5b60fc7453512ab3d481798a612eaf1e42a6c30dd3bbb  .selection/evidence.tar.gz" | sha256sum --check --strict
       - name: Extract reviewed package
         run: |
           set -euo pipefail
-          tar -xzf "$RUNNER_TEMP/source.tar.gz" -C .
-          tar -xzf "$RUNNER_TEMP/evidence.tar.gz" -C .
+          tar -xzf .selection/source.tar.gz -C .
+          tar -xzf .selection/evidence.tar.gz -C .
+          rm -rf .selection
           rm -f .github/workflows/publish-selection-robustness.yml
       - name: Commit reviewed package
         run: |
