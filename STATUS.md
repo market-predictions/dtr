@@ -2,13 +2,13 @@
 
 ## Current work package
 
-`DTR-NQ-WP-20260722-06 — Baseline validity reset`
+`DTR-NQ-WP-20260722-07 — Selection robustness and explicit execution contract`
 
-Status: **complete; final GitHub CI passed; ready for adversarial review and merge**
+Status: **claimed; design complete; candidate-universe audit starting**
 
-Decision: `CONTINUE_RESEARCH_DO_NOT_DEPLOY`
+Decision state: `HISTORICAL_SELECTION_EVIDENCE_UNDER_REVIEW`
 
-## Corrected benchmark
+## Accepted causal benchmark
 
 `DTR_PY_NQ_CANDIDATE_0_1_CAUSAL_GAP`
 
@@ -17,52 +17,34 @@ Decision: `CONTINUE_RESEARCH_DO_NOT_DEPLOY`
 - 86.004761R net;
 - PF 1.366383;
 - maximum drawdown 14.107858R;
-- return/DD 6.096231;
-- four causal gap liquidations.
+- return/DD 6.096231.
 
-## Historical references
+This benchmark is an exact regression gate and may not be retuned.
 
-- Observe-only: 504 trades and 84.164359R.
-- Suspended retrospective rejection: 491 trades and 88.495783R.
-- Historical rolling walk-forward: 289 trades and 0.151217R expectancy.
+## Work package objectives
 
-## Validity gates
+- reconstruct the original staged 904-candidate universe and selection chronology where evidence permits;
+- build aligned candidate return streams on `session_date × session` and calendar-date units;
+- apply joint multiple-testing-aware inference with fixed seeds;
+- measure bootstrap reselection, winner stability, duplicates, and parameter plateaus;
+- remove canonical import-time monkey-patching and require explicit causal execution policy;
+- preserve all prior signal and trade outcomes.
+
+## Existing unresolved gates
 
 - timestamp semantics: `UNRESOLVED`;
 - continuous-contract methodology: `UNRESOLVED`;
-- 904-search familywise adjustment: `UNRESOLVED`;
+- 904-search familywise adjustment: active work package;
 - fresh qualified OOS: `NOT_RUN_PREREGISTERED`;
 - Python/Pine parity: `NOT_RUN`.
 
-## No-retune module decisions
+## Closed or superseded work
 
-- continuation: `HOLD_FOR_FRESH_DATA`;
-- IFVG: `REJECT_NO_INCREMENTAL_VALUE`;
-- CISD: `REJECT_NO_INCREMENTAL_VALUE`;
-- entry routing: `REJECT_NO_INCREMENTAL_VALUE`, PR #5 draft pending supersession decision.
+- PR #6 merged the causal baseline reset as commit `18e48b9f15d68541da8c1bcea970a7894bf99dbf`;
+- PR #5 was closed without merge as superseded;
+- continuation remains `HOLD_FOR_FRESH_DATA`;
+- IFVG, CISD, and entry-routing decisions remain `REJECT_NO_INCREMENTAL_VALUE`.
 
-## Reproducibility
+## Scope restrictions
 
-- local suite: 75 tests passed;
-- baseline validity: 15/15 artifacts identical;
-- IFVG: 52/52;
-- CISD: 52/52;
-- continuation structural: 30/30;
-- continuation late-60: 30/30;
-- entry routing: 33/33;
-- source publication archive: checksum verified and self-cleaned;
-- evidence publication archive: checksum verified and self-cleaned;
-- pinned Ruff: passed;
-- pytest Python 3.11: passed;
-- pytest Python 3.12: passed;
-- GitHub CI run `29884201823`: success.
-
-## Remaining closure gates
-
-- final adversarial PR review;
-- squash merge of PR #6;
-- retire or rebuild PR #5 against the accepted causal benchmark.
-
-## Deployment restriction
-
-No deployment, Pine strategy release, sizing recommendation, current-sample retuning, or rescue combination is authorized.
+No fresh 2026 performance inspection, strategy retuning, new candidate family, module combination, Pine port, sizing recommendation, or deployment is authorized.
