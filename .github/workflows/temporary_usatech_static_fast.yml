@@ -1,0 +1,53 @@
+name: Temporary USATECH static fast acquisition
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/temporary_usatech_static_fast.yml
+      - scripts/temporary_download_usatech_static.py
+
+concurrency:
+  group: usatech-static-fast
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  acquire:
+    name: Fast USATECH M1 BID ${{ matrix.label }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - {label: 2022, start: 2022-01-01, end: 2023-01-01}
+          - {label: 2023, start: 2023-01-01, end: 2024-01-01}
+          - {label: 2024, start: 2024-01-01, end: 2025-01-01}
+          - {label: 2025, start: 2025-01-01, end: 2026-01-01}
+          - {label: 2026_YTD, start: 2026-01-01, end: 2026-07-23}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Download and decode
+        run: |
+          python scripts/temporary_download_usatech_static.py \
+            --start '${{ matrix.start }}' \
+            --end '${{ matrix.end }}' \
+            --label '${{ matrix.label }}' \
+            --workers 8
+          sha256sum usatechidxusd_m1_bid_${{ matrix.label }}.csv.gz \
+            | tee -a usatechidxusd_m1_bid_${{ matrix.label }}_audit.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: usatech-static-fast-${{ matrix.label }}
+          path: |
+            usatechidxusd_m1_bid_${{ matrix.label }}.csv.gz
+            usatechidxusd_m1_bid_${{ matrix.label }}_audit.txt
+          retention-days: 1
+          compression-level: 0
+          if-no-files-found: error

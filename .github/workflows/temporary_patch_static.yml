@@ -1,0 +1,42 @@
+name: Patch temporary static downloader
+
+on:
+  push:
+    branches:
+      - agent/usatech-acquisition-only
+    paths:
+      - .github/workflows/temporary_patch_static.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/usatech-acquisition-only
+          fetch-depth: 0
+      - name: Correct candle mapping and increase safe concurrency
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path=Path('.github/workflows/temporary_usatech_static_feed.yml')
+          text=path.read_text()
+          text=text.replace('import io\n','')
+          text=text.replace('seconds, open_, high, low, close, volume = RECORD.unpack_from(', 'seconds, open_, close, low, high, volume = RECORD.unpack_from(')
+          text=text.replace('float(volume),', 'float(volume) * 1_000_000.0,')
+          text=text.replace('ThreadPoolExecutor(max_workers=2)', 'ThreadPoolExecutor(max_workers=8)')
+          text=text.replace('                  time.sleep(0.15)\n','')
+          path.write_text(text)
+          PY
+          git diff --check
+      - name: Commit patch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/workflows/temporary_usatech_static_feed.yml
+          git commit -m "Correct and accelerate temporary static downloader"
+          git push origin HEAD:agent/usatech-acquisition-only

@@ -1,0 +1,41 @@
+name: Temporary USATECH static-feed probe
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/temporary_usatech_static_probe.yml
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fetch and decode one trading day
+        shell: bash
+        run: |
+          python - <<'PY'
+          import csv, datetime as dt, lzma, struct, urllib.request
+          url='https://datafeed.dukascopy.com/datafeed/USATECHIDXUSD/2023/00/03/BID_candles_min_1.bi5'
+          req=urllib.request.Request(url,headers={'User-Agent':'DTR-private-research/1.0'})
+          raw=urllib.request.urlopen(req,timeout=60).read()
+          data=lzma.decompress(raw)
+          rec=struct.Struct('>5if')
+          rows=[]
+          for off in range(0,len(data),rec.size):
+              s,o,h,l,c,v=rec.unpack_from(data,off)
+              rows.append((s,o/1000,h/1000,l/1000,c/1000,v))
+          with open('probe.csv','w',newline='') as f:
+              w=csv.writer(f);w.writerow(['seconds','open','high','low','close','volume']);w.writerows(rows)
+          print('bytes',len(raw),'records',len(rows),'first',rows[:3],'last',rows[-3:])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: usatech-static-probe
+          path: probe.csv
+          retention-days: 1
