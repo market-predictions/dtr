@@ -1,11 +1,3 @@
-from .engine import StrategyConfig, load_zip, metrics
-from .integrity import (
-    IntegrityFunnel,
-    build_session_table,
-    prepare_market_arrays,
-    resample_5m,
-    run_backtest,
-)
 from .cisd import (
     CISDAnnotation,
     CISDFunnel,
@@ -34,6 +26,7 @@ from .continuation_manifest import (
     load_continuation_manifest,
     verify_continuation_dataset,
 )
+from .engine import StrategyConfig, load_zip, metrics
 from .ifvg import (
     IFVGAnnotation,
     IFVGEvent,
@@ -48,6 +41,13 @@ from .ifvg import (
     simulate_ifvg_variant,
 )
 from .ifvg_manifest import IFVGManifest, load_ifvg_manifest, verify_ifvg_dataset
+from .integrity import (
+    IntegrityFunnel,
+    build_session_table,
+    prepare_market_arrays,
+    resample_5m,
+    run_backtest,
+)
 from .manifest import (
     ResearchManifest,
     file_sha256,
