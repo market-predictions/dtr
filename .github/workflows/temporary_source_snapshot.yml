@@ -6,6 +6,9 @@ on:
       - agent/roadmap-correction-six-step
     paths:
       - .github/workflows/temporary_source_snapshot.yml
+  pull_request:
+    paths:
+      - .github/workflows/temporary_source_snapshot.yml
 
 permissions:
   contents: read
