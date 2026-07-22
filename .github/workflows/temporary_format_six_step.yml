@@ -1,0 +1,36 @@
+name: Temporary format six-step source
+
+on:
+  push:
+    branches:
+      - agent/roadmap-correction-six-step
+    paths:
+      - .github/workflows/temporary_format_six_step.yml
+      - scripts/run_nq_usatech_proxy_validation.py
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/roadmap-correction-six-step
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fix Ruff import ordering
+        run: pipx run --spec ruff==0.15.22 ruff check --fix scripts/run_nq_usatech_proxy_validation.py
+      - name: Commit formatter changes
+        run: |
+          if git diff --quiet; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scripts/run_nq_usatech_proxy_validation.py
+          git commit -m "Format Nasdaq proxy validation runner"
+          git push origin HEAD:agent/roadmap-correction-six-step

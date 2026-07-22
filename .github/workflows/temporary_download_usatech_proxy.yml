@@ -1,0 +1,105 @@
+name: Temporary USATECH throttled acquisition
+
+on:
+  push:
+    branches:
+      - agent/roadmap-correction-six-step
+    paths:
+      - .github/workflows/temporary_download_usatech_proxy.yml
+      - temporary-usatech-download-trigger.txt
+
+concurrency:
+  group: usatech-acquisition
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  acquire:
+    name: Patched throttled USATECH M1 BID 2022-2026
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install and patch temporary downloader
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm init -y >/dev/null 2>&1
+          npm install --no-audit --no-fund dukascopy-node@1.49.0
+          MATCHES="$(grep -RIl 'pauseBetweenRetriesMs = pauseBetweenRetriesMs' node_modules/dukascopy-node || true)"
+          test -n "$MATCHES"
+          while IFS= read -r FILE; do
+            sed -i 's/pauseBetweenRetriesMs = pauseBetweenRetriesMs/this.pauseBetweenRetriesMs = pauseBetweenRetriesMs/g' "$FILE"
+          done <<< "$MATCHES"
+          grep -R 'this.pauseBetweenRetriesMs = pauseBetweenRetriesMs' node_modules/dukascopy-node | head
+      - name: Cool down provider rate limit
+        run: sleep 600
+      - name: Download yearly bid candles sequentially
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p temporary-data logs
+
+          download_year() {
+            LABEL="$1"; FROM="$2"; TO="$3"
+            OUT="temporary-data/usatechidxusd_m1_bid_${LABEL}"
+            for ATTEMPT in 1 2 3 4; do
+              echo "[$LABEL] whole-command attempt $ATTEMPT"
+              set +e
+              ./node_modules/.bin/dukascopy-node \
+                -i usatechidxusd \
+                -from "$FROM" \
+                -to "$TO" \
+                -t m1 -p bid -v -vu units -fl -f csv \
+                -dir temporary-data \
+                -fn "usatechidxusd_m1_bid_${LABEL}" \
+                -bs 1 -bp 1500 -r 12 -rp 5000 \
+                > "logs/${LABEL}_attempt_${ATTEMPT}.log" 2>&1
+              STATUS=$?
+              set -e
+              if [ "$STATUS" -eq 0 ]; then
+                echo "[$LABEL] success"
+                return 0
+              fi
+              cat "logs/${LABEL}_attempt_${ATTEMPT}.log"
+              rm -f "${OUT}.csv"
+              sleep $((ATTEMPT * 300))
+            done
+            echo "[$LABEL] exhausted retries" >&2
+            return 1
+          }
+
+          download_year 2022 2022-01-01 2023-01-01
+          sleep 180
+          download_year 2023 2023-01-01 2024-01-01
+          sleep 180
+          download_year 2024 2024-01-01 2025-01-01
+          sleep 180
+          download_year 2025 2025-01-01 2026-01-01
+          sleep 180
+          download_year 2026_YTD 2026-01-01 2026-07-23
+
+      - name: Audit and compress yearly files
+        shell: bash
+        run: |
+          set -euo pipefail
+          for CSV in temporary-data/*.csv; do
+            wc -l "$CSV"
+            sha256sum "$CSV"
+            gzip -9 "$CSV"
+          done | tee temporary-data/acquisition_audit.txt
+          cp logs/*.log temporary-data/
+
+      - name: Upload temporary private data
+        uses: actions/upload-artifact@v4
+        with:
+          name: usatechidxusd-m1-bid-2022-2026
+          path: temporary-data/*
+          retention-days: 1
+          compression-level: 0
+          if-no-files-found: error

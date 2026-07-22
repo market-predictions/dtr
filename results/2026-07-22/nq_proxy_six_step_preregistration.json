@@ -1,0 +1,112 @@
+{
+  "study_id": "DTR-NQ-WP-20260722-19",
+  "state": "OOS_PREREGISTERED_BEFORE_DUKASCOPY_NASDAQ_DOWNLOAD",
+  "scientific_reference": "DTR_CAUSAL_BAR_CLOSE_RANGE_SHIFT_MINUS1",
+  "working_policy_candidate": "E6_NO_FOMC_DAY",
+  "historical_challenger": "E6_EXCLUDE_NEAR_PRIOR_DAY_DIRECTIONAL_EXTREME",
+  "timestamp_census": {
+    "source": "registered NQ one-minute archive",
+    "candidate_reopen_gap": "gap longer than 30 minutes with first post-gap timestamp between 18:00 and 18:10 Eastern Time",
+    "normal_pair": "exclude early-close and holiday-shortened prior sessions when assessing the normal modal pair",
+    "bar_close_support": "modal normal pair 17:00 to 18:01 and no material 16:59 to 18:00 mode",
+    "bar_open_support": "modal normal pair 16:59 to 18:00",
+    "decision": "retain shift-minus-one if bar-close support is observed; otherwise halt downstream NQ work"
+  },
+  "neutral_risk_recalibration": {
+    "starting_capital_usd": 100000.0,
+    "risk_fractions": [0.005, 0.01, 0.015],
+    "costs": {
+      "normal": "published one-tick-per-side returns",
+      "moderate": "two ticks per side",
+      "severe": "four ticks per side"
+    },
+    "resampling": {
+      "date_blocks": 20000,
+      "month_blocks": 20000,
+      "seeds": [20260724, 20260824]
+    },
+    "selection_rule": "diagnostic only; no live risk selection"
+  },
+  "dukascopy_proxy": {
+    "instrument_id": "usatechidxusd",
+    "label": "Dukascopy USA 100 Technical Index bid-CFD proxy",
+    "requested_from_utc": "2022-01-01T00:00:00Z",
+    "requested_to_exclusive_utc": "2026-07-23T00:00:00Z",
+    "timeframe": "m1",
+    "price_sides": ["bid", "ask_if_available"],
+    "no_flat_fill": true,
+    "temporary_private_data": true,
+    "delete_after_research": true,
+    "not_equivalent_to": "CME NQ futures"
+  },
+  "proxy_qualification": {
+    "required": [
+      "sorted unique timestamps",
+      "OHLC integrity",
+      "annual and cleaned checksums",
+      "DST-aware UTC to Eastern conversion",
+      "session-range coverage",
+      "missing interval census",
+      "bid-ask alignment if ask is available",
+      "large discontinuity report"
+    ],
+    "minimum_session_range_coverage": 0.95,
+    "qualification_states": ["QUALIFIED_WITH_PROXY_LIMITATIONS", "REJECT_PROXY_DATA"]
+  },
+  "overlap_concordance_2022_2025": {
+    "nq_window": "intersection of registered NQ archive and qualified proxy through 2025-12-10 23:58 ET",
+    "price_comparisons": [
+      "one-minute log-return correlation",
+      "five-minute log-return correlation",
+      "daily return correlation",
+      "session-range rank correlation",
+      "ATR rank correlation"
+    ],
+    "decision_comparisons": [
+      "eligible session agreement",
+      "sweep direction agreement",
+      "signal direction agreement",
+      "entry timing within 5, 15 and 30 minutes",
+      "trade outcome sign agreement",
+      "year/session/direction metric comparison"
+    ],
+    "interpretation": "high decision concordance qualifies Dukascopy as a research-continuation proxy; low concordance rejects substitution"
+  },
+  "proxy_oos_2026": {
+    "sealed_period": "2026-01-01 through latest qualified candle before 2026-07-23",
+    "arms": [
+      "UNFILTERED_TIMING_CORRECTED_CONTROL",
+      "E6_FIXED_0_25_PRIOR_DAY_ATR",
+      "E6_NO_FOMC_DAY_FIXED_POLICY"
+    ],
+    "rules": "all signal, session, weekday, entry, stop, target, exit, E6 threshold and FOMC definitions frozen before performance inspection",
+    "primary_metrics": [
+      "trades",
+      "net_r",
+      "expectancy_r",
+      "profit_factor",
+      "max_drawdown_r",
+      "return_dd",
+      "one_two_four_tick_cost_expectancy",
+      "session_direction_breakdown"
+    ],
+    "incremental_tests": [
+      "E6 versus unfiltered paired date-block delta",
+      "E6 no-FOMC versus E6 paired date-block delta"
+    ],
+    "decision_states": [
+      "SUPPORTS_PROXY_CONTINUATION",
+      "AMBIGUOUS_EXTEND_FORWARD",
+      "CHALLENGES_MODEL",
+      "PROXY_NOT_COMPARABLE"
+    ],
+    "no_retesting": true
+  },
+  "governance": {
+    "freeze_further_nq_2023_2025_hypothesis_search": true,
+    "no_deployment_baseline": true,
+    "no_pine_or_live_sizing": true,
+    "independent_reimplementation_required": true,
+    "roadmap_compliance_review_required": true
+  }
+}

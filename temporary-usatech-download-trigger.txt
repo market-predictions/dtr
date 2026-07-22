@@ -1,0 +1,1 @@
+One-time private temporary download trigger for Dukascopy USATECH one-minute bid and ask candles. Market data must not enter repository history.

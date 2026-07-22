@@ -2,78 +2,67 @@
 
 ## Phase 0 — Data and execution validity
 
-Status: **active; deployment-blocking**
+Status: **working timestamp interpretation resolved; contract provenance still deployment-blocking**
 
-- [x] Register dataset checksum, schema, gaps, and export-cap warning.
-- [x] Preserve the 504-trade observe-only reference.
-- [x] Identify and correct retrospective post-entry gap rejection.
-- [x] Refreeze the causal 495-trade benchmark.
-- [x] Add timestamp/VWAP hypothesis tests.
-- [x] Run maintenance-boundary census and fixed timing sensitivity.
+- [x] Register dataset checksum, schema, gaps and export-cap warning.
+- [x] Correct retrospective post-entry gap rejection.
+- [x] Preserve the 495-trade execution regression benchmark.
+- [x] Run maintenance-boundary timestamp census.
+- [x] Confirm 732 normal `17:00 → 18:01` pairs and zero normal `16:59 → 18:00` pairs.
+- [x] Retain shift-minus-one as the working bar-close interpretation.
 - [x] Add rollover, uncertainty, concentration and cost evidence.
-- [x] Qualify a temporary Dukascopy USA500 one-minute proxy dataset.
-- [x] Add provider-neutral source adapters and data-integrity contracts.
-- [ ] Resolve NQ timestamp semantics from authoritative metadata or replacement data.
+- [x] Qualify temporary Dukascopy USA500 data and build provider-neutral adapters.
 - [ ] Resolve NQ continuous-contract roll and adjustment methodology.
-- [ ] Acquire actual contract-audited ES futures data.
+- [ ] Obtain authoritative source documentation where possible; this is no longer a binary engine-choice blocker after the census.
 
-## Phase 1 — Reversal baseline
+## Phase 1 — Scientific reference and evidence hierarchy
 
-Status: **causal reference complete; timing-corrected exploratory baseline added**
+Status: **corrected and frozen**
 
-- [x] Implement and validate the reversal engine.
-- [x] Lock the 495-trade causal regression reference.
-- [x] Freeze the 477-trade timing-corrected comparator.
-- [ ] Complete current-code causal selection inference after timestamp scope is finalized.
+- [x] Preserve `DTR_CAUSAL_BAR_CLOSE_RANGE_SHIFT_MINUS1` as the 477-trade scientific NQ reference control.
+- [x] Preserve original E6 as a frozen historical challenger.
+- [x] Relabel `E6_NO_FOMC_DAY` as the user-selected working policy candidate.
+- [x] State explicitly that no deployment baseline exists.
+- [x] Recalculate fixed-fraction risk on the neutral 477-trade reference.
+- [x] Retain all filtered risk curves as conditional scenario analyses only.
 
 Decision: `CONTINUE_RESEARCH_DO_NOT_DEPLOY`.
 
-## Phase 2 — E6 historical programme
+## Phase 2 — Historical NQ programme
 
-Status: **complete**
+Status: **closed against further hypothesis search**
 
-- [x] Complete advanced context research and freeze E5/E6 challengers.
-- [x] Retain Tuesday–Friday and all three sessions.
-- [x] Support the E6 mechanism without changing the 0.25 ATR threshold.
-- [x] Complete path, reward-space, sequencing, event, rollover and risk diagnostics.
-- [x] Promote `E6_NO_FOMC_DAY` as the user-mandated NQ working baseline while preserving E6 as control.
-- [x] Recalibrate 0.50%, 1.00% and 1.50% risk on the no-FOMC baseline.
-- [x] Preserve 0.50% and 1.00% as paper-research envelopes; classify 1.50% as aggressive.
+- [x] Complete context, session, sequencing, path, event, rollover and risk diagnostics.
+- [x] Apply within-stage multiple-testing controls where reconstructible.
+- [x] Classify the original 904-selection chronology as permanently unreconstructible from surviving artifacts.
+- [x] Freeze further 2023–2025 NQ threshold, weekday, session, event, entry, exit, sequencing, interaction and sizing searches.
 
-Do not add another historical filter, event buffer or sizing optimization to the 2023–2025 NQ sample.
+Do not use the current NQ sample to create another candidate rule.
 
-## Phase 3 — Fresh out-of-sample and cross-market evidence
+## Phase 3 — Dukascopy Nasdaq-proxy source validation and fresh evidence
 
-Status: **initial proxy replication complete; stronger evidence still required**
+Status: **preregistered; acquisition and execution in progress**
 
-- [x] Commit the 2026 NQ OOS data qualification specification.
-- [x] Define original E6 and E6 no-FOMC before fresh or cross-market inspection.
-- [x] Qualify Dukascopy `USA500.IDX/USD` as an S&P 500 bid-CFD proxy.
-- [x] Build a provider-neutral NQ-versus-USA500 parallel framework.
-- [x] Reproduce both NQ baselines exactly through the parallel framework.
-- [x] Run unchanged original E6 and E6 no-FOMC proxy replication.
-- [x] Keep instruments separate and prohibit pooled performance.
-- [x] Classify the initial proxy result as `PARTIAL_COST_FRAGILE_REPLICATION`.
-- [ ] Extend the unchanged USA500 proxy test materially beyond 2022–2025.
-- [ ] Acquire qualified NQ one-minute data through at least 2026-07-21.
-- [ ] Acquire materially longer, contract-audited NQ history.
-- [ ] Acquire and qualify actual ES futures data.
-- [ ] Run unchanged E6 and E6 no-FOMC on actual ES.
-- [ ] Extend forward rather than retune when evidence is ambiguous.
+- [x] Freeze the source-validation and 2026 OOS design before downloading or inspecting 2026 proxy performance.
+- [ ] Acquire temporary `usatechidxusd` one-minute data from 2022-01-01 through 2026-07-23 end-exclusive.
+- [ ] Audit annual hashes, timestamps, OHLC, missing intervals, DST conversion, session coverage and discontinuities.
+- [ ] Attempt matching ask data; otherwise use bid data with explicit conservative costs.
+- [ ] Compare 2022–2025 NQ futures and proxy one-minute/five-minute/daily returns, session ranges, ATR and strategy decisions.
+- [ ] Determine whether Dukascopy is a credible research-continuation proxy for NQ.
+- [ ] Run sealed 2026 proxy OOS arms: unfiltered reference, fixed E6 and fixed E6 no-FOMC.
+- [ ] Compare E6 incrementally against the unfiltered control and no-FOMC incrementally against E6.
+- [ ] Delete raw proxy data after research completion and preserve only hashes, audits and compact evidence.
+- [ ] Acquire qualified fresh CME NQ data when available; proxy evidence cannot replace futures validation.
 
-Passing any one replication gate authorizes continued paper research only.
+## Phase 4 — Repository consolidation and independent review
 
-## Phase 4 — Model-selection robustness
+Status: **active**
 
-Status: **original reconstruction blocked; explicit current-code primitives implemented**
-
-- [x] Historical chronological and rolling walk-forward slices.
-- [x] Cost, block-bootstrap, concentration, rollover, event and fixed-fraction stress.
-- [x] Independent reconstruction of E6 advanced blocks and no-FOMC calibration.
-- [x] Independent reconstruction of the NQ-USA500 proxy comparison.
-- [x] Deterministic repeat of all comparable cross-market artifacts.
-- [ ] Complete the separately labelled current-code causal universe after timestamp alignment.
-- [ ] Run nested walk-forward only under a preregistered candidate set.
+- [x] Freeze the deep stack while the timestamp gate was reviewed.
+- [ ] Create a squashed consolidated research snapshot against `main` after final six-step evidence is committed.
+- [ ] Close or mark PRs #7–#18 as superseded by the consolidated snapshot while preserving links and auditability.
+- [ ] Require an independent verifier to reconstruct census, risk, proxy qualification, concordance and OOS results.
+- [ ] Require the independent verifier to audit completion against this roadmap.
 
 ## Phase 5 — Pine and execution parity
 
