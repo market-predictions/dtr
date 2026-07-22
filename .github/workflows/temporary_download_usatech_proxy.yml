@@ -1,4 +1,4 @@
-name: Temporary USATECH proxy diagnostic
+name: Temporary USATECH throttled acquisition
 
 on:
   pull_request:
@@ -16,38 +16,78 @@ permissions:
   contents: read
 
 jobs:
-  diagnose:
-    name: Diagnose USATECH BID 2022
+  acquire:
+    name: Throttled USATECH M1 BID 2022-2026
     runs-on: ubuntu-latest
-    timeout-minutes: 150
+    timeout-minutes: 300
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Run downloader and preserve raw log
+      - name: Cool down provider rate limit
+        run: sleep 480
+      - name: Download yearly bid candles sequentially
         shell: bash
         run: |
-          set +e
-          mkdir -p temporary-data
-          npx --yes dukascopy-node@1.49.0 \
-            -i usatechidxusd \
-            -from 2022-01-01 \
-            -to 2023-01-01 \
-            -t m1 -p bid -v -vu units -fl -f csv \
-            -dir temporary-data \
-            -fn usatechidxusd_m1_bid_2022 \
-            -bs 5 -bp 1000 -r 10 -rp 3000 \
-            > temporary-data/download.log 2>&1
-          STATUS=$?
-          echo "$STATUS" > temporary-data/exit_status.txt
-          cat temporary-data/download.log
-          exit "$STATUS"
-      - name: Upload diagnostic artifact
-        if: always()
+          set -euo pipefail
+          mkdir -p temporary-data logs
+
+          download_year() {
+            LABEL="$1"; FROM="$2"; TO="$3"
+            OUT="temporary-data/usatechidxusd_m1_bid_${LABEL}"
+            for ATTEMPT in 1 2 3 4 5 6; do
+              echo "[$LABEL] attempt $ATTEMPT"
+              set +e
+              npx --yes dukascopy-node@1.49.0 \
+                -i usatechidxusd \
+                -from "$FROM" \
+                -to "$TO" \
+                -t m1 -p bid -v -vu units -fl -f csv \
+                -dir temporary-data \
+                -fn "usatechidxusd_m1_bid_${LABEL}" \
+                -bs 20 -bp 1200 -r 10 -rp 5000 \
+                > "logs/${LABEL}_attempt_${ATTEMPT}.log" 2>&1
+              STATUS=$?
+              set -e
+              if [ "$STATUS" -eq 0 ]; then
+                echo "[$LABEL] success"
+                return 0
+              fi
+              cat "logs/${LABEL}_attempt_${ATTEMPT}.log"
+              rm -f "${OUT}.csv"
+              sleep $((ATTEMPT * 180))
+            done
+            echo "[$LABEL] exhausted retries" >&2
+            return 1
+          }
+
+          download_year 2022 2022-01-01 2023-01-01
+          sleep 120
+          download_year 2023 2023-01-01 2024-01-01
+          sleep 120
+          download_year 2024 2024-01-01 2025-01-01
+          sleep 120
+          download_year 2025 2025-01-01 2026-01-01
+          sleep 120
+          download_year 2026_YTD 2026-01-01 2026-07-23
+
+      - name: Audit and compress yearly files
+        shell: bash
+        run: |
+          set -euo pipefail
+          for CSV in temporary-data/*.csv; do
+            wc -l "$CSV"
+            sha256sum "$CSV"
+            gzip -9 "$CSV"
+          done | tee temporary-data/acquisition_audit.txt
+          cp logs/*.log temporary-data/
+
+      - name: Upload temporary private data
         uses: actions/upload-artifact@v4
         with:
-          name: usatech-download-diagnostic-2022
+          name: usatechidxusd-m1-bid-2022-2026
           path: temporary-data/*
           retention-days: 1
+          compression-level: 0
           if-no-files-found: error
