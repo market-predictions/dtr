@@ -1,0 +1,17 @@
+{
+  "study_id": "DTR_NQ_E6_ADVANCED_BLOCKS_0_3_20260722",
+  "repeat_count": 2,
+  "artifacts_checked": 17,
+  "all_identical": true,
+  "content_hashes": {
+    "candidate_results.csv": "476acbf4a1a23fd720a7a87def86929e06af6467c22f4a2bc1a7e29633843831",
+    "candidate_inference.csv": "7df407c364f6a5348874151cf262743b64004aa89daf8aade0513d401f544cde",
+    "changed_trade_attribution.csv": "681aecbada3afced784b2addc0d6596b63505c3febe63c7ac16a1afa0f2c6143",
+    "mechanism_decision.json": "8b99786c413bb605b8beb69353dcdfa0faa14f34114e7ccab3053154ac3a725d",
+    "mechanism_summary.csv": "e61ee0171667e6807da405e80e3e82b66182e592b392c9aeec22fb3668f30292",
+    "mechanism_strata.csv": "f489c0dddbefdfbdb2dd276e3053745eee29369b3f14d7ef33cda42a1b54ec73",
+    "signal_features_decompressed": "38b6ea25efc65df3b48c419fe35a4caa5a81f22af3406f5bf41c2be92dcadb0d",
+    "signal_diagnostics_decompressed": "eeebceb27ca5db27ec357e3facfb05fe5d6f8f635abdf658a84b6546dcf39ac2",
+    "summary.json": "4166d6f37d9a714aa42ddb572c4d7b2110da745f5e3b5bdefd73d7753588239d"
+  }
+}

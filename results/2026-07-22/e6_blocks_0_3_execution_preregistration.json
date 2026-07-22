@@ -1,0 +1,72 @@
+{
+  "study_id": "DTR_NQ_E6_ADVANCED_BLOCKS_0_3_20260722",
+  "status": "FROZEN_BEFORE_RESULT_INSPECTION",
+  "working_baseline": {
+    "name": "E6_EXCLUDE_NEAR_PRIOR_DAY_DIRECTIONAL_EXTREME",
+    "expected_trades": 304,
+    "expected_net_r": 48.937550,
+    "expected_expectancy_r": 0.160979,
+    "rule": "retain unavailable prior-day ATR rows or directional-extreme distance > 0.25 completed-D1 ATR"
+  },
+  "non_selectable_control": {
+    "name": "DTR_CAUSAL_BAR_CLOSE_RANGE_SHIFT_MINUS1",
+    "expected_trades": 477,
+    "expected_net_r": 42.577515,
+    "expected_expectancy_r": 0.089261
+  },
+  "candidate_rules": {
+    "P1_TOTAL_PATH_LE_12_BARS": "entry_index - sweep_index <= 12",
+    "P2_BOS_QUALITY_2_OF_3": "BOS body fraction >= 0.60; directional close location >= 0.75; true range >= ATR14; require at least two",
+    "P3_ENTRY_EXTENSION_LE_0_35R": "absolute raw-entry to pivot distance / frozen initial risk <= 0.35",
+    "R1_CLEAR_TO_TP1": "nearest known directionally-ahead structural level clearance / frozen initial risk >= 1.25",
+    "R2_CLEAR_TO_RUNNER": "nearest known directionally-ahead structural level clearance / frozen initial risk >= 2.50",
+    "I1_BOS_QUALITY_AND_TP1_CLEARANCE": "P2 and R1; shadow only"
+  },
+  "mechanism_classification": {
+    "comparison": "E6-kept available signals versus E6-rejected near-prior-day-extreme signals using isolated causal simulations, with unavailable rows reported separately",
+    "supported_requires": [
+      "rejected expectancy at least 0.05R below kept expectancy",
+      "rejected stop-first rate at least 5 percentage points higher OR rejected mean MAE at least 0.10R higher",
+      "at least three of six adverse markers: MFE lower by 0.10R; TP1 hit lower by 5pp; TP2 hit lower by 3pp; first-15-minute MAE higher by 0.05R; first-30-minute MAE higher by 0.08R; structural clearance lower by 0.25R",
+      "kept-minus-rejected expectancy positive in at least two of three calendar years and two of three sessions"
+    ],
+    "mixed": "rejected expectancy is lower or at least three adverse markers are present, but all SUPPORTED requirements are not met",
+    "unexplained": "otherwise"
+  },
+  "families": {
+    "path_quality": ["P1_TOTAL_PATH_LE_12_BARS", "P2_BOS_QUALITY_2_OF_3", "P3_ENTRY_EXTENSION_LE_0_35R"],
+    "reward_space": ["R1_CLEAR_TO_TP1", "R2_CLEAR_TO_RUNNER"],
+    "interaction_shadow": ["I1_BOS_QUALITY_AND_TP1_CLEARANCE"]
+  },
+  "inference": {
+    "market_date_block_bootstrap_iterations": 20000,
+    "month_block_bootstrap_iterations": 20000,
+    "familywise_method": "joint market-date block max-t, one-sided incremental test versus E6",
+    "seed": 20260722
+  },
+  "historical_gate": {
+    "minimum_trades": 250,
+    "effect": "expectancy >= E6 + 0.03R OR max drawdown <= 80% of E6 with expectancy >= E6 - 0.01R",
+    "return_dd": ">= 1.15 times E6",
+    "cost": "two-tick-each-side expectancy positive and no more than 0.02R below E6",
+    "years": "all three years positive OR two positive and worst >= -3R",
+    "concentration": "maximum session and half-year share <= 60%",
+    "familywise_p": "<= 0.05",
+    "sequencing": "all changed trades attributed and no overlapping positions"
+  },
+  "family_tie_breaker": [
+    "lowest familywise adjusted p-value",
+    "highest return-to-drawdown",
+    "highest expectancy",
+    "largest executed trade count"
+  ],
+  "restrictions": [
+    "no E6 threshold change",
+    "no weekday or session search",
+    "no neighboring threshold search",
+    "no entry stop target partial breakeven or time-exit change",
+    "no additional interaction",
+    "historical results may only nominate a fresh-OOS challenger",
+    "no Pine sizing or deployment authorization"
+  ]
+}

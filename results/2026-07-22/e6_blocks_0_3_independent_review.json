@@ -1,0 +1,31 @@
+{
+  "study_id": "DTR_NQ_E6_ADVANCED_BLOCKS_0_3_20260722",
+  "seed": 20260723,
+  "overall_pass": true,
+  "checks": {
+    "dataset_checksum": true,
+    "all_metric_reconstructions": true,
+    "unfiltered_exact": true,
+    "e6_exact": true,
+    "daily_context_causal": true,
+    "weekly_context_causal": true,
+    "path_ordering": true,
+    "all_mask_contracts": true,
+    "all_attribution_checks": true,
+    "all_portfolios_non_overlapping": true,
+    "bootstrap_all_include_zero": true,
+    "bootstrap_all_observed_negative": true,
+    "mechanism_supported_reconstructed": true,
+    "classification_contract": true,
+    "no_fresh_oos_challenger": true
+  },
+  "mechanism_reconstruction": {
+    "kept_minus_rejected_expectancy_r": 0.22441391244149214,
+    "rejected_minus_kept_stop_first_rate": 0.07053757053757059,
+    "rejected_minus_kept_mae_r": 0.05019572620493529,
+    "adverse_marker_count": 3,
+    "years_with_kept_higher_expectancy": 3,
+    "sessions_with_kept_higher_expectancy": 3
+  },
+  "decision": "RETAIN_E6_NO_NEW_FILTER_ADVANCE_TO_SEQUENCING"
+}
