@@ -1,0 +1,7 @@
+{
+  "S3_SESSION_SLEEVES": {
+    "max_concurrent_positions": 2,
+    "max_planned_risk_units": 0.6666666666666666,
+    "trades_participating_in_overlap": 12
+  }
+}
