@@ -114,7 +114,6 @@ def candidate_stream_hashes(matrix: pd.DataFrame) -> dict[str, str]:
     hashes: dict[str, str] = {}
     for column in matrix.columns:
         payload = {
-            "candidate_id": str(column),
             "index": [str(value) for value in index_payload],
             "returns": [float(value) for value in matrix[column].to_numpy(float)],
         }

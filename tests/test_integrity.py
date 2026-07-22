@@ -67,9 +67,11 @@ def _session(
     )
 
 
-def test_public_engine_entry_points_are_integrity_safe() -> None:
-    assert engine.resample_5m is resample_5m
-    assert engine.run_backtest is run_backtest
+def test_public_package_entry_points_are_integrity_safe_without_engine_mutation() -> None:
+    assert resample_5m is integrity.resample_5m
+    assert run_backtest is integrity.run_backtest
+    assert engine.resample_5m is not resample_5m
+    assert engine.run_backtest is not run_backtest
 
 
 def test_resample_marks_gap_inside_five_minute_bucket() -> None:
