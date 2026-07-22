@@ -1,0 +1,79 @@
+{
+  "study_id": "DTR-NQ-WP-20260722-14",
+  "decision_state": "PREREGISTERED_EXECUTION_NOT_STARTED",
+  "starting_capital_usd": 100000.0,
+  "baseline": {
+    "name": "E6_EXCLUDE_NEAR_PRIOR_DAY_DIRECTIONAL_EXTREME",
+    "trades": 304,
+    "net_r": 48.93754952687199,
+    "expectancy_r": 0.16097878133839472,
+    "max_drawdown_r": 8.632571354238342
+  },
+  "risk_fractions": [0.005, 0.01, 0.015],
+  "cost_scenarios": {
+    "NORMAL_1_TICK_EACH_SIDE": {
+      "additional_round_trip_points_vs_published_pnl_r": 0.0,
+      "commission_per_side_usd": 2.25
+    },
+    "MODERATE_2_TICKS_EACH_SIDE": {
+      "additional_round_trip_points_vs_published_pnl_r": 0.5,
+      "commission_per_side_usd": 2.25
+    },
+    "SEVERE_4_TICKS_EACH_SIDE": {
+      "additional_round_trip_points_vs_published_pnl_r": 1.5,
+      "commission_per_side_usd": 2.25
+    }
+  },
+  "historical_metrics": [
+    "final_equity_usd",
+    "total_return_pct",
+    "maximum_drawdown_pct",
+    "maximum_drawdown_usd",
+    "longest_losing_streak",
+    "maximum_time_under_water_trades",
+    "maximum_time_under_water_calendar_days",
+    "minimum_equity_usd"
+  ],
+  "resampling": {
+    "date_block": {
+      "iterations": 20000,
+      "seed": 20260722,
+      "unit": "ETH market date",
+      "method": "sample observed ETH-date blocks with replacement; preserve chronological trade order within each sampled block; sample the same number of blocks as observed"
+    },
+    "month_block": {
+      "iterations": 20000,
+      "seed": 20260822,
+      "unit": "entry calendar month",
+      "method": "sample observed month blocks with replacement; preserve chronological trade order within each sampled block; sample the same number of month blocks as observed"
+    }
+  },
+  "distribution_metrics": [
+    "final_equity_p05_p25_p50_p75_p95",
+    "maximum_drawdown_pct_p50_p75_p90_p95_p99",
+    "probability_final_equity_below_start",
+    "probability_maximum_drawdown_at_least_10pct",
+    "probability_maximum_drawdown_at_least_20pct",
+    "probability_maximum_drawdown_at_least_30pct",
+    "longest_losing_streak_p50_p90_p95_p99",
+    "time_under_water_trades_p50_p90_p95_p99"
+  ],
+  "warning_labels": {
+    "LOSS_RISK_WATCH": "resampled probability of ending below starting capital is at least 10%",
+    "DD10_WATCH": "resampled probability of maximum drawdown at least 10% is at least 10%",
+    "DD20_WATCH": "resampled probability of maximum drawdown at least 20% is at least 5%",
+    "DD30_WATCH": "resampled probability of maximum drawdown at least 30% is at least 1%"
+  },
+  "restrictions": [
+    "risk_diagnostic_only",
+    "no live risk recommendation",
+    "no leverage increase",
+    "no dynamic sizing",
+    "no volatility scaling",
+    "no drawdown throttle",
+    "no Kelly sizing",
+    "no E6 change",
+    "no Pine or deployment authorization"
+  ],
+  "next_decision": "Describe the risk/cost trade-off and identify material tail-risk warnings. Do not select a production risk level from the historical sample."
+}

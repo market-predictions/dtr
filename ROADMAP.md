@@ -32,7 +32,7 @@ Decision: `CONTINUE_RESEARCH_DO_NOT_DEPLOY`.
 
 ## Phase 2 — Independent modules and context
 
-Status: **E6 mechanism, filters, sequencing and event attribution complete; equity stress next**
+Status: **bounded E6 historical programme complete**
 
 - [x] Continuation: `HOLD_FOR_FRESH_DATA`.
 - [x] IFVG: `REJECT_NO_INCREMENTAL_VALUE`.
@@ -46,16 +46,17 @@ Status: **E6 mechanism, filters, sequencing and event attribution complete; equi
 - [x] Complete P1–P3 path-quality and R1–R2 reward-space families; no new filter advanced.
 - [x] Complete sequencing S1–S3; retain S0 global sequencing.
 - [x] Complete official FOMC, CPI, NFP, expiration, early-close, holiday and rollover attribution.
-- [x] Preserve FOMC-pre and expiration/roll overlap as fixed risk-watch cohorts only.
+- [x] Preserve FOMC-pre and expiration/roll overlap as fixed future risk-watch cohorts only.
 - [x] Reject historical event exclusions and alternate event-window search.
-- [ ] Complete fixed-fraction equity and execution-cost stress for unchanged E6.
+- [x] Complete fixed-fraction equity and execution-cost stress for unchanged E6.
+- [x] Preserve 0.50% and 1.00% as paper-research envelopes; classify 1.50% as aggressive.
 - [ ] Footprint only with suitable historical order-flow data.
 
-Historical work may nominate fresh-OOS challengers or risk-watch cohorts only. It cannot replace E6 or authorize Pine.
+Do not add another historical filter, event rule or sizing optimization to the 2023–2025 NQ sample.
 
-## Phase 3 — Fresh out-of-sample evidence
+## Phase 3 — Fresh out-of-sample and replication evidence
 
-Status: **baseline and context challengers preregistered; data not acquired**
+Status: **preregistered; required data not acquired**
 
 - [x] Commit the 2026 OOS data qualification and pass/fail specification.
 - [x] Define Arms 0/A/B and shadow Arm C before fresh performance inspection.
@@ -63,8 +64,10 @@ Status: **baseline and context challengers preregistered; data not acquired**
 - [ ] Freeze dataset checksum and audit before performance inspection.
 - [ ] Run Arms 0/A/B with zero parameter changes.
 - [ ] Carry FOMC-pre and expiration/roll-overlap as descriptive tags only.
-- [ ] Report paired return, funnel, concentration, costs, roll and risk attribution.
+- [ ] Report paired return, funnel, concentration, costs, roll and fixed-fraction risk attribution.
 - [ ] Extend forward rather than retune when the sample is underpowered or ambiguous.
+- [ ] Acquire materially longer, contract-audited NQ history for unchanged replication.
+- [ ] Run unchanged E5/E6 and P3 replication on ES without pooling instruments.
 
 Passing authorizes continued paper research only.
 
@@ -74,11 +77,11 @@ Status: **original reconstruction blocked; explicit current-code primitives impl
 
 - [x] Historical chronological slices.
 - [x] Historical rolling walk-forward procedure.
-- [x] Cost, block-bootstrap, concentration, rollover and event stress.
+- [x] Cost, block-bootstrap, concentration, rollover, event and fixed-fraction stress.
 - [x] Classify original staged 904 reconstruction as blocked by missing leaderboards and stage bases.
 - [x] Implement aligned return matrices, stream hashes, duplicate detection and max-t primitives.
 - [x] Apply frozen inference to E6 path, reward-space and sequencing families.
-- [x] Independently reconstruct event and rollover attribution.
+- [x] Independently reconstruct event, rollover and equity-risk attribution.
 - [ ] Complete the separately labelled current-code causal universe only after timestamp alignment is finalized.
 - [ ] Run nested walk-forward only under a preregistered candidate set.
 

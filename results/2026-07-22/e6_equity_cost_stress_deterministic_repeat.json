@@ -1,0 +1,16 @@
+{
+  "all_identical": true,
+  "decision": "DETERMINISTIC_REPEAT_PASS",
+  "files_compared": 9,
+  "hashes": {
+    "artifact_hashes.json": "062d2e8eed827f8ba172008f750f56adbc8650d3ca9c4e184d676da00c57b98e",
+    "bootstrap_summary.csv": "9718b16fbb52f85fa02dbbaf62951a0e2b330a11af127be87eca07844a784789",
+    "decision.json": "cf09fe80d2ffeb5974916dfb1aa84076fddf6dbec0672aca4e268285e88f2c1d",
+    "historical_equity_1pct_cost_stress.png": "fce0e95d125bfa1f95e0aa59da71413b84b14fdf397d3a01b50f56a82902f36b",
+    "historical_equity_normal_costs.png": "dfc5c0fb9d1dd90e903034fcf32c8134ff2d0be6e9bce40d15bdee820bd16f27",
+    "historical_equity_paths.csv": "a7e5547b84d8dce9fa9d7332005eceaafda7845b6927f250cfe3ff7239105aba",
+    "historical_summary.csv": "31c1c77041e7d6dabec0c71b1ddd4a021dc6a16694a5cd62ae0d6e87361821db",
+    "month_bootstrap_drawdown_by_risk.png": "7261e124bad23140a6dbc106c8e113d52470a86a4088d7efc962795d1daa4301",
+    "repeat_probe.json": "f4af2ebeb9db85dd34b02c4ae12d0a917e9a525fd01f4f5fcece13ff011d1766"
+  }
+}

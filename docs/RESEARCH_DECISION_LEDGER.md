@@ -7,21 +7,21 @@ This ledger is the durable entry point for completed DTR research decisions. Det
 1. **Execution regression benchmark** — `DTR_PY_NQ_CANDIDATE_0_1_CAUSAL_GAP`
    - 495 trades; 86.004761R; 0.173747R expectancy.
    - Purpose: validate the causal execution engine and detect unintended code changes.
-   - It is not a deployable strategy authorization.
 
 2. **Advanced-context research comparator** — `DTR_CAUSAL_BAR_CLOSE_RANGE_SHIFT_MINUS1`
    - 477 trades; 42.577515R; 0.089261R expectancy.
    - Purpose: fixed comparator for the timing-corrected historical context program.
 
 3. **Frozen challengers**
-   - E5: `E5_EXCLUDE_COMPRESSED_RANGE` — 335 trades; 49.464423R; 0.147655R expectancy.
-   - E6: `E6_EXCLUDE_NEAR_PRIOR_DAY_DIRECTIONAL_EXTREME` — 304 trades; 48.937550R; 0.160979R expectancy.
+   - E5: 335 trades; 49.464423R; 0.147655R expectancy.
+   - E6: 304 trades; 48.937550R; 0.160979R expectancy.
    - Neither replaces the comparator until fresh-data and data-validity gates pass.
 
-4. **Shadow and risk-watch evidence**
+4. **Shadow, risk-watch and sizing evidence**
    - E5+E6 and E6+Monday remain shadow-only.
    - P2, P3, R2 and I1 remain historical diagnostics only.
    - FOMC-pre and expiration/roll-overlap are fixed risk-watch cohorts only.
+   - 0.50% and 1.00% are paper-research risk envelopes only; 1.50% is classified as aggressive.
 
 ## DTR-NQ-WP-20260722-08 — Advanced context robustness
 
@@ -97,26 +97,40 @@ Authoritative files:
 - `results/2026-07-22/e6_event_roll_preregistration.json`
 - `docs/E6_EVENT_ROLL_ATTRIBUTION_RESEARCH_2026-07-22.md`
 - `results/2026-07-22/e6_event_roll_results.csv`
-- `results/2026-07-22/e6_event_roll_inference.csv`
 - `results/2026-07-22/e6_event_roll_overlap_decomposition.csv`
-- `results/2026-07-22/e6_event_roll_discontinuities.csv`
-- `results/2026-07-22/e6_event_roll_summary.json`
 - `results/2026-07-22/e6_event_roll_independent_review.json`
-- `results/2026-07-22/e6_event_roll_deterministic_repeat.json`
-- `reviews/DTR-NQ-WP-20260722-13-independent-review.md`
 - `handovers/DTR-NQ-WP-20260722-13.md`
+
+Reusable conclusion: FOMC weakness was concentrated in nine pre-statement trades. Expiration and roll weakness came from the same 18-trade overlap. No event exclusion is authorized. Reopen only on longer, fresh or cross-market data using unchanged definitions.
+
+## DTR-NQ-WP-20260722-14 — E6 fixed-fraction equity and execution-cost stress
+
+Decision: `EQUITY_COST_STRESS_COMPLETE_NO_SIZING_AUTHORIZATION`.
+
+Authoritative files:
+
+- `results/2026-07-22/e6_equity_cost_stress_preregistration.json`
+- `docs/E6_EQUITY_COST_STRESS_RESEARCH_2026-07-22.md`
+- `results/2026-07-22/e6_equity_cost_stress_historical.csv`
+- `results/2026-07-22/e6_equity_cost_stress_bootstrap.csv`
+- `results/2026-07-22/e6_equity_cost_stress_independent_review.json`
+- `results/2026-07-22/e6_equity_cost_stress_deterministic_repeat.json`
+- `reviews/DTR-NQ-WP-20260722-14-independent-review.md`
+- `handovers/DTR-NQ-WP-20260722-14.md`
+- `changelogs/DTR-NQ-WP-20260722-14.md`
 
 Reusable conclusion:
 
-- FOMC day was weak at 14 trades and -5.56R; the loss was concentrated in nine pre-statement entries worth -7.62R.
-- CPI showed no clear adverse pattern; NFP was too small and not adverse overall.
-- Expiration-week and roll-window weakness came from the same 18-trade intersection, which lost 5.20R.
-- Expiration-only and roll-only cohorts were positive, so separate exclusions are unsupported.
-- No roll window exceeded the frozen 99th-percentile maintenance-gap threshold.
-- No event exclusion or E6 change is authorized.
+- All nine observed $100,000 account paths finished profitable.
+- Normal-cost observed final equity was $126,940 / $159,185 / $197,231 at 0.50% / 1.00% / 1.50% risk.
+- Normal-cost observed maximum drawdown was 4.3% / 8.4% / 12.4%.
+- Severe-cost 1.00% risk had a resampled 95th-percentile drawdown of approximately 22.9–25.5% and a 10.6–16.6% probability of reaching 20% drawdown.
+- Severe-cost 1.50% risk reached 20% drawdown in approximately 45.1–54.9% of resamples and 30% drawdown in approximately 8.5–13.7%.
+- Preserve 0.50% and 1.00% only as paper-research envelopes. Do not treat 1.50% as a balanced default.
+- No live sizing, leverage, Pine or deployment authorization follows.
 
-Do not search alternate release buffers, expiration-week lengths, roll-window lengths, holiday sets or event combinations on 2023–2025. Reopen the two risk-watch cohorts only on longer, fresh or cross-market data with unchanged definitions.
+Do not search additional risk fractions, dynamic sizing, volatility scaling, drawdown throttles, Kelly fractions or cost-dependent sizing on the 2023–2025 sample.
 
 ## Current forward decision
 
-The primary fresh-data evidence remains Arms 0/A/B with shadow Arm C. While fresh data is unavailable, proceed to fixed-fraction equity and execution-cost stress for unchanged E6. The repository must retain the unfiltered comparator alongside E5 and E6 until fresh evidence establishes incremental value.
+The bounded E6 historical programme is complete. The next valid evidence must come from qualified fresh NQ data, materially longer contract-audited NQ history, or unchanged ES replication. The repository must retain the unfiltered comparator alongside E5 and E6 until fresh evidence establishes incremental value.

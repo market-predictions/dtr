@@ -1,0 +1,15 @@
+{
+  "baseline_exact": true,
+  "conclusions": [
+    "All nine historical paths finish above starting capital.",
+    "0.5% risk is the most drawdown-resilient tested envelope.",
+    "1.0% risk remains profitable historically but has meaningful 20% drawdown tail risk under severe costs.",
+    "1.5% risk has materially high tail drawdown risk, especially under severe costs."
+  ],
+  "cost_adjustments_exact": true,
+  "decision": "INDEPENDENT_REVIEW_PASS",
+  "historical_paths_exact": true,
+  "independent_iterations_per_method_scenario": 10000,
+  "independent_seed_family": "20260922/20261022",
+  "no_sizing_authorization": true
+}
