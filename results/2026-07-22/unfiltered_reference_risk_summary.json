@@ -1,0 +1,25 @@
+{
+  "decision": "UNFILTERED_REFERENCE_RISK_RECALIBRATION_COMPLETE_NO_SIZING_AUTHORIZATION",
+  "baseline": {"trades": 477, "net_r": 42.57751500303384, "expectancy_r": 0.0892610377422093},
+  "historical": {
+    "normal": {
+      "0.5pct": {"final_equity_usd": 122594.75, "max_drawdown_pct": 7.94},
+      "1.0pct": {"final_equity_usd": 147582.40, "max_drawdown_pct": 15.34},
+      "1.5pct": {"final_equity_usd": 174491.03, "max_drawdown_pct": 22.24}
+    },
+    "severe": {
+      "0.5pct": {"final_equity_usd": 108035.46, "max_drawdown_pct": 9.69},
+      "1.0pct": {"final_equity_usd": 114604.79, "max_drawdown_pct": 18.55},
+      "1.5pct": {"final_equity_usd": 119393.68, "max_drawdown_pct": 26.63}
+    }
+  },
+  "resampled_ranges": {
+    "normal_0.5pct": {"p_loss_range": [0.0611, 0.0653], "dd95_range": [0.1595, 0.1629], "p_dd20_range": [0.01035, 0.01455]},
+    "normal_1.0pct": {"p_loss_range": [0.0678, 0.0740], "dd95_range": [0.2981, 0.3039], "p_dd20_range": [0.32445, 0.3366], "p_dd30_range": [0.0484, 0.05385]},
+    "normal_1.5pct": {"p_loss_range": [0.07745, 0.0840], "dd95_range": [0.4180, 0.4253], "p_dd20_range": [0.77275, 0.7784], "p_dd30_range": [0.2807, 0.29365]},
+    "severe_0.5pct": {"p_loss_range": [0.2814, 0.2861], "dd95_range": [0.2140, 0.2184], "p_dd20_range": [0.07305, 0.07995]},
+    "severe_1.0pct": {"p_loss_range": [0.3047, 0.3086], "dd95_range": [0.3887, 0.3954], "p_dd20_range": [0.6073, 0.6167], "p_dd30_range": [0.1978, 0.2082]},
+    "severe_1.5pct": {"p_loss_range": [0.3302, 0.3319], "dd95_range": [0.5298, 0.5369], "p_dd20_range": [0.9258, 0.9270], "p_dd30_range": [0.56365, 0.5734]}
+  },
+  "interpretation": "The scientific reference is positive but thin and execution-sensitive. 0.5% is the only tested envelope with relatively contained normal-cost tail risk; no live sizing authorization follows."
+}
