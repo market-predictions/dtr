@@ -1,0 +1,23 @@
+{
+  "study_id": "DTR-NQ-WP-20260722-16",
+  "decision_state": "PREREGISTERED_EXECUTION_COMPLETE",
+  "starting_capital_usd": 100000.0,
+  "baseline": {
+    "name": "E6_NO_FOMC_DAY",
+    "trades": 291,
+    "net_r": 53.48334196741127,
+    "expectancy_r": 0.18379155315261606,
+    "max_drawdown_r": 9.151060839915637
+  },
+  "risk_fractions": [0.005, 0.01, 0.015],
+  "cost_scenarios": {
+    "NORMAL_1_TICK_EACH_SIDE": {"additional_round_trip_points_vs_published_pnl_r": 0.0, "commission_per_side_usd": 2.25},
+    "MODERATE_2_TICKS_EACH_SIDE": {"additional_round_trip_points_vs_published_pnl_r": 0.5, "commission_per_side_usd": 2.25},
+    "SEVERE_4_TICKS_EACH_SIDE": {"additional_round_trip_points_vs_published_pnl_r": 1.5, "commission_per_side_usd": 2.25}
+  },
+  "resampling": {
+    "date_block": {"iterations": 20000, "seed": 20261122, "unit": "ETH market date"},
+    "month_block": {"iterations": 20000, "seed": 20261222, "unit": "entry calendar month"}
+  },
+  "restrictions": ["risk_diagnostic_only", "no live risk recommendation", "no leverage increase", "no dynamic sizing", "no baseline-rule change", "no Pine or deployment authorization"]
+}
