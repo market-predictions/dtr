@@ -2,15 +2,19 @@
 
 ## Current work package
 
-`DTR-NQ-WP-20260721-04 — CISD entry-confirmation ablation`
+`DTR-NQ-WP-20260722-06 — Baseline validity reset`
 
-Status: **complete; final CI passed; ready for PR merge**
+Status: **claimed; causal design complete; implementation starting**
 
-Branch: `agent/nq-cisd-ablation`
+Branch: `agent/nq-baseline-validity-reset`
 
-PR: `#4 — Reject CISD confirmation after causal NQ ablation`
+Decision state: `DEPLOYMENT_BLOCKED_PENDING_BASELINE_RESET`
 
-Decision: `REJECT_NO_INCREMENTAL_VALUE`
+## Trigger
+
+An independent source-and-evidence review found that the current `reject_unsafe` benchmark retrospectively discards trades when an unsafe data gap occurs after entry. The rule uses the simulated future exit and changes later portfolio eligibility using future information.
+
+The 491-trade benchmark is therefore preserved for historical reproducibility but suspended as the active comparison baseline.
 
 ## Locked primary dataset
 
@@ -18,74 +22,53 @@ Dataset SHA-256:
 
 `8d3f157a422636e5b8dda51cc3a3d9209c50cb53f9b279d3e14b627ce59370dc`
 
-NQ remains the sole optimization base for the current phase.
+NQ remains the sole research base. Raw data remains outside Git.
 
-## Frozen reversal baseline
+## Historical benchmarks
 
-`DTR_PY_NQ_CANDIDATE_0_1_GAP_SAFE`
+### Observe-only reference
+
+- trades: `504`;
+- expectancy: `0.1669927760762483R`;
+- net R: `84.16435914242919R`;
+- maximum drawdown: `14.107857513807524R`.
+
+This result bridges missing data and is retained only for regression.
+
+### Retrospective gap-reject benchmark
 
 - trades: `491`;
 - expectancy: `0.180235811449135R`;
 - net R: `88.49578342152539R`;
-- profit factor: `1.3819983049452256`;
-- maximum drawdown: `14.107857513807524R`;
-- return-to-drawdown: `6.272801`.
+- maximum drawdown: `14.107857513807524R`.
 
-The baseline remains unchanged.
+This result is noncausal for four open-trade gap cases and may not be used for deployment or final module comparison.
 
-## Closed module decisions
+## Active reset tasks
+
+- causal conservative open-trade gap liquidation;
+- exact baseline refreeze and changed-trade attribution;
+- timestamp bar-open versus bar-close evidence;
+- continuous-contract rollover sensitivity;
+- committed baseline uncertainty and selection-pressure code;
+- session×weekday concentration analysis;
+- no-retune reruns of continuation, IFVG, CISD, and entry routing.
+
+## Blocked work
+
+PR #5 — reversal entry-routing ablation — remains draft and blocked. Its completed preliminary evidence is preserved but must be rerun against the corrected benchmark.
+
+## Closed module decisions under review
 
 - continuation: `HOLD_FOR_FRESH_DATA`;
 - IFVG confirmation: `REJECT_NO_INCREMENTAL_VALUE`;
-- CISD confirmation: `REJECT_NO_INCREMENTAL_VALUE`.
+- CISD confirmation: `REJECT_NO_INCREMENTAL_VALUE`;
+- entry routing: preliminary `REJECT_NO_INCREMENTAL_VALUE` on the suspended benchmark.
 
-None may be retuned or combined on the current NQ sample.
+These decisions remain informative but are not final until no-retune reruns complete.
 
-## CISD result
+## Deployment restrictions
 
-Broad CISD confirmation is inferior to the frozen baseline:
+No production deployment, Pine strategy port, position sizing recommendation, or profitability claim is authorized.
 
-- sequence confirm: 309 trades, 0.144100R expectancy, 4.464679 return/DD;
-- last-candle confirm: identical to sequence confirm;
-- recent ≤3 bars: 296 trades, 0.136305R expectancy;
-- recent ≤6 bars: 309 trades, 0.140105R expectancy.
-
-The retest portfolio has 75 trades and 0.256552R expectancy, but only 15.3% coverage and 3.728646 return/DD. Its frozen 73-trade cohort has a 0.130746R point-estimate uplift over the complement, but trade and month-block confidence intervals cross zero and the one-sided permutation p-value is 0.210289.
-
-CISD retest is retained as a diagnostic annotation only. It is not authorized as a filter or sizing rule.
-
-## Validation status
-
-- causal bullish/bearish implementation: **complete**;
-- final-candle anchor fixtures: **passed**;
-- stale confirmed/unconfirmed sequence expiry: **passed**;
-- reset-epoch fixtures: **passed**;
-- strict manifest tests: **passed**;
-- full suite: **62 tests passed**;
-- frozen observe regression: **passed**;
-- exact changed-trade attribution: **complete**;
-- deterministic clean repeat: **52/52 artifacts byte-identical**;
-- cost stress: **complete**;
-- bootstrap and permutation analysis: **complete**;
-- independent adversarial review: **complete**;
-- pinned Ruff: **passed**;
-- pytest Python 3.11: **passed**;
-- pytest Python 3.12: **passed**;
-- GitHub CI run `29875052056`: **success**.
-
-## Promotion restriction
-
-CISD may not be added to the reversal candidate, used for position sizing, combined with IFVG or continuation, tuned further on the current sample, or ported to Pine as a strategy rule.
-
-## Next planned work package
-
-`DTR-NQ-WP-20260722-05 — Reversal entry-routing ablation`
-
-It will compare the frozen break-close route with a causally defined first-pullback route and a predeclared hybrid router while preserving signal, stop, target, and exit logic.
-
-## Open project limitations
-
-- continuous-contract rollover and back-adjustment methodology;
-- exact timestamp and daylight-saving semantics;
-- session-boundary and supplied VWAP reset verification;
-- absence of post-December-2025 paper-forward data.
+Fresh 2026 data may not be inspected until the corrected benchmark and preregistered continuation/deployment gate are committed.
