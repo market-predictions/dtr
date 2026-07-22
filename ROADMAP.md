@@ -32,7 +32,7 @@ Decision: `CONTINUE_RESEARCH_DO_NOT_DEPLOY`.
 
 ## Phase 2 — Independent modules and context
 
-Status: **no-retune module reruns and advanced context study complete**
+Status: **module reruns complete; E6 advanced framework frozen**
 
 - [x] Continuation: `HOLD_FOR_FRESH_DATA`.
 - [x] IFVG: `REJECT_NO_INCREMENTAL_VALUE`.
@@ -40,8 +40,19 @@ Status: **no-retune module reruns and advanced context study complete**
 - [x] Entry routing: `REJECT_NO_INCREMENTAL_VALUE`.
 - [x] D1/H4 direction, volatility, trend strength, range quality, prior-day/week location, overnight gap, volume and VWAP context.
 - [x] Reject historical promotion of all context filters.
-- [x] Freeze compressed-range and prior-day-proximity rules as fresh-OOS challengers.
+- [x] Freeze compressed-range E5 and prior-day-proximity E6 as fresh-OOS challengers.
+- [x] Retain Tuesday–Friday and Asia, London and New York after factorial testing.
+- [x] Freeze the E6 advanced-test framework and machine-readable preregistration.
+- [ ] Execute Block 0 exact regression and Block 1 E6 mechanism audit.
+- [ ] Execute frozen path-quality family P1–P3.
+- [ ] Execute frozen reward-space family R1–R2 and shadow interaction I1.
+- [ ] Complete independent reconstruction checkpoint before sequencing research.
+- [ ] Execute frozen sequencing family S1–S3.
+- [ ] Complete official-event, holiday and rollover attribution.
+- [ ] Complete fixed-fraction equity and cost stress for E6 and surviving challengers.
 - [ ] Footprint only with suitable historical order-flow data.
+
+Historical work may nominate fresh-OOS challengers only. It cannot replace E6 or authorize Pine.
 
 ## Phase 3 — Fresh out-of-sample evidence
 
@@ -52,6 +63,7 @@ Status: **baseline and context challengers preregistered; data not acquired**
 - [ ] Acquire qualified NQ one-minute data through at least 2026-07-21.
 - [ ] Freeze dataset checksum and audit before performance inspection.
 - [ ] Run Arms 0/A/B with zero parameter changes.
+- [ ] Add at most one E6-derived advanced challenger only if it passes the frozen historical nomination gates.
 - [ ] Report paired per-session differences, return, funnel, concentration, costs, and roll attribution.
 - [ ] Extend forward rather than retune when the sample is underpowered or ambiguous.
 
@@ -66,6 +78,7 @@ Status: **original reconstruction blocked; explicit current-code primitives impl
 - [x] Cost, block-bootstrap, concentration, and rollover stress.
 - [x] Classify original staged 904 reconstruction as blocked by missing leaderboards and stage bases.
 - [x] Implement aligned session/date return matrices, stream hashes, duplicate detection, max-t, best-mean and reselection primitives.
+- [ ] Apply joint market-date max-t inference to each E6 advanced-test family.
 - [ ] Complete the separately labelled current-code causal universe only after timestamp alignment is finalized.
 - [ ] Run nested walk-forward only under a preregistered candidate set.
 

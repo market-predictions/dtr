@@ -1,5 +1,27 @@
 # Changelog
 
+## Unreleased — 2026-07-22 E6 advanced test framework
+
+### Added
+
+- Formal baseline hierarchy separating the 495-trade engine regression benchmark, 477-trade non-selectable control and 304-trade E6 working research baseline.
+- Frozen E6 mechanism audit, path-quality family P1–P3, reward-space family R1–R2, sequencing family S1–S3 and single shadow interaction I1.
+- Official-event, holiday, rollover and fixed-fraction equity-risk diagnostic blocks.
+- Machine-readable preregistration with fixed metrics, cost scenarios, sample gates, multiplicity controls, stopping rules and execution order.
+- Work package, claim, handover, roadmap, status and research-decision-ledger entries.
+
+### Decision
+
+- Record `FRAMEWORK_FROZEN_EXECUTION_NOT_STARTED`.
+- Use E6 as the working baseline for bounded historical research while preserving the unfiltered comparator in every report.
+- Allow historical evidence to nominate fresh-OOS challengers only; no Pine or deployment promotion.
+
+### Known limits
+
+- Fresh post-2025 NQ data is unavailable.
+- Timestamp and continuous-contract methodology remain unresolved.
+- The framework definitions are frozen, but no advanced-test result has yet been generated.
+
 ## Unreleased — 2026-07-22 advanced context research
 
 ### Added
