@@ -1,0 +1,15 @@
+{
+  "decision": "DETERMINISTIC_REPEAT_PASS",
+  "all_identical": true,
+  "primary_artifacts_compared": 8,
+  "independent_review_identical": true,
+  "independent_bootstrap_identical": true,
+  "hashes": {
+    "event_roll_results.csv": "61bb5a8903e04e026edd027e98e497bfe60e2fd8d35be7d6dbeb035de05dab9f",
+    "event_roll_inference.csv": "95dee9b20315cf50b26af716d8db40271ec799be01aeb5f2daa4264ec011582d",
+    "event_overlap_matrix.csv": "d4e13049b0b4d0c206fba06edae280b547740ed5e133fa0eddacf836f36069b4",
+    "roll_discontinuities.csv": "108532524770288c6a563ee0c49ac141c422abdbe1c344964bc6a1e17c23a14b",
+    "independent_review.json": "031baa0c507c4a4585f5fe3ab7ffb30edd41c9ab5d50b4405481a44d3c9b2d74",
+    "independent_bootstrap.csv": "322444bd7c88adc7a3777fb8bff9767415c77ad2b1eaf02879ba3c279cdaa257"
+  }
+}
