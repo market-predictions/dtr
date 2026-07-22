@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 import hashlib
 import json
-from typing import Iterable, Literal
+from collections.abc import Iterable
+from dataclasses import dataclass
+from typing import Literal
 
 import numpy as np
 import pandas as pd
