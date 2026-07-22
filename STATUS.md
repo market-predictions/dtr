@@ -4,7 +4,7 @@
 
 `DTR-NQ-WP-20260722-07 — Selection robustness and explicit execution contract`
 
-Status: **exact historical reconstruction classified; architecture refactor and inference primitives implemented; CI validation active**
+Status: **exact historical reconstruction classified; architecture refactor and inference primitives implemented; clean-head CI running**
 
 Decision state: `EXACT_RECONSTRUCTION_BLOCKED_CURRENT_CAUSAL_UNIVERSE_IN_PROGRESS`
 
@@ -35,8 +35,8 @@ A newly frozen experiment is permitted only under the separate label `CURRENT_CO
 - optimizer imports the integrity-safe orchestration layer directly;
 - optimizer gap policy is explicit and defaults to `liquidate_unsafe`;
 - every new leaderboard row records the gap policy;
-- import-order and direct-entry contract tests are committed;
-- obsolete publisher workflow and staged archives were removed.
+- old monkey-patch identity tests were replaced with explicit public-package contract tests;
+- obsolete publisher, staged archives and diagnostic artifacts were removed.
 
 ## Inference progress
 
@@ -44,13 +44,13 @@ Committed deterministic primitives for:
 
 - session-date × session and calendar-date return alignment;
 - zero return assignment when a candidate takes no trade;
-- candidate return-stream SHA-256 hashes;
+- candidate return-stream SHA-256 hashes independent of candidate labels;
 - exact duplicate stream detection;
 - joint market-date block max-t testing;
 - reality-check-style best-mean testing;
 - bootstrap winner reselection frequencies and effective candidate count.
 
-Synthetic fixtures are committed; clean-head CI is pending.
+Synthetic fixtures now separate duplicate-stream behavior from winner-instability behavior. Clean-head CI is running on the corrected contracts.
 
 ## Existing unresolved gates
 
