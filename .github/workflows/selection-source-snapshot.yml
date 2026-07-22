@@ -23,13 +23,14 @@ jobs:
           tar \
             --exclude=.git \
             --exclude=.github/workflows/selection-source-snapshot.yml \
-            -czf dtr-selection-source.tar.gz .
-          sha256sum dtr-selection-source.tar.gz > dtr-selection-source.sha256
+            -czf "$RUNNER_TEMP/dtr-selection-source.tar.gz" .
+          sha256sum "$RUNNER_TEMP/dtr-selection-source.tar.gz" \
+            > "$RUNNER_TEMP/dtr-selection-source.sha256"
       - uses: actions/upload-artifact@v4
         with:
           name: dtr-selection-source
           path: |
-            dtr-selection-source.tar.gz
-            dtr-selection-source.sha256
+            ${{ runner.temp }}/dtr-selection-source.tar.gz
+            ${{ runner.temp }}/dtr-selection-source.sha256
           if-no-files-found: error
           retention-days: 2
