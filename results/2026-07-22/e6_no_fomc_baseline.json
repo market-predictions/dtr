@@ -1,0 +1,43 @@
+{
+  "study_id": "DTR-NQ-WP-20260722-15",
+  "decision": "PROMOTE_E6_NO_FOMC_DAY_AS_WORKING_BASELINE",
+  "rule": "Reject every signal whose Eastern Time entry calendar date equals an official FOMC statement date from the frozen Federal Reserve calendar, then rerun the one-global-position portfolio sequencing.",
+  "classification": "USER_MANDATED_RISK_POLICY_OVERLAY",
+  "original_e6_comparator": {
+    "trades": 304,
+    "net_r": 48.93754952687199,
+    "expectancy_r": 0.16097878133839472,
+    "max_drawdown_r": 8.632571354238342,
+    "return_dd": 5.668942371716474
+  },
+  "new_working_baseline": {
+    "name": "E6_NO_FOMC_DAY",
+    "trades": 291,
+    "net_r": 53.48334196741127,
+    "expectancy_r": 0.18379155315261606,
+    "profit_factor": 1.3970692935521183,
+    "max_drawdown_r": 9.151060839915637,
+    "return_dd": 5.844496381678994,
+    "win_rate": 0.5257731958762887,
+    "median_r": 0.4767337807606264,
+    "net_2023": 12.714586856209822,
+    "net_2024": 27.31762366122059,
+    "net_2025": 13.328733807680777,
+    "one_percent_compounded_final_equity_usd": 166725.12726303446,
+    "one_percent_compounded_max_drawdown_pct": 0.08869131584799761
+  },
+  "sequencing_attribution": {
+    "removed_original_e6_trades": 14,
+    "added_after_resequencing": 1,
+    "added_signal_id": 430,
+    "added_trade_session": "LONDON_2AM",
+    "added_trade_pnl_r": -1.013194444444,
+    "explanation": "Removing an overnight FOMC-calendar-date Asia position freed one later London signal. Therefore the exact result is 291 trades, not the naive 290-trade subtraction."
+  },
+  "evidence_status": {
+    "statistical_promotion": false,
+    "user_policy_authorization": true,
+    "original_e6_preserved_as_comparator": true,
+    "pine_or_live_deployment_authorized": false
+  }
+}
