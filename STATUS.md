@@ -4,7 +4,7 @@
 
 `DTR-NQ-WP-20260722-06 — Baseline validity reset`
 
-Status: **complete; source and compact evidence published; final GitHub CI and merge pending**
+Status: **complete; source and compact evidence published; lint findings corrected; final GitHub CI and merge pending**
 
 Decision: `CONTINUE_RESEARCH_DO_NOT_DEPLOY`
 
@@ -51,11 +51,12 @@ Decision: `CONTINUE_RESEARCH_DO_NOT_DEPLOY`
 - continuation late-60: 30/30;
 - entry routing: 33/33;
 - source publication archive: checksum verified and self-cleaned;
-- evidence publication archive: checksum verified and self-cleaned.
+- evidence publication archive: checksum verified and self-cleaned;
+- Ruff findings from the first final-head run: corrected through exact assertion-backed replacements.
 
 ## Remaining closure gates
 
-- pinned Ruff on the exact connector-authored final head;
+- pinned Ruff on the exact connector-authored lint-corrected head;
 - pytest on Python 3.11 and 3.12;
 - final adversarial PR review;
 - squash merge of PR #6;
