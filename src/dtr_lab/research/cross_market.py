@@ -9,7 +9,7 @@ import pandas as pd
 
 from .engine import StrategyConfig, metrics
 
-InstrumentName = Literal["NQ", "USA500_PROXY"]
+InstrumentName = Literal["NQ", "USA500_PROXY", "USATECH_PROXY"]
 
 # Frozen timing-corrected real-time windows. NQ source labels are shifted to bar-open
 # before these windows are applied; Dukascopy labels are already bar-open UTC labels.
@@ -315,7 +315,11 @@ def summarize_arm(
             trades, total_ticks_each_side=4.0, tick_size=tick_size
         ),
     }
-    entry_year = pd.to_datetime(trades["entry_time"]).dt.year if not trades.empty else pd.Series(dtype=int)
+    entry_year = (
+        pd.to_datetime(trades["entry_time"]).dt.year
+        if not trades.empty
+        else pd.Series(dtype=int)
+    )
     for year in (2023, 2024, 2025):
         result[f"net_{year}"] = float(trades.loc[entry_year == year, "pnl_r"].sum())
     return result
