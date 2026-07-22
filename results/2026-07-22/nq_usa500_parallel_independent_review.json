@@ -1,0 +1,24 @@
+{
+  "decision": "INDEPENDENT_REVIEW_PASS",
+  "replication_classification": "PARTIAL_COST_FRAGILE_REPLICATION",
+  "source_hashes_exact": true,
+  "nq_e6_regression_exact": true,
+  "nq_e6_no_fomc_regression_exact": true,
+  "all_summary_metrics_reconstructed": true,
+  "no_position_overlaps": true,
+  "cost_stress_reconstructed": true,
+  "fomc_attribution_reconstructed": true,
+  "independent_bootstrap_iterations": 10000,
+  "independent_bootstrap_seed_family": "20260822",
+  "independent_bootstrap": {
+    "NQ_E6": {"lo95": 0.020232, "hi95": 0.301639, "prob_positive": 0.9875},
+    "NQ_E6_NO_FOMC_DAY": {"lo95": 0.040299, "hi95": 0.328571, "prob_positive": 0.9939},
+    "USA500_PROXY_E6": {"lo95": -0.097320, "hi95": 0.192585, "prob_positive": 0.7334},
+    "USA500_PROXY_E6_NO_FOMC_DAY": {"lo95": -0.097062, "hi95": 0.200107, "prob_positive": 0.7323}
+  },
+  "fomc_attribution": {
+    "NQ": {"removed_trades": 14, "added_after_resequencing": 1, "net_policy_delta_r": 4.545792440539289},
+    "USA500_PROXY": {"removed_trades": 14, "added_after_resequencing": 1, "net_policy_delta_r": -0.3493828918839662}
+  },
+  "conclusion": "The USA500 proxy is positive at one tick per side but loses its edge at two ticks. The no-FOMC policy is neutral to slightly negative in proxy total R and does not independently replicate the NQ event effect."
+}
