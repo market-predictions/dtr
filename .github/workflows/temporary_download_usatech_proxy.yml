@@ -1,4 +1,4 @@
-name: Temporary USATECH proxy download
+name: Temporary USATECH proxy diagnostic
 
 on:
   pull_request:
@@ -16,107 +16,38 @@ permissions:
   contents: read
 
 jobs:
-  bid:
-    name: USATECH M1 BID ${{ matrix.label }}
+  diagnose:
+    name: Diagnose USATECH BID 2022
     runs-on: ubuntu-latest
     timeout-minutes: 150
-    strategy:
-      fail-fast: false
-      max-parallel: 1
-      matrix:
-        include:
-          - {label: 2022, from: 2022-01-01, to: 2023-01-01}
-          - {label: 2023, from: 2023-01-01, to: 2024-01-01}
-          - {label: 2024, from: 2024-01-01, to: 2025-01-01}
-          - {label: 2025, from: 2025-01-01, to: 2026-01-01}
-          - {label: 2026_YTD, from: 2026-01-01, to: 2026-07-23}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Download bid candles serially
+      - name: Run downloader and preserve raw log
         shell: bash
         run: |
-          set -euo pipefail
+          set +e
           mkdir -p temporary-data
-          sleep 20
           npx --yes dukascopy-node@1.49.0 \
             -i usatechidxusd \
-            -from "${{ matrix.from }}" \
-            -to "${{ matrix.to }}" \
+            -from 2022-01-01 \
+            -to 2023-01-01 \
             -t m1 -p bid -v -vu units -fl -f csv \
             -dir temporary-data \
-            -fn "usatechidxusd_m1_bid_${{ matrix.label }}" \
-            -bs 5 -bp 1000 -r 10 -rp 3000
-      - name: Audit and compress
-        shell: bash
-        run: |
-          set -euo pipefail
-          CSV="$(find temporary-data -maxdepth 1 -type f -name '*.csv' -print -quit)"
-          test -n "$CSV"
-          wc -l "$CSV" | tee temporary-data/line_count.txt
-          head -n 3 "$CSV" | tee temporary-data/head.txt
-          tail -n 3 "$CSV" | tee temporary-data/tail.txt
-          sha256sum "$CSV" | tee temporary-data/sha256.txt
-          gzip -9 "$CSV"
-      - uses: actions/upload-artifact@v4
+            -fn usatechidxusd_m1_bid_2022 \
+            -bs 5 -bp 1000 -r 10 -rp 3000 \
+            > temporary-data/download.log 2>&1
+          STATUS=$?
+          echo "$STATUS" > temporary-data/exit_status.txt
+          cat temporary-data/download.log
+          exit "$STATUS"
+      - name: Upload diagnostic artifact
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: usatechidxusd-m1-bid-${{ matrix.label }}
+          name: usatech-download-diagnostic-2022
           path: temporary-data/*
           retention-days: 1
-          compression-level: 0
-          if-no-files-found: error
-
-  ask:
-    name: USATECH M1 ASK ${{ matrix.label }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 150
-    continue-on-error: true
-    strategy:
-      fail-fast: false
-      max-parallel: 1
-      matrix:
-        include:
-          - {label: 2022, from: 2022-01-01, to: 2023-01-01}
-          - {label: 2023, from: 2023-01-01, to: 2024-01-01}
-          - {label: 2024, from: 2024-01-01, to: 2025-01-01}
-          - {label: 2025, from: 2025-01-01, to: 2026-01-01}
-          - {label: 2026_YTD, from: 2026-01-01, to: 2026-07-23}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - name: Download ask candles serially
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p temporary-data
-          sleep 20
-          npx --yes dukascopy-node@1.49.0 \
-            -i usatechidxusd \
-            -from "${{ matrix.from }}" \
-            -to "${{ matrix.to }}" \
-            -t m1 -p ask -v -vu units -fl -f csv \
-            -dir temporary-data \
-            -fn "usatechidxusd_m1_ask_${{ matrix.label }}" \
-            -bs 5 -bp 1000 -r 10 -rp 3000
-      - name: Audit and compress
-        shell: bash
-        run: |
-          set -euo pipefail
-          CSV="$(find temporary-data -maxdepth 1 -type f -name '*.csv' -print -quit)"
-          test -n "$CSV"
-          wc -l "$CSV" | tee temporary-data/line_count.txt
-          head -n 3 "$CSV" | tee temporary-data/head.txt
-          tail -n 3 "$CSV" | tee temporary-data/tail.txt
-          sha256sum "$CSV" | tee temporary-data/sha256.txt
-          gzip -9 "$CSV"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: usatechidxusd-m1-ask-${{ matrix.label }}
-          path: temporary-data/*
-          retention-days: 1
-          compression-level: 0
           if-no-files-found: error
