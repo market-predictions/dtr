@@ -1,11 +1,11 @@
 schema_version: 1
-run_id: nq_ifvg_ablation_20260721
-candidate_name: DTR_PY_NQ_CANDIDATE_0_1_GAP_SAFE
+run_id: nq_ifvg_ablation_causal_gap_20260722
+candidate_name: DTR_PY_NQ_CANDIDATE_0_1_CAUSAL_GAP
 
 dataset:
   path: ../../data/raw/NQ_Futures_-_1min_Bar_2022_2025.zip
   sha256: 8d3f157a422636e5b8dda51cc3a3d9209c50cb53f9b279d3e14b627ce59370dc
-  timestamp_semantics: provisional_bar_open
+  timestamp_semantics: unresolved_bar_open_or_close
   timezone_assumption: America/New_York
   drop_incomplete_final_date: true
 
@@ -76,12 +76,12 @@ execution:
   intrabar_source: 1min
   same_minute_collision_policy: conservative_stop_first
   random_seed: 20260721
-  gap_policy: reject_unsafe
+  gap_policy: liquidate_unsafe
 
 expected_observe:
-  trades: 491
-  net_r: 88.49578342152539
-  max_drawdown_r: 14.107857513807524
+  trades: 495
+  net_r: 86.00476134576057
+  max_drawdown_r: 14.10785751380752
   tolerance_trades: 0
   tolerance_net_r: 0.000001
   tolerance_max_drawdown_r: 0.000001

@@ -88,6 +88,7 @@ def main() -> None:
             sessions,
             config,
             market_arrays=market_arrays,
+            gap_policy=manifest.execution.gap_policy,
         )
         variant_output = output / config.name
         variant_output.mkdir(parents=True, exist_ok=True)

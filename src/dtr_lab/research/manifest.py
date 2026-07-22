@@ -58,7 +58,7 @@ class ExecutionSpec(BaseModel):
     intrabar_source: str = "1min"
     same_minute_collision_policy: str = "conservative_stop_first"
     random_seed: int = 20260721
-    gap_policy: Literal["observe_only", "reject_unsafe"] = "observe_only"
+    gap_policy: Literal["observe_only", "reject_unsafe", "liquidate_unsafe"] = "observe_only"
 
 
 class ExpectedBaseline(BaseModel):

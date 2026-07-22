@@ -1,0 +1,77 @@
+[
+  {
+    "path": "baseline_policy_comparison.csv",
+    "sha256": "c529d58ed377cff395a863300ab1fa826c278705ecc6f756f0bbcd83bf757ede",
+    "identical": true
+  },
+  {
+    "path": "baseline_uncertainty.json",
+    "sha256": "c730c2bd68ee7af4d01510f3a9e798f21e0de27872d566a5280f9adcfecd8818",
+    "identical": true
+  },
+  {
+    "path": "baseline_validity_summary.json",
+    "sha256": "26e70c2e03e1b4dadfb2dab732e56d0bc3ba359fb252446b8b659de61d48a6a8",
+    "identical": true
+  },
+  {
+    "path": "gap_liquidations.csv",
+    "sha256": "05599072bbb81a7bb84cf743f376c7bc45d6a360f7636a7e23bc63404f53f409",
+    "identical": true
+  },
+  {
+    "path": "leave_one_cell_out.csv",
+    "sha256": "8ff362d30a477969c5bad17185560f712da234e7d6d0f105d90fe3a5e6caccbe",
+    "identical": true
+  },
+  {
+    "path": "leave_one_session_out.csv",
+    "sha256": "25b449066691b299584878f7084fea44a304c7a7ceb202fcfb94aee090b8e43f",
+    "identical": true
+  },
+  {
+    "path": "leave_one_weekday_out.csv",
+    "sha256": "a8a8fd43e58672bae501ecdb0f4353134819e40a8a57234b461d29339f12b5e7",
+    "identical": true
+  },
+  {
+    "path": "rollover_candidates.csv",
+    "sha256": "5bfcc2bff7bf8f1b07c3ca97f0040c3fb91c31014c8d5a6ba6b8d7e220dfb0d1",
+    "identical": true
+  },
+  {
+    "path": "rollover_discontinuity_diagnostics.csv",
+    "sha256": "73a9846762f762797cfd1975a79d250c87bdad9df8db068fddc5d406e2bd34f2",
+    "identical": true
+  },
+  {
+    "path": "rollover_stress.csv",
+    "sha256": "84706ac723fa8331ed98f7ba6f068a3f65bf0ba3547ae367426d4f4666af2399",
+    "identical": true
+  },
+  {
+    "path": "rollover_trade_attribution.csv",
+    "sha256": "e24a34c928e3e8525ece2ab5810afbffc2f79c6a40dc77c74fbde96bd3170ca4",
+    "identical": true
+  },
+  {
+    "path": "session_weekday_attribution.csv",
+    "sha256": "e8f7912d2ddaf9ebab0a547997b67e311164c1a61d0f8f7187a493dedb69a77a",
+    "identical": true
+  },
+  {
+    "path": "timestamp_conclusion.json",
+    "sha256": "277532829431dc8089bc38ec625e1cbdce8b1d3e68ba363b54949a61f7571dd6",
+    "identical": true
+  },
+  {
+    "path": "timestamp_vwap_hypotheses.csv",
+    "sha256": "96e25637e6130d07be5a7bd959ad2e8cbbac26d8df0f90d25fd57cdb289e67a3",
+    "identical": true
+  },
+  {
+    "path": "trade_set_comparison.json",
+    "sha256": "f1087bd87124b98c67430134b1dcf4154f86a9e9b742c0fd2f5bffcaa80aca2d",
+    "identical": true
+  }
+]

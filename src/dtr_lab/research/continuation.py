@@ -119,6 +119,10 @@ class ContinuationTrade:
     er20: float
     adx14: float
     minutes_from_range_end: int
+    gap_previous_timestamp: pd.Timestamp | None = None
+    gap_current_timestamp: pd.Timestamp | None = None
+    gap_minutes: int = 0
+    gap_liquidation_price: float = np.nan
 
 
 @dataclass
@@ -141,6 +145,7 @@ class ContinuationFunnel:
     entry_signals: int = 0
     skipped_position_open: int = 0
     skipped_unsafe_gap_bridge: int = 0
+    gap_liquidations: int = 0
     trades: int = 0
 
     def as_dict(self) -> dict[str, int]:
@@ -362,6 +367,7 @@ def generate_continuation_signals(
 
 def _simulate_continuation_trade(
     one_times_ns: np.ndarray,
+    one_open: np.ndarray,
     one_high: np.ndarray,
     one_low: np.ndarray,
     one_close: np.ndarray,
@@ -369,7 +375,13 @@ def _simulate_continuation_trade(
     signal: ContinuationSignal,
     cfg: ContinuationConfig,
     five_minute_ends: set[int],
+    *,
+    unsafe_previous_ns: np.ndarray | None = None,
+    unsafe_current_ns: np.ndarray | None = None,
+    gap_policy: str = "observe",
 ) -> ContinuationTrade | None:
+    if gap_policy not in ("observe", "liquidate"):
+        raise ValueError(f"Unknown continuation trade gap policy: {gap_policy}")
     atr = float(bars.iloc[signal.entry_index]["atr14"])
     if not np.isfinite(atr):
         return None
@@ -387,8 +399,36 @@ def _simulate_continuation_trade(
     hard_end = min(max_end, signal.event_end_time)
     start_ns = np.datetime64(signal.entry_time, "ns").astype(np.int64)
     end_ns = np.datetime64(hard_end, "ns").astype(np.int64)
+    unsafe_previous = (
+        np.asarray(unsafe_previous_ns, dtype=np.int64)
+        if unsafe_previous_ns is not None
+        else np.array([], dtype=np.int64)
+    )
+    unsafe_current = (
+        np.asarray(unsafe_current_ns, dtype=np.int64)
+        if unsafe_current_ns is not None
+        else np.array([], dtype=np.int64)
+    )
+    if unsafe_previous.size != unsafe_current.size:
+        raise ValueError("Unsafe gap interval arrays must have equal length")
+    gap_index = -1
+    gap_resume_ns: int | None = None
+    scan_end_ns = end_ns
+    if gap_policy == "liquidate" and unsafe_current.size:
+        relevant = (unsafe_current > start_ns) & (unsafe_previous < end_ns)
+        indexes = np.flatnonzero(relevant)
+        if indexes.size:
+            gap_index = int(indexes[0])
+            gap_resume_ns = int(unsafe_current[gap_index])
+            scan_end_ns = max(scan_end_ns, gap_resume_ns)
+
     j0 = int(np.searchsorted(one_times_ns, start_ns, side="left"))
-    j1 = int(np.searchsorted(one_times_ns, end_ns, side="left"))
+    end_side = (
+        "right"
+        if gap_resume_ns is not None and gap_resume_ns >= end_ns
+        else "left"
+    )
+    j1 = int(np.searchsorted(one_times_ns, scan_end_ns, side=end_side))
     if j0 >= j1:
         return None
 
@@ -401,9 +441,37 @@ def _simulate_continuation_trade(
     last_index = j1 - 1
     exit_time = pd.Timestamp(one_times_ns[last_index]) + pd.Timedelta(minutes=1)
     exit_reason = "EVENT_END" if hard_end == signal.event_end_time else "MAX_HOLD"
+    gap_previous_timestamp: pd.Timestamp | None = None
+    gap_current_timestamp: pd.Timestamp | None = None
+    gap_minutes = 0
+    gap_liquidation_price = np.nan
 
     for j in range(j0, j1):
-        minute_end_ns = int(one_times_ns[j] + 60_000_000_000)
+        current_ns = int(one_times_ns[j])
+        if gap_resume_ns is not None and current_ns >= gap_resume_ns:
+            open_px = float(one_open[j])
+            if signal.direction > 0:
+                mfe = max(mfe, open_px - entry)
+                mae = max(mae, entry - open_px)
+                price = min(runner_stop - slip, open_px - slip)
+            else:
+                mfe = max(mfe, entry - open_px)
+                mae = max(mae, open_px - entry)
+                price = max(runner_stop + slip, open_px + slip)
+            realized_points += remaining * signal.direction * (price - entry)
+            remaining = 0.0
+            exit_time = pd.Timestamp(current_ns)
+            exit_reason = "GAP_LIQUIDATION"
+            gap_previous_timestamp = pd.Timestamp(int(unsafe_previous[gap_index]))
+            gap_current_timestamp = pd.Timestamp(int(unsafe_current[gap_index]))
+            gap_minutes = int(
+                (int(unsafe_current[gap_index]) - int(unsafe_previous[gap_index]))
+                // 60_000_000_000
+            )
+            gap_liquidation_price = float(price)
+            break
+
+        minute_end_ns = current_ns + 60_000_000_000
         if signal.direction > 0:
             mfe = max(mfe, one_high[j] - entry)
             mae = max(mae, entry - one_low[j])
@@ -498,6 +566,10 @@ def _simulate_continuation_trade(
         er20=signal.er20,
         adx14=signal.adx14,
         minutes_from_range_end=signal.minutes_from_range_end,
+        gap_previous_timestamp=gap_previous_timestamp,
+        gap_current_timestamp=gap_current_timestamp,
+        gap_minutes=gap_minutes,
+        gap_liquidation_price=float(gap_liquidation_price),
     )
 
 
@@ -508,9 +580,13 @@ def run_continuation_backtest(
     cfg: ContinuationConfig,
     market_arrays: tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]
     | None = None,
+    *,
+    gap_policy: Literal["reject_unsafe", "liquidate_unsafe"] = "liquidate_unsafe",
 ) -> tuple[pd.DataFrame, ContinuationFunnel]:
     signals, funnel = generate_continuation_signals(one_minute, bars, sessions, cfg)
-    one_times_ns, _one_open, one_high, one_low, one_close = (
+    if gap_policy not in ("reject_unsafe", "liquidate_unsafe"):
+        raise ValueError(f"Unknown continuation gap policy: {gap_policy}")
+    one_times_ns, one_open, one_high, one_low, one_close = (
         market_arrays or prepare_market_arrays(one_minute)
     )
     gaps = _gap_table(one_minute)
@@ -530,6 +606,7 @@ def run_continuation_backtest(
             continue
         trade = _simulate_continuation_trade(
             one_times_ns,
+            one_open,
             one_high,
             one_low,
             one_close,
@@ -537,19 +614,25 @@ def run_continuation_backtest(
             signal,
             cfg,
             five_minute_ends,
+            unsafe_previous_ns=unsafe_previous_ns,
+            unsafe_current_ns=unsafe_current_ns,
+            gap_policy="liquidate" if gap_policy == "liquidate_unsafe" else "observe",
         )
         if trade is None:
             continue
-        gap = _first_unsafe_gap_between(
-            unsafe_previous_ns,
-            unsafe_current_ns,
-            signal.entry_time,
-            trade.exit_time,
-        )
-        if gap is not None:
-            funnel.skipped_unsafe_gap_bridge += 1
-            next_free = max(next_free, pd.Timestamp(gap))
-            continue
+        if gap_policy == "reject_unsafe":
+            gap = _first_unsafe_gap_between(
+                unsafe_previous_ns,
+                unsafe_current_ns,
+                signal.entry_time,
+                trade.exit_time,
+            )
+            if gap is not None:
+                funnel.skipped_unsafe_gap_bridge += 1
+                next_free = max(next_free, pd.Timestamp(gap))
+                continue
+        if trade.exit_reason == "GAP_LIQUIDATION":
+            funnel.gap_liquidations += 1
         trades.append(trade)
         next_free = trade.exit_time
 

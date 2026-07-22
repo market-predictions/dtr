@@ -1,0 +1,18 @@
+{
+  "legacy_to_causal": {
+    "added": 4,
+    "added_net_r": -2.4910220757647896,
+    "changed_common": 0,
+    "changed_common_delta_net_r": 0.0,
+    "removed": 0,
+    "removed_net_r": 0.0
+  },
+  "observe_to_causal": {
+    "added": 0,
+    "added_net_r": 0.0,
+    "changed_common": 1,
+    "changed_common_delta_net_r": -0.7006271350014306,
+    "removed": 9,
+    "removed_net_r": -2.541029338332793
+  }
+}

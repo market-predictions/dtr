@@ -1,5 +1,5 @@
 schema_version: 1
-run_id: nq_cisd_ablation_causal_gap_20260722
+run_id: nq_candidate_0_1_causal_gap_20260722
 candidate_name: DTR_PY_NQ_CANDIDATE_0_1_CAUSAL_GAP
 
 dataset:
@@ -58,27 +58,13 @@ strategy:
   point_value: 20.0
   conservative_intrabar: true
 
-variants:
-  - name: CISD_OBSERVE
-    policy: observe
-  - name: CISD_SEQUENCE_CONFIRM
-    policy: sequence_confirm
-  - name: CISD_LAST_CANDLE_CONFIRM
-    policy: last_candle_confirm
-  - name: CISD_SEQUENCE_RECENT_3
-    policy: sequence_recent_3
-  - name: CISD_SEQUENCE_RECENT_6
-    policy: sequence_recent_6
-  - name: CISD_SEQUENCE_RETEST
-    policy: sequence_retest
-
 execution:
   intrabar_source: 1min
   same_minute_collision_policy: conservative_stop_first
-  random_seed: 20260722
+  random_seed: 20260721
   gap_policy: liquidate_unsafe
 
-expected_observe:
+expected_baseline:
   trades: 495
   net_r: 86.00476134576057
   max_drawdown_r: 14.10785751380752

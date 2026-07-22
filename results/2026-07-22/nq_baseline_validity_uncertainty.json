@@ -1,0 +1,25 @@
+{
+  "month_block_bootstrap": {
+    "estimate": 0.17374699261769797,
+    "hi95": 0.287176889861774,
+    "iterations": 10000,
+    "lo95": 0.06423594695388275,
+    "seed": 20260723
+  },
+  "multiple_testing_status": "UNRESOLVED_NO_ALIGNED_904_CANDIDATE_RETURN_MATRIX",
+  "session_date_block_bootstrap": {
+    "estimate": 0.17374699261769797,
+    "hi95": 0.2863197294482435,
+    "iterations": 10000,
+    "lo95": 0.06257356264557928,
+    "seed": 20260724
+  },
+  "sign_flip_one_sided_p": 0.0013899861001389986,
+  "trade_bootstrap": {
+    "estimate": 0.17374699261769797,
+    "hi95": 0.2875274744057656,
+    "iterations": 10000,
+    "lo95": 0.061458270307338095,
+    "seed": 20260722
+  }
+}
