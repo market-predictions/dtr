@@ -1,0 +1,36 @@
+{
+  "decision": "NO_FOMC_RISK_RECALIBRATION_COMPLETE_NO_SIZING_AUTHORIZATION",
+  "baseline": {"name": "E6_NO_FOMC_DAY", "trades": 291, "net_r": 53.48334196741127, "expectancy_r": 0.18379155315261606},
+  "historical": {
+    "normal": {
+      "0.5pct": {"final_equity": 129884.74, "max_drawdown_pct": 4.505},
+      "1.0pct": {"final_equity": 166725.13, "max_drawdown_pct": 8.869},
+      "1.5pct": {"final_equity": 211539.78, "max_drawdown_pct": 13.093}
+    },
+    "severe_four_ticks_each_side": {
+      "0.5pct": {"final_equity": 120387.88, "max_drawdown_pct": 5.105},
+      "1.0pct": {"final_equity": 143250.51, "max_drawdown_pct": 10.014},
+      "1.5pct": {"final_equity": 168498.04, "max_drawdown_pct": 14.731}
+    }
+  },
+  "resampled_ranges": {
+    "normal": {
+      "0.5pct": {"dd95_pct": [8.76, 9.76], "prob_loss_pct": [0.56, 0.68], "prob_dd20_pct": [0.0, 0.01]},
+      "1.0pct": {"dd95_pct": [16.95, 18.77], "prob_loss_pct": [0.63, 0.79], "prob_dd20_pct": [1.49, 3.43]},
+      "1.5pct": {"dd95_pct": [24.57, 27.06], "prob_loss_pct": [0.74, 0.92], "prob_dd20_pct": [16.08, 24.42], "prob_dd30_pct": [1.11, 2.54]}
+    },
+    "severe": {
+      "0.5pct": {"dd95_pct": [11.09, 11.98], "prob_loss_pct": [3.73, 4.14], "prob_dd20_pct": [0.03, 0.09]},
+      "1.0pct": {"dd95_pct": [21.26, 22.77], "prob_loss_pct": [4.21, 4.65], "prob_dd20_pct": [7.12, 10.05], "prob_dd30_pct": [0.31, 0.67]},
+      "1.5pct": {"dd95_pct": [30.51, 32.53], "prob_loss_pct": [4.67, 5.17], "prob_dd20_pct": [36.59, 42.86], "prob_dd30_pct": [5.60, 8.17]}
+    }
+  },
+  "comparison_to_original_e6_normal_final_equity": {
+    "0.5pct": {"original": 126939.77, "no_fomc": 129884.74},
+    "1.0pct": {"original": 159184.78, "no_fomc": 166725.13},
+    "1.5pct": {"original": 197230.93, "no_fomc": 211539.78}
+  },
+  "independent_review": "PASS",
+  "deterministic_repeat": "PASS",
+  "conclusion": "Keep 0.5% and 1.0% as paper-research envelopes; 1.5% remains aggressive. No live sizing authorization."
+}
