@@ -1,0 +1,168 @@
+name: Temporary USATECH static-feed acquisition
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/temporary_usatech_static_feed.yml
+
+concurrency:
+  group: usatech-static-feed
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  acquire:
+    name: Static USATECH M1 BID ${{ matrix.label }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - {label: 2022, start: 2022-01-01, end: 2023-01-01}
+          - {label: 2023, start: 2023-01-01, end: 2024-01-01}
+          - {label: 2024, start: 2024-01-01, end: 2025-01-01}
+          - {label: 2025, start: 2025-01-01, end: 2026-01-01}
+          - {label: 2026_YTD, start: 2026-01-01, end: 2026-07-23}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Download and decode daily BI5 candles
+        env:
+          START_DATE: ${{ matrix.start }}
+          END_DATE: ${{ matrix.end }}
+          LABEL: ${{ matrix.label }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > /tmp/download_static.py <<'PY'
+          from __future__ import annotations
+
+          import csv
+          import datetime as dt
+          import gzip
+          import io
+          import lzma
+          import os
+          import random
+          import struct
+          import time
+          import urllib.error
+          import urllib.request
+          from concurrent.futures import ThreadPoolExecutor, as_completed
+          from pathlib import Path
+
+          SYMBOL = "USATECHIDXUSD"
+          RECORD = struct.Struct(">5if")
+          DIVISOR = 1000.0
+          START = dt.date.fromisoformat(os.environ["START_DATE"])
+          END = dt.date.fromisoformat(os.environ["END_DATE"])
+          LABEL = os.environ["LABEL"]
+          OUT = Path(f"usatechidxusd_m1_bid_{LABEL}.csv.gz")
+          AUDIT = Path(f"usatechidxusd_m1_bid_{LABEL}_audit.txt")
+
+          def fetch_day(day: dt.date):
+              month = day.month - 1
+              url = (
+                  f"https://datafeed.dukascopy.com/datafeed/{SYMBOL}/"
+                  f"{day.year:04d}/{month:02d}/{day.day:02d}/BID_candles_min_1.bi5"
+              )
+              last = None
+              for attempt in range(8):
+                  try:
+                      request = urllib.request.Request(
+                          url,
+                          headers={"User-Agent": "DTR-private-research/1.0"},
+                      )
+                      with urllib.request.urlopen(request, timeout=90) as response:
+                          raw = response.read()
+                      if not raw:
+                          return day, [], "empty"
+                      payload = lzma.decompress(raw)
+                      if len(payload) % RECORD.size:
+                          raise ValueError(
+                              f"record-size mismatch {len(payload)} for {day}"
+                          )
+                      rows = []
+                      midnight = dt.datetime.combine(day, dt.time(), tzinfo=dt.timezone.utc)
+                      for offset in range(0, len(payload), RECORD.size):
+                          seconds, open_, high, low, close, volume = RECORD.unpack_from(
+                              payload, offset
+                          )
+                          timestamp = midnight + dt.timedelta(seconds=seconds)
+                          rows.append(
+                              (
+                                  int(timestamp.timestamp() * 1000),
+                                  open_ / DIVISOR,
+                                  high / DIVISOR,
+                                  low / DIVISOR,
+                                  close / DIVISOR,
+                                  float(volume),
+                              )
+                          )
+                      return day, rows, "ok"
+                  except urllib.error.HTTPError as error:
+                      if error.code == 404:
+                          return day, [], "404"
+                      last = f"HTTP {error.code}"
+                  except Exception as error:  # noqa: BLE001
+                      last = repr(error)
+                  time.sleep(min(90, 3 * (2**attempt)) + random.random())
+              raise RuntimeError(f"{day}: {last}")
+
+          days = []
+          current = START
+          while current < END:
+              days.append(current)
+              current += dt.timedelta(days=1)
+
+          results = {}
+          statuses = {}
+          with ThreadPoolExecutor(max_workers=2) as pool:
+              futures = {pool.submit(fetch_day, day): day for day in days}
+              for future in as_completed(futures):
+                  day, rows, status = future.result()
+                  results[day] = rows
+                  statuses[status] = statuses.get(status, 0) + 1
+                  time.sleep(0.15)
+
+          row_count = 0
+          with gzip.open(OUT, "wt", newline="", encoding="utf-8") as handle:
+              writer = csv.writer(handle)
+              writer.writerow(["timestamp", "open", "high", "low", "close", "volume"])
+              for day in sorted(results):
+                  writer.writerows(results[day])
+                  row_count += len(results[day])
+
+          AUDIT.write_text(
+              "\n".join(
+                  [
+                      f"label={LABEL}",
+                      f"start={START}",
+                      f"end_exclusive={END}",
+                      f"days={len(days)}",
+                      f"rows={row_count}",
+                      *(f"status_{key}={value}" for key, value in sorted(statuses.items())),
+                  ]
+              )
+              + "\n",
+              encoding="utf-8",
+          )
+          print(AUDIT.read_text())
+          PY
+          python /tmp/download_static.py
+          sha256sum usatechidxusd_m1_bid_${LABEL}.csv.gz | tee -a usatechidxusd_m1_bid_${LABEL}_audit.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: usatech-static-m1-bid-${{ matrix.label }}
+          path: |
+            usatechidxusd_m1_bid_${{ matrix.label }}.csv.gz
+            usatechidxusd_m1_bid_${{ matrix.label }}_audit.txt
+          retention-days: 1
+          compression-level: 0
+          if-no-files-found: error
