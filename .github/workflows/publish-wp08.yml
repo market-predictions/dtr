@@ -24,7 +24,19 @@ jobs:
       - name: Concatenate and verify encoded payload
         run: |
           set -euo pipefail
-          cat .github/wp08-payload/chunk-* > /tmp/wp08-payload.b64
+          cat \
+            .github/wp08-payload/chunk-00 \
+            .github/wp08-payload/chunk-01 \
+            .github/wp08-payload/chunk-02a \
+            .github/wp08-payload/chunk-02b \
+            .github/wp08-payload/chunk-03 \
+            .github/wp08-payload/chunk-04 \
+            .github/wp08-payload/chunk-05 \
+            .github/wp08-payload/chunk-06 \
+            .github/wp08-payload/chunk-07 \
+            .github/wp08-payload/chunk-08 \
+            .github/wp08-payload/chunk-09-fixed \
+            > /tmp/wp08-payload.b64
           test "$(wc -c < /tmp/wp08-payload.b64)" -eq 73904
           echo '98f3ba86affe92ad5b34d6a2936adbc3c0979e9e337a3e3a896a307c0ff443b5  /tmp/wp08-payload.b64' | sha256sum --check -
       - name: Decode payload
