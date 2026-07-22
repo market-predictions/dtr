@@ -1,3 +1,0 @@
-Temporary one-time trigger for USA500.IDX/USD one-minute data download.
-
-Market data is stored only in one-day GitHub Actions artifacts and is not committed to repository history.
