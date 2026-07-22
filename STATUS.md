@@ -4,9 +4,9 @@
 
 `DTR-NQ-WP-20260722-07 — Selection robustness and explicit execution contract`
 
-Status: **claimed; design complete; candidate-universe audit starting**
+Status: **exact historical reconstruction classified; architecture refactor and inference primitives implemented; CI validation active**
 
-Decision state: `HISTORICAL_SELECTION_EVIDENCE_UNDER_REVIEW`
+Decision state: `EXACT_RECONSTRUCTION_BLOCKED_CURRENT_CAUSAL_UNIVERSE_IN_PROGRESS`
 
 ## Accepted causal benchmark
 
@@ -21,29 +21,45 @@ Decision state: `HISTORICAL_SELECTION_EVIDENCE_UNDER_REVIEW`
 
 This benchmark is an exact regression gate and may not be retuned.
 
-## Work package objectives
+## Original 904 audit
 
-- reconstruct the original staged 904-candidate universe and selection chronology where evidence permits;
-- build aligned candidate return streams on `session_date × session` and calendar-date units;
-- apply joint multiple-testing-aware inference with fixed seeds;
-- measure bootstrap reselection, winner stability, duplicates, and parameter plateaus;
-- remove canonical import-time monkey-patching and require explicit causal execution policy;
-- preserve all prior signal and trade outcomes.
+The six grid definitions, pack sizes, optimizer score, runner, final candidate and narrative pack order are preserved. The original pack leaderboards, selected winner per pack, stage-transition base configurations and candidate return streams are not preserved in Git history.
+
+Decision: `EXACT_RECONSTRUCTION_BLOCKED`.
+
+A newly frozen experiment is permitted only under the separate label `CURRENT_CODE_CAUSAL_904_UNIVERSE`; it may not be represented as reconstructing the original staged selection path.
+
+## Architecture progress
+
+- canonical package import no longer mutates `engine.py` symbols;
+- optimizer imports the integrity-safe orchestration layer directly;
+- optimizer gap policy is explicit and defaults to `liquidate_unsafe`;
+- every new leaderboard row records the gap policy;
+- import-order and direct-entry contract tests are committed;
+- obsolete publisher workflow and staged archives were removed.
+
+## Inference progress
+
+Committed deterministic primitives for:
+
+- session-date × session and calendar-date return alignment;
+- zero return assignment when a candidate takes no trade;
+- candidate return-stream SHA-256 hashes;
+- exact duplicate stream detection;
+- joint market-date block max-t testing;
+- reality-check-style best-mean testing;
+- bootstrap winner reselection frequencies and effective candidate count.
+
+Synthetic fixtures are committed; clean-head CI is pending.
 
 ## Existing unresolved gates
 
 - timestamp semantics: `UNRESOLVED`;
 - continuous-contract methodology: `UNRESOLVED`;
-- 904-search familywise adjustment: active work package;
+- original 904-search familywise adjustment: `UNRESOLVED_EXACT_RECONSTRUCTION_BLOCKED`;
+- current-code causal universe inference: `IN_PROGRESS`;
 - fresh qualified OOS: `NOT_RUN_PREREGISTERED`;
 - Python/Pine parity: `NOT_RUN`.
-
-## Closed or superseded work
-
-- PR #6 merged the causal baseline reset as commit `18e48b9f15d68541da8c1bcea970a7894bf99dbf`;
-- PR #5 was closed without merge as superseded;
-- continuation remains `HOLD_FOR_FRESH_DATA`;
-- IFVG, CISD, and entry-routing decisions remain `REJECT_NO_INCREMENTAL_VALUE`.
 
 ## Scope restrictions
 
