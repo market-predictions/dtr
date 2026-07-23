@@ -1,0 +1,56 @@
+{
+  "study_id": "DTR-USA500-WP-20260723-20",
+  "decision": "NO_VIABLE_USA500_CORE_BASELINE",
+  "data": {
+    "instrument": "Dukascopy USA500.IDX/USD bid CFD proxy",
+    "source_sha256": "199d63e6f284eb1ffb93003e9020bf2852f5d96bf78f0efe50c3bdd09c11a47b",
+    "period": "2022-01-02 through 2025-12-31",
+    "not_cme_es_futures": true
+  },
+  "stage1": {
+    "selected_arm": null,
+    "best_relative_arm": "P2_TUE_FRI_NO_ASIA",
+    "best_relative_arm_net_r": -2.254786529587734,
+    "reason_not_promoted": "negative total and negative two-tick expectancy"
+  },
+  "stage1b": {
+    "selected_arm": null,
+    "diagnostic_arm": "S1_LONDON_ONLY",
+    "trades": 253,
+    "net_r": 16.97965108725046,
+    "expectancy_r": 0.06711324540415202,
+    "two_tick_expectancy_r": 0.0069987326536184525,
+    "four_tick_expectancy_r": -0.11323029284744866,
+    "max_drawdown_r": 15.466467420574125,
+    "net_2022": -2.7235906984403035,
+    "net_2023": 13.157448083075044,
+    "net_2024": 12.802623617217613,
+    "net_2025": -6.256829914601897,
+    "paired_difference_vs_all_r": 36.53972558985313,
+    "paired_lo95_r": -4.459207269488254,
+    "paired_hi95_r": 77.37307110975568,
+    "reason_not_promoted": "negative in 2022 and 2025; positive result concentrated in 2023-2024; paired interval crosses zero; four-tick expectancy negative"
+  },
+  "context": {
+    "promoted": null,
+    "best_diagnostic": "C1_EXCLUDE_COMPRESSED_RANGE",
+    "net_r": 3.4868043540848443,
+    "two_tick_expectancy_r": -0.039699205190163296,
+    "reason_not_promoted": "cost-fragile and not year-stable"
+  },
+  "event_policy": {
+    "promoted": null,
+    "best_relative_diagnostic": "NO_MONTHLY_OPEX_DAY",
+    "net_r": -13.70515999792914,
+    "two_tick_expectancy_r": -0.0782399802911008,
+    "reason_not_promoted": "relative improvement but portfolio remains negative"
+  },
+  "nq_transfer_interpretation": {
+    "e6_2023_2025_net_r_approx": 15.75545605113902,
+    "e6_2022_net_r": -21.905619675539306,
+    "e6_2022_2025_net_r": -6.15016362440029,
+    "conclusion": "NQ E6 transfer was regime-dependent rather than universal"
+  },
+  "independent_reviews": ["INDEPENDENT_REVIEW_PASS", "STAGE1B_INDEPENDENT_REVIEW_PASS"],
+  "no_deployment_authorization": true
+}
