@@ -37,7 +37,7 @@ The simple reclaim is the control. The research question is whether wick, displa
 
 ## Phase 0 — Protect DTR and establish isolation
 
-**Status:** foundation implemented; canonical DTR rerun pending CI/full checkout.
+**Status:** foundation and both CI tracks complete; direct canonical DTR data replay remains pending before shared extraction.
 
 - Create separate branch and namespace.
 - Record separation contract.
@@ -136,7 +136,7 @@ AS-A plus a right-side-confirmed reaction swing, a later retest that stays insid
 
 ## Phase 6 — Causality and adversarial tests
 
-**Status:** initial nine-test suite passed locally; full twenty-case suite pending.
+**Status:** initial nine-test suite and dedicated Python 3.11/3.12 CI passed; full twenty-case suite pending.
 
 Required coverage includes threshold edges, no reclaim, double sweep, wick boundary, displacement timing and pre-window warmup, causal pivot confirmation, same-minute stop/target collision, entry-stop collision, missing gaps before and during trades, DST, roll boundaries, simultaneous NQ/ES signals and deterministic repeated output.
 
@@ -211,6 +211,6 @@ After Python validation, build Pine Script v6 with the same sessions, state mach
 
 ## Current decision
 
-`APPROVE_FOUNDATION_WITH_BLOCKERS_BEFORE_PNL`
+`FOUNDATION_CI_PASSED_PNL_BLOCKED`
 
-Proceed next with data qualification, session/gap completeness and manual event audit. Do not calculate or inspect strategy P&L until those contracts are frozen.
+The isolated foundation may merge. Proceed next with data qualification, session/gap completeness and manual event audit. Do not calculate or inspect strategy P&L until those contracts are frozen.
