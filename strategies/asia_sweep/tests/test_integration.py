@@ -28,7 +28,10 @@ _EXECUTION = ExecutionConfig(
     point_value=20.0,
     commission_per_side=2.25,
 )
-_CONFIG = IntegrationConfig(execution=_EXECUTION)
+_CONFIG = IntegrationConfig(
+    instrument="NQ_SYNTHETIC",
+    execution=_EXECUTION,
+)
 
 
 def _event(
@@ -60,7 +63,7 @@ def _event(
 
 def _short_event(**overrides: object) -> dict[str, object]:
     values: dict[str, object] = {
-        "instrument": "ES_SYNTHETIC",
+        "instrument": "NQ_SYNTHETIC",
         "trade_date": "2024-01-02",
         "execution_window": "NEW_YORK",
         "variant": AsiaSweepVariant.DISPLACEMENT.value,
@@ -111,11 +114,21 @@ def _marked_packet(events: list[dict[str, object]]) -> pd.DataFrame:
     return mark_synthetic_event_packet(pd.DataFrame(events))
 
 
-def test_integration_config_rejects_invalid_timezone_and_tolerance() -> None:
+def test_integration_config_rejects_invalid_identity_timezone_and_tolerance() -> None:
+    with pytest.raises(ValueError, match="instrument must be non-empty"):
+        IntegrationConfig(instrument="", execution=_EXECUTION)
     with pytest.raises(ValueError, match="unknown session_timezone"):
-        IntegrationConfig(execution=_EXECUTION, session_timezone="Mars/Olympus")
+        IntegrationConfig(
+            instrument="NQ_SYNTHETIC",
+            execution=_EXECUTION,
+            session_timezone="Mars/Olympus",
+        )
     with pytest.raises(ValueError, match="price_tolerance"):
-        IntegrationConfig(execution=_EXECUTION, price_tolerance=0.0)
+        IntegrationConfig(
+            instrument="NQ_SYNTHETIC",
+            execution=_EXECUTION,
+            price_tolerance=0.0,
+        )
 
 
 def test_stable_event_key_is_deterministic_and_identity_only() -> None:
@@ -126,11 +139,13 @@ def test_stable_event_key_is_deterministic_and_identity_only() -> None:
     assert stable_event_key(event) != stable_event_key({**event, "execution_window": "NEW_YORK"})
 
 
-def test_identity_rejects_missing_dates_and_edge_whitespace() -> None:
+def test_identity_rejects_missing_dates_non_strings_and_edge_whitespace() -> None:
     with pytest.raises(ValueError, match="trade_date is missing"):
         stable_event_key(_event(trade_date=pd.NaT))
     with pytest.raises(ValueError, match="edge whitespace"):
         stable_event_key(_event(instrument=" NQ_SYNTHETIC"))
+    with pytest.raises(ValueError, match="instrument must be a string"):
+        stable_event_key(_event(instrument=None))  # type: ignore[arg-type]
 
 
 @pytest.mark.parametrize("variant", [variant.value for variant in AsiaSweepVariant])
@@ -165,6 +180,31 @@ def test_dst_wall_calendar_mapping_uses_post_transition_offset() -> None:
     signal = map_event_to_execution_signal(event, _CONFIG)
     assert signal.window_end == pd.Timestamp("2024-03-11 06:00:00-04:00")
     assert signal.window_end.utcoffset() == pd.Timedelta(hours=-4)
+
+
+def test_event_instrument_must_match_bound_economics() -> None:
+    with pytest.raises(ValueError, match="does not match integration economics"):
+        map_event_to_execution_signal(_event(instrument="ES_SYNTHETIC"), _CONFIG)
+
+
+def test_distinct_instrument_configs_keep_commission_economics_separate() -> None:
+    nq_event = _event()
+    nq_outcome = execute_mapped_event(nq_event, _target_frame(nq_event), _CONFIG)[2]
+
+    es_execution = ExecutionConfig(
+        tick_size=0.25,
+        point_value=50.0,
+        commission_per_side=2.25,
+    )
+    es_config = IntegrationConfig(
+        instrument="ES_SYNTHETIC",
+        execution=es_execution,
+    )
+    es_event = _event(instrument="ES_SYNTHETIC")
+    es_outcome = execute_mapped_event(es_event, _target_frame(es_event), es_config)[2]
+
+    assert nq_outcome.commission_dollars == pytest.approx(es_outcome.commission_dollars)
+    assert nq_outcome.commission_r > es_outcome.commission_r
 
 
 @pytest.mark.parametrize(
@@ -252,7 +292,7 @@ def test_unmarked_minute_source_and_off_grid_ohlc_are_rejected() -> None:
         execute_mapped_event(_event(), frame, _CONFIG)
 
 
-def test_unmarked_empty_and_incomplete_event_packets_are_rejected() -> None:
+def test_unmarked_empty_incomplete_and_mixed_packets_are_rejected() -> None:
     unmarked = pd.DataFrame([_event()])
     with pytest.raises(ValueError, match="synthetic-packet-only"):
         replay_synthetic_event_packet(unmarked, {}, _CONFIG)
@@ -264,6 +304,14 @@ def test_unmarked_empty_and_incomplete_event_packets_are_rejected() -> None:
     incomplete = mark_synthetic_event_packet(pd.DataFrame([{"instrument": "NQ"}]))
     with pytest.raises(ValueError, match="missing required columns"):
         replay_synthetic_event_packet(incomplete, {}, _CONFIG)
+
+    mixed_events = [_event(), _event(instrument="ES_SYNTHETIC")]
+    mixed_packet = _marked_packet(mixed_events)
+    mixed_frames = {
+        stable_event_key(event): _target_frame(event) for event in mixed_events
+    }
+    with pytest.raises(ValueError, match="one configured instrument"):
+        replay_synthetic_event_packet(mixed_packet, mixed_frames, _CONFIG)
 
 
 def test_packet_rejects_duplicate_missing_and_orphan_frame_keys() -> None:
