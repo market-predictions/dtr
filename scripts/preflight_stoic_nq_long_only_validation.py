@@ -45,7 +45,12 @@ def main() -> None:
         raise ValueError("Frozen phase-one checksum contract mismatch")
 
     candidates = design.get("candidate_arms")
-    if not isinstance(candidates, list) or not candidates or len(candidates) != len(set(candidates)):
+    candidates_invalid = (
+        not isinstance(candidates, list)
+        or not candidates
+        or len(candidates) != len(set(candidates))
+    )
+    if candidates_invalid:
         raise ValueError("candidate_arms must be a unique non-empty list")
     if int(design.get("matched_control_replicates", 0)) != 50:
         raise ValueError("Matched-control replicate count must remain 50")
@@ -56,7 +61,8 @@ def main() -> None:
         raise ValueError("Baseline slippage must remain one tick per side")
     if float(execution.get("stressed_slippage_ticks_each_side", np.nan)) != 2.0:
         raise ValueError("Stress slippage must remain two ticks per side")
-    if float(execution.get("commission_per_side_usd", np.nan)) != NQ_SPEC.commission_per_side:
+    commission = float(execution.get("commission_per_side_usd", np.nan))
+    if commission != NQ_SPEC.commission_per_side:
         raise ValueError("Commission contract mismatch")
     if list(execution.get("entry_delays_minutes", [])) != [1, 5]:
         raise ValueError("Delay family must remain one and five minutes")
