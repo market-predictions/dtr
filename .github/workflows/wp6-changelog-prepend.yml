@@ -1,0 +1,113 @@
+name: Temporary WP6 Changelog Prepend
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/wp6-changelog-prepend.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  prepend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          show-progress: false
+
+      - name: Prepend v0.7.0
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("strategies/asia_sweep/CHANGELOG.md")
+          current = path.read_text()
+          marker = "# Asia Sweep Changelog\n"
+          if not current.startswith(marker):
+              raise SystemExit("unexpected changelog header")
+          if "## v0.7.0 — 2026-07-23" in current:
+              raise SystemExit("v0.7.0 already present")
+          entry = r'''
+
+## v0.7.0 — 2026-07-23
+
+### Added
+
+- Added a synthetic Dukascopy-style proxy normalization adapter using Decimal arithmetic.
+- Added exact provider-source-instrument and BID-side binding.
+- Added policy lock `DIRECTIONAL_PESSIMISTIC_V1`.
+- Added canonical source-event, source-frame and normalization digests.
+- Added directionally pessimistic event and one-minute OHLC normalization.
+- Added raw-versus-normalized audit columns and envelope-repair flags.
+- Added source-bound compatibility with the frozen WP5 integration contract.
+- Expanded the isolated Asian Sweep suite to 223 tests.
+
+### Changed
+
+- Required execution tick to be an exact integer multiple of source quote increment.
+- Required market-observed event entry, stop and every source OHLC value to be strictly source-grid aligned.
+- Allowed only negligible arithmetic noise in the derived 2.0R source target while retaining reported and canonical values separately.
+- Required source timestamps, gaps and activity flags to remain unchanged.
+- Required rows to remain within entry-through-window-end horizon.
+- Kept normalization disconnected from private loaders and automatic execution.
+
+### Corrected during review
+
+- Bound NQ-like and ES-like fixtures to exact provider source symbols rather than a generic proxy type.
+- Locked the source side to BID and included it in event/frame markers and digests.
+- Removed arbitrary normalization-policy versioning.
+- Separated derived-target arithmetic tolerance from strict observed-price grid validation.
+- Corrected an off-grid test fixture whose Python float literal canonicalized to the on-grid value.
+- Applied the pinned Ruff import order and removed all temporary diagnostic/correction workflows.
+
+### Reason
+
+Dukascopy proxy quotes have finer observed precision than the intended futures-like execution grid. A source adapter must therefore make every translation explicit, deterministic and pessimistic while preserving source identity, missing rows and activity. The resulting path is a stress scenario, not a reconstruction of CME trades.
+
+### Validation
+
+- Repository Ruff passed.
+- Full repository tests passed on Python 3.11 and 3.12.
+- Isolated Asian Sweep suite: 223 passed on Python 3.11.
+- Isolated Asian Sweep suite: 223 passed on Python 3.12.
+- Provider-symbol, BID-side and policy-version locks passed.
+- Decimal grid, long/short pessimism and risk-collapse cases passed.
+- Timestamp, gap and activity preservation passed.
+- Wrong-source, wrong-side, swapped-frame and stale-payload rejection passed.
+- Source-row order invariance and digest determinism passed.
+- Normalized outputs satisfied the frozen WP5 event/frame binding contract.
+- No private data, real execution, P&L, optimization or variant ranking was produced.
+- Final exact-head repository CI, isolated CI and unchanged no-P&L event-audit stability remain merge gates.
+
+### Known limits
+
+- No private normalization audit packet exists.
+- BID proxy data do not establish ask-side, exchange-trade or CME futures behavior.
+- The directional policy is a conservative scenario, not observed execution truth.
+- CME timestamp, roll, volume, spread, commission, basis and fill validity remain unresolved.
+- Real-data execution, MFE, MAE, P&L and portfolio reporting remain blocked.
+- Provider authorization for future automated acquisition remains unresolved.
+- Repository-wide NumPy/pandas timedelta deprecation warnings remain warning debt.
+- The independent review is a same-session clean-room pass, not an external human audit.
+
+### Next
+
+- Generate a private normalization-only audit packet in a separate work package.
+- Retain raw and normalized paths, adjustment metrics and all digests privately.
+- Complete independent programmatic and manual normalization review.
+- Keep execution and P&L disabled throughout the private normalization audit.
+- Reproduce the locked DTR benchmark before extracting shared execution utilities.
+'''
+          path.write_text(marker + entry + current[len(marker):])
+          PY
+
+      - name: Commit changelog
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add strategies/asia_sweep/CHANGELOG.md
+          git commit -m "Add Asian Sweep v0.7.0 changelog"
+          git push origin "HEAD:${{ github.head_ref }}"
