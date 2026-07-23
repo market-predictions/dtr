@@ -1,0 +1,55 @@
+study_id: STOIC123-WP-20260723-01
+frozen_on: 2026-07-23
+purpose: Convert the discretionary article into a small causal candidate family before inspection.
+defaults:
+  execution_minutes: 5
+  management_minutes: 15
+  map_minutes: 60
+  ema_fast: 10
+  ema_slow: 20
+  atr_length: 14
+  map_breakout_lookback: 20
+  map_breakout_active_bars: 6
+  step1_close_buffer_atr: 0.05
+  step1_min_body_fraction: 0.50
+  retest_max_bars: 12
+  retest_tolerance_atr: 0.25
+  base_min_bars: 3
+  base_max_bars: 8
+  base_max_range_atr: 1.00
+  base_min_overlap_ratio: 0.50
+  step3_close_buffer_atr: 0.05
+  breakout_expiry_bars: 8
+  require_map_at_step3: true
+  fill_mode: next_open
+  stop_buffer_ticks: 4
+  minimum_risk_ticks: 8
+  max_hold_minutes: 1440
+  gap_reset_minutes: 15
+  slippage_ticks_each_side: 1.0
+  allow_long: true
+  allow_short: true
+arms:
+  - arm_id: S123_M0_NO_MAP_CONTROL
+    description: Mechanical 1-2-3 control without higher-timeframe qualification.
+    map_mode: none
+    require_map_at_step3: false
+  - arm_id: S123_M1_EMA_MAP
+    description: Primary map-first arm using 60-minute EMA alignment.
+    map_mode: ema_alignment
+  - arm_id: S123_M2_BREAKOUT_MAP
+    description: Higher-timeframe location arm requiring a recent 60-minute range breakout.
+    map_mode: recent_breakout
+  - arm_id: S123_M3_EMA_PLUS_BREAKOUT
+    description: Strict arm requiring EMA alignment and a recent breakout in the same direction.
+    map_mode: ema_plus_breakout
+  - arm_id: S123_B1_STRICT_BASE
+    description: EMA-map arm with a tighter and more overlapping Step-2 base.
+    map_mode: ema_alignment
+    base_max_range_atr: 0.75
+    base_min_overlap_ratio: 0.67
+  - arm_id: S123_C1_STRICT_CLOSE
+    description: EMA-map arm requiring stronger Step-1 and Step-3 closes.
+    map_mode: ema_alignment
+    step1_close_buffer_atr: 0.10
+    step3_close_buffer_atr: 0.10
