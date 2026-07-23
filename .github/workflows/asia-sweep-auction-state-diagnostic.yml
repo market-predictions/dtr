@@ -1,0 +1,186 @@
+name: Asia Sweep Auction-State Diagnostic
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/asia-sweep-auction-state-diagnostic.yml"
+      - "scripts/run_asia_sweep_auction_state_diagnostic.py"
+      - "scripts/aggregate_asia_sweep_auction_state_diagnostic.py"
+      - "src/dtr_lab/strategies/asia_sweep/auction_state*.py"
+      - "strategies/asia_sweep/tests/test_auction_state.py"
+      - "strategies/asia_sweep/governance/WORKPACKAGE_2026-07-23_AUCTION_STATE_DIAGNOSTIC.md"
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  instrument-diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - instrument: NQ_PROXY
+            manifest: strategies/asia_sweep/configs/manifests/nq_proxy_dukascopy_development.yaml
+            dataset: NQ_PROXY_DUKASCOPY_USATECH_M1_BID_FULL_GRID_UTC_ET.zip
+          - instrument: ES_PROXY
+            manifest: strategies/asia_sweep/configs/manifests/es_proxy_dukascopy_development.yaml
+            dataset: ES_PROXY_DUKASCOPY_USA500_M1_BID_FULL_GRID_UTC_ET.zip
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run auction-state adversarial tests
+        run: |
+          PYTHONPATH=src pytest -c strategies/asia_sweep/pytest.ini \
+            strategies/asia_sweep/tests/test_auction_state.py
+
+      - name: Download canonical private proxy artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: asia-sweep-dukascopy-proxies
+          path: canonical
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: 29996917493
+
+      - name: Verify and stage one private dataset
+        run: |
+          test -f "canonical/prepared/${{ matrix.dataset }}"
+          mkdir -p data/private/asia_sweep
+          cp "canonical/prepared/${{ matrix.dataset }}" \
+            "data/private/asia_sweep/${{ matrix.dataset }}"
+
+      - name: Run development-only auction-state diagnostic
+        run: |
+          python scripts/run_asia_sweep_auction_state_diagnostic.py \
+            "${{ matrix.manifest }}" \
+            "auction-state-${{ matrix.instrument }}"
+
+      - name: Verify instrument boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          import pandas as pd
+
+          root = Path("auction-state-${{ matrix.instrument }}")
+          summary = json.loads((root / "instrument_summary.json").read_text())
+          ledger = pd.read_csv(root / "auction_state_ledger.csv")
+          assert summary["instrument"] == "${{ matrix.instrument }}"
+          assert summary["rows"] == len(ledger)
+          assert summary["rows"] > 500
+          assert summary["pnl_calculated"] is False
+          assert summary["execution_simulated"] is False
+          assert summary["validation_partition_opened"] is False
+          assert pd.to_datetime(ledger["trade_date"]).max() < pd.Timestamp("2024-07-01")
+          forbidden = {"net_r", "gross_r", "pnl", "profit_factor", "exit_price"}
+          assert forbidden.isdisjoint({column.lower() for column in ledger.columns})
+          PY
+
+      - name: Remove private source before upload
+        if: always()
+        run: rm -rf canonical data/private
+
+      - name: Mark private source removal
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path(
+              "auction-state-${{ matrix.instrument }}/instrument_summary.json"
+          )
+          if path.exists():
+              value = json.loads(path.read_text())
+              value["private_source_removed_before_upload"] = True
+              path.write_text(json.dumps(value, indent=2) + "\n")
+          PY
+
+      - name: Upload derived diagnostic
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: asia-sweep-auction-state-${{ matrix.instrument }}
+          path: auction-state-${{ matrix.instrument }}
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 6
+
+  aggregate-diagnostic:
+    needs: instrument-diagnostic
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Download instrument diagnostics
+        uses: actions/download-artifact@v4
+        with:
+          pattern: asia-sweep-auction-state-*
+          path: diagnostic-input
+
+      - name: Aggregate and apply promotion standard
+        run: |
+          python scripts/aggregate_asia_sweep_auction_state_diagnostic.py \
+            diagnostic-input \
+            diagnostic-result
+
+      - name: Verify aggregate research boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          summary = json.loads(
+              Path("diagnostic-result/diagnostic_summary.json").read_text()
+          )
+          assert summary["pnl_calculated"] is False
+          assert summary["execution_simulated"] is False
+          assert summary["validation_partition_opened"] is False
+          assert summary["decision"] in {
+              "PROMOTE_ONE_CHALLENGER",
+              "NO_MECHANISM_PASSES_DEVELOPMENT_PROMOTION_STANDARD",
+          }
+          PY
+
+      - name: Upload aggregate diagnostic
+        uses: actions/upload-artifact@v4
+        with:
+          name: asia-sweep-auction-state-diagnostic-summary
+          path: diagnostic-result
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 6
