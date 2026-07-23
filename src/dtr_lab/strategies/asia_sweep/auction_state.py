@@ -316,20 +316,20 @@ def detect_state(window_bars: pd.DataFrame, high: float, low: float) -> StateDet
             rejection_index = reclaim_index + 2
         break
 
-    if first_side == "UP":
-        opposite = bars.iloc[first_index : decision_end + 1]
-        opposite = opposite[opposite["low"] < low]
-    else:
-        opposite = bars.iloc[first_index : decision_end + 1]
-        opposite = opposite[opposite["high"] > high]
-    opposite_index = int(opposite.index[0]) if not opposite.empty else None
-
     candidates = [
         index
         for index in (acceptance_index, rejection_index)
         if index is not None
     ]
     detection_index = min(candidates) if candidates else decision_end
+    if first_side == "UP":
+        opposite = bars.iloc[first_index : detection_index + 1]
+        opposite = opposite[opposite["low"] < low]
+    else:
+        opposite = bars.iloc[first_index : detection_index + 1]
+        opposite = opposite[opposite["high"] > high]
+    opposite_index = int(opposite.index[0]) if not opposite.empty else None
+
     if opposite_index is not None and opposite_index <= detection_index:
         state = "TWO_SIDED"
         detection_index = opposite_index
@@ -476,7 +476,7 @@ def _forward_metrics(
         return blank
     path = minutes.loc[
         (minutes.index >= anchor_timestamp)
-        & (minutes.index <= window_end)
+        & (minutes.index < window_end)
         & (minutes["is_active_quote"] > 0)
     ]
     if path.empty:
@@ -498,7 +498,7 @@ def _forward_metrics(
             anchor_timestamp + pd.Timedelta(minutes=horizon),
             window_end,
         )
-        subset = path.loc[path.index <= horizon_end]
+        subset = path.loc[path.index < horizon_end]
         if subset.empty:
             continue
         signed_return, mfe, mae = metrics(subset)
