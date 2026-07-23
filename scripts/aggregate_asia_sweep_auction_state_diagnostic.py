@@ -6,7 +6,7 @@ from pathlib import Path
 import pandas as pd
 import typer
 
-from dtr_lab.strategies.asia_sweep.auction_state_reporting import (
+from dtr_lab.strategies.asia_sweep.auction_state_analysis import (
     build_diagnostic_summary,
     flat_summary_rows,
 )
