@@ -1,8 +1,9 @@
-study_id: STOIC123-WP-20260724-02
-frozen_on: 2026-07-24
+study_id: STOIC123-WP-20260723-02
+frozen_on: 2026-07-23
 purpose: >-
   Determine whether the exploratory NQ long-only result is a genuine Stoic
   sequence effect, a generic long-equity drift effect, or a proxy-only artifact.
+phase1_expected_sha256: 5d6909bd5740e1cdea9bd3d47a9818289a6faa8b9a61338726afdc53289ff805
 source_contract:
   instrument: NQ
   expected_sha256: 8d3f157a422636e5b8dda51cc3a3d9209c50cb53f9b279d3e14b627ce59370dc
@@ -29,6 +30,7 @@ management_contract: >-
   remains two-directional so an opposite short 1-2-3 can still exit a long.
 matched_control_replicates: 50
 matched_control_contract:
+  minimum_event_match_fraction: 0.90
   match_fields:
     - calendar_year
     - calendar_month_when_available
