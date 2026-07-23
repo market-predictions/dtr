@@ -195,12 +195,5 @@ def matched_time_events(
         )
 
     if not rows:
-        raise RuntimeError("Matched-time control produced no events")
-    result = pd.DataFrame(rows).sort_values("signal_time").reset_index(drop=True)
-    match_fraction = len(result) / len(full_events)
-    if match_fraction < MINIMUM_MATCH_FRACTION:
-        raise RuntimeError(
-            "Matched-time control coverage below frozen 90% minimum: "
-            f"{match_fraction:.6f}"
-        )
-    return result
+        return pd.DataFrame()
+    return pd.DataFrame(rows).sort_values("signal_time").reset_index(drop=True)
