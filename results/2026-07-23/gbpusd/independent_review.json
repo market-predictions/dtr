@@ -1,0 +1,25 @@
+{
+  "study_id": "DTR-FX-WP-20260723-22",
+  "conclusion": "INDEPENDENT_REVIEW_PASS",
+  "checks": {
+    "primary_arm_contract": true,
+    "session_contract": true,
+    "midpoint_data_synchronized": true,
+    "spread_non_negative": true,
+    "deployment_blocked": true,
+    "session_stage_conditional": true,
+    "all_metrics_reproduced": true,
+    "paired_effects_reproduced": true,
+    "selection_gate_compliant": true
+  },
+  "roadmap_compliance": {
+    "frozen_core_used": true,
+    "monday_asia_factorial_first": true,
+    "session_decomposition_conditional": true,
+    "no_core_threshold_search": true,
+    "actual_spread_measured": true,
+    "raw_data_not_for_commit": true,
+    "no_deployment": true
+  },
+  "interpretation": "Metrics and selection logic were reconstructed independently from saved trade streams. The result remains exploratory cross-asset evidence and does not establish deployability."
+}
