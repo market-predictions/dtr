@@ -69,6 +69,15 @@ Every gate is required:
 8. Full sequence exceeds EMA-break-only by at least 0.05R expectancy or 20% return-to-drawdown.
 9. Positive 95% date-block bootstrap lower bound.
 
+## Matched-control interpretation veto
+
+The nine numerical gates are necessary but not sufficient. Promotion is also vetoed when either condition holds:
+
+- the matched-time control is not comparable, defined as a median holding-period ratio outside 0.75 to 1.25 or insufficient event coverage; or
+- the full-sequence expectancy does not exceed the 95th percentile of the 50 matched-time control expectancies.
+
+This veto is frozen before any NQ futures result is inspected. It prevents generic Nasdaq long drift or unmatched exposure duration from being mistaken for sequence-specific alpha.
+
 ## Restrictions
 
 - No parameter, timeframe, threshold, session, stop, target, exit, or matched-control redesign after performance inspection.
