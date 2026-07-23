@@ -40,7 +40,10 @@ _INTEGRATION = IntegrationConfig(
     instrument="NQ_PROXY",
     execution=_EXECUTION,
 )
-_CONFIG = ProxyNormalizationConfig(integration=_INTEGRATION)
+_CONFIG = ProxyNormalizationConfig(
+    integration=_INTEGRATION,
+    source_instrument="usatechidxusd",
+)
 
 
 def _event(
@@ -55,6 +58,7 @@ def _event(
     entry: object = 100.123,
     stop: object = 99.123,
     target: object = 102.123,
+    cfg: ProxyNormalizationConfig = _CONFIG,
 ) -> dict[str, object]:
     return mark_synthetic_proxy_event(
         {
@@ -68,7 +72,8 @@ def _event(
             "entry_price_raw": entry,
             "stop_price_raw": stop,
             "target_price_raw": target,
-        }
+        },
+        cfg,
     )
 
 
@@ -119,21 +124,35 @@ def _raw_frame(
     return mark_synthetic_proxy_minute_frame(frame, event, cfg)
 
 
-def test_config_requires_integer_grid_ratio_activity_and_valid_policy() -> None:
+def test_config_locks_source_identity_side_policy_grid_and_activity() -> None:
+    with pytest.raises(ValueError, match="source_instrument must be non-empty"):
+        ProxyNormalizationConfig(
+            integration=_INTEGRATION,
+            source_instrument="",
+        )
+    with pytest.raises(ValueError, match="frozen BID"):
+        ProxyNormalizationConfig(
+            integration=_INTEGRATION,
+            source_instrument="usatechidxusd",
+            price_side="ASK",
+        )
+    with pytest.raises(ValueError, match="frozen normalization policy"):
+        ProxyNormalizationConfig(
+            integration=_INTEGRATION,
+            source_instrument="usatechidxusd",
+            policy_version="DIRECTIONAL_PESSIMISTIC_V2",
+        )
     with pytest.raises(ValueError, match="integer multiple"):
         ProxyNormalizationConfig(
             integration=_INTEGRATION,
+            source_instrument="usatechidxusd",
             source_quote_increment="0.003",
         )
     with pytest.raises(ValueError, match="source_quote_increment must be positive"):
         ProxyNormalizationConfig(
             integration=_INTEGRATION,
+            source_instrument="usatechidxusd",
             source_quote_increment="0",
-        )
-    with pytest.raises(ValueError, match="policy_version"):
-        ProxyNormalizationConfig(
-            integration=_INTEGRATION,
-            policy_version="",
         )
     no_activity = ExecutionConfig(
         tick_size=0.25,
@@ -146,13 +165,16 @@ def test_config_requires_integer_grid_ratio_activity_and_valid_policy() -> None:
             integration=IntegrationConfig(
                 instrument="NQ_PROXY",
                 execution=no_activity,
-            )
+            ),
+            source_instrument="usatechidxusd",
         )
     assert _CONFIG.source_quote_increment == Decimal("0.001")
     assert _CONFIG.execution_tick == Decimal("0.25")
+    assert _CONFIG.source_instrument == "usatechidxusd"
+    assert _CONFIG.price_side == "BID"
 
 
-def test_event_marker_returns_a_copy_and_unmarked_event_is_rejected() -> None:
+def test_event_marker_returns_a_source_bound_copy_and_unmarked_is_rejected() -> None:
     raw = {
         "instrument": "NQ_PROXY",
         "trade_date": "2024-01-02",
@@ -165,9 +187,11 @@ def test_event_marker_returns_a_copy_and_unmarked_event_is_rejected() -> None:
         "stop_price_raw": 99.123,
         "target_price_raw": 102.123,
     }
-    marked = mark_synthetic_proxy_event(raw)
+    marked = mark_synthetic_proxy_event(raw, _CONFIG)
     assert "proxy_source_kind" not in raw
     assert marked is not raw
+    assert marked["proxy_source_instrument"] == "usatechidxusd"
+    assert marked["proxy_price_side"] == "BID"
     with pytest.raises(ValueError, match="missing required fields"):
         normalize_proxy_event(raw, _CONFIG)
 
@@ -180,6 +204,18 @@ def test_source_event_digest_is_deterministic_and_sensitive_to_payload() -> None
     assert stable_event_key(event) == stable_event_key(revised)
     assert source_event_digest(event, _CONFIG) != source_event_digest(revised, _CONFIG)
     assert normalization_digest(event, _CONFIG) != normalization_digest(revised, _CONFIG)
+
+
+def test_source_instrument_and_price_side_must_match_config() -> None:
+    wrong_source = dict(_event())
+    wrong_source["proxy_source_instrument"] = "usa500idxusd"
+    with pytest.raises(ValueError, match="source instrument does not match"):
+        normalize_proxy_event(wrong_source, _CONFIG)
+
+    wrong_side = dict(_event())
+    wrong_side["proxy_price_side"] = "ASK"
+    with pytest.raises(ValueError, match="price side does not match"):
+        normalize_proxy_event(wrong_side, _CONFIG)
 
 
 @pytest.mark.parametrize(
@@ -208,6 +244,18 @@ def test_invalid_raw_event_contract_fails_loudly(
         normalize_proxy_event(_event(**overrides), _CONFIG)
 
 
+def test_derived_target_float_noise_is_canonicalized_but_market_prices_are_not() -> None:
+    noisy = _event(target=102.12300000000001)
+    normalized = normalize_proxy_event(noisy, _CONFIG)
+    assert normalized["proxy_target_price_source"] == pytest.approx(102.123)
+    assert normalized["proxy_target_price_reported"] == pytest.approx(
+        102.12300000000001
+    )
+
+    with pytest.raises(ValueError, match="off the source quote grid"):
+        normalize_proxy_event(_event(entry=100.12300000000001), _CONFIG)
+
+
 def test_long_event_normalization_is_directionally_adverse_and_exact_2r() -> None:
     normalized = normalize_proxy_event(_event(), _CONFIG)
     assert normalized["entry_price_raw"] == pytest.approx(100.25)
@@ -216,6 +264,8 @@ def test_long_event_normalization_is_directionally_adverse_and_exact_2r() -> Non
     assert normalized["proxy_entry_price_source"] == pytest.approx(100.123)
     assert normalized["proxy_stop_price_source"] == pytest.approx(99.123)
     assert normalized["proxy_target_price_source"] == pytest.approx(102.123)
+    assert normalized["proxy_source_instrument"] == "usatechidxusd"
+    assert normalized["proxy_price_side"] == "BID"
 
 
 def test_short_event_normalization_is_directionally_adverse_and_exact_2r() -> None:
@@ -239,7 +289,35 @@ def test_normalized_risk_collapse_is_rejected() -> None:
         normalize_proxy_event(event, _CONFIG)
 
 
-def test_proxy_frame_marker_returns_copy_and_binds_event() -> None:
+def test_distinct_nq_es_sources_and_economics_remain_separate() -> None:
+    es_execution = ExecutionConfig(
+        tick_size=0.25,
+        point_value=50.0,
+        commission_per_side=2.25,
+    )
+    es_integration = IntegrationConfig(
+        instrument="ES_PROXY",
+        execution=es_execution,
+    )
+    es_config = ProxyNormalizationConfig(
+        integration=es_integration,
+        source_instrument="usa500idxusd",
+    )
+    es_event = _event(instrument="ES_PROXY", cfg=es_config)
+    es_result = normalize_proxy_fixture(
+        es_event,
+        _raw_frame(es_event, cfg=es_config),
+        es_config,
+    )
+    assert es_result.event["proxy_source_instrument"] == "usa500idxusd"
+    assert es_result.one_minute.attrs["asia_sweep_proxy_source_instrument"] == (
+        "usa500idxusd"
+    )
+    assert es_config.integration.execution.point_value == pytest.approx(50.0)
+    assert _CONFIG.integration.execution.point_value == pytest.approx(20.0)
+
+
+def test_proxy_frame_marker_returns_copy_and_binds_source_event() -> None:
     event = _event()
     raw = pd.DataFrame(
         {
@@ -255,9 +333,11 @@ def test_proxy_frame_marker_returns_copy_and_binds_event() -> None:
     assert raw.attrs == {}
     assert marked is not raw
     assert marked.attrs["asia_sweep_proxy_event_key"] == stable_event_key(event)
+    assert marked.attrs["asia_sweep_proxy_source_instrument"] == "usatechidxusd"
+    assert marked.attrs["asia_sweep_proxy_price_side"] == "BID"
 
 
-def test_unmarked_swapped_and_stale_payload_frames_are_rejected() -> None:
+def test_unmarked_swapped_stale_payload_and_source_frames_are_rejected() -> None:
     event = _event()
     unmarked = pd.DataFrame(
         {
@@ -272,13 +352,26 @@ def test_unmarked_swapped_and_stale_payload_frames_are_rejected() -> None:
     with pytest.raises(ValueError, match="not a marked synthetic proxy fixture"):
         normalize_proxy_minute_frame(unmarked, event, _CONFIG)
 
-    other = _event(execution_window="NEW_YORK", entry_timestamp="2024-01-02 08:35:00-05:00")
+    other = _event(
+        execution_window="NEW_YORK",
+        entry_timestamp="2024-01-02 08:35:00-05:00",
+    )
     with pytest.raises(ValueError, match="event key does not match"):
         normalize_proxy_minute_frame(_raw_frame(other), event, _CONFIG)
 
     revised = _event(stop=98.873, target=102.623)
     with pytest.raises(ValueError, match="event digest does not match"):
         normalize_proxy_minute_frame(_raw_frame(event), revised, _CONFIG)
+
+    wrong_source = _raw_frame(event)
+    wrong_source.attrs["asia_sweep_proxy_source_instrument"] = "usa500idxusd"
+    with pytest.raises(ValueError, match="source instrument does not match"):
+        normalize_proxy_minute_frame(wrong_source, event, _CONFIG)
+
+    wrong_side = _raw_frame(event)
+    wrong_side.attrs["asia_sweep_proxy_price_side"] = "ASK"
+    with pytest.raises(ValueError, match="price side does not match"):
+        normalize_proxy_minute_frame(wrong_side, event, _CONFIG)
 
 
 @pytest.mark.parametrize(
@@ -433,7 +526,12 @@ def test_normalized_fixture_is_deterministic_and_satisfies_wp5_binding() -> None
     event = _event()
     frame = _raw_frame(event)
     first = normalize_proxy_fixture(event, frame, _CONFIG)
-    second = normalize_proxy_fixture(event, frame.iloc[::-1].copy(), _CONFIG)
+    reversed_frame = mark_synthetic_proxy_minute_frame(
+        frame.iloc[::-1].copy(),
+        event,
+        _CONFIG,
+    )
+    second = normalize_proxy_fixture(event, reversed_frame, _CONFIG)
 
     pd.testing.assert_frame_equal(first.one_minute, second.one_minute)
     assert first.event == second.event
