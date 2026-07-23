@@ -1,4 +1,6 @@
-"""Preregistered direction, mechanism-control, and validation helpers."""
+"""Preregistered NQ direction, mechanism-control, and validation helpers."""
+
+VALIDATION_STUDY_ID = "STOIC123-WP-20260724-02"
 
 from .validation_direction import (
     DirectionMode,
@@ -22,6 +24,7 @@ __all__ = [
     "DirectionMode",
     "EntryModel",
     "StageDetection",
+    "VALIDATION_STUDY_ID",
     "delay_events",
     "detect_long_stage_events",
     "entry_config",
