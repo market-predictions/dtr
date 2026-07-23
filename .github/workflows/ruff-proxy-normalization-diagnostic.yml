@@ -8,15 +8,16 @@ on:
       - "strategies/asia_sweep/tests/test_proxy_normalization.py"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   diagnose:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout branch
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.head_ref }}
           show-progress: false
 
       - name: Apply pinned Ruff fixes
@@ -25,22 +26,17 @@ jobs:
             src/dtr_lab/strategies/asia_sweep/proxy_normalization.py \
             strategies/asia_sweep/tests/test_proxy_normalization.py \
             --fix
-          git diff -- \
-            src/dtr_lab/strategies/asia_sweep/proxy_normalization.py \
-            strategies/asia_sweep/tests/test_proxy_normalization.py \
-            > ruff-proxy-normalization-fix.diff
-          cp src/dtr_lab/strategies/asia_sweep/proxy_normalization.py \
-            proxy_normalization.ruff-fixed.py
-          cp strategies/asia_sweep/tests/test_proxy_normalization.py \
-            test_proxy_normalization.ruff-fixed.py
 
-      - name: Upload exact Ruff fix
-        uses: actions/upload-artifact@v4
-        with:
-          name: ruff-proxy-normalization-fix
-          path: |
-            ruff-proxy-normalization-fix.diff
-            proxy_normalization.ruff-fixed.py
-            test_proxy_normalization.ruff-fixed.py
-          if-no-files-found: error
-          retention-days: 1
+      - name: Commit exact Ruff fix
+        run: |
+          if git diff --quiet; then
+            echo "No Ruff changes required"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            src/dtr_lab/strategies/asia_sweep/proxy_normalization.py \
+            strategies/asia_sweep/tests/test_proxy_normalization.py
+          git commit -m "Apply pinned Ruff proxy normalization fix"
+          git push origin "HEAD:${{ github.head_ref }}"
