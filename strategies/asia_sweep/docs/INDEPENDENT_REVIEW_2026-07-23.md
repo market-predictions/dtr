@@ -2,7 +2,7 @@
 
 ## Review method
 
-A clean-room review pass was performed after implementation, using the accepted roadmap, separation requirement and greater objective of finding strategies that are consistently profitable. This is an independent analytical pass within the same AI work session, not an external human audit.
+A clean-room review pass was performed after implementation and again against the published pull-request diff, using the accepted roadmap, separation requirement and greater objective of finding strategies that are consistently profitable. This is an independent analytical pass within the same AI work session, not an external human audit.
 
 ## Verdict
 
@@ -16,10 +16,26 @@ The foundation is relevant to the broader strategy-discovery objective because i
 - The four-variant family is small enough to support multiple-testing control.
 - Entry timestamps occur after determining bar closes.
 - AS-D waits for right-side swing confirmation before using the reaction level.
+- The first qualifying sweep owns the event, preventing retrospective replacement by a later sweep.
 - Rejected events are retained, which supports funnel and selection-bias analysis.
 - Same-bar double sweeps are rejected rather than resolved optimistically.
+- AS-C uses causal preceding five-minute history and does not reset its body reference at the execution-window boundary.
 - Tests are physically and operationally separate from DTR tests.
 - ES cannot be silently run with an invented source.
+
+## Resolved during published-diff review
+
+### RR1 — Displacement reference reset at execution-window start
+
+The initial implementation calculated the trailing body median only inside each execution window. This could suppress early-London displacement signals and create a time-of-day artifact.
+
+**Resolution:** compute the median from all available preceding five-minute bars before filtering to the execution window. Added an early-London regression test.
+
+### RR2 — Repository line-length policy
+
+The initial published diff contained lines above the repository's 100-character Ruff limit.
+
+**Resolution:** reformatted the new Python files and manually verified the edited files contain no lines above 100 characters. Ruff itself could not be installed in the restricted local environment, so CI confirmation remains required.
 
 ## Findings requiring action before P&L
 
@@ -66,7 +82,7 @@ A positive NQ full-sample result alone would not support the greater goal.
 - WP-AS-03 isolation architecture: complete at signal boundary; neutral execution extraction pending.
 - WP-AS-04 event ledger: foundation complete; completeness/gap metadata pending.
 - WP-AS-05 variants: implemented.
-- WP-AS-06 deterministic tests: initial suite complete; full 20-case adversarial set pending.
+- WP-AS-06 deterministic tests: initial nine-test suite complete; full 20-case adversarial set pending.
 - WP-AS-07 onward: not authorized yet.
 
 ## Recommendation
