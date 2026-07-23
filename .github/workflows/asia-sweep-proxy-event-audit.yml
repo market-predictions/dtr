@@ -1,0 +1,127 @@
+name: Asia Sweep Proxy Event Audit
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/asia-sweep-proxy-event-audit.yml"
+      - "scripts/run_asia_sweep_manifest.py"
+      - "scripts/build_asia_sweep_audit_packet.py"
+      - "scripts/validate_asia_sweep_audit_sample.py"
+      - "src/dtr_lab/strategies/asia_sweep/**"
+      - "strategies/asia_sweep/configs/manifests/*proxy*"
+      - "strategies/asia_sweep/tests/**"
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  event-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - instrument: NQ_PROXY
+            manifest: strategies/asia_sweep/configs/manifests/nq_proxy_dukascopy_development.yaml
+            dataset: NQ_PROXY_DUKASCOPY_USATECH_M1_BID_FULL_GRID_UTC_ET.zip
+            report_root: strategies/asia_sweep/reports/asia_sweep_nq_proxy_dukascopy_development_20260723
+            artifact_name: asia-sweep-nq-proxy-event-audit
+          - instrument: ES_PROXY
+            manifest: strategies/asia_sweep/configs/manifests/es_proxy_dukascopy_development.yaml
+            dataset: ES_PROXY_DUKASCOPY_USA500_M1_BID_FULL_GRID_UTC_ET.zip
+            report_root: strategies/asia_sweep/reports/asia_sweep_es_proxy_dukascopy_development_20260723
+            artifact_name: asia-sweep-es-proxy-event-audit
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Download canonical private proxy artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: asia-sweep-dukascopy-proxies
+          path: canonical
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: 29996917493
+
+      - name: Verify canonical dataset is present
+        run: test -f "canonical/prepared/${{ matrix.dataset }}"
+
+      - name: Stage one private dataset
+        run: |
+          mkdir -p data/private/asia_sweep
+          cp "canonical/prepared/${{ matrix.dataset }}" \
+            "data/private/asia_sweep/${{ matrix.dataset }}"
+
+      - name: Build event-only ledgers
+        run: python scripts/run_asia_sweep_manifest.py "${{ matrix.manifest }}"
+
+      - name: Build deterministic audit packet
+        run: |
+          python scripts/build_asia_sweep_audit_packet.py \
+            --report-root "${{ matrix.report_root }}" \
+            --instrument "${{ matrix.instrument }}" \
+            --sample-size 50
+
+      - name: Independently reconstruct sampled events
+        run: |
+          python scripts/validate_asia_sweep_audit_sample.py \
+            --source-zip "data/private/asia_sweep/${{ matrix.dataset }}" \
+            --manifest "${{ matrix.manifest }}" \
+            --sample "${{ matrix.report_root }}/manual_audit_sample_50.csv" \
+            --output-root "${{ matrix.report_root }}"
+
+      - name: Verify no execution or P&L output
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path("${{ matrix.report_root }}")
+          event_summary = json.loads((root / "event_audit_summary.json").read_text())
+          validation = json.loads(
+              (root / "independent_validation_summary.json").read_text()
+          )
+          assert event_summary["pnl_calculated"] is False
+          assert event_summary["execution_simulated"] is False
+          assert validation["pnl_calculated"] is False
+          assert validation["execution_simulated"] is False
+          assert validation["all_events_valid"] is True
+          assert validation["validation_errors"] == 0
+          assert validation["sample_rows"] == 50
+          forbidden = ("pnl", "realized", "exit_price", "mfe", "mae")
+          for ledger in root.glob("*_event_ledger.csv"):
+              header = ledger.open().readline().lower()
+              assert not any(token in header for token in forbidden), ledger
+          PY
+
+      - name: Remove source dataset before artifact upload
+        if: always()
+        run: rm -rf canonical data/private
+
+      - name: Upload private derived event audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: ${{ matrix.report_root }}
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 6

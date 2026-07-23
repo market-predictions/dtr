@@ -1,7 +1,7 @@
 schema_version: 1
 run_id: asia_sweep_nq_proxy_dukascopy_development_20260723
 strategy_id: ASIA_SWEEP_STANDALONE_V0
-research_status: STRUCTURAL_DATA_REGISTERED_EVENT_RUNNER_BLOCKED
+research_status: EVENT_ONLY_READY_AUDIT_REQUIRED_PNL_BLOCKED
 
 separation:
   strategy_namespace: asia_sweep
@@ -13,8 +13,7 @@ dataset:
   instrument: NQ_PROXY
   source_kind: DUKASCOPY_INDEX_CFD_PROXY
   source_instrument: usatechidxusd
-  qualification_status: STRUCTURALLY_QUALIFIED_PRIVATE_PROXY_DATA_ADAPTER_REQUIRED
-  event_runner_blocked_reason: proxy_timezone_activity_adapter_not_implemented
+  qualification_status: STRUCTURALLY_QUALIFIED_PRIVATE_PROXY_EVENT_ADAPTER_ENABLED
   provider_authorization_status: PROVIDER_AUTHORIZATION_UNRESOLVED
   loader: asia_sweep_zip_csv_v1
   path: data/private/asia_sweep/NQ_PROXY_DUKASCOPY_USATECH_M1_BID_FULL_GRID_UTC_ET.zip
@@ -35,6 +34,7 @@ dataset:
   schema:
     timestamp_column: "timestamp UTC"
     timestamp_format: "%Y-%m-%dT%H:%M:%SZ"
+    activity_column: is_active_quote
     required_columns: [open, high, low, close, volume, is_active_quote]
   activity_gate:
     minimum_positive_volume_minutes: 1
@@ -70,7 +70,7 @@ strategy:
   target_rr: 2.0
 
 execution:
-  status: BLOCKED_PROXY_ADAPTER_AND_EVENT_SEMANTICS_REQUIRED
+  status: EVENT_LEDGER_ONLY_EXECUTION_AND_PNL_BLOCKED
   signal_source: 5min
   intended_intrabar_source: 1min
   intended_same_minute_collision_policy: conservative_stop_first

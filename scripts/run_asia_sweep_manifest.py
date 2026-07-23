@@ -43,6 +43,10 @@ def _config(manifest: dict[str, object], variant: AsiaSweepVariant) -> AsiaSweep
     dataset = manifest["dataset"]
     strategy = manifest["strategy"]
     execution = manifest["execution"]
+    activity = dataset.get("activity_gate", {})
+    schema = dataset.get("schema", {})
+    activity_column = schema.get("activity_column")
+    maximum_inactive = activity.get("maximum_consecutive_zero_volume_minutes")
     return AsiaSweepConfig(
         name=f"{manifest['strategy_id']}:{variant.value}",
         variant=variant,
@@ -61,7 +65,21 @@ def _config(manifest: dict[str, object], variant: AsiaSweepVariant) -> AsiaSweep
         retest_band_ticks=int(strategy["retest_band_ticks"]),
         stop_buffer_ticks=int(strategy["stop_buffer_ticks"]),
         target_rr=float(strategy["target_rr"]),
+        activity_column=str(activity_column) if activity_column is not None else None,
+        minimum_active_minutes=int(activity.get("minimum_positive_volume_minutes", 1)),
+        maximum_consecutive_inactive_minutes=(
+            int(maximum_inactive) if maximum_inactive is not None else None
+        ),
     )
+
+
+def _period_timestamp(value: object, timezone: str | None) -> pd.Timestamp:
+    timestamp = pd.Timestamp(value)
+    if timezone is None:
+        return timestamp
+    if timestamp.tz is None:
+        return timestamp.tz_localize(timezone, ambiguous="raise", nonexistent="raise")
+    return timestamp.tz_convert(timezone)
 
 
 @app.command()
@@ -94,14 +112,23 @@ def main(manifest_path: Path) -> None:
         timestamp_column=str(schema_data["timestamp_column"]),
         timestamp_format=schema_data.get("timestamp_format"),
         required_columns=tuple(schema_data["required_columns"]),
+        source_timezone=dataset.get("source_timezone"),
+        session_timezone=dataset.get("session_timezone"),
     )
     one = load_one_minute_zip(source, schema)
     bars = resample_5m(one)
-    start = pd.Timestamp(manifest["periods"]["development_start"])
-    end = pd.Timestamp(manifest["periods"]["development_end"])
-    one = one[(one["timestamp"] >= start - pd.Timedelta(days=1)) & (one["timestamp"] < end)]
+    session_timezone = dataset.get("session_timezone")
+    start = _period_timestamp(
+        manifest["periods"]["development_start"],
+        session_timezone,
+    )
+    end = _period_timestamp(
+        manifest["periods"]["development_end"],
+        session_timezone,
+    )
+    one = one[(one["timestamp"] >= start - pd.DateOffset(days=1)) & (one["timestamp"] < end)]
     bars = bars[
-        (bars["timestamp"] >= start - pd.Timedelta(days=1))
+        (bars["timestamp"] >= start - pd.DateOffset(days=1))
         & (bars["timestamp"] < end)
     ]
 
