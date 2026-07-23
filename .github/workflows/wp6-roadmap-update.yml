@@ -1,7 +1,9 @@
 name: Temporary WP6 Governance Commit
 
 on:
-  pull_request:
+  push:
+    branches:
+      - agent/asia-sweep-proxy-normalization-contract
     paths:
       - ".github/workflows/wp6-roadmap-update.yml"
 
@@ -16,7 +18,7 @@ jobs:
       - name: Checkout branch
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.head_ref }}
+          ref: agent/asia-sweep-proxy-normalization-contract
           show-progress: false
 
       - name: Prepend changelog v0.7.0
@@ -110,4 +112,4 @@ Dukascopy proxy quotes have finer observed precision than the intended futures-l
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add strategies/asia_sweep/CHANGELOG.md
           git commit -m "Add Asian Sweep v0.7.0 changelog"
-          git push origin "HEAD:${{ github.head_ref }}"
+          git push origin HEAD:agent/asia-sweep-proxy-normalization-contract
