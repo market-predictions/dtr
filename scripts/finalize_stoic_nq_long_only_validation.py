@@ -23,6 +23,7 @@ def main() -> None:
         "matched_p95_expectancy_r",
         "matched_to_full_hold_ratio",
         "hold_distribution_match_flag",
+        "matched_min_event_match_fraction",
     }
     missing = required_matched.difference(matched.columns)
     if missing:
@@ -35,7 +36,11 @@ def main() -> None:
     promoted: list[str] = []
     for row in matched.itertuples(index=False):
         hold_ratio = float(row.matched_to_full_hold_ratio)
-        comparable = bool(row.hold_distribution_match_flag) and 0.75 <= hold_ratio <= 1.25
+        hold_comparable = bool(row.hold_distribution_match_flag) and (
+            0.75 <= hold_ratio <= 1.25
+        )
+        coverage_passed = float(row.matched_min_event_match_fraction) >= 0.90
+        comparable = hold_comparable and coverage_passed
         exceeds_p95 = float(row.full_expectancy_r) > float(row.matched_p95_expectancy_r)
         numerical_pass = bool(numerical.get(row.arm_id, False))
         vetoed = not comparable or not exceeds_p95
@@ -46,6 +51,8 @@ def main() -> None:
             {
                 "arm_id": row.arm_id,
                 "numerical_gates_passed": numerical_pass,
+                "hold_distribution_comparable": hold_comparable,
+                "matched_control_coverage_passed": coverage_passed,
                 "matched_control_comparable": comparable,
                 "full_expectancy_exceeds_matched_p95": exceeds_p95,
                 "matched_control_vetoed": vetoed,
