@@ -22,66 +22,74 @@ Status: **complete**
 
 ## Phase 2 — Integrity and descriptive evidence
 
-Status: **complete for proxies and GBPUSD; NQ futures pending**
+Status: **complete**
 
-- [x] Audit event funnels, chronology, risk, gaps, overlap, years, and costs on completed sources.
+- [x] Audit event funnels, chronology, risk, gaps, overlap, years, and costs.
 - [x] Reject GBPUSD transfer.
 - [x] Classify index-proxy results as positive but uncertain.
-- [ ] Execute the checksum-qualified NQ futures replication.
+- [x] Execute the checksum-qualified NQ futures replication.
 
 ## Phase 3 — NQ long-only validation
 
-Status: **active; preregistered**
+Status: **complete; no promotion**
 
 Work package: `STOIC123-WP-20260723-02`
 
-- [x] Correct the direction-restriction versus management-exit contract and independently review all 18 corrected ledgers.
+- [x] Correct the direction-restriction versus management-exit contract.
+- [x] Independently review all 18 corrected proxy/FX ledgers.
 - [x] Freeze four candidate roles before NQ futures inspection.
 - [x] Freeze long-only, short-only, and both-direction comparators.
 - [x] Freeze one-tick baseline, two-tick stress, and delayed-entry tests.
 - [x] Freeze expanding-year, RTH/overnight, concentration, and exposure attribution.
-- [ ] Reacquire the registered NQ archive and verify the exact SHA-256.
-- [ ] Execute the full validation and independent reconstruction.
+- [x] Reacquire the registered NQ archive and verify the exact SHA-256.
+- [x] Execute the full validation and independent reconstruction.
+
+Decision: `NO_PROMOTION_STOP_NQ_LONG_ONLY_CURRENT_SAMPLE`.
 
 ## Phase 4 — Mechanism review
 
-Status: **implemented; execution pending**
+Status: **complete; no validated sequence edge**
 
-- [x] Define causal EMA-break-only control.
-- [x] Define causal EMA-break-plus-retest control.
-- [x] Define 50 deterministic matched-time controls per candidate with a 90% minimum event-match integrity gate.
-- [x] Preserve higher-timeframe eligibility and original risk width in matched controls.
-- [ ] Determine whether the full sequence adds at least 0.05R expectancy or 20% return-to-drawdown over EMA break.
-- [ ] Reject the full sequence if simpler controls are equally useful.
+- [x] Run causal EMA-break-only control.
+- [x] Run causal EMA-break-plus-retest control.
+- [x] Run 50 deterministic matched-time controls per candidate.
+- [x] Preserve higher-timeframe eligibility and original risk width.
+- [x] Apply the frozen 90% event-coverage and matched-p95 veto.
+- [x] Reject EMA-map long-only on actual NQ futures.
+- [x] Reject strict close because incremental expectancy over EMA break was only 0.002R.
+- [x] Reject EMA-plus-breakout promotion because of 2023 failure, uncertainty, and control coverage failure.
 
 ## Phase 5 — Selection gate
 
-Status: **blocked on NQ validation output**
+Status: **closed; no finalist**
 
-A candidate must pass every preregistered gate: positive expectancy, broad annual stability, limited concentration, cost and delay resilience, lower drawdown, mechanism value, and a positive date-block lower bound.
+- No candidate passed all nine numerical gates.
+- Every date-block 95% interval crossed zero.
+- Every candidate was vetoed by the matched-control contract.
+- No Pine, sizing, paper-deployment, alert, or live-trading work is authorized.
 
-Failure means `NO_PROMOTION`. Partial historical improvement authorizes at most further paper research.
+## Phase 6 — Fresh or longer-history evidence
 
-## Phase 6 — Cross-market and longer-history evidence
+Status: **blocked until new data exist**
 
-Status: **blocked**
-
-- [ ] Replicate an NQ finalist on qualified fresh or longer contract-audited data.
+- [ ] Obtain qualified unseen NQ data or materially longer contract-audited NQ history.
+- [ ] Test any retained directional hypothesis only under a new preregistration.
+- [ ] Treat the observed no-map short asymmetry as post-hoc; do not test it again on the current sample.
 - [ ] Acquire actual ES futures data before any ES claim.
-- [ ] Keep NQ and ES results separate.
+- [ ] Keep all instrument results separate.
 
 ## Phase 7 — TradingView parity
 
-Status: **blocked**
+Status: **blocked; no finalist**
 
-- [ ] Port only a data-supported finalist to Pine Script v6.
+- [ ] Port only a candidate that first passes fresh-data validation.
 - [ ] Reconcile Python and Pine events one-for-one.
 - [ ] Make higher-timeframe completion and delayed confirmation explicit.
 
 ## Phase 8 — Paper-forward observation
 
-Status: **blocked**
+Status: **blocked; no finalist**
 
-- [ ] Freeze any finalist without further historical tuning.
+- [ ] Freeze any future finalist without further historical tuning.
 - [ ] Observe forward execution and slippage.
 - [ ] Require a new decision gate before production use.
