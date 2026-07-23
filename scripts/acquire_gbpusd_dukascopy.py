@@ -52,7 +52,7 @@ def fetch_day(day: dt.date, side: str) -> tuple[dt.date, list[tuple], str]:
             midnight = dt.datetime.combine(day, dt.time(), tzinfo=dt.timezone.utc)
             rows = []
             for offset in range(0, len(payload), RECORD.size):
-                seconds, open_, high, low, close, volume = RECORD.unpack_from(
+                seconds, open_, close, low, high, volume = RECORD.unpack_from(
                     payload, offset
                 )
                 timestamp = midnight + dt.timedelta(seconds=seconds)
@@ -91,6 +91,7 @@ def acquire_year(year: int, out_dir: Path, workers: int) -> dict:
         "year": year,
         "calendar_days": len(days),
         "divisor": DIVISOR,
+        "bi5_field_order": ["seconds", "open", "close", "low", "high", "volume"],
         "sides": {},
     }
     for side in ("BID", "ASK"):
