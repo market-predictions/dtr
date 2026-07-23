@@ -5,9 +5,9 @@ from datetime import time
 import numpy as np
 import pandas as pd
 
-from .backtest import simulate
 from .config import InstrumentSpec, SequenceConfig
 from .reporting import summarize
+from .validation_backtest import simulate_validation
 
 
 def _session_label(timestamp: pd.Timestamp) -> str:
@@ -121,4 +121,4 @@ def run_scenario(
     spec: InstrumentSpec,
     config: SequenceConfig,
 ) -> pd.DataFrame:
-    return simulate(one_minute, events, management_events, spec, config)
+    return simulate_validation(one_minute, events, management_events, spec, config)
