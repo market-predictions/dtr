@@ -20,6 +20,8 @@ All timestamps are interpreted in `America/New_York` pending source-semantic res
 
 A sweep requires penetration of at least two ticks beyond the Asia high or low. A five-minute bar that sweeps both sides is rejected as ambiguous.
 
+The first qualifying sweep in an execution window owns the event. If that first sweep fails the required same-bar reclaim or later confirmation, the window is rejected for that variant. A later sweep in the same window may not replace it. This prevents retrospective selection of the most favorable sweep.
+
 ### AS-A aggressive reclaim
 
 - downside sweep: close at or above Asia low;
@@ -39,6 +41,7 @@ AS-A plus an opposing candle within three subsequent five-minute bars:
 
 - directional body agrees with reversal;
 - body at least 1.25 times the causal trailing median body;
+- the trailing median uses all available preceding five-minute bars and does not reset at the execution-window boundary;
 - close passes the sweep-candle midpoint;
 - close remains back inside the Asia range.
 
@@ -62,7 +65,7 @@ The reaction swing is unavailable until the right-side confirmation bar closes.
 ## Portfolio rules
 
 - maximum one open position per instrument;
-- first valid signal per execution window wins;
+- first qualifying sweep per execution window owns the setup;
 - maximum one trade per London window and one per New York window;
 - no same-window re-entry in the primary specification.
 
