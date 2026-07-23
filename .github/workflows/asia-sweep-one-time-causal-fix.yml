@@ -19,74 +19,57 @@ jobs:
           ref: ${{ github.head_ref }}
           show-progress: false
 
-      - name: Apply exact causal corrections
+      - name: Apply line-addressed causal corrections
         run: |
           python - <<'PY'
           from pathlib import Path
-          from textwrap import dedent
 
           path = Path("src/dtr_lab/strategies/asia_sweep/auction_state.py")
-          text = path.read_text()
+          lines = path.read_text().splitlines(keepends=True)
 
-          old_opposite = dedent('''\
-              if first_side == "UP":
-                  opposite = bars.iloc[first_index : decision_end + 1]
-                  opposite = opposite[opposite["low"] < low]
-              else:
-                  opposite = bars.iloc[first_index : decision_end + 1]
-                  opposite = opposite[opposite["high"] > high]
-              opposite_index = int(opposite.index[0]) if not opposite.empty else None
+          opposite_start = next(
+              index
+              for index, line in enumerate(lines)
+              if line == '    if first_side == "UP":\n'
+              and lines[index + 1]
+              == '        opposite = bars.iloc[first_index : decision_end + 1]\n'
+          )
+          candidates_start = next(
+              index
+              for index in range(opposite_start, len(lines))
+              if lines[index] == '    candidates = [\n'
+          )
+          detection_end = next(
+              index
+              for index in range(candidates_start, len(lines))
+              if lines[index]
+              == '    detection_index = min(candidates) if candidates else decision_end\n'
+          )
+          opposite_block = lines[opposite_start:candidates_start]
+          candidates_block = lines[candidates_start : detection_end + 1]
+          opposite_block = [
+              line.replace("decision_end + 1", "detection_index + 1")
+              for line in opposite_block
+          ]
+          lines = (
+              lines[:opposite_start]
+              + candidates_block
+              + opposite_block
+              + lines[detection_end + 1 :]
+          )
 
-              candidates = [
-                  index
-                  for index in (acceptance_index, rejection_index)
-                  if index is not None
-              ]
-              detection_index = min(candidates) if candidates else decision_end
-          ''')
-          new_opposite = dedent('''\
-              candidates = [
-                  index
-                  for index in (acceptance_index, rejection_index)
-                  if index is not None
-              ]
-              detection_index = min(candidates) if candidates else decision_end
-              if first_side == "UP":
-                  opposite = bars.iloc[first_index : detection_index + 1]
-                  opposite = opposite[opposite["low"] < low]
-              else:
-                  opposite = bars.iloc[first_index : detection_index + 1]
-                  opposite = opposite[opposite["high"] > high]
-              opposite_index = int(opposite.index[0]) if not opposite.empty else None
-          ''')
-          old_path = dedent('''\
-              path = minutes.loc[
-                  (minutes.index >= anchor_timestamp)
-                  & (minutes.index <= window_end)
-                  & (minutes["is_active_quote"] > 0)
-              ]
-          ''')
-          new_path = dedent('''\
-              path = minutes.loc[
-                  (minutes.index >= anchor_timestamp)
-                  & (minutes.index < window_end)
-                  & (minutes["is_active_quote"] > 0)
-              ]
-          ''')
-          old_horizon = '        subset = path.loc[path.index <= horizon_end]\n'
-          new_horizon = '        subset = path.loc[path.index < horizon_end]\n'
+          session_line = '        & (minutes.index <= window_end)\n'
+          horizon_line = '        subset = path.loc[path.index <= horizon_end]\n'
+          if lines.count(session_line) != 1:
+              raise SystemExit("unexpected session endpoint occurrence count")
+          if lines.count(horizon_line) != 1:
+              raise SystemExit("unexpected fixed-horizon occurrence count")
+          lines[lines.index(session_line)] = '        & (minutes.index < window_end)\n'
+          lines[lines.index(horizon_line)] = (
+              '        subset = path.loc[path.index < horizon_end]\n'
+          )
 
-          for old, new, name in (
-              (old_opposite, new_opposite, "opposite-side horizon"),
-              (old_path, new_path, "session half-open path"),
-              (old_horizon, new_horizon, "fixed-horizon endpoint"),
-          ):
-              count = text.count(old)
-              if count != 1:
-                  raise SystemExit(f"expected one {name} snippet, found {count}")
-              text = text.replace(old, new)
-
-          path.write_text(text)
+          path.write_text("".join(lines))
           Path(".github/workflows/asia-sweep-one-time-causal-fix.yml").unlink()
           PY
 
