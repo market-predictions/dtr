@@ -7,15 +7,13 @@ import pandas as pd
 import pytest
 
 from dtr_lab.strategies.asia_sweep import integration as integration_module
-from dtr_lab.strategies.asia_sweep.execution import (
-    ExecutionConfig,
-    ExecutionReason,
-    mark_synthetic_fixture,
-)
+from dtr_lab.strategies.asia_sweep.execution import ExecutionConfig, ExecutionReason
 from dtr_lab.strategies.asia_sweep.integration import (
     IntegrationConfig,
+    event_contract_digest,
     execute_mapped_event,
     map_event_to_execution_signal,
+    mark_synthetic_event_minute_frame,
     mark_synthetic_event_packet,
     replay_synthetic_event_packet,
     stable_event_key,
@@ -77,14 +75,14 @@ def _short_event(**overrides: object) -> dict[str, object]:
     return _event(**values)
 
 
-def _frame(
+def _raw_frame(
     *,
     start: str = "2024-01-02 02:05:00-05:00",
     periods: int = 3,
     price: float = 100.0,
 ) -> pd.DataFrame:
     timestamps = pd.date_range(start, periods=periods, freq="1min")
-    frame = pd.DataFrame(
+    return pd.DataFrame(
         {
             "timestamp": timestamps,
             "open": price,
@@ -94,15 +92,28 @@ def _frame(
             "is_active_quote": 1,
         }
     )
-    return mark_synthetic_fixture(frame)
 
 
-def _target_frame(event: dict[str, object]) -> pd.DataFrame:
-    direction = int(event["direction"])
-    frame = _frame(
+def _bound_frame(
+    event: dict[str, object],
+    *,
+    cfg: IntegrationConfig = _CONFIG,
+    periods: int = 3,
+) -> pd.DataFrame:
+    frame = _raw_frame(
         start=str(event["entry_timestamp"]),
+        periods=periods,
         price=float(event["entry_price_raw"]),
     )
+    return mark_synthetic_event_minute_frame(frame, event, cfg)
+
+
+def _target_frame(
+    event: dict[str, object],
+    cfg: IntegrationConfig = _CONFIG,
+) -> pd.DataFrame:
+    direction = int(event["direction"])
+    frame = _bound_frame(event, cfg=cfg)
     if direction > 0:
         frame.loc[0, "high"] = 103.0
     else:
@@ -137,6 +148,13 @@ def test_stable_event_key_is_deterministic_and_identity_only() -> None:
     assert stable_event_key(event) == stable_event_key(dict(reversed(list(event.items()))))
     assert stable_event_key(event) == stable_event_key(changed_non_identity)
     assert stable_event_key(event) != stable_event_key({**event, "execution_window": "NEW_YORK"})
+
+
+def test_event_contract_digest_detects_execution_payload_drift() -> None:
+    event = _event()
+    revised = {**event, "stop_price_raw": 98.75, "target_price_raw": 102.50}
+    assert stable_event_key(event) == stable_event_key(revised)
+    assert event_contract_digest(event, _CONFIG) != event_contract_digest(revised, _CONFIG)
 
 
 def test_identity_rejects_missing_dates_non_strings_and_edge_whitespace() -> None:
@@ -201,7 +219,11 @@ def test_distinct_instrument_configs_keep_commission_economics_separate() -> Non
         execution=es_execution,
     )
     es_event = _event(instrument="ES_SYNTHETIC")
-    es_outcome = execute_mapped_event(es_event, _target_frame(es_event), es_config)[2]
+    es_outcome = execute_mapped_event(
+        es_event,
+        _target_frame(es_event, es_config),
+        es_config,
+    )[2]
 
     assert nq_outcome.commission_dollars == pytest.approx(es_outcome.commission_dollars)
     assert nq_outcome.commission_r > es_outcome.commission_r
@@ -280,16 +302,31 @@ def test_mapped_long_and_short_execute_on_synthetic_target_fixtures(
     assert outcome.net_r is not None
 
 
-def test_unmarked_minute_source_and_off_grid_ohlc_are_rejected() -> None:
-    frame = _target_frame(_event())
-    frame.attrs.clear()
-    with pytest.raises(ValueError, match="synthetic-test-only"):
-        execute_mapped_event(_event(), frame, _CONFIG)
+def test_unbound_minute_source_and_off_grid_ohlc_are_rejected() -> None:
+    raw = _raw_frame()
+    with pytest.raises(ValueError, match="event key does not match"):
+        execute_mapped_event(_event(), raw, _CONFIG)
 
     frame = _target_frame(_event())
     frame.loc[0, "high"] = 102.13
     with pytest.raises(ValueError, match="minute high is off"):
         execute_mapped_event(_event(), frame, _CONFIG)
+
+
+def test_swapped_frame_and_same_identity_payload_drift_are_rejected() -> None:
+    long_event = _event()
+    short_event = _short_event()
+    long_frame = _target_frame(long_event)
+    short_frame = _target_frame(short_event)
+
+    with pytest.raises(ValueError, match="event key does not match"):
+        execute_mapped_event(long_event, short_frame, _CONFIG)
+    with pytest.raises(ValueError, match="event key does not match"):
+        execute_mapped_event(short_event, long_frame, _CONFIG)
+
+    revised = {**long_event, "stop_price_raw": 98.75, "target_price_raw": 102.50}
+    with pytest.raises(ValueError, match="contract digest does not match"):
+        execute_mapped_event(revised, long_frame, _CONFIG)
 
 
 def test_unmarked_empty_incomplete_and_mixed_packets_are_rejected() -> None:
@@ -307,14 +344,11 @@ def test_unmarked_empty_incomplete_and_mixed_packets_are_rejected() -> None:
 
     mixed_events = [_event(), _event(instrument="ES_SYNTHETIC")]
     mixed_packet = _marked_packet(mixed_events)
-    mixed_frames = {
-        stable_event_key(event): _target_frame(event) for event in mixed_events
-    }
     with pytest.raises(ValueError, match="one configured instrument"):
-        replay_synthetic_event_packet(mixed_packet, mixed_frames, _CONFIG)
+        replay_synthetic_event_packet(mixed_packet, {}, _CONFIG)
 
 
-def test_packet_rejects_duplicate_missing_and_orphan_frame_keys() -> None:
+def test_packet_rejects_duplicate_missing_orphan_and_malformed_frame_keys() -> None:
     event = _event()
     duplicate_packet = _marked_packet([event, dict(event)])
     key = stable_event_key(event)
@@ -327,7 +361,13 @@ def test_packet_rejects_duplicate_missing_and_orphan_frame_keys() -> None:
     with pytest.raises(ValueError, match="orphan minute frame"):
         replay_synthetic_event_packet(
             packet,
-            {key: _target_frame(event), "orphan": _target_frame(event)},
+            {key: _target_frame(event), "0" * 64: _target_frame(event)},
+            _CONFIG,
+        )
+    with pytest.raises(ValueError, match="lowercase SHA-256"):
+        replay_synthetic_event_packet(
+            packet,
+            {key: _target_frame(event), "not-a-hash": _target_frame(event)},
             _CONFIG,
         )
 
@@ -348,10 +388,12 @@ def test_batch_replay_is_order_independent_and_matches_row_execution() -> None:
     for event in events:
         key, signal, outcome = execute_mapped_event(event, frames[stable_event_key(event)], _CONFIG)
         row = first.loc[first["stable_event_key"] == key].iloc[0]
+        assert row["event_contract_digest"] == event_contract_digest(event, _CONFIG)
         assert row["mapped_signal_timestamp"] == signal.signal_timestamp
         assert row["mapped_window_end"] == signal.window_end
         assert row["reason"] == outcome.reason
         assert row["net_r"] == pytest.approx(outcome.net_r)
+        assert row["configured_point_value"] == pytest.approx(20.0)
 
 
 def test_mapping_and_batch_replay_do_not_mutate_inputs() -> None:
@@ -376,11 +418,11 @@ def test_integrated_prefix_reproduces_target_and_data_gap_exit() -> None:
     event = _event()
     assert validate_integrated_prefix(event, _target_frame(event), _CONFIG) is True
 
-    gap_frame = _frame(periods=4)
+    gap_frame = _bound_frame(event, periods=4)
     gap_frame = gap_frame[
         gap_frame["timestamp"] != pd.Timestamp("2024-01-02 02:07:00-05:00")
     ].copy()
-    mark_synthetic_fixture(gap_frame)
+    mark_synthetic_event_minute_frame(gap_frame, event, _CONFIG)
     assert validate_integrated_prefix(event, gap_frame, _CONFIG) is True
     _, _, outcome = execute_mapped_event(event, gap_frame, _CONFIG)
     assert outcome.reason == ExecutionReason.DATA_GAP_LIQUIDATION
