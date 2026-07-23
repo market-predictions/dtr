@@ -1,5 +1,70 @@
 # Asia Sweep Changelog
 
+## v0.5.0 — 2026-07-23
+
+### Added
+
+- Added an isolated one-minute execution simulator under the standalone Asia Sweep namespace.
+- Added immutable execution signal, configuration and outcome models.
+- Added explicit blocked, exited and unresolved execution states with deterministic reasons.
+- Added adverse entry, stop and market-exit slippage and separate round-trip commission accounting.
+- Added stop-first entry-minute and later-minute collision handling.
+- Added stop-gap, target-gap, missing-minute, stale-activity and exact time-exit logic.
+- Added a hard synthetic-fixture workflow guard and prefix-replay validation.
+- Added 37 direct execution/precedence tests within an isolated suite of 146 tests.
+
+### Changed
+
+- Locked execution target construction to the preregistered 2.0R.
+- Made the one-minute open at the exact signal timestamp the only eligible entry bar.
+- Kept the signal-layer stop fixed and recalculated target distance from actual slipped entry risk.
+- Required missing-data liquidation to wait for the first subsequent active quote.
+- Preserved the first unsafe source condition when stale activity precedes later missing data.
+- Kept blocked and unresolved paths free of manufactured return values.
+
+### Corrected during review
+
+- Rewrote two adversarial fixtures that did not isolate their claimed one-tick-risk and 11-minute-stale boundaries.
+- Applied pinned Ruff import ordering exactly and removed the temporary diagnostic workflow.
+- Added finite-value, OHLC-invariant, timestamp-grid and timezone-awareness validation.
+- Prevented inactive carry-forward quotes from being used as missing-data liquidation fills.
+- Prevented later missing timestamps from overwriting an already-unsafe stale-path reason.
+- Removed arbitrary target-RR variation from the synthetic execution input.
+
+### Reason
+
+Execution semantics must be frozen independently of strategy outcomes. Exact entry timing, conservative intrabar ordering, unsafe-data liquidation, time exits and explicit costs determine whether a signal can be evaluated without lookahead or hidden optimism. Keeping the simulator synthetic-only prevents performance feedback from influencing this contract.
+
+### Validation
+
+- Isolated Asia Sweep suite: 146 passed on Python 3.11.
+- Isolated Asia Sweep suite: 146 passed on Python 3.12.
+- Repository Ruff passed.
+- Full repository tests passed on Python 3.11 and 3.12.
+- Prefix replay passed for target, stop, data-gap, stale-activity and time exits.
+- Long/short stop-gap and target-gap symmetry passed.
+- Unmarked frames, duplicate timestamps, off-grid timestamps, non-finite prices and invalid OHLC fail loudly.
+- Branch comparison changes only standalone Asia Sweep execution, tests and governance.
+- No real proxy/futures execution, P&L, optimization or variant selection was performed.
+
+### Known limits
+
+- No event-ledger-to-execution adapter exists.
+- The synthetic marker is an accidental-use guard, not a security boundary.
+- Proxy/futures price-grid normalization is not implemented.
+- Real-data MFE, MAE, portfolio constraints and reporting are not implemented.
+- CME futures timestamp, continuous-contract, roll, volume, cost and fill validation remain unresolved.
+- Existing NumPy/pandas timedelta deprecation warnings remain repository-wide warning debt.
+- The independent review is a same-session clean-room pass, not an external human audit.
+
+### Next
+
+- Add a separate event-to-execution integration and deterministic replay gate.
+- Freeze price-grid and source-kind mapping before any real-data execution.
+- Prove event ledgers remain unchanged when mapped into execution inputs.
+- Reproduce the locked DTR benchmark before extracting any shared execution utility.
+- Keep all real-data P&L disabled until the integration package is independently reviewed and merged.
+
 ## v0.4.0 — 2026-07-23
 
 ### Added

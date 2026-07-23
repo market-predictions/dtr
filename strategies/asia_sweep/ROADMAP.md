@@ -25,7 +25,7 @@ The simple reclaim is the control. The research question is whether wick, displa
 
 ## Hard separation rules
 
-- Development branches are phase-specific; current event-semantic work uses `agent/asia-sweep-proxy-event-semantics`.
+- Development branches are phase-specific; current execution-contract work uses `agent/asia-sweep-neutral-execution-contract`.
 - Governance, manifests, reports and tests: `strategies/asia_sweep/`.
 - Code: `src/dtr_lab/strategies/asia_sweep/`.
 - Runner: `scripts/run_asia_sweep_manifest.py`.
@@ -79,7 +79,7 @@ The proxy snapshots may support descriptive market-structure and event-semantic 
 
 ## Phase 3 — Shared infrastructure boundary
 
-**Status:** signal boundary, strict source adapter, manifest execution guard and proxy event adapter complete; neutral execution adapter pending.
+**Status:** signal boundary, strict source adapter, manifest execution guard, proxy event adapter and isolated synthetic neutral-execution contract complete. Event-to-execution integration and all real-data execution remain blocked.
 
 Permitted reuse:
 
@@ -87,18 +87,21 @@ Permitted reuse:
 - checksum verification;
 - generic five-minute resampling;
 - causal generic features;
-- later, neutral conservative execution and reporting utilities.
+- the standalone synthetic neutral-execution contract after a separate integration adapter passes review;
+- later, neutral reporting utilities.
 
 Prohibited reuse:
 
 - DTR signal generation;
 - DTR source-loader repairs that conceal duplicates or incomplete dates;
 - DTR selected configuration;
-- DTR result and promotion logic.
+- DTR result and promotion logic;
+- shared DTR execution extraction before exact locked-benchmark replay;
+- direct real-data calls into the synthetic execution simulator.
 
 ## Phase 4 — Event ledger and manual audit
 
-**Status:** official no-P&L proxy ledgers, deterministic 50-event samples per proxy, independent clean-room reconstruction and private five-minute OHLC evidence are complete. Proxy event semantics are frozen; post-entry execution and P&L remain blocked.
+**Status:** official no-P&L proxy ledgers, deterministic 50-event samples per proxy, independent clean-room reconstruction and private five-minute OHLC evidence are complete. Proxy event semantics are frozen; real-data execution and P&L remain blocked.
 
 Store one record per instrument/date/window, including no-sweep and rejected events. Minimum content includes Asia range, interval-integrity status, swept side, sweep timestamp and depth, candle morphology, reclaim, displacement, failed retest, entry, stop, target, status and rejection reason.
 
@@ -147,17 +150,19 @@ AS-A plus a right-side-confirmed reaction swing, a later retest that stays insid
 
 ## Phase 6 — Causality and adversarial tests
 
-**Status:** signal/data/manifest tests and proxy activity, DST, future-staleness and late-entry adversarial cases pass in dedicated Python 3.11/3.12 CI; original DTR lint/tests pass independently. Post-entry execution cases remain pending because execution is not connected.
+**Status:** signal, data, manifest, proxy event and synthetic execution adversarial coverage passes in dedicated Python 3.11/3.12 CI; original repository Ruff/tests pass independently. Real-data integration and portfolio-level cases remain pending.
 
-Completed coverage includes threshold edges, no reclaim, double sweep, wick boundaries, displacement timing and pre-window warmup, causal pivot confirmation, first-sweep ownership, incomplete ranges, missing pre-signal data, future gaps, duplicate timestamps, deterministic output, instrument-neutral signal semantics, blocked-manifest handling, activity-staleness boundaries, DST-aware proxy conversion and entry exactly at window end.
+Completed signal/event coverage includes threshold edges, no reclaim, double sweep, wick boundaries, displacement timing and pre-window warmup, causal pivot confirmation, first-sweep ownership, incomplete ranges, missing pre-signal data, future gaps, duplicate timestamps, deterministic output, instrument-neutral signal semantics, blocked-manifest handling, activity-staleness boundaries, DST-aware proxy conversion and entry exactly at window end.
 
-Future execution coverage must include same-minute stop/target collision, entry-stop collision, post-entry gaps, time exits, roll boundaries and simultaneous NQ/ES portfolio constraints.
+Completed synthetic execution coverage includes exact-minute entry, missing/inactive entry, gap-through-stop, one-tick risk, entry/later stop-target collisions, long/short stop and target gaps, missing-minute liquidation, first-active-quote handling, 10/11-minute inactivity boundaries, first-unsafe-condition precedence, unresolved paths, time exits, slippage, commission, target-RR lock, input immutability and prefix replay.
 
-For every emitted signal, truncate data at the entry timestamp and reproduce the same decision. Any change under prefix replay is a lookahead failure.
+Future coverage must include event-to-execution mapping, price-grid normalization, roll boundaries, MFE/MAE reporting and simultaneous NQ/ES portfolio constraints.
+
+For every emitted signal or completed synthetic exit, truncate data at the determining timestamp and reproduce the same decision. Any change under prefix replay is a lookahead failure.
 
 ## Phase 7 — Controlled development research
 
-**Blocked until the neutral execution contract and execution-specific Phase 6 tests pass. Real-data P&L remains prohibited.**
+**Blocked until the event-to-execution integration and deterministic replay package passes. Real-data P&L remains prohibited.**
 
 Partitions:
 
@@ -224,6 +229,6 @@ After Python validation, build Pine Script v6 with the same sessions, state mach
 
 ## Current decision
 
-`PROXY_EVENT_SEMANTICS_FROZEN_EXECUTION_AND_PNL_BLOCKED`
+`SYNTHETIC_NEUTRAL_EXECUTION_FROZEN_REAL_DATA_PNL_BLOCKED`
 
-The proxy event-semantic layer may merge after final exact-head CI. Proceed next with a separate neutral-execution contract and synthetic adversarial simulator tests. Do not calculate or inspect strategy P&L until execution semantics, conservative collision handling, gap/time-exit behavior, the locked DTR benchmark and futures-confirmation requirements are frozen.
+The isolated execution contract may merge after final exact-head CI and unchanged event-audit stability gates pass. Proceed next with a separate event-to-execution integration and deterministic replay package. Do not calculate or inspect real proxy/futures P&L until source-kind mapping, price-grid policy, immutable event mapping, integration replay and futures/proxy limitations are frozen.
