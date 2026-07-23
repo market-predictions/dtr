@@ -14,6 +14,8 @@ State: `FRAMEWORK_COMPLETE_DATA_RUN_PENDING`
 
 - `pytest -q tests/test_stoic_123.py`: 10 passed in the implementation environment.
 - Python byte-code compilation: passed.
+- Repository Ruff gate: passed.
+- Complete repository test suite: passed on Python 3.11 and Python 3.12.
 - Full historical execution: pending because raw qualified data files are excluded from Git and were unavailable in the implementation environment.
 
 ## Next command
