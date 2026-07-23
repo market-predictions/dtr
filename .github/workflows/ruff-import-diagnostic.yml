@@ -1,0 +1,39 @@
+name: Temporary Ruff Import Diagnostic
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/ruff-import-diagnostic.yml"
+      - "strategies/asia_sweep/tests/test_execution.py"
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+
+      - name: Apply pinned Ruff import fix
+        run: |
+          pipx run ruff==0.15.22 check \
+            strategies/asia_sweep/tests/test_execution.py \
+            --select I001 --fix
+          git diff -- strategies/asia_sweep/tests/test_execution.py \
+            > ruff-import-fix.diff
+          cp strategies/asia_sweep/tests/test_execution.py \
+            test_execution.ruff-fixed.py
+
+      - name: Upload exact Ruff fix
+        uses: actions/upload-artifact@v4
+        with:
+          name: ruff-import-fix
+          path: |
+            ruff-import-fix.diff
+            test_execution.ruff-fixed.py
+          if-no-files-found: error
+          retention-days: 1
