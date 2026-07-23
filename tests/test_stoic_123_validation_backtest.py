@@ -116,3 +116,44 @@ def test_validation_simulator_matches_reference_gap_and_tie_precedence() -> None
     observed = simulate_validation(one, events, management, NQ_SPEC, config)
     pd.testing.assert_frame_equal(observed, expected)
     assert observed.loc[0, "exit_reason"] == "gap_liquidation"
+
+
+def test_nq_uses_cached_path_not_reference_fallback(monkeypatch) -> None:
+    import stoic_123_lab.validation_backtest as module
+
+    timestamps = pd.date_range("2025-01-02 09:00", periods=5, freq="1min")
+    one = pd.DataFrame(
+        {
+            "timestamp": timestamps,
+            "open": [100.0, 100.0, 100.0, 100.0, 100.0],
+            "high": [101.0, 101.0, 101.0, 101.0, 101.0],
+            "low": [99.0, 99.0, 99.0, 99.0, 99.0],
+            "close": [100.0, 100.0, 100.0, 100.0, 100.0],
+            "volume": 1.0,
+        }
+    )
+    events = pd.DataFrame(
+        {
+            "arm_id": ["TEST"],
+            "direction": [1],
+            "signal_time": [timestamps[0]],
+            "base_lock_time": [timestamps[0] - pd.Timedelta(minutes=5)],
+            "breakout_close": [100.0],
+            "protective_boundary": [95.0],
+        }
+    )
+    management = pd.DataFrame(columns=["direction", "signal_time"])
+    config = replace(
+        _config(),
+        stop_buffer_ticks=0,
+        minimum_risk_ticks=1,
+        max_hold_minutes=2,
+    )
+
+    def fail_fallback(*args, **kwargs):
+        raise AssertionError("reference fallback was called for NQ")
+
+    monkeypatch.setattr(module, "simulate", fail_fallback)
+    observed = module.simulate_validation(one, events, management, NQ_SPEC, config)
+    assert len(observed) == 1
+    assert observed.loc[0, "exit_reason"] == "max_hold"
