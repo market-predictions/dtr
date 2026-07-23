@@ -1,0 +1,13 @@
+{
+  "decision": "NO_ARM_PASSES_DTR_FX_V01_PROMOTION",
+  "promoted": [],
+  "frozen_challenger": "FX_B1_PREVDAY_LONDON_BOS_MID",
+  "next_gate": "UNCHANGED_OLDER_HISTORY_VALIDATION_2015_2021",
+  "restrictions": [
+    "NO_2022_2025_RETUNING",
+    "NO_SHORT_ONLY_PROMOTION",
+    "NO_PINE",
+    "NO_SIZING",
+    "NO_DEPLOYMENT"
+  ]
+}
