@@ -1,0 +1,188 @@
+name: Asia Sweep First Proxy Baseline
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/asia-sweep-first-proxy-baseline.yml"
+      - "scripts/run_asia_sweep_proxy_baseline.py"
+      - "scripts/aggregate_asia_sweep_proxy_baseline.py"
+      - "src/dtr_lab/strategies/asia_sweep/shadow_*.py"
+      - "strategies/asia_sweep/configs/baseline/**"
+      - "strategies/asia_sweep/governance/WORKPACKAGE_2026-07-23_FIRST_PROXY_BASELINE.md"
+      - "strategies/asia_sweep/tests/test_shadow_baseline.py"
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  instrument-baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - instrument: NQ_PROXY
+            manifest: strategies/asia_sweep/configs/manifests/nq_proxy_dukascopy_development.yaml
+            dataset: NQ_PROXY_DUKASCOPY_USATECH_M1_BID_FULL_GRID_UTC_ET.zip
+            report_root: strategies/asia_sweep/reports/asia_sweep_nq_proxy_dukascopy_development_20260723
+          - instrument: ES_PROXY
+            manifest: strategies/asia_sweep/configs/manifests/es_proxy_dukascopy_development.yaml
+            dataset: ES_PROXY_DUKASCOPY_USA500_M1_BID_FULL_GRID_UTC_ET.zip
+            report_root: strategies/asia_sweep/reports/asia_sweep_es_proxy_dukascopy_development_20260723
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run shadow parity tests
+        run: |
+          PYTHONPATH=src pytest -c strategies/asia_sweep/pytest.ini \
+            strategies/asia_sweep/tests/test_shadow_baseline.py
+
+      - name: Download canonical private proxy artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: asia-sweep-dukascopy-proxies
+          path: canonical
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: 29996917493
+
+      - name: Verify and stage one private dataset
+        run: |
+          test -f "canonical/prepared/${{ matrix.dataset }}"
+          mkdir -p data/private/asia_sweep
+          cp "canonical/prepared/${{ matrix.dataset }}" \
+            "data/private/asia_sweep/${{ matrix.dataset }}"
+
+      - name: Rebuild frozen event ledgers
+        run: python scripts/run_asia_sweep_manifest.py "${{ matrix.manifest }}"
+
+      - name: Run independent shadow baseline
+        run: |
+          python scripts/run_asia_sweep_proxy_baseline.py \
+            strategies/asia_sweep/configs/baseline/first_proxy_baseline_20260723.yaml \
+            "${{ matrix.manifest }}" \
+            "${{ matrix.report_root }}"
+
+      - name: Verify instrument result boundaries
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path("${{ matrix.report_root }}/first_proxy_baseline")
+          summary = json.loads((root / "instrument_summary.json").read_text())
+          assert summary["instrument"] == "${{ matrix.instrument }}"
+          assert summary["development_end_exclusive"] == "2024-07-01 00:00:00"
+          assert summary["cme_futures_validated"] is False
+          assert summary["deployment_authorized"] is False
+          assert summary["trade_ledger_rows"] > 0
+          PY
+
+      - name: Remove private source before upload
+        if: always()
+        run: rm -rf canonical data/private
+
+      - name: Mark source removal in summary
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path("${{ matrix.report_root }}/first_proxy_baseline/instrument_summary.json")
+          if path.exists():
+              value = json.loads(path.read_text())
+              value["private_source_removed_before_upload"] = True
+              path.write_text(json.dumps(value, indent=2) + "\n")
+          PY
+
+      - name: Upload derived private baseline result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: asia-sweep-first-baseline-${{ matrix.instrument }}
+          path: ${{ matrix.report_root }}/first_proxy_baseline
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 6
+
+  aggregate-baseline:
+    needs: instrument-baseline
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Download instrument results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: asia-sweep-first-baseline-*
+          path: baseline-input
+
+      - name: Aggregate and classify
+        run: |
+          python scripts/aggregate_asia_sweep_proxy_baseline.py \
+            baseline-input \
+            strategies/asia_sweep/configs/baseline/first_proxy_baseline_20260723.yaml \
+            baseline-result
+
+      - name: Verify no lockbox or deployment claim
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          summary = json.loads(Path("baseline-result/baseline_summary.json").read_text())
+          assert summary["lockbox_opened"] is False
+          assert summary["optimization_performed"] is False
+          assert summary["cme_futures_validated"] is False
+          assert summary["deployment_authorized"] is False
+          assert summary["overall_classification"] in {
+              "PROMISING_DEVELOPMENT_SCREEN",
+              "PROMISING_BUT_INSUFFICIENT_SAMPLE",
+              "MIXED_NOT_PROMOTABLE",
+              "NOT_PROMISING_CURRENT_SPEC",
+              "INVALID_BASELINE",
+          }
+          PY
+
+      - name: Upload aggregate baseline result
+        uses: actions/upload-artifact@v4
+        with:
+          name: asia-sweep-first-baseline-summary
+          path: baseline-result
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 6
