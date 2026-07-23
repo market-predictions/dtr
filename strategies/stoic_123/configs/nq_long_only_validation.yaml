@@ -1,0 +1,80 @@
+study_id: STOIC123-WP-20260724-02
+frozen_on: 2026-07-24
+purpose: >-
+  Determine whether the exploratory NQ long-only result is a genuine Stoic
+  sequence effect, a generic long-equity drift effect, or a proxy-only artifact.
+source_contract:
+  instrument: NQ
+  expected_sha256: 8d3f157a422636e5b8dda51cc3a3d9209c50cb53f9b279d3e14b627ce59370dc
+  period_start_et: 2022-12-26T18:00:00
+  period_end_et: 2025-12-10T23:58:00
+  source_classification: research continuous NQ futures archive with unresolved roll and timestamp semantics
+candidate_arms:
+  - S123_M0_NO_MAP_CONTROL
+  - S123_M1_EMA_MAP
+  - S123_C1_STRICT_CLOSE
+  - S123_M3_EMA_PLUS_BREAKOUT
+candidate_roles:
+  S123_M0_NO_MAP_CONTROL: simplicity benchmark
+  S123_M1_EMA_MAP: primary candidate
+  S123_C1_STRICT_CLOSE: secondary candidate
+  S123_M3_EMA_PLUS_BREAKOUT: diagnostic candidate
+entry_models:
+  - full_123
+  - ema_break
+  - ema_break_retest
+  - matched_time
+management_contract: >-
+  Entry direction may be restricted, but the 15-minute management detector
+  remains two-directional so an opposite short 1-2-3 can still exit a long.
+matched_control_replicates: 50
+matched_control_contract:
+  match_fields:
+    - calendar_year
+    - calendar_month_when_available
+    - weekday
+    - RTH_or_overnight
+    - 30_minute_time_bucket
+    - higher_timeframe_map_eligibility
+  preserve_from_full_event:
+    - signal_to_protective_boundary_distance
+  exclusions:
+    - original_full_event_timestamps
+    - timestamps_within_24_hours_of_original
+    - duplicate_pseudo_entry_timestamps
+execution_tests:
+  baseline_slippage_ticks_each_side: 1
+  stressed_slippage_ticks_each_side: 2
+  commission_per_side_usd: 2.25
+  entry_delays_minutes:
+    - 1
+    - 5
+  stop_collision_policy: protective stop first
+  missing_data_policy: first observable post-gap liquidation
+attribution:
+  sessions:
+    RTH: 09:30-16:00_ET
+    OVERNIGHT: all_other_ET_minutes
+  expanding_test_years:
+    - 2023
+    - 2024
+    - 2025
+  report_year_and_month_concentration: true
+  report_exposure_normalized_return: true
+promotion_gates:
+  - positive_expectancy
+  - at_least_three_of_four_observed_years_positive
+  - all_full_years_2023_2025_positive
+  - no_positive_year_above_60_percent_of_positive_net_R
+  - positive_under_two_ticks_each_side
+  - positive_with_one_minute_entry_delay
+  - max_drawdown_at_least_25_percent_below_both_direction_version
+  - full_sequence_beats_ema_break_by_0_05R_expectancy_or_20_percent_return_to_drawdown
+  - positive_95_percent_date_block_lower_bound
+restrictions:
+  - no parameter, threshold, timeframe, session, stop, target or exit optimization
+  - no candidate selection outside the four frozen arms
+  - no use of ES proxy or GBPUSD results to tune NQ
+  - no pooled instrument result
+  - no CME contract or rollover claim beyond the registered source limitations
+  - no Pine port, sizing, alert, deployment or profitability authorization
