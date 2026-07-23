@@ -18,7 +18,9 @@
     "spread_measurement": "ask close minus bid close on synchronized active candles",
     "strategy_tick_size": 0.0001,
     "strategy_tick_interpretation": "one pip",
-    "point_value_per_standard_lot": 100000.0
+    "point_value_per_standard_lot": 100000.0,
+    "commission_per_side_usd_per_standard_lot": 3.5,
+    "base_slippage_model": "75th-percentile quoted spread divided equally across entry and exit sides, plus 0.1 pip per side"
   },
   "frozen_core": {
     "sessions": ["ASIA_7PM", "LONDON_2AM", "NEW_YORK_9AM"],
@@ -45,7 +47,7 @@
   ],
   "promotion_requirements": {
     "positive_net_r": true,
-    "positive_two_tick_equivalent_expectancy": true,
+    "positive_one_pip_each_side_expectancy": true,
     "positive_years_minimum": 3,
     "latest_year_non_negative": true,
     "paired_date_block_interval_above_zero": true,
