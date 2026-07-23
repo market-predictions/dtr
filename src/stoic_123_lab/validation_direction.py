@@ -143,7 +143,6 @@ def detect_long_stage_events(
         return StageDetection(pd.DataFrame(), funnel, bars)
 
     open_ = bars["open"].to_numpy(float)
-    high = bars["high"].to_numpy(float)
     low = bars["low"].to_numpy(float)
     close = bars["close"].to_numpy(float)
     ema_fast = bars["ema_fast"].to_numpy(float)
