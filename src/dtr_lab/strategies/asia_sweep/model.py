@@ -55,6 +55,9 @@ class AsiaSweepConfig:
     stop_buffer_ticks: int = 2
     target_rr: float = 2.0
     same_bar_double_sweep_policy: str = "reject_ambiguous"
+    activity_column: str | None = None
+    minimum_active_minutes: int = 1
+    maximum_consecutive_inactive_minutes: int | None = None
 
     def __post_init__(self) -> None:
         if self.tick_size <= 0:
@@ -71,6 +74,22 @@ class AsiaSweepConfig:
             raise ValueError("target_rr must be positive")
         if self.same_bar_double_sweep_policy != "reject_ambiguous":
             raise ValueError("Only reject_ambiguous is currently supported")
+        if self.activity_column is None:
+            if self.maximum_consecutive_inactive_minutes is not None:
+                raise ValueError(
+                    "maximum_consecutive_inactive_minutes requires activity_column"
+                )
+        else:
+            if self.minimum_active_minutes < 1:
+                raise ValueError("minimum_active_minutes must be at least one")
+            if self.maximum_consecutive_inactive_minutes is None:
+                raise ValueError(
+                    "activity_column requires maximum_consecutive_inactive_minutes"
+                )
+            if self.maximum_consecutive_inactive_minutes < 0:
+                raise ValueError(
+                    "maximum_consecutive_inactive_minutes must be non-negative"
+                )
 
 
 @dataclass(frozen=True)
@@ -86,18 +105,31 @@ class AsiaSweepEvent:
     asia_high: float
     asia_low: float
     asia_range_points: float
+    integrity_failure_scope: str | None = None
     asia_expected_minutes: int = 0
     asia_observed_minutes: int = 0
     asia_missing_minutes: int = 0
     asia_complete: bool = False
+    asia_active_minutes: int | None = None
+    asia_inactive_minutes: int | None = None
+    asia_max_inactive_run: int | None = None
+    asia_activity_eligible: bool | None = None
     execution_expected_minutes: int = 0
     execution_observed_minutes: int = 0
     execution_missing_minutes: int = 0
     execution_window_complete: bool = False
+    execution_active_minutes: int | None = None
+    execution_inactive_minutes: int | None = None
+    execution_max_inactive_run: int | None = None
+    execution_activity_eligible: bool | None = None
     pre_signal_expected_minutes: int | None = None
     pre_signal_observed_minutes: int | None = None
     pre_signal_missing_minutes: int | None = None
     pre_signal_path_complete: bool | None = None
+    pre_signal_active_minutes: int | None = None
+    pre_signal_inactive_minutes: int | None = None
+    pre_signal_max_inactive_run: int | None = None
+    pre_signal_activity_eligible: bool | None = None
     swept_side: str | None = None
     direction: int = 0
     first_sweep_timestamp: pd.Timestamp | None = None
