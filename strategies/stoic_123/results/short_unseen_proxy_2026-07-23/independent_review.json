@@ -1,0 +1,66 @@
+{
+  "all_ledgers_pass": true,
+  "artifact_sha256": "324849b9ae7958f13f426dc0f12763b118e2f2ffe2add827ab2a4d93ab840418",
+  "forward_short": {
+    "expectancy_r": 0.0493812693922536,
+    "hi95": 0.913892733831138,
+    "lo95": -0.6718486799097343,
+    "net_r": 2.1233945838669057,
+    "trades": 43
+  },
+  "gates_passed": 4,
+  "gates_total": 12,
+  "ledger_count": 16,
+  "management_both_directions": true,
+  "management_counts": {
+    "forward_2026": {"events": 67, "long": 40, "short": 27},
+    "older_history": {"events": 596, "long": 390, "short": 206}
+  },
+  "matched": [
+    {
+      "full_expectancy_exceeds_matched_p95": false,
+      "full_expectancy_r": -0.1237542204110721,
+      "full_median_hold_minutes": 72.0,
+      "matched_control_comparable": true,
+      "matched_control_passed": false,
+      "matched_median_expectancy_r": -0.1476380972839673,
+      "matched_median_hold_minutes": 82.0,
+      "matched_p95_expectancy_r": 0.1645899170239244,
+      "matched_to_full_hold_ratio": 1.1388888888888888,
+      "minimum_event_match_fraction": 0.9973009446693656,
+      "partition": "older_history",
+      "replicates": 50
+    },
+    {
+      "full_expectancy_exceeds_matched_p95": false,
+      "full_expectancy_r": 0.0493812693922536,
+      "full_median_hold_minutes": 69.0,
+      "matched_control_comparable": false,
+      "matched_control_passed": false,
+      "matched_median_expectancy_r": -0.1882100453538689,
+      "matched_median_hold_minutes": 43.75,
+      "matched_p95_expectancy_r": 0.4711269657518531,
+      "matched_to_full_hold_ratio": 0.6340579710144928,
+      "minimum_event_match_fraction": 1.0,
+      "partition": "forward_2026",
+      "replicates": 50
+    }
+  ],
+  "mechanism": {
+    "forward_expectancy_gain_vs_ema_break": -0.030593222604947394,
+    "older_expectancy_gain_vs_ema_break": 0.0010475776013179894
+  },
+  "older_short": {
+    "expectancy_r": -0.1237542204110721,
+    "hi95": 0.2086619157764944,
+    "lo95": -0.4117729698287851,
+    "net_r": -86.13293740610621,
+    "positive_year_concentration": 0.5097911129465907,
+    "positive_years": 2,
+    "trades": 696
+  },
+  "source_duplicates": 0,
+  "source_no_overlap": true,
+  "source_rows": {"forward_2026": 189836, "older_history": 1998563},
+  "verdict": "REJECT_CURRENT_SHORT_SIDE_HYPOTHESIS_NO_PAID_NQ_VALIDATION"
+}

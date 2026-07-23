@@ -1,0 +1,13 @@
+gate,passed,older_expectancy_gain_vs_ema_break,older_return_dd_gain_vs_ema_break,forward_expectancy_gain_vs_ema_break,forward_return_dd_gain_vs_ema_break
+older_history_trade_count_gte_500,True,0.001047578,,-0.030593223,-0.535883108
+older_history_expectancy_positive,False,0.001047578,,-0.030593223,-0.535883108
+older_history_date_block_lo95_positive,False,0.001047578,,-0.030593223,-0.535883108
+at_least_five_of_seven_older_years_positive,False,0.001047578,,-0.030593223,-0.535883108
+largest_positive_year_share_lte_0_40,False,0.001047578,,-0.030593223,-0.535883108
+older_history_two_tick_expectancy_positive,False,0.001047578,,-0.030593223,-0.535883108
+older_history_one_minute_delay_expectancy_positive,False,0.001047578,,-0.030593223,-0.535883108
+forward_2026_trade_count_gte_30,True,0.001047578,,-0.030593223,-0.535883108
+forward_2026_expectancy_positive,True,0.001047578,,-0.030593223,-0.535883108
+forward_2026_two_tick_expectancy_positive,True,0.001047578,,-0.030593223,-0.535883108
+full_sequence_mechanism_value_over_ema_break,False,0.001047578,,-0.030593223,-0.535883108
+matched_time_short_control_passes,False,0.001047578,,-0.030593223,-0.535883108

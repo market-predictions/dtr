@@ -1,0 +1,3 @@
+partition,replicates,full_expectancy_r,matched_median_expectancy_r,matched_p95_expectancy_r,full_expectancy_exceeds_matched_p95,minimum_event_match_fraction,full_median_hold_minutes,matched_median_hold_minutes,matched_to_full_hold_ratio,matched_control_comparable,matched_control_passed
+older_history,50,-0.12375422,-0.147638097,0.164589917,False,0.997300945,72.0,82.0,1.138888889,True,False
+forward_2026,50,0.049381269,-0.188210045,0.471126966,False,1.0,69.0,43.75,0.634057971,False,False
