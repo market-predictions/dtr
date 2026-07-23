@@ -13,6 +13,9 @@ from dtr_lab.strategies.asia_sweep.auction_state import (
     DEVELOPMENT_START,
     build_auction_state_ledger,
 )
+from dtr_lab.strategies.asia_sweep.auction_state_retest import (
+    attach_retest_forward_metrics,
+)
 from dtr_lab.strategies.asia_sweep.data import ZipCsvSchema, load_one_minute_zip
 
 app = typer.Typer(add_completion=False)
@@ -72,6 +75,7 @@ def main(manifest_path: Path, output_root: Path) -> None:
         development_start=DEVELOPMENT_START,
         development_end=DEVELOPMENT_END,
     )
+    ledger = attach_retest_forward_metrics(ledger, one_minute)
     if ledger.empty:
         raise RuntimeError("auction-state diagnostic produced no boundary events")
     if pd.to_datetime(ledger["trade_date"]).max() >= pd.Timestamp("2024-07-01"):
