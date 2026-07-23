@@ -3,6 +3,7 @@ name: Asia Sweep Dukascopy Proxy Data
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened]
     paths:
       - ".github/workflows/asia-sweep-dukascopy-proxy-data.yml"
       - "scripts/download_dukascopy_static_proxy.py"
