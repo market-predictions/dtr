@@ -76,7 +76,7 @@ class SequenceConfig:
     allow_long: bool = True
     allow_short: bool = True
 
-    def management_config(self) -> "SequenceConfig":
+    def management_config(self) -> SequenceConfig:
         return replace(
             self,
             arm_id=f"{self.arm_id}__MANAGEMENT",
