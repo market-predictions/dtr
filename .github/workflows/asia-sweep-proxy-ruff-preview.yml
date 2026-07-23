@@ -1,0 +1,35 @@
+name: Asia Sweep Proxy Ruff Preview
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/asia-sweep-proxy-ruff-preview.yml"
+      - "scripts/prepare_dukascopy_proxy_data.py"
+
+permissions:
+  contents: read
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+
+      - name: Generate exact Ruff import fix
+        shell: bash
+        run: |
+          pipx run ruff==0.15.22 check --fix --diff \
+            scripts/prepare_dukascopy_proxy_data.py \
+            > proxy-ruff-fix.diff 2>&1 || true
+          cat proxy-ruff-fix.diff
+
+      - name: Upload Ruff preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: asia-sweep-proxy-ruff-preview
+          path: proxy-ruff-fix.diff
+          if-no-files-found: error
+          retention-days: 7
