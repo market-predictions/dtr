@@ -42,7 +42,7 @@ def _fetch_day(
                 raise ValueError(f"record-size mismatch on {day}")
 
             rows: list[tuple[int, float, float, float, float, float]] = []
-            midnight = dt.datetime.combine(day, dt.time(), tzinfo=dt.timezone.utc)
+            midnight = dt.datetime.combine(day, dt.time(), tzinfo=dt.UTC)
             for offset in range(0, len(payload), _RECORD.size):
                 seconds, open_, close, low, high, volume = _RECORD.unpack_from(
                     payload,
