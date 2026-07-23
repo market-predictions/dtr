@@ -1,9 +1,9 @@
 # Status — Stoic Edge 1-2-3
 
 Date: 2026-07-23
-Version: `v0.3.0-research-preregistered`
-Active work package: `STOIC123-WP-20260723-02`
-Decision state: `NQ_LONG_ONLY_MECHANISM_VALIDATION_PREREGISTERED`
+Version: `v0.3.0-research-complete`
+Active work package: none
+Decision state: `NO_PROMOTION_STOP_NQ_LONG_ONLY_CURRENT_SAMPLE`
 
 ## Completed evidence
 
@@ -11,46 +11,33 @@ Decision state: `NQ_LONG_ONLY_MECHANISM_VALIDATION_PREREGISTERED`
 - Qualified NQ futures, `NQ_PROXY`, `ES_PROXY`, and GBPUSD source contracts.
 - GBPUSD phase one rejected: all six arms negative.
 - NQ and ES proxy phase one completed separately with independent ledger reconstruction.
-- Five of six arms were positive on each index proxy, but every date-block interval crossed zero.
-- Strict close remains the strongest cross-proxy robustness candidate; no strategy is promoted.
-- Repository Ruff and full tests passed on Python 3.11 and Python 3.12 for v0.2.0.
+- The flawed informal long-only counterfactual was corrected so entry direction no longer disables opposite-direction technical exits.
+- All 18 corrected proxy/FX ledgers passed independent review.
+- The preregistered actual-NQ long-only mechanism validation completed on the exact checksum-qualified archive.
+- Workflow run `30036385787` passed Ruff, focused tests, checksum and source-bound preflight, full study execution, matched-control veto, raw-data removal, and artifact upload.
+- Full repository CI also passed on the final validation implementation.
 
-## Direction-counterfactual correction
+## Actual NQ long-only result
 
-The informal long-only counterfactual disabled short entries and unintentionally disabled opposite short management signals as well. That altered both entry direction and the exit system.
+- No-map: 555 trades, +75.71R, +0.136R expectancy; negative in 2023; 4/9 numerical gates.
+- EMA map: 252 trades, -1.83R, -0.007R expectancy; 2/9 gates.
+- Strict close: 226 trades, +10.97R, +0.049R expectancy; negative in 2024; 4/9 gates.
+- EMA plus breakout: 147 trades, +41.56R, +0.283R expectancy; -40.72R in 2023; 5/9 gates.
+- Every 95% date-block interval crossed zero.
+- No arm passed all numerical gates.
+- All four arms were vetoed by the frozen matched-control contract.
 
-`STOIC123-WP-20260723-02` supersedes that interpretation:
+## Scientific decision
 
-- long-only means long entries only;
-- the management detector remains two-directional;
-- an opposite short 1-2-3 may still exit a long;
-- all 18 corrected ledgers passed independent arithmetic, chronology, risk, overlap, and direction review;
-- only the no-map controls changed; the NQ EMA-map and strict-close candidates were unchanged;
-- no earlier counterfactual artifact may be promoted.
+`NO_PROMOTION_STOP_NQ_LONG_ONLY_CURRENT_SAMPLE`
 
-## Active frozen validation
+The actual NQ archive does not confirm the proxy-derived EMA-map long-only thesis. Strict close does not add meaningful expectancy over a simple EMA break. EMA plus breakout remains historically interesting but chronologically unstable and statistically uncertain.
 
-Candidates:
+The strong historical no-map short-side result is post-hoc and may only be retained as a hypothesis for qualified unseen or materially longer contract-audited data. It does not authorize another same-sample search.
 
-1. no-map full-sequence benchmark;
-2. EMA-map primary candidate;
-3. strict-close secondary candidate;
-4. EMA-plus-breakout diagnostic candidate.
-
-The study compares both-direction, long-only, short-only, EMA-break-only, EMA-break-plus-retest, and matched-time controls on the checksum-qualified NQ futures archive. It also runs cost, entry-delay, chronological, session, concentration, and exposure tests.
-
-## Execution state
-
-- Design and promotion gates frozen before NQ futures performance inspection.
-- Dedicated runner and 26 focused regression tests implemented locally.
-- Source bounds, source/config checksums, event geometry, management direction, matched-control coverage, and independent reconstruction are hard gates.
-- Registered public source reacquisition workflow prepared.
-- Historical execution pending exact archive checksum confirmation.
-
-## Scientific restrictions
+## Restrictions
 
 - No DTR baseline or DTR result is changed.
-- No Stoic threshold, timeframe, session, stop, target, or exit optimization.
+- No Stoic threshold, timeframe, session, stop, target, delay, or exit optimization.
 - No pooled instrument result.
-- No CFD proxy relabelling as CME futures.
-- No Pine, sizing, deployment, alert, or profitability authorization.
+- No Pine, sizing, deployment, alert, paper-trading, or profitability authorization.
