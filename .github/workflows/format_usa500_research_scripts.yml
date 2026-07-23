@@ -6,6 +6,9 @@ on:
       - agent/usa500-baseline-discovery
     paths:
       - temporary/format_usa500_scripts.trigger
+  pull_request:
+    paths:
+      - temporary/format_usa500_scripts.trigger
 
 permissions:
   contents: write
