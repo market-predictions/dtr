@@ -1,0 +1,46 @@
+name: Temporary Ruff Proxy Normalization Diagnostic
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/ruff-proxy-normalization-diagnostic.yml"
+      - "src/dtr_lab/strategies/asia_sweep/proxy_normalization.py"
+      - "strategies/asia_sweep/tests/test_proxy_normalization.py"
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+
+      - name: Apply pinned Ruff fixes
+        run: |
+          pipx run ruff==0.15.22 check \
+            src/dtr_lab/strategies/asia_sweep/proxy_normalization.py \
+            strategies/asia_sweep/tests/test_proxy_normalization.py \
+            --fix
+          git diff -- \
+            src/dtr_lab/strategies/asia_sweep/proxy_normalization.py \
+            strategies/asia_sweep/tests/test_proxy_normalization.py \
+            > ruff-proxy-normalization-fix.diff
+          cp src/dtr_lab/strategies/asia_sweep/proxy_normalization.py \
+            proxy_normalization.ruff-fixed.py
+          cp strategies/asia_sweep/tests/test_proxy_normalization.py \
+            test_proxy_normalization.ruff-fixed.py
+
+      - name: Upload exact Ruff fix
+        uses: actions/upload-artifact@v4
+        with:
+          name: ruff-proxy-normalization-fix
+          path: |
+            ruff-proxy-normalization-fix.diff
+            proxy_normalization.ruff-fixed.py
+            test_proxy_normalization.ruff-fixed.py
+          if-no-files-found: error
+          retention-days: 1
