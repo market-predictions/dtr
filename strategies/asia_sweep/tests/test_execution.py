@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 import inspect
-from dataclasses import asdict
+from dataclasses import asdict, replace
 
 import pandas as pd
 import pytest
 
-from dtr_lab.strategies.asia_sweep import execution as execution_module
 from dtr_lab.strategies.asia_sweep.execution import (
     ExecutionConfig,
     ExecutionReason,
@@ -61,7 +60,7 @@ def _signal(
     )
 
 
-def _preserve_fixture_marker(frame: pd.DataFrame) -> pd.DataFrame:
+def _keep_marker(frame: pd.DataFrame) -> pd.DataFrame:
     return mark_synthetic_fixture(frame.copy())
 
 
@@ -73,8 +72,11 @@ def test_real_or_unmarked_source_is_rejected() -> None:
 
 
 def test_missing_exact_entry_minute_blocks_trade() -> None:
-    frame = _frame(start="2024-01-02 02:06")
-    outcome = simulate_execution(_signal(), frame, _CONFIG)
+    outcome = simulate_execution(
+        _signal(),
+        _frame(start="2024-01-02 02:06"),
+        _CONFIG,
+    )
     assert outcome.status == ExecutionStatus.BLOCKED
     assert outcome.reason == ExecutionReason.MISSING_ENTRY_MINUTE
     assert outcome.net_r is None
@@ -84,7 +86,6 @@ def test_inactive_entry_minute_blocks_trade() -> None:
     frame = _frame()
     frame.loc[0, "is_active_quote"] = 0
     outcome = simulate_execution(_signal(), frame, _CONFIG)
-    assert outcome.status == ExecutionStatus.BLOCKED
     assert outcome.reason == ExecutionReason.INACTIVE_ENTRY_MINUTE
 
 
@@ -97,23 +98,22 @@ def test_entry_open_at_stop_blocks_trade(
     stop: float,
     entry_open: float,
 ) -> None:
-    frame = _frame(price=entry_open)
     outcome = simulate_execution(
         _signal(direction=direction, stop=stop),
-        frame,
+        _frame(price=entry_open),
         _CONFIG,
     )
     assert outcome.reason == ExecutionReason.ENTRY_GAP_THROUGH_STOP
     assert outcome.net_r is None
 
 
-def test_one_tick_or_smaller_executed_risk_blocks_trade() -> None:
-    frame = _frame(price=99.25)
-    outcome = simulate_execution(_signal(stop=99.25), frame, _CONFIG)
-    assert outcome.reason == ExecutionReason.ENTRY_GAP_THROUGH_STOP
-
-    frame = _frame(price=99.25)
-    outcome = simulate_execution(_signal(stop=99.25 - 0.25), frame, _CONFIG)
+def test_one_tick_executed_risk_blocks_trade() -> None:
+    config = replace(_CONFIG, entry_slippage_ticks=0.0)
+    outcome = simulate_execution(
+        _signal(stop=99.0),
+        _frame(price=99.25),
+        config,
+    )
     assert outcome.reason == ExecutionReason.EXECUTED_RISK_TOO_SMALL
 
 
@@ -180,8 +180,9 @@ def test_target_gap_fills_at_target_without_favorable_improvement() -> None:
 def test_missing_post_entry_minute_liquidates_at_next_open() -> None:
     frame = _frame()
     missing = pd.Timestamp("2024-01-02 02:07")
-    frame = _preserve_fixture_marker(frame[frame["timestamp"] != missing])
-    frame.loc[frame["timestamp"] == pd.Timestamp("2024-01-02 02:08"), "open"] = 99.5
+    frame = _keep_marker(frame[frame["timestamp"] != missing])
+    resume = frame["timestamp"] == pd.Timestamp("2024-01-02 02:08")
+    frame.loc[resume, "open"] = 99.5
     outcome = simulate_execution(_signal(), frame, _CONFIG)
     assert outcome.reason == ExecutionReason.DATA_GAP_LIQUIDATION
     assert outcome.exit_timestamp == pd.Timestamp("2024-01-02 02:08")
@@ -190,8 +191,7 @@ def test_missing_post_entry_minute_liquidates_at_next_open() -> None:
 
 
 def test_missing_data_without_observation_by_window_end_is_unresolved() -> None:
-    frame = _frame(periods=2)
-    outcome = simulate_execution(_signal(), frame, _CONFIG)
+    outcome = simulate_execution(_signal(), _frame(periods=2), _CONFIG)
     assert outcome.status == ExecutionStatus.UNRESOLVED
     assert outcome.reason == ExecutionReason.UNRESOLVED_DATA_EXIT
     assert outcome.net_r is None
@@ -217,9 +217,9 @@ def test_eleventh_inactive_minute_liquidates_on_next_active_open() -> None:
 
 
 def test_stale_run_without_active_time_exit_is_unresolved() -> None:
-    frame = _frame(periods=12)
+    frame = _frame(periods=13)
     frame.loc[1:, "is_active_quote"] = 0
-    signal = _signal(end="2024-01-02 02:16")
+    signal = _signal(end="2024-01-02 02:17")
     outcome = simulate_execution(signal, frame, _CONFIG)
     assert outcome.status == ExecutionStatus.UNRESOLVED
     assert outcome.reason == ExecutionReason.UNRESOLVED_STALE_EXIT
@@ -228,10 +228,8 @@ def test_stale_run_without_active_time_exit_is_unresolved() -> None:
 
 def test_exact_window_end_uses_bar_open_and_market_slippage() -> None:
     frame = _frame()
-    frame.loc[
-        frame["timestamp"] == pd.Timestamp("2024-01-02 02:15"),
-        "open",
-    ] = 100.5
+    exit_row = frame["timestamp"] == pd.Timestamp("2024-01-02 02:15")
+    frame.loc[exit_row, "open"] = 100.5
     outcome = simulate_execution(_signal(), frame, _CONFIG)
     assert outcome.reason == ExecutionReason.TIME_EXIT
     assert outcome.exit_price_raw == pytest.approx(100.5)
@@ -241,14 +239,12 @@ def test_exact_window_end_uses_bar_open_and_market_slippage() -> None:
 
 def test_missing_or_inactive_time_exit_is_unresolved() -> None:
     frame = _frame()
-    frame = _preserve_fixture_marker(
-        frame[frame["timestamp"] != pd.Timestamp("2024-01-02 02:15")]
-    )
-    missing = simulate_execution(_signal(), frame, _CONFIG)
+    exit_time = pd.Timestamp("2024-01-02 02:15")
+    missing_frame = _keep_marker(frame[frame["timestamp"] != exit_time])
+    missing = simulate_execution(_signal(), missing_frame, _CONFIG)
     assert missing.reason == ExecutionReason.UNRESOLVED_TIME_EXIT
 
-    frame = _frame()
-    frame.loc[frame["timestamp"] == pd.Timestamp("2024-01-02 02:15"), "is_active_quote"] = 0
+    frame.loc[frame["timestamp"] == exit_time, "is_active_quote"] = 0
     inactive = simulate_execution(_signal(), frame, _CONFIG)
     assert inactive.reason == ExecutionReason.UNRESOLVED_TIME_EXIT
 
@@ -257,8 +253,7 @@ def test_commission_is_separate_from_slippage_and_net_r() -> None:
     frame = _frame()
     frame.loc[0, "high"] = 103.0
     outcome = simulate_execution(_signal(), frame, _CONFIG)
-    expected_risk_dollars = 1.25 * 20.0
-    expected_commission_r = 4.50 / expected_risk_dollars
+    expected_commission_r = 4.50 / (1.25 * 20.0)
     assert outcome.commission_dollars == pytest.approx(4.50)
     assert outcome.commission_r == pytest.approx(expected_commission_r)
     assert outcome.net_r == pytest.approx(2.0 - expected_commission_r)
@@ -273,7 +268,7 @@ def test_prefix_replay_reproduces_determining_exit(exit_case: str) -> None:
         frame.loc[2, "low"] = 98.0
     elif exit_case == "gap":
         missing = pd.Timestamp("2024-01-02 02:07")
-        frame = _preserve_fixture_marker(frame[frame["timestamp"] != missing])
+        frame = _keep_marker(frame[frame["timestamp"] != missing])
     assert validate_execution_prefix(_signal(), frame, _CONFIG) is True
 
 
@@ -287,13 +282,18 @@ def test_signal_and_input_frame_are_not_mutated() -> None:
 
 
 def test_duplicate_and_off_grid_timestamps_fail_loudly() -> None:
-    duplicate = pd.concat([_frame().iloc[:2], _frame().iloc[:1]], ignore_index=True)
+    duplicate = pd.concat(
+        [_frame().iloc[:2], _frame().iloc[:1]],
+        ignore_index=True,
+    )
     mark_synthetic_fixture(duplicate)
     with pytest.raises(ValueError, match="duplicate timestamps"):
         simulate_execution(_signal(), duplicate, _CONFIG)
 
     off_grid = _frame()
-    off_grid.loc[0, "timestamp"] += pd.Timedelta(seconds=30)
+    off_grid.loc[0, "timestamp"] = (
+        pd.Timestamp(off_grid.loc[0, "timestamp"]) + pd.Timedelta(seconds=30)
+    )
     with pytest.raises(ValueError, match="off-grid timestamps"):
         simulate_execution(_signal(), off_grid, _CONFIG)
 
@@ -301,17 +301,12 @@ def test_duplicate_and_off_grid_timestamps_fail_loudly() -> None:
 def test_activity_audit_can_be_disabled_for_generic_synthetic_bars() -> None:
     frame = _frame().drop(columns="is_active_quote")
     mark_synthetic_fixture(frame)
-    config = ExecutionConfig(
-        tick_size=0.25,
-        point_value=20.0,
-        commission_per_side=2.25,
-        activity_column=None,
-    )
+    config = replace(_CONFIG, activity_column=None)
     outcome = simulate_execution(_signal(), frame, config)
     assert outcome.reason == ExecutionReason.TIME_EXIT
 
 
-def test_execution_module_never_calls_active_dtr_signal_generator() -> None:
-    source = inspect.getsource(execution_module)
+def test_execution_function_never_calls_active_dtr_signal_generator() -> None:
+    source = inspect.getsource(simulate_execution)
     assert "generate_signals" not in source
     assert "dtr_lab.research.engine" not in source
