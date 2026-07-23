@@ -34,10 +34,6 @@ jobs:
             report_root: strategies/asia_sweep/reports/asia_sweep_es_proxy_dukascopy_development_20260723
             artifact_name: asia-sweep-es-proxy-event-audit
 
-    env:
-      GH_TOKEN: ${{ github.token }}
-      CANONICAL_RUN_ID: "29996917493"
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -56,12 +52,16 @@ jobs:
           pip install -e ".[dev]"
 
       - name: Download canonical private proxy artifact
-        run: |
-          gh run download "${CANONICAL_RUN_ID}" \
-            --repo "${GITHUB_REPOSITORY}" \
-            --name asia-sweep-dukascopy-proxies \
-            --dir canonical
-          test -f "canonical/${{ matrix.dataset }}"
+        uses: actions/download-artifact@v4
+        with:
+          name: asia-sweep-dukascopy-proxies
+          path: canonical
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: 29996917493
+
+      - name: Verify canonical dataset is present
+        run: test -f "canonical/${{ matrix.dataset }}"
 
       - name: Stage one private dataset
         run: |
