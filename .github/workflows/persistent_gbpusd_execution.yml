@@ -1,9 +1,7 @@
 name: Persistent GBPUSD acquisition and DTR execution
 
 on:
-  push:
-    branches:
-      - agent/gbpusd-dtr-replication
+  pull_request:
     paths:
       - temporary/gbpusd_execute.trigger
 
@@ -196,5 +194,6 @@ jobs:
                   reviews/DTR-FX-WP-20260723-22-independent-review.md \
                   changelogs/DTR-FX-WP-20260723-22.md \
                   handovers/DTR-FX-WP-20260723-22.md
+          git rm temporary/gbpusd_execute.trigger
           git commit -m "Complete GBPUSD DTR replication"
           git push origin HEAD:agent/gbpusd-dtr-replication
