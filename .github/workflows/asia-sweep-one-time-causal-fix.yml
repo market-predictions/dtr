@@ -23,51 +23,56 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
+          from textwrap import dedent
 
           path = Path("src/dtr_lab/strategies/asia_sweep/auction_state.py")
           text = path.read_text()
 
-          old_opposite = '''    if first_side == "UP":
-              opposite = bars.iloc[first_index : decision_end + 1]
-              opposite = opposite[opposite["low"] < low]
-          else:
-              opposite = bars.iloc[first_index : decision_end + 1]
-              opposite = opposite[opposite["high"] > high]
-          opposite_index = int(opposite.index[0]) if not opposite.empty else None
+          old_opposite = dedent('''\
+              if first_side == "UP":
+                  opposite = bars.iloc[first_index : decision_end + 1]
+                  opposite = opposite[opposite["low"] < low]
+              else:
+                  opposite = bars.iloc[first_index : decision_end + 1]
+                  opposite = opposite[opposite["high"] > high]
+              opposite_index = int(opposite.index[0]) if not opposite.empty else None
 
-          candidates = [
-              index
-              for index in (acceptance_index, rejection_index)
-              if index is not None
-          ]
-          detection_index = min(candidates) if candidates else decision_end
-          '''
-          new_opposite = '''    candidates = [
-              index
-              for index in (acceptance_index, rejection_index)
-              if index is not None
-          ]
-          detection_index = min(candidates) if candidates else decision_end
-          if first_side == "UP":
-              opposite = bars.iloc[first_index : detection_index + 1]
-              opposite = opposite[opposite["low"] < low]
-          else:
-              opposite = bars.iloc[first_index : detection_index + 1]
-              opposite = opposite[opposite["high"] > high]
-          opposite_index = int(opposite.index[0]) if not opposite.empty else None
-          '''
-          old_path = '''    path = minutes.loc[
-              (minutes.index >= anchor_timestamp)
-              & (minutes.index <= window_end)
-              & (minutes["is_active_quote"] > 0)
-          ]
-          '''
-          new_path = '''    path = minutes.loc[
-              (minutes.index >= anchor_timestamp)
-              & (minutes.index < window_end)
-              & (minutes["is_active_quote"] > 0)
-          ]
-          '''
+              candidates = [
+                  index
+                  for index in (acceptance_index, rejection_index)
+                  if index is not None
+              ]
+              detection_index = min(candidates) if candidates else decision_end
+          ''')
+          new_opposite = dedent('''\
+              candidates = [
+                  index
+                  for index in (acceptance_index, rejection_index)
+                  if index is not None
+              ]
+              detection_index = min(candidates) if candidates else decision_end
+              if first_side == "UP":
+                  opposite = bars.iloc[first_index : detection_index + 1]
+                  opposite = opposite[opposite["low"] < low]
+              else:
+                  opposite = bars.iloc[first_index : detection_index + 1]
+                  opposite = opposite[opposite["high"] > high]
+              opposite_index = int(opposite.index[0]) if not opposite.empty else None
+          ''')
+          old_path = dedent('''\
+              path = minutes.loc[
+                  (minutes.index >= anchor_timestamp)
+                  & (minutes.index <= window_end)
+                  & (minutes["is_active_quote"] > 0)
+              ]
+          ''')
+          new_path = dedent('''\
+              path = minutes.loc[
+                  (minutes.index >= anchor_timestamp)
+                  & (minutes.index < window_end)
+                  & (minutes["is_active_quote"] > 0)
+              ]
+          ''')
           old_horizon = '        subset = path.loc[path.index <= horizon_end]\n'
           new_horizon = '        subset = path.loc[path.index < horizon_end]\n'
 
