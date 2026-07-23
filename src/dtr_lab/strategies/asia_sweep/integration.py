@@ -15,7 +15,7 @@ from .execution import (
     simulate_execution,
     validate_execution_prefix,
 )
-from .model import AsiaSweepVariant, DEFAULT_WINDOWS
+from .model import DEFAULT_WINDOWS, AsiaSweepVariant
 
 _EVENT_SOURCE_KIND = "SYNTHETIC_EVENT_PACKET"
 _REQUIRED_EVENT_COLUMNS = {
