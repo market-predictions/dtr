@@ -7,6 +7,10 @@ on:
     paths:
       - .github/workflows/temporary_patch_gbpusd_transport.yml
       - temporary/patch_gbpusd_transport.trigger
+  pull_request:
+    paths:
+      - .github/workflows/temporary_patch_gbpusd_transport.yml
+      - temporary/patch_gbpusd_transport.trigger
 
 permissions:
   contents: write
