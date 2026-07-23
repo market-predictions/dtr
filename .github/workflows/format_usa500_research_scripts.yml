@@ -21,8 +21,13 @@ jobs:
         with:
           ref: agent/usa500-baseline-discovery
           fetch-depth: 0
-      - name: Apply Ruff fixes and formatting
+      - name: Apply Ruff formatting and fixes
         run: |
+          pipx run --spec ruff==0.15.22 ruff format \
+            scripts/run_usa500_baseline_discovery.py \
+            scripts/review_usa500_baseline_discovery.py \
+            scripts/run_usa500_session_decomposition.py \
+            scripts/review_usa500_session_decomposition.py
           pipx run --spec ruff==0.15.22 ruff check --fix --unsafe-fixes \
             scripts/run_usa500_baseline_discovery.py \
             scripts/review_usa500_baseline_discovery.py \
