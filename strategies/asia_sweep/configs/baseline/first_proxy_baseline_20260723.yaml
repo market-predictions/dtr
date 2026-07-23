@@ -1,0 +1,72 @@
+schema_version: 1
+work_package: AS-WP-20260723-07
+baseline_id: asia_sweep_first_proxy_baseline_20260723
+strategy_id: ASIA_SWEEP_STANDALONE_V0
+research_status: DEVELOPMENT_SCREEN_ONLY
+
+periods:
+  development_start: 2023-01-01T00:00:00
+  development_end_exclusive: 2024-07-01T00:00:00
+  historical_validation_opened: false
+  later_research_opened: false
+
+instruments:
+  NQ_PROXY:
+    source_kind: DUKASCOPY_INDEX_CFD_PROXY
+    source_instrument: usatechidxusd
+    price_side: BID
+    source_quote_increment: 0.001
+    execution_tick: 0.25
+    point_value: 20.0
+    commission_per_side: 2.25
+  ES_PROXY:
+    source_kind: DUKASCOPY_INDEX_CFD_PROXY
+    source_instrument: usa500idxusd
+    price_side: BID
+    source_quote_increment: 0.001
+    execution_tick: 0.25
+    point_value: 50.0
+    commission_per_side: 2.25
+
+variants:
+  - AS_A_AGGRESSIVE_RECLAIM
+  - AS_B_WICK_QUALIFIED
+  - AS_C_DISPLACEMENT
+  - AS_D_FAILED_RETEST
+
+normalization:
+  policy: DIRECTIONAL_PESSIMISTIC_V1
+  preserve_timestamps: true
+  preserve_missing_minutes: true
+  preserve_activity: true
+  minimum_normalized_risk_ticks_exclusive: 1
+
+execution:
+  entry_slippage_ticks: 1.0
+  stop_slippage_ticks: 1.0
+  market_exit_slippage_ticks: 1.0
+  target_rr: 2.0
+  collision_policy: stop_first
+  maximum_consecutive_inactive_minutes: 10
+  time_exit_at_window_end: true
+  reentry: false
+  partials: false
+
+promise_thresholds:
+  minimum_exited_trades_each_instrument: 50
+  minimum_net_expectancy_each_instrument: 0.0
+  minimum_pooled_equal_event_expectancy_r: 0.05
+  minimum_pooled_profit_factor: 1.10
+  require_positive_2023: true
+  require_positive_2024_h1: true
+  maximum_blocked_unresolved_fraction: 0.02
+  maximum_positive_net_r_instrument_contribution: 0.75
+
+prohibitions:
+  optimize_parameters: false
+  select_subgroups_after_results: false
+  combine_variants: false
+  open_lockbox: false
+  compare_with_dtr: false
+  claim_cme_futures_validity: false
+  authorize_deployment: false
