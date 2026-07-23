@@ -8,7 +8,8 @@ import yaml
 
 MapMode = Literal["none", "ema_alignment", "recent_breakout", "ema_plus_breakout"]
 FillMode = Literal["next_open", "signal_close"]
-InstrumentName = Literal["NQ", "ES_PROXY"]
+ExecutionModel = Literal["single_ohlc", "fx_bid_ask"]
+InstrumentName = Literal["NQ", "NQ_PROXY", "ES_PROXY", "GBPUSD"]
 
 
 @dataclass(frozen=True)
@@ -19,6 +20,7 @@ class InstrumentSpec:
     commission_per_side: float
     source_sha256: str
     source_classification: str
+    execution_model: ExecutionModel = "single_ohlc"
 
 
 NQ_SPEC = InstrumentSpec(
@@ -30,16 +32,41 @@ NQ_SPEC = InstrumentSpec(
     source_classification="NQ futures research archive",
 )
 
+NQ_PROXY_SPEC = InstrumentSpec(
+    name="NQ_PROXY",
+    tick_size=0.25,
+    point_value=20.0,
+    commission_per_side=2.25,
+    source_sha256="b98f08a0fd35255c09232d41da10ee84559587067b48e942cccdbe37b0b888c4",
+    source_classification=(
+        "Dukascopy USATECH bid-CFD Nasdaq-100 proxy with NQ-equivalent research "
+        "economics; not CME NQ futures"
+    ),
+)
+
 ES_PROXY_SPEC = InstrumentSpec(
     name="ES_PROXY",
     tick_size=0.25,
     point_value=50.0,
     commission_per_side=2.25,
-    source_sha256="199d63e6f284eb1ffb93003e9020bf2852f5d96bf78f0efe50c3bdd09c11a47b",
+    source_sha256="a2342f9d64695d8ecb618a907600b4de0b1433ba65d25c1f0ac3d0566ab9a72f",
     source_classification=(
-        "Dukascopy USA500 bid-CFD proxy with ES-equivalent execution economics; "
-        "not CME ES futures"
+        "Dukascopy USA500 bid-CFD S&P-500 proxy with ES-equivalent research "
+        "economics; not CME ES futures"
     ),
+)
+
+GBPUSD_SPEC = InstrumentSpec(
+    name="GBPUSD",
+    tick_size=0.00001,
+    point_value=100_000.0,
+    commission_per_side=0.0,
+    source_sha256="44df46cfd7bce946074ae2f541a654cff907c7cc9a8bc43fac8b4090624e860e",
+    source_classification=(
+        "Dukascopy GBPUSD bid/ask M1 private cache; corrected from the documented "
+        "BI5 open-close-low-high field order; midpoint signals with side-correct execution"
+    ),
+    execution_model="fx_bid_ask",
 )
 
 
@@ -99,6 +126,8 @@ class SequenceConfig:
             raise ValueError("base_min_overlap_ratio must be between zero and one")
         if self.minimum_risk_ticks <= 0:
             raise ValueError("minimum_risk_ticks must be positive")
+        if self.slippage_ticks_each_side < 0:
+            raise ValueError("slippage_ticks_each_side cannot be negative")
         if not (self.allow_long or self.allow_short):
             raise ValueError("At least one direction must be enabled")
 

@@ -59,14 +59,16 @@ def date_block_bootstrap(
         }
     work = trades.copy()
     work["block"] = pd.to_datetime(work["entry_time"]).dt.normalize()
-    blocks = [group["pnl_r"].to_numpy(float) for _, group in work.groupby("block", sort=True)]
+    grouped = work.groupby("block", sort=True)["pnl_r"]
+    block_sums = grouped.sum().to_numpy(float)
+    block_counts = grouped.size().to_numpy(np.int64)
     rng = np.random.default_rng(seed)
     means = np.empty(iterations)
     for iteration in range(iterations):
-        selected = rng.integers(0, len(blocks), size=len(blocks))
-        means[iteration] = np.concatenate([blocks[index] for index in selected]).mean()
+        selected = rng.integers(0, len(block_sums), size=len(block_sums))
+        means[iteration] = block_sums[selected].sum() / block_counts[selected].sum()
     return {
-        "blocks": len(blocks),
+        "blocks": len(block_sums),
         "observed_expectancy_r": float(work["pnl_r"].mean()),
         "lo95_expectancy_r": float(np.quantile(means, 0.025)),
         "hi95_expectancy_r": float(np.quantile(means, 0.975)),
@@ -90,7 +92,7 @@ def classify(summary: dict[str, object], inference: dict[str, object]) -> str:
 def validate_no_pooling(summary: pd.DataFrame) -> None:
     if "instrument" not in summary.columns:
         raise ValueError("Summary must retain instrument labels")
-    allowed = {"NQ", "ES_PROXY"}
+    allowed = {"NQ", "NQ_PROXY", "ES_PROXY", "GBPUSD"}
     observed = set(summary["instrument"].dropna().astype(str))
     if not observed.issubset(allowed):
         raise ValueError(f"Unexpected instrument labels: {sorted(observed - allowed)}")
