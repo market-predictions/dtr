@@ -194,7 +194,7 @@ def main() -> None:
         full_trades = arm_trades[f"{arm_id}__LONG_FULL"]
         full_expectancy = float(full["expectancy_r"])
         full_hold = float(full["median_hold_minutes"])
-        matched_metrics = []
+        matched_metrics: list[dict[str, object]] = []
         for replicate in range(matched_replicates):
             matched_events = matched_time_events(
                 long_events,
@@ -202,6 +202,9 @@ def main() -> None:
                 map_bars,
                 long_config,
                 seed=20260724 + arm_index * 10_000 + replicate,
+            )
+            event_match_fraction = (
+                len(matched_events) / len(long_events) if len(long_events) else np.nan
             )
             matched_config = replace(
                 long_config,
@@ -219,6 +222,7 @@ def main() -> None:
                 instrument="NQ",
                 arm_id=matched_config.arm_id,
             )
+            metric["event_match_fraction"] = float(event_match_fraction)
             matched_metrics.append(metric)
             if replicate == 0:
                 matched_events.to_csv(
@@ -250,6 +254,10 @@ def main() -> None:
                 "matched_median_hold_minutes": matched_hold,
                 "matched_to_full_hold_ratio": hold_ratio,
                 "hold_distribution_match_flag": bool(0.75 <= hold_ratio <= 1.25),
+                "full_event_count": int(len(long_events)),
+                "matched_min_event_match_fraction": float(
+                    matched_frame["event_match_fraction"].min()
+                ),
                 "full_trade_count": int(len(full_trades)),
                 "matched_median_trade_count": float(matched_frame["trades"].median()),
             }
