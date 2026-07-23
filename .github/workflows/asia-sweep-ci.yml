@@ -1,0 +1,41 @@
+name: Asia Sweep CI
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/asia-sweep-ci.yml"
+      - "scripts/run_asia_sweep_manifest.py"
+      - "src/dtr_lab/strategies/**"
+      - "strategies/asia_sweep/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  isolated-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run isolated Asia Sweep tests
+        run: PYTHONPATH=src pytest -c strategies/asia_sweep/pytest.ini
