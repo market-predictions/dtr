@@ -18,11 +18,16 @@ from .model import DEFAULT_WINDOWS, AsiaSweepVariant
 
 _PROXY_SOURCE_KIND = "SYNTHETIC_DUKASCOPY_INDEX_CFD_PROXY_FIXTURE"
 _PROXY_EVENT_KIND_FIELD = "proxy_source_kind"
+_PROXY_SOURCE_INSTRUMENT_FIELD = "proxy_source_instrument"
+_PROXY_PRICE_SIDE_FIELD = "proxy_price_side"
 _PROXY_FRAME_KIND_ATTR = "asia_sweep_proxy_source_kind"
+_PROXY_FRAME_INSTRUMENT_ATTR = "asia_sweep_proxy_source_instrument"
+_PROXY_FRAME_PRICE_SIDE_ATTR = "asia_sweep_proxy_price_side"
 _PROXY_EVENT_KEY_ATTR = "asia_sweep_proxy_event_key"
 _PROXY_EVENT_DIGEST_ATTR = "asia_sweep_proxy_event_digest"
 _POLICY_VERSION = "DIRECTIONAL_PESSIMISTIC_V1"
 _FROZEN_TARGET_RR = Decimal("2.0")
+_TARGET_NOISE_FRACTION = Decimal("0.000001")
 _REQUIRED_EVENT_FIELDS = {
     "instrument",
     "trade_date",
@@ -35,6 +40,8 @@ _REQUIRED_EVENT_FIELDS = {
     "stop_price_raw",
     "target_price_raw",
     _PROXY_EVENT_KIND_FIELD,
+    _PROXY_SOURCE_INSTRUMENT_FIELD,
+    _PROXY_PRICE_SIDE_FIELD,
 }
 _REQUIRED_FRAME_COLUMNS = {
     "timestamp",
@@ -50,10 +57,19 @@ class ProxyNormalizationConfig:
     """Synthetic proxy-to-execution-grid normalization contract."""
 
     integration: IntegrationConfig
+    source_instrument: str
     source_quote_increment: Decimal | str | float = Decimal("0.001")
+    price_side: str = "BID"
     policy_version: str = _POLICY_VERSION
 
     def __post_init__(self) -> None:
+        _strict_text(self.source_instrument, name="source_instrument")
+        if self.price_side != "BID":
+            raise ValueError("only the frozen BID proxy price side is supported")
+        if self.policy_version != _POLICY_VERSION:
+            raise ValueError(
+                f"only the frozen normalization policy {_POLICY_VERSION} is supported"
+            )
         source_increment = _as_decimal(
             self.source_quote_increment,
             name="source_quote_increment",
@@ -69,8 +85,6 @@ class ProxyNormalizationConfig:
             raise ValueError(
                 "execution tick must be an integer multiple of source quote increment"
             )
-        if not self.policy_version or self.policy_version != self.policy_version.strip():
-            raise ValueError("policy_version must be non-empty and contain no edge whitespace")
         if self.integration.execution.activity_column is None:
             raise ValueError("proxy normalization requires an activity column")
         object.__setattr__(self, "source_quote_increment", source_increment)
@@ -104,6 +118,7 @@ class ProxyEventFacts:
     entry: Decimal
     stop: Decimal
     target: Decimal
+    target_reported: Decimal
 
 
 @dataclass(frozen=True)
@@ -223,11 +238,16 @@ def _window_bounds(
     return start, end
 
 
-def mark_synthetic_proxy_event(event: Mapping[str, object]) -> dict[str, object]:
-    """Return a marked copy of a synthetic proxy event."""
+def mark_synthetic_proxy_event(
+    event: Mapping[str, object],
+    cfg: ProxyNormalizationConfig,
+) -> dict[str, object]:
+    """Return a source-identity-bound copy of a synthetic proxy event."""
 
     marked = dict(event)
     marked[_PROXY_EVENT_KIND_FIELD] = _PROXY_SOURCE_KIND
+    marked[_PROXY_SOURCE_INSTRUMENT_FIELD] = cfg.source_instrument
+    marked[_PROXY_PRICE_SIDE_FIELD] = cfg.price_side
     return marked
 
 
@@ -240,6 +260,10 @@ def _validate_raw_event(
         raise ValueError(f"proxy event missing required fields: {sorted(missing)}")
     if event[_PROXY_EVENT_KIND_FIELD] != _PROXY_SOURCE_KIND:
         raise ValueError("proxy event is not a marked synthetic proxy fixture")
+    if event[_PROXY_SOURCE_INSTRUMENT_FIELD] != cfg.source_instrument:
+        raise ValueError("proxy event source instrument does not match normalization config")
+    if event[_PROXY_PRICE_SIDE_FIELD] != cfg.price_side:
+        raise ValueError("proxy event price side does not match normalization config")
 
     instrument = _strict_text(event["instrument"], name="instrument")
     if instrument != cfg.integration.instrument:
@@ -276,12 +300,18 @@ def _validate_raw_event(
 
     entry = _source_price(event["entry_price_raw"], name="proxy event entry", cfg=cfg)
     stop = _source_price(event["stop_price_raw"], name="proxy event stop", cfg=cfg)
-    target = _source_price(event["target_price_raw"], name="proxy event target", cfg=cfg)
+    target_reported = _as_decimal(
+        event["target_price_raw"],
+        name="proxy event target",
+    )
+    if target_reported <= 0:
+        raise ValueError("proxy event target must be positive")
     risk = entry - stop if direction > 0 else stop - entry
     if risk <= 0:
         raise ValueError("proxy event risk must be positive")
-    expected_target = entry + Decimal(direction) * risk * _FROZEN_TARGET_RR
-    if target != expected_target:
+    target = entry + Decimal(direction) * risk * _FROZEN_TARGET_RR
+    target_tolerance = cfg.source_quote_increment * _TARGET_NOISE_FRACTION
+    if abs(target_reported - target) > target_tolerance:
         raise ValueError("proxy event target is inconsistent with source-grid 2.0R")
     if direction > 0 and not stop < entry < target:
         raise ValueError("invalid raw long proxy event geometry")
@@ -302,6 +332,7 @@ def _validate_raw_event(
         entry=entry,
         stop=stop,
         target=target,
+        target_reported=target_reported,
     )
 
 
@@ -309,7 +340,7 @@ def source_event_digest(
     event: Mapping[str, object],
     cfg: ProxyNormalizationConfig,
 ) -> str:
-    """Hash canonical raw event facts at source quote precision."""
+    """Hash canonical raw event facts and exact proxy source identity."""
 
     facts = _validate_raw_event(event, cfg)
     payload = "|".join(
@@ -320,6 +351,8 @@ def source_event_digest(
             str(_source_ticks(facts.entry, name="proxy event entry", cfg=cfg)),
             str(_source_ticks(facts.stop, name="proxy event stop", cfg=cfg)),
             str(_source_ticks(facts.target, name="proxy event target", cfg=cfg)),
+            cfg.source_instrument,
+            cfg.price_side,
             str(cfg.source_quote_increment),
         )
     )
@@ -336,6 +369,8 @@ def normalization_digest(
         (
             source_event_digest(event, cfg),
             cfg.policy_version,
+            cfg.source_instrument,
+            cfg.price_side,
             str(cfg.source_quote_increment),
             str(cfg.execution_tick),
             cfg.integration.instrument,
@@ -365,6 +400,8 @@ def normalize_proxy_event(
 
     normalized = dict(event)
     normalized.pop(_PROXY_EVENT_KIND_FIELD, None)
+    normalized.pop(_PROXY_SOURCE_INSTRUMENT_FIELD, None)
+    normalized.pop(_PROXY_PRICE_SIDE_FIELD, None)
     normalized["entry_timestamp"] = facts.entry_timestamp
     normalized["entry_price_raw"] = float(entry)
     normalized["stop_price_raw"] = float(stop)
@@ -372,6 +409,9 @@ def normalize_proxy_event(
     normalized["proxy_entry_price_source"] = float(facts.entry)
     normalized["proxy_stop_price_source"] = float(facts.stop)
     normalized["proxy_target_price_source"] = float(facts.target)
+    normalized["proxy_target_price_reported"] = float(facts.target_reported)
+    normalized["proxy_source_instrument"] = cfg.source_instrument
+    normalized["proxy_price_side"] = cfg.price_side
     normalized["proxy_source_quote_increment"] = float(cfg.source_quote_increment)
     normalized["proxy_normalization_policy"] = cfg.policy_version
     normalized["proxy_source_event_digest"] = source_event_digest(event, cfg)
@@ -384,10 +424,12 @@ def mark_synthetic_proxy_minute_frame(
     event: Mapping[str, object],
     cfg: ProxyNormalizationConfig,
 ) -> pd.DataFrame:
-    """Return a marked copy of a synthetic raw proxy minute path bound to one event."""
+    """Return a marked raw proxy path bound to source identity and one event."""
 
     marked = frame.copy(deep=True)
     marked.attrs[_PROXY_FRAME_KIND_ATTR] = _PROXY_SOURCE_KIND
+    marked.attrs[_PROXY_FRAME_INSTRUMENT_ATTR] = cfg.source_instrument
+    marked.attrs[_PROXY_FRAME_PRICE_SIDE_ATTR] = cfg.price_side
     marked.attrs[_PROXY_EVENT_KEY_ATTR] = stable_event_key(event)
     marked.attrs[_PROXY_EVENT_DIGEST_ATTR] = source_event_digest(event, cfg)
     return marked
@@ -423,6 +465,10 @@ def _validate_raw_frame(
 ) -> pd.DataFrame:
     if frame.attrs.get(_PROXY_FRAME_KIND_ATTR) != _PROXY_SOURCE_KIND:
         raise ValueError("proxy minute frame is not a marked synthetic proxy fixture")
+    if frame.attrs.get(_PROXY_FRAME_INSTRUMENT_ATTR) != cfg.source_instrument:
+        raise ValueError("proxy minute frame source instrument does not match config")
+    if frame.attrs.get(_PROXY_FRAME_PRICE_SIDE_ATTR) != cfg.price_side:
+        raise ValueError("proxy minute frame price side does not match config")
     expected_key = stable_event_key(event)
     expected_digest = source_event_digest(event, cfg)
     if frame.attrs.get(_PROXY_EVENT_KEY_ATTR) != expected_key:
@@ -567,6 +613,8 @@ def normalize_proxy_minute_frame(
     out["proxy_high_envelope_repaired"] = [values[4] for values in normalized_rows]
     out["proxy_low_envelope_repaired"] = [values[5] for values in normalized_rows]
     out["proxy_normalization_policy"] = cfg.policy_version
+    out["proxy_source_instrument"] = cfg.source_instrument
+    out["proxy_price_side"] = cfg.price_side
 
     out = mark_synthetic_event_minute_frame(
         out,
@@ -574,6 +622,8 @@ def normalize_proxy_minute_frame(
         cfg.integration,
     )
     out.attrs[_PROXY_FRAME_KIND_ATTR] = _PROXY_SOURCE_KIND
+    out.attrs[_PROXY_FRAME_INSTRUMENT_ATTR] = cfg.source_instrument
+    out.attrs[_PROXY_FRAME_PRICE_SIDE_ATTR] = cfg.price_side
     out.attrs["asia_sweep_proxy_source_event_digest"] = source_event_digest(event, cfg)
     out.attrs["asia_sweep_proxy_normalization_digest"] = normalization_digest(event, cfg)
     out.attrs["asia_sweep_proxy_source_frame_digest"] = source_frame_digest(
@@ -625,4 +675,7 @@ def validate_normalized_integration_contract(
         == result.one_minute.attrs.get("asia_sweep_proxy_normalization_digest")
         and result.source_frame_digest
         == result.one_minute.attrs.get("asia_sweep_proxy_source_frame_digest")
+        and cfg.source_instrument
+        == result.one_minute.attrs.get(_PROXY_FRAME_INSTRUMENT_ATTR)
+        and cfg.price_side == result.one_minute.attrs.get(_PROXY_FRAME_PRICE_SIDE_ATTR)
     )
