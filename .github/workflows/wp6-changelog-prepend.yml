@@ -11,6 +11,7 @@ permissions:
 jobs:
   prepend:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Checkout branch
         uses: actions/checkout@v4
