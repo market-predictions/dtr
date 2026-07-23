@@ -61,12 +61,12 @@ jobs:
           run-id: 29996917493
 
       - name: Verify canonical dataset is present
-        run: test -f "canonical/${{ matrix.dataset }}"
+        run: test -f "canonical/prepared/${{ matrix.dataset }}"
 
       - name: Stage one private dataset
         run: |
           mkdir -p data/private/asia_sweep
-          cp "canonical/${{ matrix.dataset }}" \
+          cp "canonical/prepared/${{ matrix.dataset }}" \
             "data/private/asia_sweep/${{ matrix.dataset }}"
 
       - name: Build event-only ledgers
