@@ -86,6 +86,18 @@ class AsiaSweepEvent:
     asia_high: float
     asia_low: float
     asia_range_points: float
+    asia_expected_minutes: int = 0
+    asia_observed_minutes: int = 0
+    asia_missing_minutes: int = 0
+    asia_complete: bool = False
+    execution_expected_minutes: int = 0
+    execution_observed_minutes: int = 0
+    execution_missing_minutes: int = 0
+    execution_window_complete: bool = False
+    pre_signal_expected_minutes: int | None = None
+    pre_signal_observed_minutes: int | None = None
+    pre_signal_missing_minutes: int | None = None
+    pre_signal_path_complete: bool | None = None
     swept_side: str | None = None
     direction: int = 0
     first_sweep_timestamp: pd.Timestamp | None = None

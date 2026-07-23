@@ -1,5 +1,60 @@
 # Asia Sweep Changelog
 
+## v0.2.0 — 2026-07-23
+
+### Added
+
+- Added exact half-open one-minute interval auditing.
+- Added Asia-range, full-window and pre-signal completeness metadata to every event.
+- Added a strict Asia Sweep ZIP/CSV adapter that does not silently drop duplicates or the final date.
+- Added explicit source-schema fields to the NQ manifest; ES remains blocked until registered.
+- Expanded the isolated suite from 9 to 25 tests.
+- Added full pytest-report artifacts before the isolated CI gate is enforced.
+
+### Changed
+
+- A partial Asia range is now `INELIGIBLE`.
+- Missing data before the determining signal bar now blocks the setup.
+- A future gap after a valid signal is recorded but cannot retrospectively remove that signal.
+- `NO_SWEEP` is emitted only after a complete execution window.
+- AS-C now requires a complete causal 20-bar body reference.
+- Duplicate timestamps now fail loudly instead of being silently deduplicated.
+
+### Corrected during review
+
+- Replaced the inherited source loader because it silently deduplicated timestamps and removed the final date.
+- Renamed the Asia interval-integrity test module to avoid a pytest import collision with DTR's existing `test_integrity.py`.
+- Applied Ruff's exact import-format correction.
+
+### Reason
+
+The strategy cannot be evaluated honestly unless the range, signal path and source records are complete at the time each decision becomes observable. Future data-quality events must not alter prior signal decisions.
+
+### Validation
+
+- Python syntax compilation passed locally.
+- Isolated Asia Sweep suite: 25 passed locally.
+- Dedicated Asia Sweep CI passed on Python 3.11 and 3.12.
+- Original repository CI passed, including Ruff and existing DTR tests.
+- Independent published-diff review verdict: `APPROVE_DATA_INTEGRITY_FOR_MERGE_BLOCK_EVENT_RESULTS_AND_PNL`.
+- No P&L or historical strategy result was generated.
+
+### Known limits
+
+- Qualified raw NQ and ES files are not available in the active workspace for event generation.
+- NQ timestamp labeling and continuous-contract construction remain unresolved.
+- ES data and schema remain unregistered.
+- Manual 50 NQ + 50 ES event audit remains blocked.
+- Post-entry execution and causal gap liquidation are not connected.
+
+### Next
+
+- Acquire and register qualified ES data.
+- Resolve or preregister NQ timestamp-interpretation sensitivity.
+- Generate event ledgers without P&L.
+- Complete the manual event audit.
+- Freeze event semantics before adding execution.
+
 ## v0.1.0 — 2026-07-23
 
 ### Added
