@@ -1,0 +1,8 @@
+{
+  "verdict": "PASS",
+  "scope": "Independent arithmetic, geometry, sequencing and aggregate-metric reconstruction from saved ledgers.",
+  "maximum_pnl_reconstruction_difference_r": 7.212008767965017e-13,
+  "position_overlap_found": false,
+  "invalid_trade_geometry_found": false,
+  "external_human_review": false
+}
