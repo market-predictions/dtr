@@ -8,6 +8,14 @@ on:
       - ".github/workflows/stoic-short-proxy-source-qualification.yml"
       - "scripts/acquire_stoic_usatech_partition.py"
       - "strategies/stoic_123/configs/short_unseen_proxy_validation.yaml"
+  pull_request:
+    branches:
+      - agent/stoic-nq-long-only-validation
+    types: [opened, synchronize, reopened]
+    paths:
+      - ".github/workflows/stoic-short-proxy-source-qualification.yml"
+      - "scripts/acquire_stoic_usatech_partition.py"
+      - "strategies/stoic_123/configs/short_unseen_proxy_validation.yaml"
   workflow_dispatch:
 
 concurrency:
