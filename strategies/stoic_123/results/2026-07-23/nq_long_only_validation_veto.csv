@@ -1,0 +1,5 @@
+arm_id,numerical_gates_passed,hold_distribution_comparable,matched_control_coverage_passed,matched_control_comparable,full_expectancy_exceeds_matched_p95,matched_control_vetoed,promoted
+S123_C1_STRICT_CLOSE,False,True,False,False,True,True,False
+S123_M0_NO_MAP_CONTROL,False,True,True,True,False,True,False
+S123_M1_EMA_MAP,False,True,False,False,False,True,False
+S123_M3_EMA_PLUS_BREAKOUT,False,True,False,False,True,True,False
