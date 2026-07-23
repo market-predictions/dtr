@@ -6,8 +6,7 @@ from zipfile import ZIP_DEFLATED, ZipFile
 import pandas as pd
 import pytest
 
-from dtr_lab.strategies.asia_sweep.data import load_one_minute_zip, ZipCsvSchema
-
+from dtr_lab.strategies.asia_sweep.data import ZipCsvSchema, load_one_minute_zip
 
 _SCHEMA = ZipCsvSchema(
     timestamp_column="timestamp ET",
