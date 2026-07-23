@@ -1,0 +1,81 @@
+schema_version: 1
+run_id: asia_sweep_nq_proxy_dukascopy_development_20260723
+strategy_id: ASIA_SWEEP_STANDALONE_V0
+research_status: STRUCTURAL_DATA_REGISTERED_EVENT_RUNNER_BLOCKED
+
+separation:
+  strategy_namespace: asia_sweep
+  call_active_dtr_generate_signals: false
+  write_into_dtr_results: false
+  allow_combined_portfolio_test: false
+
+dataset:
+  instrument: NQ_PROXY
+  source_kind: DUKASCOPY_INDEX_CFD_PROXY
+  source_instrument: usatechidxusd
+  qualification_status: STRUCTURALLY_QUALIFIED_PRIVATE_PROXY_DATA_ADAPTER_REQUIRED
+  event_runner_blocked_reason: proxy_timezone_activity_adapter_not_implemented
+  provider_authorization_status: PROVIDER_AUTHORIZATION_UNRESOLVED
+  loader: asia_sweep_zip_csv_v1
+  path: data/private/asia_sweep/NQ_PROXY_DUKASCOPY_USATECH_M1_BID_FULL_GRID_UTC_ET.zip
+  sha256: b98f08a0fd35255c09232d41da10ee84559587067b48e942cccdbe37b0b888c4
+  source_timezone: UTC
+  session_timezone: America/New_York
+  timestamp_semantics: one_minute_bar_open_utc
+  continuous_contract_method: not_applicable_cfd_index_proxy
+  observed_quote_increment: 0.001
+  signal_tick_size: 0.25
+  tick_size: 0.25
+  point_value: 20.0
+  commission_per_side: 2.25
+  economics_status: FUTURES_EQUIVALENT_METADATA_PNL_BLOCKED
+  rows: 2103840
+  positive_volume_rows: 1366578
+  zero_volume_rows: 737262
+  schema:
+    timestamp_column: "timestamp UTC"
+    timestamp_format: "%Y-%m-%dT%H:%M:%SZ"
+    required_columns: [open, high, low, close, volume, is_active_quote]
+  activity_gate:
+    minimum_positive_volume_minutes: 1
+    maximum_consecutive_zero_volume_minutes: 10
+    require_complete_one_minute_grid: true
+
+periods:
+  development_start: 2023-01-01T00:00:00
+  development_end: 2024-07-01T00:00:00
+  historical_validation_end: 2025-04-01T00:00:00
+  later_research_end: 2026-01-01T00:00:00
+
+strategy:
+  variants:
+    - AS_A_AGGRESSIVE_RECLAIM
+    - AS_B_WICK_QUALIFIED
+    - AS_C_DISPLACEMENT
+    - AS_D_FAILED_RETEST
+  asia_range: {start: "18:00", end: "02:00"}
+  execution_windows:
+    - {name: LONDON, start: "02:00", end: "06:00"}
+    - {name: NEW_YORK, start: "08:30", end: "11:30"}
+  weekdays: [0, 1, 2, 3, 4]
+  min_sweep_ticks: 2
+  wick_ratio_min: 0.50
+  close_location_min: 0.60
+  displacement_max_bars: 3
+  displacement_body_mult: 1.25
+  displacement_median_length: 20
+  failed_retest_max_bars: 8
+  retest_band_ticks: 4
+  stop_buffer_ticks: 2
+  target_rr: 2.0
+
+execution:
+  status: BLOCKED_PROXY_ADAPTER_AND_EVENT_SEMANTICS_REQUIRED
+  signal_source: 5min
+  intended_intrabar_source: 1min
+  intended_same_minute_collision_policy: conservative_stop_first
+  intended_gap_policy: liquidate_unsafe
+  slippage_ticks_each_side: 1.0
+
+outputs:
+  root: strategies/asia_sweep/reports/asia_sweep_nq_proxy_dukascopy_development_20260723

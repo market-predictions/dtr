@@ -1,5 +1,62 @@
 # Asia Sweep Changelog
 
+## v0.3.0 — 2026-07-23
+
+### Added
+
+- Added controlled static-BI5 acquisition tooling for Dukascopy USATECH and USA500 index-CFD proxies.
+- Added deterministic full-grid ZIP and GZIP archives with SHA-256 inventory records.
+- Added dedicated NQ-proxy and ES-proxy manifests with hard event-runner blocks.
+- Added offset-aware New York timestamps while retaining UTC as the authoritative clock.
+- Added `is_active_quote` metadata and a frozen source-activity/staleness contract.
+- Added a manifest guard that prevents unresolved proxy adapters from entering event generation.
+- Added qualification, clean-room review and handover records for the private proxy registration.
+
+### Changed
+
+- Replaced the rate-limited package API with the previously qualified static daily BI5 transport.
+- Replaced positive-volume-only normalization with complete quote-grid retention.
+- Restored the ordinary isolated Asia Sweep CI after all eight yearly acquisition jobs completed.
+- Classified provider authorization as unresolved and prohibited publication or redistribution of market data.
+
+### Corrected during review
+
+- Corrected BI5 field interpretation to seconds, open, close, low, high and volume.
+- Replaced `datetime.timezone.utc` with `datetime.UTC` for repository Ruff compliance.
+- Prevented DST ambiguity by serializing New York timestamps with explicit UTC offsets.
+- Disclosed a one-row USATECH source revision and a five-row USA500 active-count drift.
+- Corrected the final canonical USA500 count to 1,348,073 positive-volume rows.
+
+### Reason
+
+Proxy data can support market-structure research only when quote continuity, source activity, timezone semantics and proxy-versus-futures limitations remain explicit. Zero-volume carry-forward rows are neither missing bars nor proof of tradability, so they must be retained and audited separately.
+
+### Validation
+
+- Eight yearly acquisition jobs passed for 2022–2025.
+- Each proxy retains exactly 2,103,840 unique, on-grid UTC minutes.
+- Zero duplicate timestamps, off-grid rows, non-one-minute adjacency gaps and OHLC violations.
+- Canonical normalized artifact digest: `sha256:1ebbac7dd92bd61c21988102b227d7e706ba51e3669e4f3c4aa647fa48d1276e`.
+- Original repository CI passed on the acquisition head.
+- Isolated Asia Sweep CI passed on Python 3.11 and 3.12.
+- No P&L, optimization or combined DTR/Asia result was generated.
+
+### Known limits
+
+- The proxy timezone/activity adapter is not implemented.
+- The event ledger can still emit an entry at execution-window end.
+- Official no-P&L proxy event ledgers and 50-event audits are not complete.
+- Provider authorization for future automated acquisition remains unresolved.
+- CFD proxy data cannot validate CME futures roll, volume, costs or fills.
+
+### Next
+
+- Implement UTC-to-New-York proxy loading and the frozen activity gate.
+- Correct the end-of-window entry boundary with adversarial tests.
+- Generate official no-P&L event ledgers for both proxies.
+- Audit at least 50 events per proxy.
+- Keep execution simulation and P&L blocked until event semantics are frozen.
+
 ## v0.2.0 — 2026-07-23
 
 ### Added
