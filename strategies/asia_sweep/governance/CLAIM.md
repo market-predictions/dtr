@@ -6,4 +6,4 @@
 - Claimed scope: standalone foundation only
 - Started: 2026-07-23
 - Constraint: no edits to active DTR strategy or locked evidence
-- Status: implementation complete; published-diff review fixes applied; CI and merge pending
+- Status: foundation complete; DTR CI and dedicated Asia Sweep CI passed; merge and next work package pending
