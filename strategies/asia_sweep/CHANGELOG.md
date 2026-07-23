@@ -1,5 +1,63 @@
 # Asia Sweep Changelog
 
+## v0.4.0 — 2026-07-23
+
+### Added
+
+- Added timezone-aware UTC-to-`America/New_York` proxy loading with DST-safe wall-calendar session construction.
+- Added separate source-activity auditing alongside exact one-minute grid integrity.
+- Added the frozen activity gate: at least one active minute and no inactive run longer than 10 minutes.
+- Added causal pre-signal activity metadata and distinct integrity failure scope/reasons.
+- Added a private real-data event-audit workflow for both registered proxies.
+- Added deterministic 50-event samples, clean-room event reconstruction and private five-minute OHLC evidence.
+
+### Changed
+
+- Enabled the registered proxy manifests for event-ledger-only research while keeping execution and P&L blocked.
+- Made observed signal eligibility depend only on source data available through the determining bar.
+- Preserved descriptive full-window activity without allowing future inactivity to erase an earlier decision.
+- Required `entry_timestamp < execution_window_end` for all variants.
+
+### Corrected during review
+
+- Corrected a London boundary defect that could emit a 05:55 bar as a 06:00 entry.
+- Replaced elapsed-time date arithmetic with explicit local wall-calendar construction across DST weekends.
+- Separated stale carry-forward quotes from missing timestamp-grid records.
+- Corrected cross-run artifact download and canonical `prepared/` staging paths.
+- Added retained private OHLC paths after review found event rows alone insufficient for manual audit evidence.
+- Applied Ruff's exact formatting correction for one over-length test line.
+
+### Reason
+
+Event semantics must be reproducible before any execution or performance research. Timestamp identity, source activity and half-open entry boundaries are part of the strategy definition, not data-cleaning details, and future source conditions may not change an already observable event.
+
+### Validation
+
+- Development event ledgers: 3,120 records per proxy across four preregistered variants.
+- Deterministic audit samples: 50 NQ-proxy and 50 ES-proxy records.
+- Independent clean-room reconstruction: 100/100 exact, zero mismatches.
+- NQ private OHLC evidence: 6,900 five-minute rows.
+- ES private OHLC evidence: 6,888 five-minute rows.
+- Repository Ruff and tests passed on Python 3.11 and 3.12.
+- Isolated Asia Sweep tests passed on Python 3.11 and 3.12.
+- Both private event-audit jobs passed source verification, reconstruction and no-P&L enforcement.
+- No execution simulation, P&L, optimization or variant selection was performed.
+
+### Known limits
+
+- No neutral post-entry execution adapter exists.
+- Same-minute collisions, gaps and time exits are not implemented.
+- CME futures timestamp, continuous-contract, roll, volume, cost and fill validation remain unresolved.
+- Provider authorization for future automated proxy acquisition remains unresolved.
+- The independent review is a same-session clean-room pass, not an external human audit.
+
+### Next
+
+- Freeze a neutral execution contract in a separate work package.
+- Add synthetic same-minute stop/target, entry-stop, gap and time-exit tests.
+- Reproduce the locked DTR benchmark before extracting shared execution utilities.
+- Keep all real-data P&L disabled until the execution package is independently reviewed and merged.
+
 ## v0.3.0 — 2026-07-23
 
 ### Added
@@ -134,7 +192,7 @@ The strategy cannot be evaluated honestly unless the range, signal path and sour
 
 ### Reason
 
-The Asia high/low sweep hypothesis is a distinct strategy, not a DTR filter or entry module. It therefore requires independent data, signals, tests, evidence and promotion decisions.
+The Asia high/low sweep hypothesis is a distinct strategy, not a DTR filter or entry module. It therefore requires independent data, signals, tests, manifests, reports, validation and promotion decisions.
 
 ### Validation
 
