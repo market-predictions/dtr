@@ -220,7 +220,12 @@ def main() -> None:
             "no_core_retuning": True,
             "no_deployment": True,
         },
-        "interpretation": "All calculations and promotion decisions reproduced from the saved trade streams. Independent bootstrap seeds are descriptive and do not convert retrospective USA500 development into out-of-sample evidence.",
+        "interpretation": (
+            "All calculations and promotion decisions reproduced from the saved "
+            "trade streams. Independent bootstrap seeds are descriptive and do "
+            "not convert retrospective USA500 development into out-of-sample "
+            "evidence."
+        ),
     }
     (args.out / "independent_review.json").write_text(
         json.dumps(review, indent=2), encoding="utf-8"

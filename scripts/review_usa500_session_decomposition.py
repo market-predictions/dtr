@@ -157,7 +157,11 @@ def main() -> None:
             "no_context_or_event_continuation_without_baseline": True,
             "no_core_retuning": True,
         },
-        "interpretation": "London-only is positive at one and two ticks but fails the frozen year-stability gate because 2022 and 2025 are negative. It remains diagnostic and is not a USA500 baseline.",
+        "interpretation": (
+            "London-only is positive at one and two ticks but fails the frozen "
+            "year-stability gate because 2022 and 2025 are negative. It remains "
+            "diagnostic and is not a USA500 baseline."
+        ),
     }
     (args.out / "stage1b_independent_review.json").write_text(
         json.dumps(review, indent=2), encoding="utf-8"
