@@ -1,9 +1,8 @@
 # Active Claim
 
-- Work package: `AS-WP-20260723-01`
-- Branch: `agent/asia-sweep-data-event-audit`
-- Pull request: `#24` (draft)
-- Claimed scope: causal data-integrity and event-audit foundation only
+- Work package: `AS-WP-20260723-02`
+- Branch: `agent/asia-sweep-dukascopy-proxy-registration`
+- Claimed scope: Dukascopy proxy acquisition, provenance and event-audit preparation
 - Started: 2026-07-23
-- Constraint: no P&L, no parameter tuning, no active DTR changes
-- Status: implementation complete; 25 isolated tests and both CI tracks passed; data-backed audit remains blocked by unavailable qualified NQ/ES files
+- Constraint: proxy/futures separation, no P&L, no parameter tuning, no active DTR changes
+- Status: acquisition workflow and deterministic preparation code committed; download run pending
