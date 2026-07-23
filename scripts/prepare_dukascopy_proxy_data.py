@@ -168,7 +168,8 @@ def _prepare(spec: ProxySpec, output_directory: Path) -> PreparedDataset:
     differences = timestamp_utc.diff().dropna()
     non_one_minute_gaps = int((differences != pd.Timedelta(minutes=1)).sum())
     if non_one_minute_gaps:
-        preview = ", ".join(differences[differences != pd.Timedelta(minutes=1)].astype(str)[:3])
+        abnormal = differences[differences != pd.Timedelta(minutes=1)]
+        preview = ", ".join(abnormal.astype(str).iloc[:3])
         raise ValueError(
             f"{spec.source_instrument} contains {non_one_minute_gaps} non-one-minute "
             f"adjacent gaps: {preview}"
@@ -292,8 +293,8 @@ def main() -> None:
         },
         "datasets": [asdict(item) for item in prepared],
     }
-    inventory_path = output_directory = args.output_root / "dukascopy_proxy_inventory.json"
-    output_directory.write_text(json.dumps(inventory, indent=2) + "\n")
+    inventory_path = args.output_root / "dukascopy_proxy_inventory.json"
+    inventory_path.write_text(json.dumps(inventory, indent=2) + "\n")
     print(json.dumps(inventory, indent=2))
 
 
