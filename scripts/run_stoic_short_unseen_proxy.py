@@ -15,8 +15,8 @@ from stoic_123_lab.short_proxy_source import (
     _load_partition as load_partition,
 )
 from stoic_123_lab.short_proxy_study import (
-    SHORT_PROXY_SPEC,
     _run_partition as run_partition,
+    SHORT_PROXY_SPEC,
 )
 
 FROZEN_PHASE1_SHA256 = "5d6909bd5740e1cdea9bd3d47a9818289a6faa8b9a61338726afdc53289ff805"
