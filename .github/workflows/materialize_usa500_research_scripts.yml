@@ -1,0 +1,41 @@
+name: Materialize USA500 research scripts
+
+on:
+  push:
+    branches:
+      - agent/usa500-baseline-discovery
+    paths:
+      - temporary/usa500_research_scripts.tar.gz.b64
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/usa500-baseline-discovery
+          fetch-depth: 0
+      - name: Decode research scripts
+        run: |
+          base64 --decode temporary/usa500_research_scripts.tar.gz.b64 > /tmp/usa500_scripts.tar.gz
+          tar -xzf /tmp/usa500_scripts.tar.gz
+          python -m py_compile \
+            scripts/run_usa500_baseline_discovery.py \
+            scripts/review_usa500_baseline_discovery.py \
+            scripts/run_usa500_session_decomposition.py \
+            scripts/review_usa500_session_decomposition.py
+      - name: Commit materialized scripts
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scripts/run_usa500_baseline_discovery.py \
+                  scripts/review_usa500_baseline_discovery.py \
+                  scripts/run_usa500_session_decomposition.py \
+                  scripts/review_usa500_session_decomposition.py
+          git rm temporary/usa500_research_scripts.tar.gz.b64
+          git rm .github/workflows/materialize_usa500_research_scripts.yml
+          git commit -m "Add reproducible USA500 research runners"
+          git push origin HEAD:agent/usa500-baseline-discovery
