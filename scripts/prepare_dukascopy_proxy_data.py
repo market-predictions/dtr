@@ -30,6 +30,8 @@ class PreparedDataset:
     source_instrument: str
     display_name: str
     source_files: tuple[str, ...]
+    downloaded_rows: int
+    zero_volume_rows_removed: int
     source_rows: int
     first_timestamp_utc: str
     last_timestamp_utc: str
@@ -52,10 +54,14 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def _find_csv_files(directory: Path) -> list[Path]:
-    files = sorted(directory.rglob("*.csv"))
+def _find_source_files(directory: Path) -> list[Path]:
+    files = sorted(
+        path
+        for path in directory.rglob("*")
+        if path.is_file() and (path.name.endswith(".csv") or path.name.endswith(".csv.gz"))
+    )
     if not files:
-        raise ValueError(f"Expected CSV files in {directory}")
+        raise ValueError(f"Expected CSV or CSV.GZ files in {directory}")
     return files
 
 
@@ -101,7 +107,7 @@ def _write_deterministic_zip(source: Path, destination: Path) -> None:
 
 
 def _read_sources(spec: ProxySpec) -> tuple[pd.DataFrame, tuple[str, ...]]:
-    sources = _find_csv_files(spec.raw_directory)
+    sources = _find_source_files(spec.raw_directory)
     frames: list[pd.DataFrame] = []
     source_names: list[str] = []
     for source in sources:
@@ -116,6 +122,14 @@ def _read_sources(spec: ProxySpec) -> tuple[pd.DataFrame, tuple[str, ...]]:
 
 def _prepare(spec: ProxySpec, output_directory: Path) -> PreparedDataset:
     frame, source_names = _read_sources(spec)
+    downloaded_rows = int(len(frame))
+    volume = pd.to_numeric(frame["volume"], errors="raise")
+    active_mask = volume > 0
+    zero_volume_rows_removed = int((~active_mask).sum())
+    frame = frame.loc[active_mask].reset_index(drop=True)
+    if frame.empty:
+        raise ValueError(f"{spec.source_instrument} has no positive-volume rows")
+
     timestamp_utc = _parse_utc_timestamps(frame["timestamp"])
     duplicate_count = int(timestamp_utc.duplicated(keep=False).sum())
     if duplicate_count:
@@ -151,8 +165,15 @@ def _prepare(spec: ProxySpec, output_directory: Path) -> PreparedDataset:
         }
     )
     normalized = normalized.sort_values("timestamp UTC").reset_index(drop=True)
-    if normalized.empty:
-        raise ValueError(f"{spec.source_instrument} produced no normalized rows")
+
+    invalid_ohlc = (
+        (normalized["high"] < normalized[["open", "close", "low"]].max(axis=1))
+        | (normalized["low"] > normalized[["open", "close", "high"]].min(axis=1))
+    )
+    if bool(invalid_ohlc.any()):
+        raise ValueError(
+            f"{spec.source_instrument} contains {int(invalid_ohlc.sum())} invalid OHLC rows"
+        )
 
     output_directory.mkdir(parents=True, exist_ok=True)
     csv_name = f"{spec.research_id}_M1_BID_UTC_ET.csv"
@@ -171,6 +192,8 @@ def _prepare(spec: ProxySpec, output_directory: Path) -> PreparedDataset:
         source_instrument=spec.source_instrument,
         display_name=spec.display_name,
         source_files=source_names,
+        downloaded_rows=downloaded_rows,
+        zero_volume_rows_removed=zero_volume_rows_removed,
         source_rows=int(len(normalized)),
         first_timestamp_utc=utc_series.iloc[0].isoformat(),
         last_timestamp_utc=utc_series.iloc[-1].isoformat(),
@@ -214,8 +237,8 @@ def main() -> None:
     prepared = [_prepare(spec, args.output_root) for spec in specs]
     inventory = {
         "purpose": "Asia Sweep proxy data registration; no P&L",
-        "provider": "Dukascopy public historical data API",
-        "downloader": "dukascopy-node",
+        "provider": "Dukascopy public static BI5 historical data feed",
+        "downloader": "scripts/download_dukascopy_static_proxy.py",
         "downloader_version": args.package_version,
         "date_from_argument": args.date_from,
         "date_to_argument": args.date_to,
@@ -223,9 +246,8 @@ def main() -> None:
         "price_type": "bid",
         "source_timezone": "UTC",
         "normalized_session_timezone": _ET_ZONE,
-        "include_volumes": True,
-        "volume_units": "units",
-        "include_flat_bars": True,
+        "volume_units": "feed_volume_scaled_to_units",
+        "zero_volume_rows_removed": True,
         "datasets": [asdict(item) for item in prepared],
     }
     inventory_path = args.output_root / "dukascopy_proxy_inventory.json"
