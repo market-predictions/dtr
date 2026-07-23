@@ -1,12 +1,18 @@
 from __future__ import annotations
 
+from datetime import time
+
 import numpy as np
 import pandas as pd
 
 from .backtest import simulate
 from .config import InstrumentSpec, SequenceConfig
 from .reporting import summarize
-from .validation_matching import _session_label
+
+
+def _session_label(timestamp: pd.Timestamp) -> str:
+    clock = timestamp.time()
+    return "RTH" if time(9, 30) <= clock < time(16, 0) else "OVERNIGHT"
 
 
 def delay_events(events: pd.DataFrame, minutes: int) -> pd.DataFrame:
@@ -40,6 +46,7 @@ def evaluate_trades(
             }
         )
         return result
+
     entry = pd.to_datetime(trades["entry_time"])
     exit_ = pd.to_datetime(trades["exit_time"])
     exposure_hours = float((exit_ - entry).dt.total_seconds().sum() / 3600)
@@ -47,7 +54,7 @@ def evaluate_trades(
     yearly = trades.assign(year=entry.dt.year).groupby("year")["pnl_r"].sum()
     monthly = trades.assign(month=entry.dt.to_period("M")).groupby("month")["pnl_r"].sum()
 
-    def share(series: pd.Series) -> float:
+    def positive_share(series: pd.Series) -> float:
         positive = series.clip(lower=0)
         total = float(positive.sum())
         return float(positive.max() / total) if total > 0 else np.nan
@@ -61,8 +68,8 @@ def evaluate_trades(
                 if exposure_hours > 0
                 else np.nan
             ),
-            "largest_positive_year_share": share(yearly),
-            "largest_positive_month_share": share(monthly),
+            "largest_positive_year_share": positive_share(yearly),
+            "largest_positive_month_share": positive_share(monthly),
         }
     )
     return result
@@ -98,8 +105,8 @@ def expanding_year_folds(trades: pd.DataFrame) -> pd.DataFrame:
         )
         rows.append(
             {
-                "train_through_year": test_year - 1,
-                "test_year": test_year,
+                "train_through_year": int(test_year) - 1,
+                "test_year": int(test_year),
                 **summary,
             }
         )
