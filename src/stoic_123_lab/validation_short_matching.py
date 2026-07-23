@@ -23,16 +23,37 @@ class _PreparedShortPools:
     broad: dict[tuple[object, ...], np.ndarray]
 
 
-_POOL_CACHE: dict[tuple[int, int, SequenceConfig], _PreparedShortPools] = {}
+_POOL_CACHE: dict[tuple[int, int, SequenceConfig, str, str], _PreparedShortPools] = {}
 
 
-def _session_label(timestamp: pd.Timestamp) -> str:
-    clock = timestamp.time()
+def _session_label(
+    timestamp: pd.Timestamp,
+    *,
+    source_timezone: str,
+    session_timezone: str,
+) -> str:
+    localized = pd.Timestamp(timestamp)
+    if localized.tzinfo is None:
+        localized = localized.tz_localize(source_timezone)
+    else:
+        localized = localized.tz_convert(source_timezone)
+    clock = localized.tz_convert(session_timezone).time()
     return "RTH" if time(9, 30) <= clock < time(16, 0) else "OVERNIGHT"
 
 
-def _half_hour_bucket(timestamp: pd.Timestamp) -> int:
-    return timestamp.hour * 2 + timestamp.minute // 30
+def _half_hour_bucket(
+    timestamp: pd.Timestamp,
+    *,
+    source_timezone: str,
+    session_timezone: str,
+) -> int:
+    localized = pd.Timestamp(timestamp)
+    if localized.tzinfo is None:
+        localized = localized.tz_localize(source_timezone)
+    else:
+        localized = localized.tz_convert(source_timezone)
+    clock = localized.tz_convert(session_timezone)
+    return clock.hour * 2 + clock.minute // 30
 
 
 def _stable_offset(
@@ -61,8 +82,11 @@ def _prepare_short_pools(
     execution_bars: pd.DataFrame,
     map_bars: pd.DataFrame,
     config: SequenceConfig,
+    *,
+    source_timezone: str,
+    session_timezone: str,
 ) -> _PreparedShortPools:
-    key = (id(execution_bars), id(map_bars), config)
+    key = (id(execution_bars), id(map_bars), config, source_timezone, session_timezone)
     cached = _POOL_CACHE.get(key)
     if cached is not None:
         return cached
@@ -73,8 +97,20 @@ def _prepare_short_pools(
     bars["year"] = bars["signal_time"].dt.year
     bars["month"] = bars["signal_time"].dt.month
     bars["weekday"] = bars["signal_time"].dt.weekday
-    bars["session"] = bars["signal_time"].map(_session_label)
-    bars["bucket"] = bars["signal_time"].map(_half_hour_bucket)
+    bars["session"] = bars["signal_time"].map(
+        lambda value: _session_label(
+            value,
+            source_timezone=source_timezone,
+            session_timezone=session_timezone,
+        )
+    )
+    bars["bucket"] = bars["signal_time"].map(
+        lambda value: _half_hour_bucket(
+            value,
+            source_timezone=source_timezone,
+            session_timezone=session_timezone,
+        )
+    )
     bars["map_allows"] = [
         _map_allows_short(int(ema), int(breakout), config)
         for ema, breakout in zip(
@@ -118,6 +154,8 @@ def matched_time_short_events(
     config: SequenceConfig,
     *,
     seed: int,
+    source_timezone: str = "UTC",
+    session_timezone: str = "America/New_York",
 ) -> pd.DataFrame:
     """Build deterministic short pseudo entries without using future returns."""
 
@@ -126,7 +164,13 @@ def matched_time_short_events(
         result.attrs["match_fraction"] = 0.0
         return result
 
-    prepared = _prepare_short_pools(execution_bars, map_bars, config)
+    prepared = _prepare_short_pools(
+        execution_bars,
+        map_bars,
+        config,
+        source_timezone=source_timezone,
+        session_timezone=session_timezone,
+    )
     bars = prepared.bars
     original_times = set(pd.to_datetime(full_events["signal_time"]))
     used: set[pd.Timestamp] = set()
@@ -138,8 +182,16 @@ def matched_time_short_events(
         if not np.isfinite(risk_width) or risk_width <= 0:
             continue
 
-        session = _session_label(original)
-        bucket = _half_hour_bucket(original)
+        session = _session_label(
+            original,
+            source_timezone=source_timezone,
+            session_timezone=session_timezone,
+        )
+        bucket = _half_hour_bucket(
+            original,
+            source_timezone=source_timezone,
+            session_timezone=session_timezone,
+        )
         candidate_pools = (
             prepared.exact.get(
                 (original.year, original.month, original.weekday(), session, bucket)
@@ -190,7 +242,7 @@ def matched_time_short_events(
         rows.append(
             _short_event_row(
                 arm_id=f"{config.arm_id}__MATCHED_SHORT",
-                model="ema_break",
+                model="matched_time",
                 step1_time=signal_time,
                 retest_time=None,
                 signal_time=signal_time,
