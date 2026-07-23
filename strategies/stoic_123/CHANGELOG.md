@@ -12,36 +12,40 @@
 - Cached resampling and indexed management exits.
 - Array-based detector engine with exact equivalence against the original state machine.
 - Four additional regression tests, bringing the dedicated total to fourteen.
-- Full GBPUSD 2022-2025 phase-one result and independent reconstruction package.
-- Canonical Drive data manifests for NQ proxy, ES proxy, and repaired GBPUSD.
+- Full GBPUSD, NQ-proxy, and ES-proxy phase-one result and independent reconstruction packages.
+- Canonical Drive data and result manifests for NQ proxy, ES proxy, and repaired GBPUSD.
 
 ### Changed
 
 - Replaced pandas row-by-row state iteration with an equivalent NumPy-backed state machine.
 - Replaced quadratic management-event lookup with sorted timestamp indexes.
 - Replaced concatenation-heavy bootstrap arithmetic with block sums and counts.
+- Split index-proxy execution into clean instrument-isolated runs to prevent transition-state resource pressure.
 - Preserved the frozen `phase1.yaml` byte-for-byte; SHA-256 remains `5d6909bd5740e1cdea9bd3d47a9818289a6faa8b9a61338726afdc53289ff805`.
 
 ### Reason
 
-GBPUSD requires true bid/ask execution rather than a futures-style fixed cost approximation. The original detector and inference loops also became operationally impractical on four years of minute data. The changes preserve strategy logic while making the study executable and auditable.
+GBPUSD requires true bid/ask execution rather than a futures-style fixed cost approximation. Four years of minute data also required equivalent array-based iteration and indexed lookups. Instrument-isolated runs preserve scientific separation and remove unnecessary peak-memory coupling.
 
 ### Result
 
-All six GBPUSD arms are `NO_EDGE`. Net expectancy ranges from -0.451R to -0.788R per trade. No parameter tuning or second-stage GBPUSD search is authorized.
+- GBPUSD: all six arms are `NO_EDGE`; expectancy ranges from -0.451R to -0.788R. Direct transfer is rejected.
+- NQ proxy: five arms are positive; the strict-close arm leads at 0.204R expectancy, but its 95% date-block interval crosses zero.
+- ES proxy: five arms are positive; EMA-plus-breakout leads at 0.115R and strict close produces 0.104R, but all intervals cross zero.
+- Cross-proxy conclusion: strict close is the strongest robustness candidate, not a validated strategy.
 
 ### Known limitations
 
 - GBPUSD is one Dukascopy spot-FX quote stream, not a broker-neutral consolidated tape.
 - NQ and ES proxy archives are bid-only CFDs, not CME futures.
 - Provider volume is not centralized futures volume.
-- The combined proxy phase-one run still requires a clean official execution package after the newly exposed transition-performance issue is resolved.
+- All positive proxy candidates remain statistically uncertain under date-block resampling.
 
 ### Next
 
-- Profile and resolve the proxy multi-source transition bottleneck without changing signal rules.
-- Execute clean, separate official NQ-proxy and ES-proxy phase-one packages.
-- Compare proxy results against the qualified NQ futures archive when mounted.
+- Execute preregistered nearby-definition, timeframe, chronology, and cost robustness tests.
+- Compare proxy findings against the qualified NQ futures archive when mounted.
+- Test mechanism value against simpler EMA-break and matched-entry controls.
 - Stop GBPUSD research unless a genuinely different mechanism is preregistered.
 
 ## v0.1.0-research — 2026-07-23
