@@ -11,7 +11,11 @@ import numpy as np
 import pandas as pd
 
 from dtr_lab.research import engine
-from dtr_lab.research.cross_market import USA500_PROXY_SPEC, build_covered_session_table, classify_proxy_gaps
+from dtr_lab.research.cross_market import (
+    USA500_PROXY_SPEC,
+    build_covered_session_table,
+    classify_proxy_gaps,
+)
 
 BASE_PATH = Path(__file__).with_name("run_usa500_baseline_discovery.py")
 spec = importlib.util.spec_from_file_location("usa500_base_program", BASE_PATH)
@@ -46,14 +50,28 @@ def main() -> None:
     one = base.load_proxy(args.usa500)
     gaps = classify_proxy_gaps(one)
     bars = base.attach_gap_metadata(engine.resample_5m(one), gaps)
-    sessions_raw = build_covered_session_table(one, bars, minimum_coverage=USA500_PROXY_SPEC.minimum_range_coverage)
+    sessions_raw = build_covered_session_table(
+        one, bars, minimum_coverage=USA500_PROXY_SPEC.minimum_range_coverage
+    )
     sessions = base.sanitize_sessions(sessions_raw, bars, gaps)
-    eligible = sessions.loc[~sessions["integrity_range_gap_rejected"]].copy().sort_values(["range_start", "session"])
-    cfg = replace(USA500_PROXY_SPEC.strategy_config(name="USA500_SESSION_DECOMPOSITION"), weekdays=(0, 1, 2, 3, 4), sessions=("LONDON_2AM", "NEW_YORK_9AM", "ASIA_7PM"))
+    eligible = (
+        sessions.loc[~sessions["integrity_range_gap_rejected"]]
+        .copy()
+        .sort_values(["range_start", "session"])
+    )
+    cfg = replace(
+        USA500_PROXY_SPEC.strategy_config(name="USA500_SESSION_DECOMPOSITION"),
+        weekdays=(0, 1, 2, 3, 4),
+        sessions=("LONDON_2AM", "NEW_YORK_9AM", "ASIA_7PM"),
+    )
     signals, funnel = engine.generate_signals(bars, eligible, cfg)
     cached = base.simulate_all(one, bars, signals, cfg, gaps)
-    features = pd.read_csv(args.prior / "signal_features.csv.gz", parse_dates=["session_date", "entry_time"])
-    if len(features) != len(signals) or not np.array_equal(features["signal_id"].to_numpy(int), np.arange(len(signals))):
+    features = pd.read_csv(
+        args.prior / "signal_features.csv.gz", parse_dates=["session_date", "entry_time"]
+    )
+    if len(features) != len(signals) or not np.array_equal(
+        features["signal_id"].to_numpy(int), np.arange(len(signals))
+    ):
         raise RuntimeError("signal cache does not match frozen Stage 1 features")
 
     session_arms = {
@@ -71,18 +89,46 @@ def main() -> None:
         mask = features["weekday"].isin(weekdays) & features["session"].isin(allowed)
         trades = base.sequence(features, cached, mask)
         trades_by_arm[arm] = trades
-        summary = base.summarize(trades, arm, base.eligible_count(eligible, weekdays, allowed), int(mask.sum()), cfg.tick_size)
-        summary.update(base.block_bootstrap(trades, "date", args.iterations, args.seed + 10 + index))
+        summary = base.summarize(
+            trades,
+            arm,
+            base.eligible_count(eligible, weekdays, allowed),
+            int(mask.sum()),
+            cfg.tick_size,
+        )
+        summary.update(
+            base.block_bootstrap(trades, "date", args.iterations, args.seed + 10 + index)
+        )
         rows.append(summary)
     table = pd.DataFrame(rows)
     baseline = table.loc[table["arm"] == "S0_ALL"].iloc[0]
     for index, row in table.iterrows():
         arm = row["arm"]
         if arm == "S0_ALL":
-            paired = {"observed_net_difference_r": 0.0, "lo95_net_difference_r": 0.0, "hi95_net_difference_r": 0.0, "prob_net_difference_positive": np.nan}
-            flags = {key: True for key in ("gate_cost", "gate_return_dd", "gate_years", "gate_sample", "gate_concentration", "gate_paired_mean")}
+            paired = {
+                "observed_net_difference_r": 0.0,
+                "lo95_net_difference_r": 0.0,
+                "hi95_net_difference_r": 0.0,
+                "prob_net_difference_positive": np.nan,
+            }
+            flags = {
+                key: True
+                for key in (
+                    "gate_cost",
+                    "gate_return_dd",
+                    "gate_years",
+                    "gate_sample",
+                    "gate_concentration",
+                    "gate_paired_mean",
+                )
+            }
         else:
-            paired = base.paired_date_bootstrap(trades_by_arm[arm], trades_by_arm["S0_ALL"], args.iterations, args.seed + 100 + index)
+            paired = base.paired_date_bootstrap(
+                trades_by_arm[arm],
+                trades_by_arm["S0_ALL"],
+                args.iterations,
+                args.seed + 100 + index,
+            )
             for key, value in paired.items():
                 table.loc[index, key] = value
             combined = row.to_dict()
@@ -93,22 +139,41 @@ def main() -> None:
         for key, value in flags.items():
             table.loc[index, key] = value
         table.loc[index, "gate_all"] = all(flags.values())
-        table.loc[index, "uncertainty_class"] = "SUPPORTED" if paired["lo95_net_difference_r"] > 0 else "EXPLORATORY" if paired["observed_net_difference_r"] > 0 else "NOT_BETTER"
+        table.loc[index, "uncertainty_class"] = (
+            "SUPPORTED"
+            if paired["lo95_net_difference_r"] > 0
+            else "EXPLORATORY"
+            if paired["observed_net_difference_r"] > 0
+            else "NOT_BETTER"
+        )
 
     passing = table.loc[(table["arm"] != "S0_ALL") & table["gate_all"]]
-    selected_session = None if passing.empty else passing.sort_values(["return_dd", "two_tick_expectancy_r", "net_r"], ascending=False).iloc[0]["arm"]
+    selected_session = (
+        None
+        if passing.empty
+        else passing.sort_values(
+            ["return_dd", "two_tick_expectancy_r", "net_r"], ascending=False
+        ).iloc[0]["arm"]
+    )
 
     context_table = pd.DataFrame()
     event_table = pd.DataFrame()
     selected_context = None
     selected_event = None
     if selected_session is not None:
-        session_mask = features["weekday"].isin(weekdays) & features["session"].isin(session_arms[selected_session])
+        session_mask = features["weekday"].isin(weekdays) & features["session"].isin(
+            session_arms[selected_session]
+        )
         session_trades = trades_by_arm[selected_session]
         context_masks = {
             "C0_SESSION_BASELINE": session_mask,
-            "C1_EXCLUDE_COMPRESSED_RANGE": session_mask & (features["range_percentile"].isna() | (features["range_percentile"] >= 1 / 3)),
-            "C2_EXCLUDE_NEAR_PRIOR_DAY_EXTREME": session_mask & (features["directional_extreme_distance_atr"].isna() | (features["directional_extreme_distance_atr"] > 0.25)),
+            "C1_EXCLUDE_COMPRESSED_RANGE": session_mask
+            & (features["range_percentile"].isna() | (features["range_percentile"] >= 1 / 3)),
+            "C2_EXCLUDE_NEAR_PRIOR_DAY_EXTREME": session_mask
+            & (
+                features["directional_extreme_distance_atr"].isna()
+                | (features["directional_extreme_distance_atr"] > 0.25)
+            ),
             "C3_PATH_LE_12_BARS": session_mask & (features["sweep_to_entry_bars"] <= 12),
             "C4_ENTRY_EXTENSION_LE_0_35R": session_mask & (features["entry_extension_r"] <= 0.35),
             "C5_BOS_QUALITY_2_OF_3": session_mask & (features["bos_quality_score"] >= 2),
@@ -119,42 +184,125 @@ def main() -> None:
         for index, (arm, mask) in enumerate(context_masks.items()):
             trades = base.sequence(features, cached, mask)
             context_trades[arm] = trades
-            summary = base.summarize(trades, arm, base.eligible_count(eligible, weekdays, session_arms[selected_session]), int(mask.sum()), cfg.tick_size)
-            paired = {"observed_net_difference_r": 0.0, "lo95_net_difference_r": 0.0, "hi95_net_difference_r": 0.0, "prob_net_difference_positive": np.nan} if arm == "C0_SESSION_BASELINE" else base.paired_date_bootstrap(trades, session_trades, args.iterations, args.seed + 200 + index)
+            summary = base.summarize(
+                trades,
+                arm,
+                base.eligible_count(eligible, weekdays, session_arms[selected_session]),
+                int(mask.sum()),
+                cfg.tick_size,
+            )
+            paired = (
+                {
+                    "observed_net_difference_r": 0.0,
+                    "lo95_net_difference_r": 0.0,
+                    "hi95_net_difference_r": 0.0,
+                    "prob_net_difference_positive": np.nan,
+                }
+                if arm == "C0_SESSION_BASELINE"
+                else base.paired_date_bootstrap(
+                    trades, session_trades, args.iterations, args.seed + 200 + index
+                )
+            )
             summary.update(paired)
             context_rows.append(summary)
         context_table = pd.DataFrame(context_rows)
         context_baseline = context_table.loc[context_table["arm"] == "C0_SESSION_BASELINE"].iloc[0]
         for index, row in context_table.iterrows():
-            flags = {key: True for key in ("gate_retention", "gate_cost", "gate_return_dd", "gate_years", "gate_paired_mean")} if row["arm"] == "C0_SESSION_BASELINE" else base.gate_stage2(row, context_baseline)
+            flags = (
+                {
+                    key: True
+                    for key in (
+                        "gate_retention",
+                        "gate_cost",
+                        "gate_return_dd",
+                        "gate_years",
+                        "gate_paired_mean",
+                    )
+                }
+                if row["arm"] == "C0_SESSION_BASELINE"
+                else base.gate_stage2(row, context_baseline)
+            )
             for key, value in flags.items():
                 context_table.loc[index, key] = value
             context_table.loc[index, "gate_all"] = all(flags.values())
-            context_table.loc[index, "uncertainty_class"] = "SUPPORTED" if row["lo95_net_difference_r"] > 0 else "EXPLORATORY" if row["observed_net_difference_r"] > 0 else "NOT_BETTER"
-        passing_context = context_table.loc[(context_table["arm"] != "C0_SESSION_BASELINE") & context_table["gate_all"]]
-        selected_context = "C0_SESSION_BASELINE" if passing_context.empty else passing_context.sort_values(["return_dd", "two_tick_expectancy_r", "net_r"], ascending=False).iloc[0]["arm"]
+            context_table.loc[index, "uncertainty_class"] = (
+                "SUPPORTED"
+                if row["lo95_net_difference_r"] > 0
+                else "EXPLORATORY"
+                if row["observed_net_difference_r"] > 0
+                else "NOT_BETTER"
+            )
+        passing_context = context_table.loc[
+            (context_table["arm"] != "C0_SESSION_BASELINE") & context_table["gate_all"]
+        ]
+        selected_context = (
+            "C0_SESSION_BASELINE"
+            if passing_context.empty
+            else passing_context.sort_values(
+                ["return_dd", "two_tick_expectancy_r", "net_r"], ascending=False
+            ).iloc[0]["arm"]
+        )
         selected_mask = context_masks[selected_context]
         selected_trades = context_trades[selected_context]
 
         event_rows = []
         event_trades: dict[str, pd.DataFrame] = {"E0_CONTEXT_BASELINE": selected_trades}
-        base_summary = base.summarize(selected_trades, "E0_CONTEXT_BASELINE", base.eligible_count(eligible, weekdays, session_arms[selected_session]), int(selected_mask.sum()), cfg.tick_size)
-        base_summary.update({"observed_net_difference_r": 0.0, "lo95_net_difference_r": 0.0, "hi95_net_difference_r": 0.0, "prob_net_difference_positive": np.nan})
+        base_summary = base.summarize(
+            selected_trades,
+            "E0_CONTEXT_BASELINE",
+            base.eligible_count(eligible, weekdays, session_arms[selected_session]),
+            int(selected_mask.sum()),
+            cfg.tick_size,
+        )
+        base_summary.update(
+            {
+                "observed_net_difference_r": 0.0,
+                "lo95_net_difference_r": 0.0,
+                "hi95_net_difference_r": 0.0,
+                "prob_net_difference_positive": np.nan,
+            }
+        )
         event_rows.append(base_summary)
         for index, (event_name, event_mask) in enumerate(base.event_masks(features).items()):
             arm = f"E_{event_name}"
             trades = base.sequence(features, cached, selected_mask & event_mask)
             event_trades[arm] = trades
-            summary = base.summarize(trades, arm, base.eligible_count(eligible, weekdays, session_arms[selected_session]), int((selected_mask & event_mask).sum()), cfg.tick_size)
-            summary.update(base.paired_date_bootstrap(trades, selected_trades, args.iterations, args.seed + 300 + index))
-            changed = base.changed_attribution(selected_trades, trades, f"{selected_context}->{arm}")
-            flags = base.event_gate(selected_trades, trades, pd.Series(summary), pd.Series(base_summary), changed)
+            summary = base.summarize(
+                trades,
+                arm,
+                base.eligible_count(eligible, weekdays, session_arms[selected_session]),
+                int((selected_mask & event_mask).sum()),
+                cfg.tick_size,
+            )
+            summary.update(
+                base.paired_date_bootstrap(
+                    trades, selected_trades, args.iterations, args.seed + 300 + index
+                )
+            )
+            changed = base.changed_attribution(
+                selected_trades, trades, f"{selected_context}->{arm}"
+            )
+            flags = base.event_gate(
+                selected_trades, trades, pd.Series(summary), pd.Series(base_summary), changed
+            )
             summary.update(flags)
-            summary["gate_all"] = all(flags.values()) and summary["one_tick_expectancy_r"] > 0 and summary["two_tick_expectancy_r"] > 0
+            summary["gate_all"] = (
+                all(flags.values())
+                and summary["one_tick_expectancy_r"] > 0
+                and summary["two_tick_expectancy_r"] > 0
+            )
             event_rows.append(summary)
         event_table = pd.DataFrame(event_rows)
-        passing_events = event_table.loc[(event_table["arm"] != "E0_CONTEXT_BASELINE") & event_table["gate_all"].fillna(False)]
-        selected_event = "E0_CONTEXT_BASELINE" if passing_events.empty else passing_events.sort_values(["return_dd", "two_tick_expectancy_r", "net_r"], ascending=False).iloc[0]["arm"]
+        passing_events = event_table.loc[
+            (event_table["arm"] != "E0_CONTEXT_BASELINE") & event_table["gate_all"].fillna(False)
+        ]
+        selected_event = (
+            "E0_CONTEXT_BASELINE"
+            if passing_events.empty
+            else passing_events.sort_values(
+                ["return_dd", "two_tick_expectancy_r", "net_r"], ascending=False
+            ).iloc[0]["arm"]
+        )
 
         for arm, trades in {**context_trades, **event_trades}.items():
             trades.to_csv(args.out / f"{arm}__trades.csv", index=False)
@@ -162,7 +310,9 @@ def main() -> None:
     all_cached = []
     for signal_id, trade in cached.items():
         all_cached.append({"signal_id": signal_id, **base.asdict(trade)})
-    pd.DataFrame(all_cached).to_csv(args.out / "all_signal_trades.csv.gz", index=False, compression="gzip")
+    pd.DataFrame(all_cached).to_csv(
+        args.out / "all_signal_trades.csv.gz", index=False, compression="gzip"
+    )
     for arm, trades in trades_by_arm.items():
         trades.to_csv(args.out / f"{arm}__trades.csv", index=False)
     table.to_csv(args.out / "stage1b_session_decomposition.csv", index=False)
@@ -178,16 +328,67 @@ def main() -> None:
         "selected_session": selected_session,
         "selected_context": selected_context,
         "selected_event": selected_event,
-        "decision": "NO_VIABLE_USA500_CORE_BASELINE" if selected_session is None else "EXPLORATORY_USA500_SESSION_CANDIDATE",
+        "decision": "NO_VIABLE_USA500_CORE_BASELINE"
+        if selected_session is None
+        else "EXPLORATORY_USA500_SESSION_CANDIDATE",
         "no_deployment_authorization": True,
     }
-    (args.out / "stage1b_decision.json").write_text(json.dumps(decision, indent=2), encoding="utf-8")
+    (args.out / "stage1b_decision.json").write_text(
+        json.dumps(decision, indent=2), encoding="utf-8"
+    )
     print(json.dumps(decision, indent=2))
-    print(table[["arm", "trades", "net_r", "expectancy_r", "two_tick_expectancy_r", "max_drawdown_r", "return_dd", "net_2022", "net_2023", "net_2024", "net_2025", "gate_all", "uncertainty_class"]].to_string(index=False))
+    print(
+        table[
+            [
+                "arm",
+                "trades",
+                "net_r",
+                "expectancy_r",
+                "two_tick_expectancy_r",
+                "max_drawdown_r",
+                "return_dd",
+                "net_2022",
+                "net_2023",
+                "net_2024",
+                "net_2025",
+                "gate_all",
+                "uncertainty_class",
+            ]
+        ].to_string(index=False)
+    )
     if not context_table.empty:
-        print("\nCONTEXT\n", context_table[["arm", "trades", "net_r", "expectancy_r", "two_tick_expectancy_r", "max_drawdown_r", "return_dd", "gate_all", "uncertainty_class"]].to_string(index=False))
+        print(
+            "\nCONTEXT\n",
+            context_table[
+                [
+                    "arm",
+                    "trades",
+                    "net_r",
+                    "expectancy_r",
+                    "two_tick_expectancy_r",
+                    "max_drawdown_r",
+                    "return_dd",
+                    "gate_all",
+                    "uncertainty_class",
+                ]
+            ].to_string(index=False),
+        )
     if not event_table.empty:
-        print("\nEVENTS\n", event_table[["arm", "trades", "net_r", "expectancy_r", "two_tick_expectancy_r", "max_drawdown_r", "return_dd", "gate_all"]].to_string(index=False))
+        print(
+            "\nEVENTS\n",
+            event_table[
+                [
+                    "arm",
+                    "trades",
+                    "net_r",
+                    "expectancy_r",
+                    "two_tick_expectancy_r",
+                    "max_drawdown_r",
+                    "return_dd",
+                    "gate_all",
+                ]
+            ].to_string(index=False),
+        )
 
 
 if __name__ == "__main__":

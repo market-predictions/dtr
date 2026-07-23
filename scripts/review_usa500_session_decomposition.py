@@ -19,7 +19,9 @@ ARMS = {
 
 
 def sequence(features: pd.DataFrame, cache: pd.DataFrame, allowed: tuple[str, ...]) -> pd.DataFrame:
-    selected = features.loc[features["weekday"].isin((1, 2, 3, 4)) & features["session"].isin(allowed)].sort_values("entry_time")
+    selected = features.loc[
+        features["weekday"].isin((1, 2, 3, 4)) & features["session"].isin(allowed)
+    ].sort_values("entry_time")
     records = cache.set_index("signal_id")
     rows = []
     next_free = pd.Timestamp.min
@@ -57,14 +59,19 @@ def metrics(frame: pd.DataFrame) -> dict[str, float | int]:
     }
 
 
-def paired(candidate: pd.DataFrame, baseline: pd.DataFrame, iterations: int, seed: int) -> dict[str, float]:
+def paired(
+    candidate: pd.DataFrame, baseline: pd.DataFrame, iterations: int, seed: int
+) -> dict[str, float]:
     def blocks(frame: pd.DataFrame) -> pd.Series:
         date = pd.to_datetime(frame["session_date"]).dt.normalize()
         return frame.assign(block=date).groupby("block")["pnl_r"].sum()
+
     left = blocks(candidate)
     right = blocks(baseline)
     index = left.index.union(right.index)
-    values = (left.reindex(index, fill_value=0.0) - right.reindex(index, fill_value=0.0)).to_numpy(float)
+    values = (left.reindex(index, fill_value=0.0) - right.reindex(index, fill_value=0.0)).to_numpy(
+        float
+    )
     rng = np.random.default_rng(seed)
     samples = rng.choice(values, size=(iterations, len(values)), replace=True).sum(axis=1)
     return {
@@ -86,7 +93,10 @@ def main() -> None:
     args.out.mkdir(parents=True, exist_ok=True)
 
     features = pd.read_csv(args.features, parse_dates=["entry_time", "session_date"])
-    cache = pd.read_csv(args.results / "all_signal_trades.csv.gz", parse_dates=["entry_time", "exit_time", "session_date"])
+    cache = pd.read_csv(
+        args.results / "all_signal_trades.csv.gz",
+        parse_dates=["entry_time", "exit_time", "session_date"],
+    )
     reported = pd.read_csv(args.results / "stage1b_session_decomposition.csv")
     decision = json.loads((args.results / "stage1b_decision.json").read_text())
 
@@ -94,8 +104,12 @@ def main() -> None:
         "arm_contract": set(reported["arm"]) == set(ARMS),
         "selected_session_is_none": decision["selected_session"] is None,
         "decision_no_viable_baseline": decision["decision"] == "NO_VIABLE_USA500_CORE_BASELINE",
-        "no_context_run_after_failed_gate": not (args.results / "stage2_session_context_candidates.csv").exists(),
-        "no_event_run_after_failed_gate": not (args.results / "stage3_session_event_candidates.csv").exists(),
+        "no_context_run_after_failed_gate": not (
+            args.results / "stage2_session_context_candidates.csv"
+        ).exists(),
+        "no_event_run_after_failed_gate": not (
+            args.results / "stage3_session_event_candidates.csv"
+        ).exists(),
         "deployment_blocked": bool(decision["no_deployment_authorization"]),
     }
 
@@ -107,7 +121,9 @@ def main() -> None:
         values = metrics(frame)
         source = reported.loc[reported["arm"] == arm].iloc[0]
         for key in ("trades", "net_r", "expectancy_r", "max_drawdown_r", "return_dd"):
-            if not np.isclose(float(values[key]), float(source[key]), atol=1e-9, rtol=0, equal_nan=True):
+            if not np.isclose(
+                float(values[key]), float(source[key]), atol=1e-9, rtol=0, equal_nan=True
+            ):
                 raise AssertionError(f"{arm}/{key}: {values[key]} != {source[key]}")
         rows.append({"arm": arm, **values})
     checks["all_trade_streams_resequenced"] = True
@@ -124,7 +140,9 @@ def main() -> None:
         bootstrap_rows.append({"arm": arm, **result})
     checks["paired_effects_reproduced"] = True
 
-    nonbaseline_passes = bool(reported.loc[reported["arm"] != "S0_ALL", "gate_all"].fillna(False).any())
+    nonbaseline_passes = bool(
+        reported.loc[reported["arm"] != "S0_ALL", "gate_all"].fillna(False).any()
+    )
     checks["stop_rule_followed"] = not nonbaseline_passes
     conclusion = "INDEPENDENT_REVIEW_PASS" if all(checks.values()) else "INDEPENDENT_REVIEW_FAIL"
     review = {
@@ -141,7 +159,9 @@ def main() -> None:
         },
         "interpretation": "London-only is positive at one and two ticks but fails the frozen year-stability gate because 2022 and 2025 are negative. It remains diagnostic and is not a USA500 baseline.",
     }
-    (args.out / "stage1b_independent_review.json").write_text(json.dumps(review, indent=2), encoding="utf-8")
+    (args.out / "stage1b_independent_review.json").write_text(
+        json.dumps(review, indent=2), encoding="utf-8"
+    )
     pd.DataFrame(rows).to_csv(args.out / "stage1b_independent_metrics.csv", index=False)
     pd.DataFrame(bootstrap_rows).to_csv(args.out / "stage1b_independent_bootstrap.csv", index=False)
     print(json.dumps(review, indent=2))

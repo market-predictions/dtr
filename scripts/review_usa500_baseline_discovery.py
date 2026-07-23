@@ -64,10 +64,13 @@ def metrics(path: Path) -> dict[str, float | int]:
     }
 
 
-def paired(candidate: pd.DataFrame, baseline: pd.DataFrame, *, iterations: int, seed: int) -> dict[str, float]:
+def paired(
+    candidate: pd.DataFrame, baseline: pd.DataFrame, *, iterations: int, seed: int
+) -> dict[str, float]:
     def block(frame: pd.DataFrame) -> pd.Series:
         dates = pd.to_datetime(frame["session_date"]).dt.normalize()
         return frame.assign(block=dates).groupby("block")["pnl_r"].sum()
+
     left = block(candidate)
     right = block(baseline)
     index = left.index.union(right.index).sort_values()
@@ -106,10 +109,14 @@ def main() -> None:
     checks["stage1_arm_contract"] = set(stage1["arm"]) == EXPECTED_STAGE1
     checks["stage2_candidate_contract"] = set(stage2["arm"]) == EXPECTED_STAGE2
     checks["stage3_event_contract"] = set(stage3["arm"]) == EXPECTED_STAGE3
-    checks["classification_is_exploratory"] = decision["classification"] == "EXPLORATORY_RETROSPECTIVE_USA500_CANDIDATE"
+    checks["classification_is_exploratory"] = (
+        decision["classification"] == "EXPLORATORY_RETROSPECTIVE_USA500_CANDIDATE"
+    )
     checks["deployment_blocked"] = bool(decision["no_deployment_authorization"])
     checks["nq_controls_retained"] = len(decision.get("nq_transfer_controls", [])) >= 2
-    checks["no_interaction_arm"] = not any("AND" in arm or "INTERACTION" in arm for arm in stage2["arm"])
+    checks["no_interaction_arm"] = not any(
+        "AND" in arm or "INTERACTION" in arm for arm in stage2["arm"]
+    )
 
     metric_rows = []
     for table_name, table in (("stage1", stage1), ("stage2", stage2), ("stage3", stage3)):
@@ -117,7 +124,11 @@ def main() -> None:
             trade_path = args.results / f"{row.arm}__trades.csv"
             independent = metrics(trade_path)
             for key in ("trades", "net_r", "expectancy_r", "max_drawdown_r", "return_dd"):
-                assert_close(float(independent[key]), float(getattr(row, key)), f"{table_name}/{row.arm}/{key}")
+                assert_close(
+                    float(independent[key]),
+                    float(getattr(row, key)),
+                    f"{table_name}/{row.arm}/{key}",
+                )
             metric_rows.append({"stage": table_name, "arm": row.arm, **independent})
     checks["all_metrics_reproduced"] = True
 
@@ -129,7 +140,9 @@ def main() -> None:
             continue
         candidate = pd.read_csv(args.results / f"{arm}__trades.csv")
         result = paired(candidate, p0, iterations=args.iterations, seed=args.seed + index)
-        assert_close(result["observed"], float(row["observed_net_difference_r"]), f"stage1/{arm}/observed")
+        assert_close(
+            result["observed"], float(row["observed_net_difference_r"]), f"stage1/{arm}/observed"
+        )
         independent_pairs.append({"stage": "stage1", "arm": arm, **result})
 
     selected_calendar = decision["selected_calendar"]
@@ -139,8 +152,12 @@ def main() -> None:
         if arm == "C0_CALENDAR_BASELINE":
             continue
         candidate = pd.read_csv(args.results / f"{arm}__trades.csv")
-        result = paired(candidate, calendar, iterations=args.iterations, seed=args.seed + 100 + index)
-        assert_close(result["observed"], float(row["observed_net_difference_r"]), f"stage2/{arm}/observed")
+        result = paired(
+            candidate, calendar, iterations=args.iterations, seed=args.seed + 100 + index
+        )
+        assert_close(
+            result["observed"], float(row["observed_net_difference_r"]), f"stage2/{arm}/observed"
+        )
         independent_pairs.append({"stage": "stage2", "arm": arm, **result})
 
     selected_context = decision["selected_context"]
@@ -150,25 +167,41 @@ def main() -> None:
         if arm == "E0_CONTEXT_BASELINE":
             continue
         candidate = pd.read_csv(args.results / f"{arm}__trades.csv")
-        result = paired(candidate, context, iterations=args.iterations, seed=args.seed + 200 + index)
-        assert_close(result["observed"], float(row["observed_net_difference_r"]), f"stage3/{arm}/observed")
+        result = paired(
+            candidate, context, iterations=args.iterations, seed=args.seed + 200 + index
+        )
+        assert_close(
+            result["observed"], float(row["observed_net_difference_r"]), f"stage3/{arm}/observed"
+        )
         independent_pairs.append({"stage": "stage3", "arm": arm, **result})
     checks["paired_observed_effects_reproduced"] = True
 
     # Selection audit: the selected arm must either be baseline or have all declared gates true.
     if selected_calendar == "P0_TUE_FRI_ALL":
-        checks["calendar_selection_gate_compliant"] = not bool(stage1.loc[stage1["arm"] != "P0_TUE_FRI_ALL", "gate_all"].any())
+        checks["calendar_selection_gate_compliant"] = not bool(
+            stage1.loc[stage1["arm"] != "P0_TUE_FRI_ALL", "gate_all"].any()
+        )
     else:
-        checks["calendar_selection_gate_compliant"] = bool(stage1.loc[stage1["arm"] == selected_calendar, "gate_all"].iloc[0])
+        checks["calendar_selection_gate_compliant"] = bool(
+            stage1.loc[stage1["arm"] == selected_calendar, "gate_all"].iloc[0]
+        )
     if selected_context == "C0_CALENDAR_BASELINE":
-        checks["context_selection_gate_compliant"] = not bool(stage2.loc[stage2["arm"] != "C0_CALENDAR_BASELINE", "gate_all"].any())
+        checks["context_selection_gate_compliant"] = not bool(
+            stage2.loc[stage2["arm"] != "C0_CALENDAR_BASELINE", "gate_all"].any()
+        )
     else:
-        checks["context_selection_gate_compliant"] = bool(stage2.loc[stage2["arm"] == selected_context, "gate_all"].iloc[0])
+        checks["context_selection_gate_compliant"] = bool(
+            stage2.loc[stage2["arm"] == selected_context, "gate_all"].iloc[0]
+        )
     selected_event = decision["selected_event"]
     if selected_event == "E0_CONTEXT_BASELINE":
-        checks["event_selection_gate_compliant"] = not bool(stage3.loc[stage3["arm"] != "E0_CONTEXT_BASELINE", "gate_all"].fillna(False).any())
+        checks["event_selection_gate_compliant"] = not bool(
+            stage3.loc[stage3["arm"] != "E0_CONTEXT_BASELINE", "gate_all"].fillna(False).any()
+        )
     else:
-        checks["event_selection_gate_compliant"] = bool(stage3.loc[stage3["arm"] == selected_event, "gate_all"].iloc[0])
+        checks["event_selection_gate_compliant"] = bool(
+            stage3.loc[stage3["arm"] == selected_event, "gate_all"].iloc[0]
+        )
 
     conclusion = "INDEPENDENT_REVIEW_PASS" if all(checks.values()) else "INDEPENDENT_REVIEW_FAIL"
     review = {
@@ -189,11 +222,17 @@ def main() -> None:
         },
         "interpretation": "All calculations and promotion decisions reproduced from the saved trade streams. Independent bootstrap seeds are descriptive and do not convert retrospective USA500 development into out-of-sample evidence.",
     }
-    (args.out / "independent_review.json").write_text(json.dumps(review, indent=2), encoding="utf-8")
+    (args.out / "independent_review.json").write_text(
+        json.dumps(review, indent=2), encoding="utf-8"
+    )
     pd.DataFrame(metric_rows).to_csv(args.out / "independent_metrics.csv", index=False)
-    pd.DataFrame(independent_pairs).to_csv(args.out / "independent_paired_bootstrap.csv", index=False)
+    pd.DataFrame(independent_pairs).to_csv(
+        args.out / "independent_paired_bootstrap.csv", index=False
+    )
     hashes = {path.name: sha256(path) for path in sorted(args.results.iterdir()) if path.is_file()}
-    (args.out / "reviewed_artifact_hashes.json").write_text(json.dumps(hashes, indent=2), encoding="utf-8")
+    (args.out / "reviewed_artifact_hashes.json").write_text(
+        json.dumps(hashes, indent=2), encoding="utf-8"
+    )
     print(json.dumps(review, indent=2))
 
 
