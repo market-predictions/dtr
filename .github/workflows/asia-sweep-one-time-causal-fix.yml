@@ -1,0 +1,95 @@
+name: One-time Auction-State Causal Fix
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/asia-sweep-one-time-causal-fix.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  patch-and-remove:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          show-progress: false
+
+      - name: Apply exact causal corrections
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("src/dtr_lab/strategies/asia_sweep/auction_state.py")
+          text = path.read_text()
+
+          old_opposite = '''    if first_side == "UP":
+              opposite = bars.iloc[first_index : decision_end + 1]
+              opposite = opposite[opposite["low"] < low]
+          else:
+              opposite = bars.iloc[first_index : decision_end + 1]
+              opposite = opposite[opposite["high"] > high]
+          opposite_index = int(opposite.index[0]) if not opposite.empty else None
+
+          candidates = [
+              index
+              for index in (acceptance_index, rejection_index)
+              if index is not None
+          ]
+          detection_index = min(candidates) if candidates else decision_end
+          '''
+          new_opposite = '''    candidates = [
+              index
+              for index in (acceptance_index, rejection_index)
+              if index is not None
+          ]
+          detection_index = min(candidates) if candidates else decision_end
+          if first_side == "UP":
+              opposite = bars.iloc[first_index : detection_index + 1]
+              opposite = opposite[opposite["low"] < low]
+          else:
+              opposite = bars.iloc[first_index : detection_index + 1]
+              opposite = opposite[opposite["high"] > high]
+          opposite_index = int(opposite.index[0]) if not opposite.empty else None
+          '''
+          old_path = '''    path = minutes.loc[
+              (minutes.index >= anchor_timestamp)
+              & (minutes.index <= window_end)
+              & (minutes["is_active_quote"] > 0)
+          ]
+          '''
+          new_path = '''    path = minutes.loc[
+              (minutes.index >= anchor_timestamp)
+              & (minutes.index < window_end)
+              & (minutes["is_active_quote"] > 0)
+          ]
+          '''
+          old_horizon = '        subset = path.loc[path.index <= horizon_end]\n'
+          new_horizon = '        subset = path.loc[path.index < horizon_end]\n'
+
+          for old, new, name in (
+              (old_opposite, new_opposite, "opposite-side horizon"),
+              (old_path, new_path, "session half-open path"),
+              (old_horizon, new_horizon, "fixed-horizon endpoint"),
+          ):
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f"expected one {name} snippet, found {count}")
+              text = text.replace(old, new)
+
+          path.write_text(text)
+          Path(".github/workflows/asia-sweep-one-time-causal-fix.yml").unlink()
+          PY
+
+      - name: Commit exact corrections
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/dtr_lab/strategies/asia_sweep/auction_state.py \
+            .github/workflows/asia-sweep-one-time-causal-fix.yml
+          git commit -m "Correct auction-state causal horizons"
+          git push origin HEAD:${{ github.head_ref }}
