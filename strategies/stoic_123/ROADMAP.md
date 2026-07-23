@@ -7,64 +7,68 @@ Status: **complete**
 - [x] Create a separate branch, namespace, runner, governance tree, and result contract.
 - [x] Preserve all DTR baselines and signal code unchanged.
 - [x] Freeze the six-arm phase-one family before performance inspection.
-- [x] Label USA500 as `ES_PROXY`, not CME ES futures.
+- [x] Keep proxy and futures identities explicit.
 
 ## Phase 1 — Mechanical baseline engine
 
-Status: **complete; data execution pending**
+Status: **complete**
 
 - [x] Implement close-based Step 1 beyond EMA 10/20.
-- [x] Implement retest logic and a causal post-retest base.
-- [x] Lock the Step-2 boundary before any Step-3 bar.
-- [x] Implement close-confirmed Step 3 and next-open execution.
-- [x] Implement protective stop, gap liquidation, single-position sequencing, and costs.
+- [x] Implement causal retest, post-retest base, frozen boundary, and Step 3.
+- [x] Implement next-open execution, protective stop, gap liquidation, costs, and sequencing.
 - [x] Implement opposite complete 1-2-3 management exit.
-- [x] Add synthetic tests and independent trade-ledger reconstruction.
-- [ ] Execute the frozen family on the qualified NQ and `ES_PROXY` files.
+- [x] Execute separate GBPUSD, NQ-proxy, and ES-proxy phase-one packages.
+- [x] Independently reconstruct every published trade ledger.
 
 ## Phase 2 — Integrity and descriptive evidence
 
-Status: **blocked on phase-one data run**
+Status: **complete for proxies and GBPUSD; NQ futures pending**
 
-- [ ] Audit event counts through the full funnel.
-- [ ] Inspect examples without changing definitions.
-- [ ] Report session, direction, weekday, year, hold-time, exit-reason, and cost attribution.
-- [ ] Confirm no positions bridge unsafe data gaps.
-- [ ] Confirm no overlapping positions within each instrument stream.
+- [x] Audit event funnels, chronology, risk, gaps, overlap, years, and costs on completed sources.
+- [x] Reject GBPUSD transfer.
+- [x] Classify index-proxy results as positive but uncertain.
+- [ ] Execute the checksum-qualified NQ futures replication.
 
-## Phase 3 — Robustness, not optimization
+## Phase 3 — NQ long-only validation
 
-Status: **not started**
+Status: **active; preregistered**
 
-- [ ] Run nearby predeclared timing sensitivity: 3/5/10-minute execution and 15/30/60-minute management.
-- [ ] Stress one, two, and four ticks per side.
-- [ ] Run chronological folds and date-block bootstrap.
-- [ ] Test boundary definition sensitivity: wick boundary versus close boundary.
-- [ ] Test maximum base age and base compression without searching unrestricted grids.
+Work package: `STOIC123-WP-20260723-02`
+
+- [x] Correct the direction-restriction versus management-exit contract and independently review all 18 corrected ledgers.
+- [x] Freeze four candidate roles before NQ futures inspection.
+- [x] Freeze long-only, short-only, and both-direction comparators.
+- [x] Freeze one-tick baseline, two-tick stress, and delayed-entry tests.
+- [x] Freeze expanding-year, RTH/overnight, concentration, and exposure attribution.
+- [ ] Reacquire the registered NQ archive and verify the exact SHA-256.
+- [ ] Execute the full validation and independent reconstruction.
 
 ## Phase 4 — Mechanism review
 
-Status: **not started**
+Status: **implemented; execution pending**
 
-- [ ] Determine whether any edge comes from the map, Step 1 impulse, base compression, or generic breakout exposure.
-- [ ] Compare against matched random-time and simple EMA-break controls.
-- [ ] Quantify redundancy versus existing DTR opportunities and trade timing.
-- [ ] Reject the strategy if the map adds no material information or the sequence reduces to an ordinary breakout with worse execution.
+- [x] Define causal EMA-break-only control.
+- [x] Define causal EMA-break-plus-retest control.
+- [x] Define 50 deterministic matched-time controls per candidate with a 90% minimum event-match integrity gate.
+- [x] Preserve higher-timeframe eligibility and original risk width in matched controls.
+- [ ] Determine whether the full sequence adds at least 0.05R expectancy or 20% return-to-drawdown over EMA break.
+- [ ] Reject the full sequence if simpler controls are equally useful.
 
-## Phase 5 — Cross-market evidence
+## Phase 5 — Selection gate
 
-Status: **not started**
+Status: **blocked on NQ validation output**
 
-- [ ] Compare NQ and `ES_PROXY` without pooling returns or tuning by instrument.
-- [ ] Acquire actual contract-audited ES futures data when available.
-- [ ] Repeat the frozen finalist on actual ES before any ES claim.
-- [ ] Extend NQ with qualified fresh and longer-history data.
+A candidate must pass every preregistered gate: positive expectancy, broad annual stability, limited concentration, cost and delay resilience, lower drawdown, mechanism value, and a positive date-block lower bound.
 
-## Phase 6 — Selection gate
+Failure means `NO_PROMOTION`. Partial historical improvement authorizes at most further paper research.
 
-Status: **not started**
+## Phase 6 — Cross-market and longer-history evidence
 
-A candidate may advance only if it is causal, cost-resilient, chronologically stable, not driven by one session/year, and materially useful relative to simpler controls. Otherwise record `STOP_RESEARCH` or retain only as a descriptive chart-study tool.
+Status: **blocked**
+
+- [ ] Replicate an NQ finalist on qualified fresh or longer contract-audited data.
+- [ ] Acquire actual ES futures data before any ES claim.
+- [ ] Keep NQ and ES results separate.
 
 ## Phase 7 — TradingView parity
 
@@ -72,14 +76,12 @@ Status: **blocked**
 
 - [ ] Port only a data-supported finalist to Pine Script v6.
 - [ ] Reconcile Python and Pine events one-for-one.
-- [ ] Make repainting, higher-timeframe completion, and delayed confirmation explicit.
-- [ ] Add alerts only after parity passes.
+- [ ] Make higher-timeframe completion and delayed confirmation explicit.
 
 ## Phase 8 — Paper-forward observation
 
 Status: **blocked**
 
-- [ ] Freeze the finalist.
-- [ ] Observe forward without retuning.
-- [ ] Compare actual slippage and missed fills with the research assumptions.
-- [ ] Require a new decision gate before any production use.
+- [ ] Freeze any finalist without further historical tuning.
+- [ ] Observe forward execution and slippage.
+- [ ] Require a new decision gate before production use.
