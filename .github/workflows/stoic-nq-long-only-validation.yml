@@ -12,6 +12,17 @@ on:
       - "strategies/stoic_123/configs/nq_long_only_validation.yaml"
       - "strategies/stoic_123/configs/phase1.yaml"
       - "tests/test_stoic_123_validation.py"
+  pull_request:
+    branches:
+      - agent/stoic-123-separate-framework
+    types: [opened, synchronize, reopened]
+    paths:
+      - ".github/workflows/stoic-nq-long-only-validation.yml"
+      - "scripts/run_stoic_nq_long_only_validation.py"
+      - "src/stoic_123_lab/**"
+      - "strategies/stoic_123/configs/nq_long_only_validation.yaml"
+      - "strategies/stoic_123/configs/phase1.yaml"
+      - "tests/test_stoic_123_validation.py"
 
 permissions:
   contents: read
