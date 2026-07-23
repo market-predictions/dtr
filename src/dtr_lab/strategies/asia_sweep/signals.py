@@ -5,7 +5,12 @@ from dataclasses import replace
 import numpy as np
 import pandas as pd
 
-from .integrity import IntervalIntegrity, audit_minute_interval
+from .integrity import (
+    IntervalActivity,
+    IntervalIntegrity,
+    audit_activity_interval,
+    audit_minute_interval,
+)
 from .model import AsiaSweepConfig, AsiaSweepEvent, AsiaSweepVariant, ExecutionWindow
 
 _REQUIRED_COLUMNS = {"timestamp", "open", "high", "low", "close"}
@@ -29,7 +34,19 @@ def _validate_bars(frame: pd.DataFrame, *, name: str) -> pd.DataFrame:
 
 
 def _timestamp(day: pd.Timestamp, hour: int, minute: int) -> pd.Timestamp:
-    return day.normalize() + pd.Timedelta(hours=hour, minutes=minute)
+    """Construct a local wall-clock timestamp without elapsed-time DST drift."""
+
+    day = pd.Timestamp(day)
+    naive = pd.Timestamp(
+        year=day.year,
+        month=day.month,
+        day=day.day,
+        hour=hour,
+        minute=minute,
+    )
+    if day.tz is None:
+        return naive
+    return naive.tz_localize(day.tz, ambiguous="raise", nonexistent="raise")
 
 
 def _asia_bounds(
@@ -37,8 +54,9 @@ def _asia_bounds(
     cfg: AsiaSweepConfig,
 ) -> tuple[pd.Timestamp, pd.Timestamp]:
     end = _timestamp(trade_date, cfg.asia_end_hour, cfg.asia_end_minute)
+    previous_date = pd.Timestamp(trade_date) - pd.DateOffset(days=1)
     start = _timestamp(
-        trade_date - pd.Timedelta(days=1),
+        previous_date,
         cfg.asia_start_hour,
         cfg.asia_start_minute,
     )
@@ -54,7 +72,8 @@ def _window_bounds(
     start = _timestamp(trade_date, window.start_hour, window.start_minute)
     end = _timestamp(trade_date, window.end_hour, window.end_minute)
     if end <= start:
-        end += pd.Timedelta(days=1)
+        next_date = pd.Timestamp(trade_date) + pd.DateOffset(days=1)
+        end = _timestamp(next_date, window.end_hour, window.end_minute)
     return start, end
 
 
@@ -81,6 +100,30 @@ def _morphology(row: pd.Series, direction: int) -> tuple[float, float]:
     return float(wick), float(clv)
 
 
+def _audit_activity(
+    frame: pd.DataFrame,
+    start: pd.Timestamp,
+    end: pd.Timestamp,
+    cfg: AsiaSweepConfig,
+) -> IntervalActivity | None:
+    if cfg.activity_column is None:
+        return None
+    if cfg.maximum_consecutive_inactive_minutes is None:
+        raise ValueError("activity configuration is incomplete")
+    return audit_activity_interval(
+        frame,
+        start,
+        end,
+        activity_column=cfg.activity_column,
+        minimum_active_minutes=cfg.minimum_active_minutes,
+        maximum_consecutive_inactive_minutes=cfg.maximum_consecutive_inactive_minutes,
+    )
+
+
+def _grid_failure_reason(cfg: AsiaSweepConfig, legacy_reason: str) -> str:
+    return "missing_minute_grid" if cfg.activity_column is not None else legacy_reason
+
+
 def _base_event(
     instrument: str,
     trade_date: pd.Timestamp,
@@ -92,9 +135,12 @@ def _base_event(
     asia_low: float,
     asia_integrity: IntervalIntegrity,
     execution_integrity: IntervalIntegrity,
+    asia_activity: IntervalActivity | None,
+    execution_activity: IntervalActivity | None,
     *,
     status: str,
     rejection_reason: str | None,
+    integrity_failure_scope: str | None = None,
 ) -> AsiaSweepEvent:
     return AsiaSweepEvent(
         instrument=instrument,
@@ -103,6 +149,7 @@ def _base_event(
         variant=cfg.variant.value,
         status=status,
         rejection_reason=rejection_reason,
+        integrity_failure_scope=integrity_failure_scope,
         asia_start=asia_start,
         asia_end=asia_end,
         asia_high=asia_high,
@@ -112,10 +159,30 @@ def _base_event(
         asia_observed_minutes=asia_integrity.observed_minutes,
         asia_missing_minutes=asia_integrity.missing_minutes,
         asia_complete=asia_integrity.complete,
+        asia_active_minutes=(asia_activity.active_minutes if asia_activity else None),
+        asia_inactive_minutes=(asia_activity.inactive_minutes if asia_activity else None),
+        asia_max_inactive_run=(
+            asia_activity.maximum_consecutive_inactive_minutes if asia_activity else None
+        ),
+        asia_activity_eligible=(asia_activity.eligible if asia_activity else None),
         execution_expected_minutes=execution_integrity.expected_minutes,
         execution_observed_minutes=execution_integrity.observed_minutes,
         execution_missing_minutes=execution_integrity.missing_minutes,
         execution_window_complete=execution_integrity.complete,
+        execution_active_minutes=(
+            execution_activity.active_minutes if execution_activity else None
+        ),
+        execution_inactive_minutes=(
+            execution_activity.inactive_minutes if execution_activity else None
+        ),
+        execution_max_inactive_run=(
+            execution_activity.maximum_consecutive_inactive_minutes
+            if execution_activity
+            else None
+        ),
+        execution_activity_eligible=(
+            execution_activity.eligible if execution_activity else None
+        ),
     )
 
 
@@ -124,22 +191,38 @@ def _attach_pre_signal_integrity(
     one_minute: pd.DataFrame,
     start: pd.Timestamp,
     end: pd.Timestamp,
+    cfg: AsiaSweepConfig,
 ) -> AsiaSweepEvent:
     integrity = audit_minute_interval(one_minute, start, end)
+    activity = _audit_activity(one_minute, start, end, cfg)
     updated = replace(
         event,
         pre_signal_expected_minutes=integrity.expected_minutes,
         pre_signal_observed_minutes=integrity.observed_minutes,
         pre_signal_missing_minutes=integrity.missing_minutes,
         pre_signal_path_complete=integrity.complete,
+        pre_signal_active_minutes=(activity.active_minutes if activity else None),
+        pre_signal_inactive_minutes=(activity.inactive_minutes if activity else None),
+        pre_signal_max_inactive_run=(
+            activity.maximum_consecutive_inactive_minutes if activity else None
+        ),
+        pre_signal_activity_eligible=(activity.eligible if activity else None),
     )
-    if integrity.complete:
-        return updated
-    return replace(
-        updated,
-        status="INELIGIBLE",
-        rejection_reason="incomplete_pre_signal_path",
-    )
+    if not integrity.complete:
+        return replace(
+            updated,
+            status="INELIGIBLE",
+            rejection_reason=_grid_failure_reason(cfg, "incomplete_pre_signal_path"),
+            integrity_failure_scope="pre_signal_path",
+        )
+    if activity is not None and not activity.eligible:
+        return replace(
+            updated,
+            status="INELIGIBLE",
+            rejection_reason=activity.failure_reason,
+            integrity_failure_scope="pre_signal_path",
+        )
+    return updated
 
 
 def _find_displacement(
@@ -276,6 +359,8 @@ def _detect_window_event(
     start, end = _window_bounds(trade_date, window)
     asia_integrity = audit_minute_interval(one_minute, asia_start, asia_end)
     execution_integrity = audit_minute_interval(one_minute, start, end)
+    asia_activity = _audit_activity(one_minute, asia_start, asia_end, cfg)
+    execution_activity = _audit_activity(one_minute, start, end, cfg)
 
     if not asia_integrity.complete:
         return _base_event(
@@ -289,8 +374,29 @@ def _detect_window_event(
             np.nan,
             asia_integrity,
             execution_integrity,
+            asia_activity,
+            execution_activity,
             status="INELIGIBLE",
-            rejection_reason="incomplete_asia_range",
+            rejection_reason=_grid_failure_reason(cfg, "incomplete_asia_range"),
+            integrity_failure_scope="asia_range",
+        )
+    if asia_activity is not None and not asia_activity.eligible:
+        return _base_event(
+            instrument,
+            trade_date,
+            window,
+            cfg,
+            asia_start,
+            asia_end,
+            np.nan,
+            np.nan,
+            asia_integrity,
+            execution_integrity,
+            asia_activity,
+            execution_activity,
+            status="INELIGIBLE",
+            rejection_reason=asia_activity.failure_reason,
+            integrity_failure_scope="asia_range",
         )
 
     asia = one_minute[
@@ -311,6 +417,8 @@ def _detect_window_event(
             asia_low,
             asia_integrity,
             execution_integrity,
+            asia_activity,
+            execution_activity,
             status="INELIGIBLE",
             rejection_reason="invalid_asia_range",
         )
@@ -337,16 +445,26 @@ def _detect_window_event(
         asia_low,
         asia_integrity,
         execution_integrity,
+        asia_activity,
+        execution_activity,
         status="INELIGIBLE",
         rejection_reason=None,
     )
     if wb.empty:
-        reason = (
-            "incomplete_execution_window"
-            if not execution_integrity.complete
-            else "missing_execution_bars"
-        )
-        return replace(base, rejection_reason=reason)
+        if not execution_integrity.complete:
+            reason = _grid_failure_reason(cfg, "incomplete_execution_window")
+            return replace(
+                base,
+                rejection_reason=reason,
+                integrity_failure_scope="execution_window",
+            )
+        if execution_activity is not None and not execution_activity.eligible:
+            return replace(
+                base,
+                rejection_reason=execution_activity.failure_reason,
+                integrity_failure_scope="execution_window",
+            )
+        return replace(base, rejection_reason="missing_execution_bars")
 
     min_depth = cfg.min_sweep_ticks * cfg.tick_size
     sweep_pos: int | None = None
@@ -366,6 +484,7 @@ def _detect_window_event(
                 one_minute,
                 start,
                 _bar_end(row),
+                cfg,
             )
         if lower:
             sweep_pos, direction = int(pos), 1
@@ -376,7 +495,20 @@ def _detect_window_event(
 
     if sweep_pos is None:
         if not execution_integrity.complete:
-            return replace(base, rejection_reason="incomplete_execution_window")
+            return replace(
+                base,
+                rejection_reason=_grid_failure_reason(
+                    cfg,
+                    "incomplete_execution_window",
+                ),
+                integrity_failure_scope="execution_window",
+            )
+        if execution_activity is not None and not execution_activity.eligible:
+            return replace(
+                base,
+                rejection_reason=execution_activity.failure_reason,
+                integrity_failure_scope="execution_window",
+            )
         return replace(base, status="NO_SWEEP", rejection_reason=None)
 
     row = wb.iloc[sweep_pos]
@@ -412,6 +544,7 @@ def _detect_window_event(
         one_minute,
         start,
         _bar_end(row),
+        cfg,
     )
     if event.status == "INELIGIBLE":
         return event
@@ -449,6 +582,7 @@ def _detect_window_event(
                 one_minute,
                 audit_start,
                 deadline,
+                cfg,
             )
             if event.status == "INELIGIBLE":
                 return event
@@ -479,6 +613,7 @@ def _detect_window_event(
                 one_minute,
                 start,
                 deadline,
+                cfg,
             )
             if event.status == "INELIGIBLE":
                 return event
@@ -486,15 +621,24 @@ def _detect_window_event(
         event = replace(event, failed_retest_present=True)
 
     entry_row = wb.iloc[int(entry_pos)]
+    entry_timestamp = _bar_end(entry_row)
     audit_start = _variant_audit_start(cfg, start, entry_row)
     event = _attach_pre_signal_integrity(
         event,
         one_minute,
         audit_start,
-        _bar_end(entry_row),
+        entry_timestamp,
+        cfg,
     )
     if event.status == "INELIGIBLE":
         return event
+    if entry_timestamp >= end:
+        return replace(
+            event,
+            status="REJECTED",
+            rejection_reason="entry_at_or_after_window_end",
+            entry_timestamp=entry_timestamp,
+        )
 
     entry = float(entry_row["close"])
     stop = (
@@ -510,7 +654,7 @@ def _detect_window_event(
         event,
         status="SIGNAL",
         rejection_reason=None,
-        entry_timestamp=_bar_end(entry_row),
+        entry_timestamp=entry_timestamp,
         entry_price_raw=entry,
         stop_price_raw=stop,
         target_price_raw=target,
@@ -531,7 +675,11 @@ def build_event_ledger(
 
     one = _validate_bars(one_minute, name="one_minute")
     bars = _validate_bars(bars_5m, name="bars_5m")
-    first = one["timestamp"].min().normalize() + pd.Timedelta(days=1)
+    if cfg.activity_column is not None and cfg.activity_column not in one.columns:
+        raise ValueError(
+            f"one_minute missing activity column: {cfg.activity_column}"
+        )
+    first = one["timestamp"].min().normalize() + pd.DateOffset(days=1)
     last = one["timestamp"].max().normalize()
     rows: list[dict[str, object]] = []
     for day in pd.date_range(first, last, freq="D"):
