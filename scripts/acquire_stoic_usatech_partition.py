@@ -50,7 +50,7 @@ def _fetch_day(day: dt.date) -> tuple[dt.date, list[CandleRow], str, int]:
             if len(payload) % RECORD.size:
                 raise ValueError(f"record-size mismatch on {day}")
 
-            midnight = dt.datetime.combine(day, dt.time(), tzinfo=dt.timezone.utc)
+            midnight = dt.datetime.combine(day, dt.time(), tzinfo=dt.UTC)
             rows: list[CandleRow] = []
             zero_volume = 0
             for offset in range(0, len(payload), RECORD.size):
