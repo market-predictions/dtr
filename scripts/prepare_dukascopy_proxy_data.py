@@ -1,17 +1,16 @@
 from __future__ import annotations
 
 import argparse
-from dataclasses import asdict, dataclass
 import gzip
 import hashlib
 import json
-from pathlib import Path
 import shutil
+from dataclasses import asdict, dataclass
+from pathlib import Path
 from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 
 import numpy as np
 import pandas as pd
-
 
 _REQUIRED_COLUMNS = ("timestamp", "open", "high", "low", "close", "volume")
 _ET_ZONE = "America/New_York"
@@ -30,7 +29,7 @@ class PreparedDataset:
     research_id: str
     source_instrument: str
     display_name: str
-    source_file: str
+    source_files: tuple[str, ...]
     source_rows: int
     first_timestamp_utc: str
     last_timestamp_utc: str
@@ -53,11 +52,11 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def _find_single_csv(directory: Path) -> Path:
-    files = sorted(directory.glob("*.csv"))
-    if len(files) != 1:
-        raise ValueError(f"Expected one CSV in {directory}, found: {files}")
-    return files[0]
+def _find_csv_files(directory: Path) -> list[Path]:
+    files = sorted(directory.rglob("*.csv"))
+    if not files:
+        raise ValueError(f"Expected CSV files in {directory}")
+    return files
 
 
 def _parse_utc_timestamps(values: pd.Series) -> pd.Series:
@@ -101,17 +100,31 @@ def _write_deterministic_zip(source: Path, destination: Path) -> None:
         archive.writestr(info, source.read_bytes())
 
 
-def _prepare(spec: ProxySpec, output_directory: Path) -> PreparedDataset:
-    source = _find_single_csv(spec.raw_directory)
-    frame = pd.read_csv(source)
-    missing = set(_REQUIRED_COLUMNS).difference(frame.columns)
-    if missing:
-        raise ValueError(f"{source} missing required columns: {sorted(missing)}")
+def _read_sources(spec: ProxySpec) -> tuple[pd.DataFrame, tuple[str, ...]]:
+    sources = _find_csv_files(spec.raw_directory)
+    frames: list[pd.DataFrame] = []
+    source_names: list[str] = []
+    for source in sources:
+        frame = pd.read_csv(source)
+        missing = set(_REQUIRED_COLUMNS).difference(frame.columns)
+        if missing:
+            raise ValueError(f"{source} missing required columns: {sorted(missing)}")
+        frames.append(frame.loc[:, list(_REQUIRED_COLUMNS)])
+        source_names.append(str(source.relative_to(spec.raw_directory)))
+    return pd.concat(frames, ignore_index=True), tuple(source_names)
 
+
+def _prepare(spec: ProxySpec, output_directory: Path) -> PreparedDataset:
+    frame, source_names = _read_sources(spec)
     timestamp_utc = _parse_utc_timestamps(frame["timestamp"])
     duplicate_count = int(timestamp_utc.duplicated(keep=False).sum())
     if duplicate_count:
-        raise ValueError(f"{source} contains {duplicate_count} duplicate timestamps")
+        duplicate_values = timestamp_utc[timestamp_utc.duplicated(keep=False)]
+        preview = ", ".join(duplicate_values.astype(str).unique()[:3])
+        raise ValueError(
+            f"{spec.source_instrument} contains {duplicate_count} duplicate timestamps: "
+            f"{preview}"
+        )
 
     off_grid = (
         (timestamp_utc.dt.second != 0)
@@ -120,7 +133,9 @@ def _prepare(spec: ProxySpec, output_directory: Path) -> PreparedDataset:
     )
     off_grid_count = int(off_grid.sum())
     if off_grid_count:
-        raise ValueError(f"{source} contains {off_grid_count} off-grid timestamps")
+        raise ValueError(
+            f"{spec.source_instrument} contains {off_grid_count} off-grid timestamps"
+        )
 
     normalized = pd.DataFrame(
         {
@@ -137,7 +152,7 @@ def _prepare(spec: ProxySpec, output_directory: Path) -> PreparedDataset:
     )
     normalized = normalized.sort_values("timestamp UTC").reset_index(drop=True)
     if normalized.empty:
-        raise ValueError(f"{source} produced no normalized rows")
+        raise ValueError(f"{spec.source_instrument} produced no normalized rows")
 
     output_directory.mkdir(parents=True, exist_ok=True)
     csv_name = f"{spec.research_id}_M1_BID_UTC_ET.csv"
@@ -155,7 +170,7 @@ def _prepare(spec: ProxySpec, output_directory: Path) -> PreparedDataset:
         research_id=spec.research_id,
         source_instrument=spec.source_instrument,
         display_name=spec.display_name,
-        source_file=source.name,
+        source_files=source_names,
         source_rows=int(len(normalized)),
         first_timestamp_utc=utc_series.iloc[0].isoformat(),
         last_timestamp_utc=utc_series.iloc[-1].isoformat(),
