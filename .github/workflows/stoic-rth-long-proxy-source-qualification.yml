@@ -9,6 +9,15 @@ on:
       - "scripts/acquire_stoic_usatech_partition.py"
       - "strategies/stoic_123/configs/rth_long_proxy_validation.yaml"
       - "strategies/stoic_123/governance/workpackages/STOIC123-WP-20260724-04.md"
+  pull_request:
+    branches:
+      - agent/stoic-short-unseen-proxy-validation
+    types: [opened, synchronize, reopened]
+    paths:
+      - ".github/workflows/stoic-rth-long-proxy-source-qualification.yml"
+      - "scripts/acquire_stoic_usatech_partition.py"
+      - "strategies/stoic_123/configs/rth_long_proxy_validation.yaml"
+      - "strategies/stoic_123/governance/workpackages/STOIC123-WP-20260724-04.md"
   workflow_dispatch:
 
 concurrency:
