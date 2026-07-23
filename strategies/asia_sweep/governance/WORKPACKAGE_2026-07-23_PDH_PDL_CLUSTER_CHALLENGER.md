@@ -95,3 +95,7 @@ Failure closes the Asian Sweep research line. No threshold expansion, weekday/di
 - instrument, pooled and subperiod metrics;
 - exact cost and normalization disclosure;
 - independent review and final stop/promote decision.
+
+## Execution status
+
+The checksum-bound package and dedicated synthetic tests passed before installation. Temporary installer and payload files were removed. Official private development replay is authorized only from the exact human-authored PR head following this note.
