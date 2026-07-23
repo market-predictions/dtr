@@ -6,9 +6,11 @@ A clean-room review pass was performed after implementation and again against th
 
 ## Verdict
 
-`APPROVE_FOUNDATION_WITH_BLOCKERS_BEFORE_PNL`
+`APPROVE_FOUNDATION_FOR_MERGE_BLOCK_PNL`
 
 The foundation is relevant to the broader strategy-discovery objective because it tests a simple, transferable market hypothesis on both NQ and ES and requires incremental evidence over a simpler reclaim control. The architecture correctly treats it as a separate strategy rather than a DTR enhancement.
+
+The original repository CI and the dedicated Asia Sweep CI both pass. This supports merging the isolated foundation. It does not authorize historical P&L research because data-completeness, ES qualification, event audit and execution gates remain open.
 
 ## Strengths
 
@@ -21,6 +23,7 @@ The foundation is relevant to the broader strategy-discovery objective because i
 - Same-bar double sweeps are rejected rather than resolved optimistically.
 - AS-C uses causal preceding five-minute history and does not reset its body reference at the execution-window boundary.
 - Tests are physically and operationally separate from DTR tests.
+- A dedicated workflow runs the separate suite on Python 3.11 and 3.12.
 - ES cannot be silently run with an invented source.
 
 ## Resolved during published-diff review
@@ -35,7 +38,13 @@ The initial implementation calculated the trailing body median only inside each 
 
 The initial published diff contained lines above the repository's 100-character Ruff limit.
 
-**Resolution:** reformatted the new Python files and manually verified the edited files contain no lines above 100 characters. Ruff itself could not be installed in the restricted local environment, so CI confirmation remains required.
+**Resolution:** reformatted the new Python files. The repository Ruff gate and both CI workflows now pass.
+
+### RR3 — Separate-suite CI coverage
+
+The original DTR CI intentionally does not discover tests under `strategies/asia_sweep/tests/`.
+
+**Resolution:** added a dedicated `Asia Sweep CI` workflow. It passes on Python 3.11 and 3.12 without merging the suites.
 
 ## Findings requiring action before P&L
 
@@ -63,11 +72,11 @@ The ledger stores raw close, stop and target levels but does not yet model next-
 
 **Required:** connect a neutral execution adapter only after event audit. Preserve conservative stop-first collisions.
 
-### R5 — DTR baseline protection is documented but not rerun here
+### R5 — Direct DTR baseline replay is still required before shared extraction
 
-No existing DTR file was edited, which minimizes risk, but the canonical baseline was not rerun in this tool environment.
+No existing DTR file was edited, and the original DTR CI passes. However, the canonical 495-trade baseline was not rerun against the raw local dataset in this tool environment.
 
-**Required:** CI or a full local checkout must reproduce the locked 495-trade benchmark before any shared-infrastructure extraction.
+**Required:** a full data checkout must reproduce the locked benchmark before any shared execution infrastructure is extracted or changed.
 
 ### R6 — Strategy relevance depends on transfer, not headline NQ profit
 
@@ -77,14 +86,14 @@ A positive NQ full-sample result alone would not support the greater goal.
 
 ## Roadmap alignment
 
-- WP-AS-00/01 documentation: substantially complete.
+- WP-AS-00/01 documentation: complete for the foundation.
 - WP-AS-02 data qualification: NQ referenced but unresolved; ES blocked.
 - WP-AS-03 isolation architecture: complete at signal boundary; neutral execution extraction pending.
 - WP-AS-04 event ledger: foundation complete; completeness/gap metadata pending.
 - WP-AS-05 variants: implemented.
-- WP-AS-06 deterministic tests: initial nine-test suite complete; full 20-case adversarial set pending.
+- WP-AS-06 deterministic tests: initial nine-test suite and dedicated CI complete; full 20-case adversarial set pending.
 - WP-AS-07 onward: not authorized yet.
 
 ## Recommendation
 
-Merge only as a research foundation after CI passes. Continue autonomously with data qualification and event audit. Do not inspect P&L until the separation, completeness, gap and execution contracts are frozen.
+The isolated foundation may be merged. Continue autonomously with data qualification and event audit in the separate Asia Sweep research track. Do not inspect P&L until the separation, completeness, gap and execution contracts are frozen.
