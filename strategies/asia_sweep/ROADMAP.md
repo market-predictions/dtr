@@ -55,7 +55,7 @@ Primary sessions in `America/New_York`:
 - London: 02:00–06:00;
 - New York: 08:30–11:30.
 
-Use half-open windows. Include Monday through Friday initially and report weekdays separately. Maximum one trade per instrument per execution window; first valid signal wins; no same-window re-entry in the primary specification.
+Use half-open windows. Include Monday through Friday initially and report weekdays separately. The first qualifying sweep in each execution window owns the event. If it fails reclaim or confirmation, a later sweep may not replace it. Maximum one trade per instrument per execution window; no same-window re-entry in the primary specification.
 
 ## Phase 2 — Qualify NQ and ES data
 
@@ -120,7 +120,7 @@ AS-A plus rejection-wick ratio at least 0.50 and direction-adjusted close-locati
 
 ### AS-C displacement
 
-AS-A plus an opposing candle within three bars. Its body is at least 1.25 times the causal trailing median body, the close passes the sweep-candle midpoint, and price remains back inside the Asia range.
+AS-A plus an opposing candle within three bars. Its body is at least 1.25 times the causal trailing median body, the close passes the sweep-candle midpoint, and price remains back inside the Asia range. The median is computed from all available preceding five-minute bars and does not reset at the London or New York window boundary.
 
 ### AS-D failed retest
 
@@ -136,9 +136,9 @@ AS-A plus a right-side-confirmed reaction swing, a later retest that stays insid
 
 ## Phase 6 — Causality and adversarial tests
 
-**Status:** initial eight-test suite passed locally; full twenty-case suite pending.
+**Status:** initial nine-test suite passed locally; full twenty-case suite pending.
 
-Required coverage includes threshold edges, no reclaim, double sweep, wick boundary, displacement timing, causal pivot confirmation, same-minute stop/target collision, entry-stop collision, missing gaps before and during trades, DST, roll boundaries, simultaneous NQ/ES signals and deterministic repeated output.
+Required coverage includes threshold edges, no reclaim, double sweep, wick boundary, displacement timing and pre-window warmup, causal pivot confirmation, same-minute stop/target collision, entry-stop collision, missing gaps before and during trades, DST, roll boundaries, simultaneous NQ/ES signals and deterministic repeated output.
 
 For every emitted signal, truncate data at the entry timestamp and reproduce the same decision. Any change under prefix replay is a lookahead failure.
 
