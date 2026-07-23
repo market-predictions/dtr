@@ -7,17 +7,13 @@ from pathlib import Path
 
 import pandas as pd
 
-from stoic_123_lab import load_config_family
+from stoic_123_lab import (
+    load_config_family,
+    short_proxy_gates,
+    short_proxy_source,
+    short_proxy_study,
+)
 from stoic_123_lab.data import file_sha256
-from stoic_123_lab.short_proxy_gates import _promotion_gates as promotion_gates
-from stoic_123_lab.short_proxy_source import (
-    _load_design as load_design,
-    _load_partition as load_partition,
-)
-from stoic_123_lab.short_proxy_study import (
-    _run_partition as run_partition,
-    SHORT_PROXY_SPEC,
-)
 
 FROZEN_PHASE1_SHA256 = "5d6909bd5740e1cdea9bd3d47a9818289a6faa8b9a61338726afdc53289ff805"
 SOURCE_ARM_ID = "S123_M0_NO_MAP_CONTROL"
@@ -36,7 +32,7 @@ def main() -> None:
     args = parser.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
 
-    design = load_design(args.design)
+    design = short_proxy_source._load_design(args.design)
     if file_sha256(args.phase1) != FROZEN_PHASE1_SHA256:
         raise ValueError("Frozen phase-one checksum mismatch")
     hypothesis = design.get("hypothesis")
@@ -54,10 +50,18 @@ def main() -> None:
 
     configs = {config.arm_id: config for config in load_config_family(args.phase1)}
     base = configs[SOURCE_ARM_ID]
-    older_frame, older_audits = load_partition(args.sources, design, "older_history")
-    forward_frame, forward_audits = load_partition(args.sources, design, "forward_2026")
+    older_frame, older_audits = short_proxy_source._load_partition(
+        args.sources,
+        design,
+        "older_history",
+    )
+    forward_frame, forward_audits = short_proxy_source._load_partition(
+        args.sources,
+        design,
+        "forward_2026",
+    )
 
-    older = run_partition(
+    older = short_proxy_study._run_partition(
         partition="older_history",
         one_minute=older_frame,
         base=base,
@@ -65,7 +69,7 @@ def main() -> None:
         seed_base=20260723,
         out=args.out,
     )
-    forward = run_partition(
+    forward = short_proxy_study._run_partition(
         partition="forward_2026",
         one_minute=forward_frame,
         base=base,
@@ -79,7 +83,7 @@ def main() -> None:
     review_rows = older["review_rows"] + forward["review_rows"]
     annual_rows = older["annual_rows"] + forward["annual_rows"]
     matched_rows = [older["matched"], forward["matched"]]
-    gates = promotion_gates(older, forward)
+    gates = short_proxy_gates._promotion_gates(older, forward)
 
     summary_frame = pd.DataFrame(summary_rows)
     inference_frame = pd.DataFrame(inference_rows)
@@ -118,7 +122,9 @@ def main() -> None:
         "all_promotion_gates_passed": all_pass,
         "passed_gate_count": int(gates_frame["passed"].sum()),
         "total_gate_count": int(len(gates_frame)),
-        "source_classification": SHORT_PROXY_SPEC.source_classification,
+        "source_classification": (
+            short_proxy_study.SHORT_PROXY_SPEC.source_classification
+        ),
         "phase1_sha256": file_sha256(args.phase1),
         "design_sha256": file_sha256(args.design),
         "management_direction_retained": True,
