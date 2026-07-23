@@ -1,0 +1,16 @@
+name: Stoic short unseen proxy source qualification
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  archived:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Qualification complete
+        run: |
+          echo "Source qualification completed in run 30046002940."
+          echo "Use the checksum-gated validation workflow for further execution."

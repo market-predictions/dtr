@@ -1,0 +1,150 @@
+name: Stoic short unseen proxy validation
+
+on:
+  push:
+    branches:
+      - agent/stoic-short-unseen-proxy-validation
+    paths:
+      - ".github/workflows/stoic-short-unseen-proxy-validation.yml"
+      - "scripts/acquire_stoic_usatech_partition.py"
+      - "scripts/run_stoic_short_unseen_proxy.py"
+      - "src/stoic_123_lab/**"
+      - "strategies/stoic_123/configs/phase1.yaml"
+      - "strategies/stoic_123/configs/short_unseen_proxy_validation.yaml"
+      - "tests/test_stoic_123_short_validation.py"
+  pull_request:
+    branches:
+      - agent/stoic-nq-long-only-validation
+    types: [opened, synchronize, reopened]
+    paths:
+      - ".github/workflows/stoic-short-unseen-proxy-validation.yml"
+      - "scripts/acquire_stoic_usatech_partition.py"
+      - "scripts/run_stoic_short_unseen_proxy.py"
+      - "src/stoic_123_lab/**"
+      - "strategies/stoic_123/configs/phase1.yaml"
+      - "strategies/stoic_123/configs/short_unseen_proxy_validation.yaml"
+      - "tests/test_stoic_123_short_validation.py"
+  workflow_dispatch:
+
+concurrency:
+  group: stoic-short-unseen-proxy-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  acquire:
+    name: Acquire frozen USATECH ${{ matrix.label }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        include:
+          - {label: 2015, start: 2015-01-01, end: 2016-01-01}
+          - {label: 2016, start: 2016-01-01, end: 2017-01-01}
+          - {label: 2017, start: 2017-01-01, end: 2018-01-01}
+          - {label: 2018, start: 2018-01-01, end: 2019-01-01}
+          - {label: 2019, start: 2019-01-01, end: 2020-01-01}
+          - {label: 2020, start: 2020-01-01, end: 2021-01-01}
+          - {label: 2021, start: 2021-01-01, end: 2022-01-01}
+          - {label: 2026_YTD, start: 2026-01-01, end: 2026-07-23}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install acquisition dependency gate
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff==0.14.10
+          ruff check scripts/acquire_stoic_usatech_partition.py
+      - name: Reacquire frozen partition
+        run: |
+          python scripts/acquire_stoic_usatech_partition.py \
+            --start '${{ matrix.start }}' \
+            --end '${{ matrix.end }}' \
+            --label '${{ matrix.label }}' \
+            --workers 8
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stoic-short-source-${{ matrix.label }}
+          path: |
+            usatechidxusd_m1_bid_${{ matrix.label }}.csv.gz
+            usatechidxusd_m1_bid_${{ matrix.label }}_audit.json
+          retention-days: 1
+          compression-level: 0
+          if-no-files-found: error
+
+  execute:
+    needs: acquire
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,research]"
+      - name: Ruff and focused tests
+        run: |
+          ruff check .
+          pytest -q \
+            tests/test_stoic_123_short_validation.py \
+            tests/test_stoic_123_validation.py \
+            tests/test_stoic_123_validation_backtest.py \
+            tests/test_stoic_123.py
+      - name: Download frozen source partitions
+        uses: actions/download-artifact@v4
+        with:
+          pattern: stoic-short-source-*
+          path: private-data
+          merge-multiple: true
+      - name: Execute frozen short-side falsification
+        shell: bash
+        run: |
+          set +e
+          mkdir -p reports/stoic_123/short_unseen_proxy
+          python scripts/run_stoic_short_unseen_proxy.py \
+            --sources private-data \
+            --phase1 strategies/stoic_123/configs/phase1.yaml \
+            --design strategies/stoic_123/configs/short_unseen_proxy_validation.yaml \
+            --out reports/stoic_123/short_unseen_proxy \
+            --iterations 10000 \
+            > reports/stoic_123/short_unseen_proxy/execution.log 2>&1
+          status=$?
+          echo "$status" > reports/stoic_123/short_unseen_proxy/execution.status
+          cat reports/stoic_123/short_unseen_proxy/execution.log
+          exit 0
+      - name: Remove raw market data
+        if: always()
+        run: rm -rf private-data
+      - name: Enforce compact result payload
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          if find reports -type f \( -name '*.gz' -o -name '*.zip' -o -name '*.parquet' \) | grep -q .; then
+            echo "Unexpected raw-like object in result payload"
+            exit 1
+          fi
+      - name: Upload compact result or diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stoic-short-unseen-proxy-validation
+          path: reports/stoic_123/short_unseen_proxy
+          retention-days: 7
+          if-no-files-found: error
+      - name: Enforce execution gate
+        run: test "$(cat reports/stoic_123/short_unseen_proxy/execution.status)" = "0"

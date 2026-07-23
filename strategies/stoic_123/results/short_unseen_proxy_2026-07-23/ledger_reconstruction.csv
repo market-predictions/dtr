@@ -1,0 +1,17 @@
+partition,scenario_id,trades,count_match,net_match,expectancy_match,risk_positive,chronology_valid,overlap_count,direction_values
+forward_2026,S123_M0_NO_MAP_CONTROL__BOTH_FULL,119,True,True,True,True,True,0,"-1,1"
+forward_2026,S123_M0_NO_MAP_CONTROL__LONG_FULL,78,True,True,True,True,True,0,1
+forward_2026,S123_M0_NO_MAP_CONTROL__SHORT_EMA_BREAK_RETEST,773,True,True,True,True,True,0,-1
+forward_2026,S123_M0_NO_MAP_CONTROL__SHORT_EMA_BREAK,834,True,True,True,True,True,0,-1
+forward_2026,S123_M0_NO_MAP_CONTROL__SHORT_FULL_COST_2T,43,True,True,True,True,True,0,-1
+forward_2026,S123_M0_NO_MAP_CONTROL__SHORT_FULL_DELAY_1M,43,True,True,True,True,True,0,-1
+forward_2026,S123_M0_NO_MAP_CONTROL__SHORT_FULL_DELAY_5M,43,True,True,True,True,True,0,-1
+forward_2026,S123_M0_NO_MAP_CONTROL__SHORT_FULL,43,True,True,True,True,True,0,-1
+older_history,S123_M0_NO_MAP_CONTROL__BOTH_FULL,1580,True,True,True,True,True,0,"-1,1"
+older_history,S123_M0_NO_MAP_CONTROL__LONG_FULL,948,True,True,True,True,True,0,1
+older_history,S123_M0_NO_MAP_CONTROL__SHORT_EMA_BREAK_RETEST,7720,True,True,True,True,True,0,-1
+older_history,S123_M0_NO_MAP_CONTROL__SHORT_EMA_BREAK,8537,True,True,True,True,True,0,-1
+older_history,S123_M0_NO_MAP_CONTROL__SHORT_FULL_COST_2T,696,True,True,True,True,True,0,-1
+older_history,S123_M0_NO_MAP_CONTROL__SHORT_FULL_DELAY_1M,687,True,True,True,True,True,0,-1
+older_history,S123_M0_NO_MAP_CONTROL__SHORT_FULL_DELAY_5M,653,True,True,True,True,True,0,-1
+older_history,S123_M0_NO_MAP_CONTROL__SHORT_FULL,696,True,True,True,True,True,0,-1

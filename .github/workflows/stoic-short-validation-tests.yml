@@ -1,0 +1,52 @@
+name: Stoic short validation tests
+
+on:
+  push:
+    branches:
+      - agent/stoic-short-unseen-proxy-validation
+    paths:
+      - ".github/workflows/stoic-short-validation-tests.yml"
+      - "src/stoic_123_lab/validation_short_direction.py"
+      - "src/stoic_123_lab/validation_short_matching.py"
+      - "tests/test_stoic_123_short_validation.py"
+  pull_request:
+    branches:
+      - agent/stoic-nq-long-only-validation
+    types: [opened, synchronize, reopened]
+    paths:
+      - ".github/workflows/stoic-short-validation-tests.yml"
+      - "src/stoic_123_lab/validation_short_direction.py"
+      - "src/stoic_123_lab/validation_short_matching.py"
+      - "tests/test_stoic_123_short_validation.py"
+
+permissions:
+  contents: read
+
+jobs:
+  focused:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e ".[dev,research]"
+      - name: Run focused tests and retain output
+        shell: bash
+        run: |
+          set +e
+          pytest tests/test_stoic_123_short_validation.py -vv --tb=short \
+            > stoic-short-test-report.txt 2>&1
+          status=$?
+          cat stoic-short-test-report.txt
+          echo "$status" > stoic-short-test-status.txt
+          exit 0
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stoic-short-test-report
+          path: |
+            stoic-short-test-report.txt
+            stoic-short-test-status.txt
+          retention-days: 2
+      - name: Enforce focused test gate
+        run: test "$(cat stoic-short-test-status.txt)" = "0"

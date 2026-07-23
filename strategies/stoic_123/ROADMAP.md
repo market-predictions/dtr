@@ -13,83 +13,68 @@ Status: **complete**
 
 Status: **complete**
 
-- [x] Implement close-based Step 1 beyond EMA 10/20.
-- [x] Implement causal retest, post-retest base, frozen boundary, and Step 3.
-- [x] Implement next-open execution, protective stop, gap liquidation, costs, and sequencing.
+- [x] Implement causal Step 1, retest, post-retest base, frozen boundary, and Step 3.
+- [x] Implement next-open execution, protective stop, gaps, costs, and sequencing.
 - [x] Implement opposite complete 1-2-3 management exit.
 - [x] Execute separate GBPUSD, NQ-proxy, and ES-proxy phase-one packages.
 - [x] Independently reconstruct every published trade ledger.
 
-## Phase 2 — Integrity and descriptive evidence
+## Phase 2 — Actual-NQ long-only validation
 
-Status: **complete**
-
-- [x] Audit event funnels, chronology, risk, gaps, overlap, years, and costs.
-- [x] Reject GBPUSD transfer.
-- [x] Classify index-proxy results as positive but uncertain.
-- [x] Execute the checksum-qualified NQ futures replication.
-
-## Phase 3 — NQ long-only validation
-
-Status: **complete; no promotion**
+Status: **complete; rejected**
 
 Work package: `STOIC123-WP-20260723-02`
 
-- [x] Correct the direction-restriction versus management-exit contract.
-- [x] Independently review all 18 corrected proxy/FX ledgers.
-- [x] Freeze four candidate roles before NQ futures inspection.
-- [x] Freeze long-only, short-only, and both-direction comparators.
-- [x] Freeze one-tick baseline, two-tick stress, and delayed-entry tests.
-- [x] Freeze expanding-year, RTH/overnight, concentration, and exposure attribution.
-- [x] Reacquire the registered NQ archive and verify the exact SHA-256.
-- [x] Execute the full validation and independent reconstruction.
+- [x] Correct entry-direction versus management-direction behavior.
+- [x] Run checksum-qualified NQ futures validation.
+- [x] Run EMA-break, retest, matched-time, cost, delay, chronology, and uncertainty controls.
+- [x] Reject every long-only candidate under the frozen promotion contract.
 
 Decision: `NO_PROMOTION_STOP_NQ_LONG_ONLY_CURRENT_SAMPLE`.
 
-## Phase 4 — Mechanism review
+## Phase 3 — Unseen short-side falsification
 
-Status: **complete; no validated sequence edge**
+Status: **complete; rejected**
 
-- [x] Run causal EMA-break-only control.
-- [x] Run causal EMA-break-plus-retest control.
-- [x] Run 50 deterministic matched-time controls per candidate.
-- [x] Preserve higher-timeframe eligibility and original risk width.
-- [x] Apply the frozen 90% event-coverage and matched-p95 veto.
-- [x] Reject EMA-map long-only on actual NQ futures.
-- [x] Reject strict close because incremental expectancy over EMA break was only 0.002R.
-- [x] Reject EMA-plus-breakout promotion because of 2023 failure, uncertainty, and control coverage failure.
+Work package: `STOIC123-WP-20260723-03`
 
-## Phase 5 — Selection gate
+- [x] Freeze the post-hoc no-map short result as one unchanged hypothesis.
+- [x] Qualify disjoint 2015-2021 and 2026 YTD USATECH proxy partitions.
+- [x] Freeze and enforce exact annual/YTD source checksums.
+- [x] Preserve both-direction technical management.
+- [x] Run short EMA-break and EMA-break-plus-retest controls.
+- [x] Run 50 New-York-session-aware matched-time short controls per partition.
+- [x] Run cost, delay, year breadth, concentration, uncertainty, and mechanism gates.
+- [x] Independently reconstruct all 16 ledgers and all 12 gates.
+
+Decision: `REJECT_CURRENT_SHORT_SIDE_HYPOTHESIS_NO_PAID_NQ_VALIDATION`.
+
+## Phase 4 — Selection gate
 
 Status: **closed; no finalist**
 
-- No candidate passed all nine numerical gates.
-- Every date-block 95% interval crossed zero.
-- Every candidate was vetoed by the matched-control contract.
-- No Pine, sizing, paper-deployment, alert, or live-trading work is authorized.
+- Actual-NQ long-only candidates failed.
+- The unseen short-only proxy hypothesis failed.
+- No direction or sequence variant has reproducible incremental value over simpler controls.
+- No paid futures-data acquisition is justified for this exact mechanical formulation.
 
-## Phase 6 — Fresh or longer-history evidence
+## Phase 5 — TradingView parity
 
-Status: **blocked until new data exist**
+Status: **closed for current family**
 
-- [ ] Obtain qualified unseen NQ data or materially longer contract-audited NQ history.
-- [ ] Test any retained directional hypothesis only under a new preregistration.
-- [ ] Treat the observed no-map short asymmetry as post-hoc; do not test it again on the current sample.
-- [ ] Acquire actual ES futures data before any ES claim.
-- [ ] Keep all instrument results separate.
+- No Pine port is authorized because there is no data-supported finalist.
+- No alerts, sizing, dashboard, strategy publication, or paper-forward deployment are authorized.
 
-## Phase 7 — TradingView parity
+## Phase 6 — Future research boundary
 
-Status: **blocked; no finalist**
+Status: **new mechanism required**
 
-- [ ] Port only a candidate that first passes fresh-data validation.
-- [ ] Reconcile Python and Pine events one-for-one.
-- [ ] Make higher-timeframe completion and delayed confirmation explicit.
+A future Stoic project may start only when all conditions hold:
 
-## Phase 8 — Paper-forward observation
+- the market mechanism is genuinely different from direction, session, filter, threshold, stop, target, delay, or exit retuning;
+- the hypothesis is independently motivated before inspecting new returns;
+- data and decision gates are preregistered;
+- instrument and source identities remain explicit;
+- current failed artifacts are not reused for candidate selection.
 
-Status: **blocked; no finalist**
-
-- [ ] Freeze any future finalist without further historical tuning.
-- [ ] Observe forward execution and slippage.
-- [ ] Require a new decision gate before production use.
+Until then, the current mechanical Stoic 1-2-3 roadmap is complete and closed.

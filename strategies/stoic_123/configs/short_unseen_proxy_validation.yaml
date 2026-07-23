@@ -1,0 +1,98 @@
+study_id: STOIC123-WP-20260723-03
+frozen_on: 2026-07-23
+status: SOURCE_QUALIFIED_EXECUTION_AUTHORIZED
+purpose: >-
+  Test whether the post-hoc NQ no-map short-only observation replicates without
+  modification on disjoint Dukascopy USATECH bid-CFD proxy history. This is a
+  falsification screen, not CME NQ futures validation.
+matched_control_replicates: 50
+
+hypothesis:
+  source_arm_id: S123_M0_NO_MAP_CONTROL
+  direction_mode: short_only
+  phase1_config_path: strategies/stoic_123/configs/phase1.yaml
+  phase1_expected_sha256: 5d6909bd5740e1cdea9bd3d47a9818289a6faa8b9a61338726afdc53289ff805
+  parameter_changes_allowed: false
+
+source_contract:
+  classification: Dukascopy USATECH bid-CFD Nasdaq-100 proxy; not CME NQ futures
+  qualification_workflow_run: 30046002940
+  price_stream: bid_only
+  signal_and_execution_prices: same_bid_ohlc_stream
+  execution_tick_size: 0.25
+  point_value_usd: 20.0
+  commission_per_side_usd: 2.25
+  source_quote_increment: 0.001
+  inactive_definition: volume_lte_zero
+  timestamp_basis: UTC converted to naive UTC before existing resampling
+  matching_source_timezone: UTC
+  matching_session_timezone: America/New_York
+  partitions:
+    older_history:
+      role: primary_long_history_falsification
+      start_inclusive_utc: 2015-01-01
+      end_exclusive_utc: 2022-01-01
+      labels: [2015, 2016, 2017, 2018, 2019, 2020, 2021]
+      expected_sha256_by_label:
+        2015: b9688d228fb1955c36c3ff98121ce65e703c718ff6d346c3acc2cc8a91cc1bbe
+        2016: f7d398b9e191159494fc447196b5b9b17e58908dd49079aa22063fc23bf42d44
+        2017: 1a46dc15b980b0e969adf65b5fa9327123ab82c270b0e3f65fb9bff2a536585e
+        2018: a5c8c549bb5879a900ffbfc656e7888e0dc45146da7a30d5f7c588c53a97e04f
+        2019: 5b91e33480ace01d1f4f930d464756d28fb480d525e6a4523c09b7787a7fa845
+        2020: 6e4f9212e0ffcc604c5d8bb791c5ebc592061b594fe65b76c56e051f4ddb6f89
+        2021: 674121b3766e586e8bbca84c199035f136990a6f889939458083bf6666fa5a55
+    forward_2026:
+      role: fresh_forward_proxy_check
+      start_inclusive_utc: 2026-01-01
+      end_exclusive_utc: 2026-07-23
+      labels: [2026_YTD]
+      expected_sha256_by_label:
+        2026_YTD: f8e46ff444879e51b149d8a2fe675b8a499186da279cc5d53c3947037059d3fc
+
+comparators:
+  - both_direction_full_sequence
+  - long_only_full_sequence
+  - short_only_ema_break
+  - short_only_ema_break_retest
+  - fifty_deterministic_matched_time_short_controls
+
+execution_tests:
+  baseline_slippage_ticks_each_side: 1.0
+  stressed_slippage_ticks_each_side: 2.0
+  entry_delays_minutes: [1, 5]
+  max_hold_minutes: 1440
+  management_direction: both
+
+promotion_screen:
+  classification_if_all_pass: RETAIN_FOR_PAID_NQ_FUTURES_VALIDATION
+  otherwise: REJECT_OR_HOLD_NO_PROMOTION
+  all_required:
+    - older_history_trade_count_gte_500
+    - older_history_expectancy_positive
+    - older_history_date_block_lo95_positive
+    - at_least_five_of_seven_older_years_positive
+    - largest_positive_year_share_lte_0_40
+    - older_history_two_tick_expectancy_positive
+    - older_history_one_minute_delay_expectancy_positive
+    - forward_2026_trade_count_gte_30
+    - forward_2026_expectancy_positive
+    - forward_2026_two_tick_expectancy_positive
+    - full_sequence_mechanism_value_over_ema_break
+    - matched_time_short_control_passes
+  mechanism_value_rule: >-
+    Full sequence must exceed short EMA-break-only by at least 0.05R expectancy
+    or 20% return-to-drawdown on older history, and must not underperform the
+    control on 2026 YTD.
+  matched_control_rule: >-
+    Every replicate must cover at least 90% of source events, median holding
+    period ratio must remain between 0.75 and 1.25, and full-sequence expectancy
+    must exceed the 95th percentile of matched-control expectancy in both
+    partitions.
+
+restrictions:
+  - No source partition may overlap the inspected 2022-12-26 through 2025-12-10 NQ sample.
+  - No 2022-2025 USATECH performance may be used for candidate selection or promotion.
+  - No parameter, timeframe, threshold, session, stop, target, exit, delay, or matching-rule search.
+  - No pooling of older history and 2026 YTD for promotion decisions.
+  - No proxy result may be represented as CME NQ futures evidence.
+  - No Pine port, sizing, alerts, paper deployment, or live trading authorization.
