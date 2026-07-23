@@ -1,3 +1,4 @@
+# Frozen static BI5 transport; no strategy P&L in this workflow.
 name: Asia Sweep Dukascopy Proxy Data
 
 on:
