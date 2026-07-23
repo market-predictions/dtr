@@ -1,0 +1,24 @@
+{
+  "study_id": "DTR-USA500-WP-20260723-20-STAGE1B",
+  "conclusion": "INDEPENDENT_REVIEW_PASS",
+  "checks": {
+    "arm_contract": true,
+    "selected_session_is_none": true,
+    "decision_no_viable_baseline": true,
+    "no_context_run_after_failed_gate": true,
+    "no_event_run_after_failed_gate": true,
+    "deployment_blocked": true,
+    "all_trade_streams_resequenced": true,
+    "paired_effects_reproduced": true,
+    "stop_rule_followed": true
+  },
+  "roadmap_monitor": {
+    "factorial_preceded_session_decomposition": true,
+    "stage1b_was_preregistered": true,
+    "no_monday_reintroduction": true,
+    "no_session_time_search": true,
+    "no_context_or_event_continuation_without_baseline": true,
+    "no_core_retuning": true
+  },
+  "interpretation": "London-only is positive at one and two ticks but fails the frozen year-stability gate because 2022 and 2025 are negative. It remains diagnostic and is not a USA500 baseline."
+}

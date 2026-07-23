@@ -1,0 +1,32 @@
+{
+  "study_id": "DTR-USA500-WP-20260723-20-STAGE1B",
+  "frozen_after_stage1_before_stage1b_run": true,
+  "reason": "The preregistered Monday x Asia factorial found no positive cost-robust calendar baseline. A bounded session decomposition is required to distinguish the known positive London contribution from the negative Asia and New York contributions without declaring a London-only baseline post hoc.",
+  "parent_reference": "P0_TUE_FRI_ALL",
+  "weekdays": [1, 2, 3, 4],
+  "arms": {
+    "S0_ALL": ["ASIA_7PM", "LONDON_2AM", "NEW_YORK_9AM"],
+    "S1_LONDON_ONLY": ["LONDON_2AM"],
+    "S2_NEW_YORK_ONLY": ["NEW_YORK_9AM"],
+    "S3_ASIA_ONLY": ["ASIA_7PM"],
+    "S4_LONDON_ASIA": ["LONDON_2AM", "ASIA_7PM"],
+    "S5_ASIA_NEW_YORK": ["ASIA_7PM", "NEW_YORK_9AM"]
+  },
+  "promotion_gate": {
+    "one_tick_expectancy_positive": true,
+    "two_tick_expectancy_positive": true,
+    "return_dd_improvement_min": 0.15,
+    "minimum_positive_years": 3,
+    "minimum_2025_net_r": 0.0,
+    "minimum_trades": 180,
+    "alternative_minimum_trade_retention": 0.40,
+    "maximum_single_year_positive_net_share": 0.70,
+    "paired_date_block_mean_difference_positive": true,
+    "crossing_zero_interval_classification": "exploratory"
+  },
+  "continuation": {
+    "if_session_arm_passes": "rerun the six fixed context candidates and five one-at-a-time event policies on that frozen session baseline",
+    "if_no_session_arm_passes": "stop USA500 optimization of this core and classify no viable proxy baseline"
+  },
+  "prohibited": ["session time search", "Monday reintroduction", "core parameter retuning", "context threshold search", "interactions", "deployment"]
+}

@@ -1,0 +1,28 @@
+{
+  "study_id": "DTR-USA500-WP-20260723-20",
+  "conclusion": "INDEPENDENT_REVIEW_PASS",
+  "checks": {
+    "stage1_arm_contract": true,
+    "stage2_candidate_contract": true,
+    "stage3_event_contract": true,
+    "classification_is_exploratory": true,
+    "deployment_blocked": true,
+    "nq_controls_retained": true,
+    "no_interaction_arm": true,
+    "all_metrics_reproduced": true,
+    "paired_observed_effects_reproduced": true,
+    "calendar_selection_gate_compliant": true,
+    "context_selection_gate_compliant": true,
+    "event_selection_gate_compliant": true
+  },
+  "roadmap_compliance": {
+    "started_from_unfiltered_core": true,
+    "monday_asia_factorial_first": true,
+    "nq_transfer_controls_external_only": true,
+    "single_factor_context_only": true,
+    "event_policies_one_at_a_time": true,
+    "no_core_retuning": true,
+    "no_deployment": true
+  },
+  "interpretation": "All calculations and promotion decisions reproduced from saved trade streams. Independent bootstrap seeds are descriptive and do not convert retrospective USA500 development into out-of-sample evidence."
+}
