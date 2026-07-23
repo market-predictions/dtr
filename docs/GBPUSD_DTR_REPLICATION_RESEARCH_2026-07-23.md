@@ -4,44 +4,39 @@
 
 `NO_VIABLE_GBPUSD_DTR_BASELINE`
 
-The frozen Day Trader Rauf core was applied to Dukascopy GBPUSD one-minute bid/ask data from 2022 through 2025. Signals use synchronized midpoint OHLC. The execution model uses the observed 75th-percentile spread, 0.1 pip slippage per side, and a $3.50 commission per side for one standard lot.
+This study applies the frozen Day Trader Rauf core to temporary Dukascopy GBPUSD one-minute bid/ask data from 2022 through 2025. Signals use synchronized midpoint OHLC; the base execution model uses the observed 75th-percentile spread plus 0.1 pip slippage and a $3.50 commission per side for one standard lot.
 
-## Data audit
+## Data and execution audit
 
 - Synchronized active candles: 1,488,142
-- Active period: 2022-01-02 17:01 ET through 2025-12-31 16:58 ET
-- Median quoted spread: 0.90 pips
-- 75th-percentile spread: 1.10 pips
-- Base modeled slippage: 0.65 pips per side
+- Active period: 2022-01-02 17:01:00 through 2025-12-31 16:58:00
+- Median quoted spread: 0.900 pips
+- 75th-percentile spread: 1.100 pips
+- Base modeled slippage: 0.650 pips per side
 - Eligible covered sessions: 3,056
-- The source BI5 field order was corrected to `open, close, low, high` before analysis; all corrected annual files passed OHLC integrity.
 
 ## Monday × Asia factorial
 
-| Arm | Trades | Net R | Expectancy | +1 pip each side | Max DD | Positive years |
-|---|---:|---:|---:|---:|---:|---:|
-| Tue–Fri, all sessions | 669 | -52.15R | -0.078R | -0.109R | 59.90R | 0 |
-| Mon–Fri, all sessions | 837 | -70.52R | -0.084R | -0.116R | 71.85R | 0 |
-| Tue–Fri, no Asia | 527 | -37.63R | -0.071R | -0.100R | 55.17R | 0 |
-| Mon–Fri, no Asia | 646 | -53.92R | -0.083R | -0.113R | 64.90R | 0 |
-
-Adding Monday worsened the portfolio. Removing Asia reduced losses but did not create a positive or cost-robust strategy.
+| arm                |   trades |    net_r |   expectancy_r |   one_pip_each_side_expectancy_r |   max_drawdown_r |   positive_years | gate_all   |
+|:-------------------|---------:|---------:|---------------:|---------------------------------:|-----------------:|-----------------:|:-----------|
+| P0_TUE_FRI_ALL     |      669 | -52.1457 |        -0.0779 |                          -0.1093 |          59.9042 |                0 | False      |
+| P1_MON_FRI_ALL     |      837 | -70.5200 |        -0.0843 |                          -0.1161 |          71.8531 |                0 | False      |
+| P2_TUE_FRI_NO_ASIA |      527 | -37.6297 |        -0.0714 |                          -0.0998 |          55.1725 |                0 | False      |
+| P3_MON_FRI_NO_ASIA |      646 | -53.9245 |        -0.0835 |                          -0.1127 |          64.8976 |                0 | False      |
 
 ## Session decomposition
 
-| Arm | Trades | Net R | Expectancy | +1 pip each side | Max DD | Positive years |
-|---|---:|---:|---:|---:|---:|---:|
-| London only | 284 | -24.66R | -0.087R | -0.117R | 31.89R | 1 |
-| New York only | 266 | -19.96R | -0.075R | -0.101R | 31.24R | 1 |
-| Asia only | 168 | -14.76R | -0.088R | -0.128R | 20.07R | 1 |
-| London + New York | 527 | -37.63R | -0.071R | -0.100R | 55.17R | 0 |
-| London + Asia | 424 | -39.36R | -0.093R | -0.127R | 41.54R | 1 |
-| Asia + New York | 434 | -34.72R | -0.080R | -0.111R | 43.80R | 0 |
+| arm                |   trades |    net_r |   expectancy_r |   one_pip_each_side_expectancy_r |   max_drawdown_r |   positive_years | gate_all   |
+|:-------------------|---------:|---------:|---------------:|---------------------------------:|-----------------:|-----------------:|:-----------|
+| S1_LONDON_ONLY     |      284 | -24.6599 |        -0.0868 |                          -0.1173 |          31.8948 |                1 | False      |
+| S2_NEW_YORK_ONLY   |      266 | -19.9618 |        -0.0750 |                          -0.1010 |          31.2423 |                1 | False      |
+| S3_ASIA_ONLY       |      168 | -14.7558 |        -0.0878 |                          -0.1281 |          20.0729 |                1 | False      |
+| S4_LONDON_NEW_YORK |      527 | -37.6297 |        -0.0714 |                          -0.0998 |          55.1725 |                0 | False      |
+| S5_LONDON_ASIA     |      424 | -39.3611 |        -0.0928 |                          -0.1272 |          41.5387 |                1 | False      |
+| S6_ASIA_NEW_YORK   |      434 | -34.7176 |        -0.0800 |                          -0.1115 |          43.8043 |                0 | False      |
 
-No session arm was positive. The independent verifier reproduced all metrics, paired effects, and selection decisions.
+## Interpretation
 
-## Strategic conclusion
+Neither the frozen broad arms nor the bounded session decomposition produced a cost-robust and year-stable GBPUSD baseline. No neighboring parameter search is authorized on this sample.
 
-The current DTR reversal core does not transfer to GBPUSD. The result is negative before additional one- and two-pip cost stress, so execution refinement cannot rescue it. No neighboring parameter search, Pine conversion, sizing, or deployment is authorized on this sample.
-
-The corrected raw bid/ask cache is retained privately and is not committed or redistributed.
+This is exploratory cross-asset evidence. It does not authorize Pine conversion, position sizing, or live deployment.
