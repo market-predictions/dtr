@@ -1,0 +1,19 @@
+{
+  "base_branch": "agent/nq-usa500-parallel-framework",
+  "branch": "agent/stoic-123-separate-framework",
+  "candidate_family_size": 6,
+  "config_path": "strategies/stoic_123/configs/phase1.yaml",
+  "config_sha256": "5d6909bd5740e1cdea9bd3d47a9818289a6faa8b9a61338726afdc53289ff805",
+  "created": "2026-07-23",
+  "decision": "FRAMEWORK_COMPLETE_DATA_RUN_PENDING",
+  "es_proxy_is_not_cme_es_futures": true,
+  "instruments": [
+    "NQ",
+    "ES_PROXY"
+  ],
+  "performance_inspected": false,
+  "pooling_prohibited": true,
+  "strategy_namespace": "stoic_123_lab",
+  "study_id": "STOIC123-WP-20260723-01",
+  "version": "0.1.0-research"
+}
