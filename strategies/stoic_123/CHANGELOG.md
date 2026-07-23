@@ -1,5 +1,53 @@
 # Changelog — Stoic Edge 1-2-3
 
+## v0.3.0-research-complete — 2026-07-23
+
+### Added
+
+- Preregistered and executed `STOIC123-WP-20260723-02` on the checksum-qualified NQ futures archive.
+- Both-direction, long-only, short-only, EMA-break-only, EMA-break-plus-retest, cost-stress, and delayed-entry scenarios.
+- Fifty deterministic matched-time controls per candidate with frozen event-coverage and holding-period comparability gates.
+- Cached validation simulator and matched-pool engine with exact parity tests against the reference execution engine.
+- Exact source/config preflight, retained diagnostic artifacts, raw-data removal, compact result publication, and independent reconstruction.
+- Final result report, decision JSON, compact summaries, mechanism evidence, inference, matched-control evidence, and veto output.
+
+### Corrected
+
+- Separated entry-direction restrictions from the two-direction management detector.
+- Superseded the flawed informal long-only artifacts.
+- Corrected the validation workflow session helper, NQ execution-model discriminator, manifest date serialization, and final matched-control coverage veto.
+- Preserved the 90% matched-control coverage rule after one mapped arm exposed insufficient coverage; no matching rule was broadened after returns were inspected.
+
+### Result
+
+- No-map long-only: 555 trades, +75.71R, +0.136R expectancy; 4/9 gates.
+- EMA-map long-only: 252 trades, -1.83R, -0.007R expectancy; 2/9 gates.
+- Strict-close long-only: 226 trades, +10.97R, +0.049R expectancy; 4/9 gates.
+- EMA-plus-breakout long-only: 147 trades, +41.56R, +0.283R expectancy; 5/9 gates.
+- Every 95% date-block interval crossed zero.
+- No arm passed all numerical gates.
+- All four arms were vetoed by the matched-control contract.
+
+### Decision
+
+`NO_PROMOTION_STOP_NQ_LONG_ONLY_CURRENT_SAMPLE`
+
+The actual NQ archive does not confirm the proxy-derived EMA-map long-only thesis. Strict close adds negligible expectancy over a simple EMA break. EMA-plus-breakout is historically interesting but chronologically unstable and statistically uncertain.
+
+### Known limitations
+
+- Continuous-contract roll and exact timestamp semantics remain unresolved.
+- December 2022 is only a partial year.
+- Matched-time controls are causal benchmarks, not complete factor models.
+- The observed no-map short-side strength is post-hoc and cannot be selected on this sample.
+
+### Next
+
+- Stop same-sample long-only research and tuning.
+- Retain directional asymmetry only as a fresh-data hypothesis.
+- Require qualified unseen or materially longer contract-audited data before any new Stoic selection work.
+- Keep Pine, sizing, alerts, paper deployment, and live use blocked.
+
 ## v0.2.0-research — 2026-07-23
 
 ### Added
@@ -12,40 +60,33 @@
 - Cached resampling and indexed management exits.
 - Array-based detector engine with exact equivalence against the original state machine.
 - Four additional regression tests, bringing the dedicated total to fourteen.
-- Full GBPUSD, NQ-proxy, and ES-proxy phase-one result and independent reconstruction packages.
-- Canonical Drive data and result manifests for NQ proxy, ES proxy, and repaired GBPUSD.
+- Full GBPUSD 2022-2025 phase-one result and independent reconstruction package.
+- Canonical Drive data manifests for NQ proxy, ES proxy, and repaired GBPUSD.
 
 ### Changed
 
 - Replaced pandas row-by-row state iteration with an equivalent NumPy-backed state machine.
 - Replaced quadratic management-event lookup with sorted timestamp indexes.
 - Replaced concatenation-heavy bootstrap arithmetic with block sums and counts.
-- Split index-proxy execution into clean instrument-isolated runs to prevent transition-state resource pressure.
 - Preserved the frozen `phase1.yaml` byte-for-byte; SHA-256 remains `5d6909bd5740e1cdea9bd3d47a9818289a6faa8b9a61338726afdc53289ff805`.
 
 ### Reason
 
-GBPUSD requires true bid/ask execution rather than a futures-style fixed cost approximation. Four years of minute data also required equivalent array-based iteration and indexed lookups. Instrument-isolated runs preserve scientific separation and remove unnecessary peak-memory coupling.
+GBPUSD requires true bid/ask execution rather than a futures-style fixed cost approximation. The original detector and inference loops also became operationally impractical on four years of minute data. The changes preserve strategy logic while making the study executable and auditable.
 
 ### Result
 
-- GBPUSD: all six arms are `NO_EDGE`; expectancy ranges from -0.451R to -0.788R. Direct transfer is rejected.
-- NQ proxy: five arms are positive; the strict-close arm leads at 0.204R expectancy, but its 95% date-block interval crosses zero.
-- ES proxy: five arms are positive; EMA-plus-breakout leads at 0.115R and strict close produces 0.104R, but all intervals cross zero.
-- Cross-proxy conclusion: strict close is the strongest robustness candidate, not a validated strategy.
+All six GBPUSD arms are `NO_EDGE`. Net expectancy ranges from -0.451R to -0.788R per trade. No parameter tuning or second-stage GBPUSD search is authorized.
 
 ### Known limitations
 
 - GBPUSD is one Dukascopy spot-FX quote stream, not a broker-neutral consolidated tape.
 - NQ and ES proxy archives are bid-only CFDs, not CME futures.
 - Provider volume is not centralized futures volume.
-- All positive proxy candidates remain statistically uncertain under date-block resampling.
 
 ### Next
 
-- Execute preregistered nearby-definition, timeframe, chronology, and cost robustness tests.
-- Compare proxy findings against the qualified NQ futures archive when mounted.
-- Test mechanism value against simpler EMA-break and matched-entry controls.
+- Compare proxy results against qualified futures evidence.
 - Stop GBPUSD research unless a genuinely different mechanism is preregistered.
 
 ## v0.1.0-research — 2026-07-23

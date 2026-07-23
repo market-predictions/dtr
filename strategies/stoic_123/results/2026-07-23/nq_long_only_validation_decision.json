@@ -1,0 +1,37 @@
+{
+  "candidate_arms": [
+    "S123_M0_NO_MAP_CONTROL",
+    "S123_M1_EMA_MAP",
+    "S123_C1_STRICT_CLOSE",
+    "S123_M3_EMA_PLUS_BREAKOUT"
+  ],
+  "design_sha256": "becb765fec8c933258500c3fbd2aafca84e06f4c456ea7c96f9bf6e179633777",
+  "management_contract": "entry restrictions do not disable opposite-direction technical exits",
+  "matched_control_replicates": 50,
+  "matched_control_veto_contract": {
+    "full_expectancy_must_exceed_matched_p95": true,
+    "median_hold_ratio_max": 1.25,
+    "median_hold_ratio_min": 0.75,
+    "minimum_event_match_fraction": 0.9
+  },
+  "matched_control_vetoed_arms": [
+    "S123_C1_STRICT_CLOSE",
+    "S123_M0_NO_MAP_CONTROL",
+    "S123_M1_EMA_MAP",
+    "S123_M3_EMA_PLUS_BREAKOUT"
+  ],
+  "numerical_gate_passed_arms": [],
+  "phase1_sha256": "5d6909bd5740e1cdea9bd3d47a9818289a6faa8b9a61338726afdc53289ff805",
+  "promoted_arms": [],
+  "restrictions": [
+    "no parameter, threshold, timeframe, session, stop, target or exit optimization",
+    "no candidate selection outside the four frozen arms",
+    "no use of ES proxy or GBPUSD results to tune NQ",
+    "no pooled instrument result",
+    "no CME contract or rollover claim beyond the registered source limitations",
+    "no Pine port, sizing, alert, deployment or profitability authorization"
+  ],
+  "source_sha256": "8d3f157a422636e5b8dda51cc3a3d9209c50cb53f9b279d3e14b627ce59370dc",
+  "status": "NO_PROMOTION",
+  "study_id": "STOIC123-WP-20260723-02"
+}
