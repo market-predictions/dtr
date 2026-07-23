@@ -12,6 +12,7 @@ on:
       - "strategies/stoic_123/configs/nq_long_only_validation.yaml"
       - "strategies/stoic_123/configs/phase1.yaml"
       - "tests/test_stoic_123_validation.py"
+      - "tests/test_stoic_123_validation_backtest.py"
   pull_request:
     branches:
       - agent/stoic-123-separate-framework
@@ -23,6 +24,11 @@ on:
       - "strategies/stoic_123/configs/nq_long_only_validation.yaml"
       - "strategies/stoic_123/configs/phase1.yaml"
       - "tests/test_stoic_123_validation.py"
+      - "tests/test_stoic_123_validation_backtest.py"
+
+concurrency:
+  group: stoic-nq-long-only-validation-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -52,7 +58,12 @@ jobs:
         run: ruff check .
 
       - name: Validation tests
-        run: pytest -q tests/test_stoic_123_validation.py tests/test_stoic_123.py tests/test_stoic_123_gbpusd.py
+        run: >-
+          pytest -q
+          tests/test_stoic_123_validation.py
+          tests/test_stoic_123_validation_backtest.py
+          tests/test_stoic_123.py
+          tests/test_stoic_123_gbpusd.py
 
       - name: Acquire registered public NQ archive
         shell: bash
