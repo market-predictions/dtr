@@ -1,0 +1,179 @@
+name: Asia Sweep PDH PDL Cluster Challenger
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/asia-sweep-pdh-pdl-cluster-challenger.yml"
+      - "scripts/run_asia_sweep_cluster_challenger.py"
+      - "scripts/aggregate_asia_sweep_cluster_challenger.py"
+      - "src/dtr_lab/strategies/asia_sweep/cluster_challenger.py"
+      - "strategies/asia_sweep/tests/test_cluster_challenger.py"
+      - "strategies/asia_sweep/governance/WORKPACKAGE_2026-07-23_PDH_PDL_CLUSTER_CHALLENGER.md"
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  instrument-cluster:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - instrument: NQ_PROXY
+            manifest: strategies/asia_sweep/configs/manifests/nq_proxy_dukascopy_development.yaml
+            dataset: NQ_PROXY_DUKASCOPY_USATECH_M1_BID_FULL_GRID_UTC_ET.zip
+          - instrument: ES_PROXY
+            manifest: strategies/asia_sweep/configs/manifests/es_proxy_dukascopy_development.yaml
+            dataset: ES_PROXY_DUKASCOPY_USA500_M1_BID_FULL_GRID_UTC_ET.zip
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run frozen challenger tests
+        run: |
+          PYTHONPATH=src pytest -c strategies/asia_sweep/pytest.ini \
+            strategies/asia_sweep/tests/test_cluster_challenger.py
+
+      - name: Download canonical private proxy artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: asia-sweep-dukascopy-proxies
+          path: canonical
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: 29996917493
+
+      - name: Verify and stage one private dataset
+        run: |
+          test -f "canonical/prepared/${{ matrix.dataset }}"
+          mkdir -p data/private/asia_sweep
+          cp "canonical/prepared/${{ matrix.dataset }}" \
+            "data/private/asia_sweep/${{ matrix.dataset }}"
+
+      - name: Run frozen development challenger
+        run: |
+          python scripts/run_asia_sweep_cluster_challenger.py \
+            "${{ matrix.manifest }}" \
+            "cluster-${{ matrix.instrument }}"
+
+      - name: Verify instrument boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          import pandas as pd
+
+          root = Path("cluster-${{ matrix.instrument }}")
+          summary = json.loads((root / "instrument_summary.json").read_text())
+          audit = pd.read_csv(root / "cluster_audit_ledger.csv")
+          executions = pd.read_csv(root / "cluster_execution_ledger.csv")
+          assert summary["instrument"] == "${{ matrix.instrument }}"
+          assert summary["signals"] == summary["executions"]
+          assert summary["validation_partition_opened"] is False
+          assert pd.to_datetime(audit["trade_date"]).max() < pd.Timestamp("2024-07-01")
+          if not executions.empty:
+              assert pd.to_datetime(executions["trade_date"]).max() < pd.Timestamp("2024-07-01")
+              assert set(executions["status"]).issubset({"EXITED", "BLOCKED", "UNRESOLVED"})
+          PY
+
+      - name: Remove private source before upload
+        if: always()
+        run: rm -rf canonical data/private
+
+      - name: Mark private source removal
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path("cluster-${{ matrix.instrument }}/instrument_summary.json")
+          if path.exists():
+              value = json.loads(path.read_text())
+              value["private_source_removed_before_upload"] = True
+              path.write_text(json.dumps(value, indent=2) + "\n")
+          PY
+
+      - name: Upload derived challenger result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: asia-sweep-cluster-${{ matrix.instrument }}
+          path: cluster-${{ matrix.instrument }}
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 6
+
+  aggregate-cluster:
+    needs: instrument-cluster
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Download instrument challenger outputs
+        uses: actions/download-artifact@v4
+        with:
+          pattern: asia-sweep-cluster-*
+          path: cluster-input
+
+      - name: Aggregate and apply frozen gate
+        run: |
+          python scripts/aggregate_asia_sweep_cluster_challenger.py \
+            cluster-input \
+            cluster-result
+
+      - name: Verify aggregate boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          summary = json.loads(Path("cluster-result/cluster_summary.json").read_text())
+          assert summary["validation_partition_opened"] is False
+          assert summary["decision"] in {
+              "PROMOTE_ONE_FROZEN_CLUSTER_CHALLENGER",
+              "STOP_FINAL_CLUSTER_CHALLENGER",
+          }
+          PY
+
+      - name: Upload aggregate challenger result
+        uses: actions/upload-artifact@v4
+        with:
+          name: asia-sweep-pdh-pdl-cluster-challenger-summary
+          path: cluster-result
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 6
