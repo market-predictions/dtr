@@ -11,6 +11,7 @@
 - Added causal entry timestamps, raw stop/target construction and rejection-reason logging.
 - Added a prefix-replay causality validator.
 - Added a separate nine-test synthetic suite outside the default DTR test path.
+- Added a dedicated Asia Sweep CI workflow for Python 3.11 and 3.12.
 - Added roadmap, preregistration, strategy specification, work package, claim, handover and reviewer report.
 
 ### Corrected during review
@@ -25,10 +26,11 @@ The Asia high/low sweep hypothesis is a distinct strategy, not a DTR filter or e
 
 ### Validation
 
-- Python syntax compilation passed.
-- Separate synthetic suite: 9 passed.
-- Manual line-length review found no lines above 100 characters in the edited Python files.
-- Existing DTR files and active signal logic were not edited.
+- Python syntax compilation passed locally.
+- Separate synthetic suite: 9 passed locally.
+- Dedicated Asia Sweep CI passed on Python 3.11 and 3.12.
+- Original repository CI passed, including the Ruff gate and existing DTR tests.
+- Branch comparison remains additive: no existing DTR file is modified or deleted.
 
 ### Known limits
 
@@ -37,7 +39,6 @@ The Asia high/low sweep hypothesis is a distinct strategy, not a DTR filter or e
 - ES data are not registered in the repository.
 - Manual chart audit of 50 NQ and 50 ES events is not complete.
 - No historical or fresh OOS result exists.
-- GitHub CI status remains to be confirmed.
 
 ### Next
 
