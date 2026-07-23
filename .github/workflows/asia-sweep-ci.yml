@@ -68,7 +68,7 @@ jobs:
         run: test "${{ steps.asia_tests.outputs.exit_code }}" = "0"
 
   proxy-acquire:
-    if: github.head_ref == 'agent/asia-sweep-dukascopy-proxy-registration'
+    if: startsWith(github.head_ref, 'agent/asia-sweep-dukascopy-proxy-registration')
     runs-on: ubuntu-latest
     timeout-minutes: 180
     strategy:
@@ -155,7 +155,7 @@ jobs:
           compression-level: 0
 
   proxy-normalize:
-    if: github.head_ref == 'agent/asia-sweep-dukascopy-proxy-registration'
+    if: startsWith(github.head_ref, 'agent/asia-sweep-dukascopy-proxy-registration')
     needs: proxy-acquire
     runs-on: ubuntu-latest
     timeout-minutes: 90
