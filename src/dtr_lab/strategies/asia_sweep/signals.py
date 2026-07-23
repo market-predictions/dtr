@@ -5,6 +5,7 @@ from dataclasses import replace
 import numpy as np
 import pandas as pd
 
+from .integrity import IntervalIntegrity, audit_minute_interval
 from .model import AsiaSweepConfig, AsiaSweepEvent, AsiaSweepVariant, ExecutionWindow
 
 _REQUIRED_COLUMNS = {"timestamp", "open", "high", "low", "close"}
@@ -16,7 +17,12 @@ def _validate_bars(frame: pd.DataFrame, *, name: str) -> pd.DataFrame:
         raise ValueError(f"{name} missing required columns: {sorted(missing)}")
     out = frame.copy()
     out["timestamp"] = pd.to_datetime(out["timestamp"])
-    out = out.sort_values("timestamp").drop_duplicates("timestamp").reset_index(drop=True)
+    duplicate_mask = out["timestamp"].duplicated(keep=False)
+    if bool(duplicate_mask.any()):
+        duplicate_values = out.loc[duplicate_mask, "timestamp"].astype(str).unique()
+        preview = ", ".join(duplicate_values[:3])
+        raise ValueError(f"{name} has duplicate timestamps: {preview}")
+    out = out.sort_values("timestamp").reset_index(drop=True)
     if out.empty:
         raise ValueError(f"{name} is empty")
     return out
@@ -84,6 +90,8 @@ def _base_event(
     asia_end: pd.Timestamp,
     asia_high: float,
     asia_low: float,
+    asia_integrity: IntervalIntegrity,
+    execution_integrity: IntervalIntegrity,
     *,
     status: str,
     rejection_reason: str | None,
@@ -100,6 +108,37 @@ def _base_event(
         asia_high=asia_high,
         asia_low=asia_low,
         asia_range_points=asia_high - asia_low,
+        asia_expected_minutes=asia_integrity.expected_minutes,
+        asia_observed_minutes=asia_integrity.observed_minutes,
+        asia_missing_minutes=asia_integrity.missing_minutes,
+        asia_complete=asia_integrity.complete,
+        execution_expected_minutes=execution_integrity.expected_minutes,
+        execution_observed_minutes=execution_integrity.observed_minutes,
+        execution_missing_minutes=execution_integrity.missing_minutes,
+        execution_window_complete=execution_integrity.complete,
+    )
+
+
+def _attach_pre_signal_integrity(
+    event: AsiaSweepEvent,
+    one_minute: pd.DataFrame,
+    start: pd.Timestamp,
+    end: pd.Timestamp,
+) -> AsiaSweepEvent:
+    integrity = audit_minute_interval(one_minute, start, end)
+    updated = replace(
+        event,
+        pre_signal_expected_minutes=integrity.expected_minutes,
+        pre_signal_observed_minutes=integrity.observed_minutes,
+        pre_signal_missing_minutes=integrity.missing_minutes,
+        pre_signal_path_complete=integrity.complete,
+    )
+    if integrity.complete:
+        return updated
+    return replace(
+        updated,
+        status="INELIGIBLE",
+        rejection_reason="incomplete_pre_signal_path",
     )
 
 
@@ -153,12 +192,7 @@ def _find_failed_retest(
     asia_level: float,
     cfg: AsiaSweepConfig,
 ) -> int | None:
-    """Causal one-right-bar swing, retest, then break state machine.
-
-    A reaction swing is only available one full bar after its visual location. The retest
-    must occur after that confirmation and remain strictly inside the original sweep extreme.
-    Entry is emitted only after a later close breaks the confirmed reaction swing.
-    """
+    """Causal one-right-bar swing, retest, then break state machine."""
 
     end = min(len(window_bars), sweep_position + cfg.failed_retest_max_bars + 1)
     reaction_level: float | None = None
@@ -217,6 +251,19 @@ def _find_failed_retest(
     return None
 
 
+def _variant_audit_start(
+    cfg: AsiaSweepConfig,
+    window_start: pd.Timestamp,
+    decision_row: pd.Series,
+) -> pd.Timestamp:
+    if cfg.variant != AsiaSweepVariant.DISPLACEMENT:
+        return window_start
+    reference_start = pd.Timestamp(decision_row["timestamp"]) - pd.Timedelta(
+        minutes=5 * cfg.displacement_median_length
+    )
+    return min(window_start, reference_start)
+
+
 def _detect_window_event(
     instrument: str,
     trade_date: pd.Timestamp,
@@ -226,39 +273,80 @@ def _detect_window_event(
     cfg: AsiaSweepConfig,
 ) -> AsiaSweepEvent:
     asia_start, asia_end = _asia_bounds(trade_date, cfg)
+    start, end = _window_bounds(trade_date, window)
+    asia_integrity = audit_minute_interval(one_minute, asia_start, asia_end)
+    execution_integrity = audit_minute_interval(one_minute, start, end)
+
+    if not asia_integrity.complete:
+        return _base_event(
+            instrument,
+            trade_date,
+            window,
+            cfg,
+            asia_start,
+            asia_end,
+            np.nan,
+            np.nan,
+            asia_integrity,
+            execution_integrity,
+            status="INELIGIBLE",
+            rejection_reason="incomplete_asia_range",
+        )
+
     asia = one_minute[
         (one_minute["timestamp"] >= asia_start)
         & (one_minute["timestamp"] < asia_end)
     ]
-    if asia.empty:
-        return _base_event(
-            instrument, trade_date, window, cfg, asia_start, asia_end, np.nan, np.nan,
-            status="INELIGIBLE", rejection_reason="missing_asia_range",
-        )
     asia_high = float(asia["high"].max())
     asia_low = float(asia["low"].min())
     if not np.isfinite(asia_high) or not np.isfinite(asia_low) or asia_high <= asia_low:
         return _base_event(
-            instrument, trade_date, window, cfg, asia_start, asia_end, asia_high, asia_low,
-            status="INELIGIBLE", rejection_reason="invalid_asia_range",
+            instrument,
+            trade_date,
+            window,
+            cfg,
+            asia_start,
+            asia_end,
+            asia_high,
+            asia_low,
+            asia_integrity,
+            execution_integrity,
+            status="INELIGIBLE",
+            rejection_reason="invalid_asia_range",
         )
 
-    start, end = _window_bounds(trade_date, window)
     bars_with_reference = bars_5m.copy()
     bodies = (bars_with_reference["close"] - bars_with_reference["open"]).abs()
     bars_with_reference["_causal_body_median"] = bodies.shift(1).rolling(
         cfg.displacement_median_length,
-        min_periods=max(3, min(cfg.displacement_median_length, 5)),
+        min_periods=cfg.displacement_median_length,
     ).median()
     wb = bars_with_reference[
         (bars_with_reference["timestamp"] >= start)
         & (bars_with_reference["timestamp"] < end)
     ].copy().reset_index(drop=True)
+
+    base = _base_event(
+        instrument,
+        trade_date,
+        window,
+        cfg,
+        asia_start,
+        asia_end,
+        asia_high,
+        asia_low,
+        asia_integrity,
+        execution_integrity,
+        status="INELIGIBLE",
+        rejection_reason=None,
+    )
     if wb.empty:
-        return _base_event(
-            instrument, trade_date, window, cfg, asia_start, asia_end, asia_high, asia_low,
-            status="INELIGIBLE", rejection_reason="missing_execution_window",
+        reason = (
+            "incomplete_execution_window"
+            if not execution_integrity.complete
+            else "missing_execution_bars"
         )
+        return replace(base, rejection_reason=reason)
 
     min_depth = cfg.min_sweep_ticks * cfg.tick_size
     sweep_pos: int | None = None
@@ -267,9 +355,17 @@ def _detect_window_event(
         upper = float(row["high"]) - asia_high >= min_depth
         lower = asia_low - float(row["low"]) >= min_depth
         if upper and lower:
-            return _base_event(
-                instrument, trade_date, window, cfg, asia_start, asia_end, asia_high, asia_low,
-                status="REJECTED", rejection_reason="ambiguous_double_sweep",
+            event = replace(
+                base,
+                status="REJECTED",
+                rejection_reason="ambiguous_double_sweep",
+                first_sweep_timestamp=pd.Timestamp(row["timestamp"]),
+            )
+            return _attach_pre_signal_integrity(
+                event,
+                one_minute,
+                start,
+                _bar_end(row),
             )
         if lower:
             sweep_pos, direction = int(pos), 1
@@ -279,22 +375,22 @@ def _detect_window_event(
             break
 
     if sweep_pos is None:
-        return _base_event(
-            instrument, trade_date, window, cfg, asia_start, asia_end, asia_high, asia_low,
-            status="NO_SWEEP", rejection_reason=None,
-        )
+        if not execution_integrity.complete:
+            return replace(base, rejection_reason="incomplete_execution_window")
+        return replace(base, status="NO_SWEEP", rejection_reason=None)
 
     row = wb.iloc[sweep_pos]
     sweep_extreme = float(row["low"] if direction > 0 else row["high"])
     depth = asia_low - sweep_extreme if direction > 0 else sweep_extreme - asia_high
-    reclaim = float(row["close"]) >= asia_low if direction > 0 else float(row["close"]) <= asia_high
-    wick_ratio, clv = _morphology(row, direction)
-    base = _base_event(
-        instrument, trade_date, window, cfg, asia_start, asia_end, asia_high, asia_low,
-        status="REJECTED", rejection_reason=None,
+    reclaim = (
+        float(row["close"]) >= asia_low
+        if direction > 0
+        else float(row["close"]) <= asia_high
     )
+    wick_ratio, clv = _morphology(row, direction)
     event = replace(
         base,
+        status="REJECTED",
         swept_side="LOW" if direction > 0 else "HIGH",
         direction=direction,
         first_sweep_timestamp=pd.Timestamp(row["timestamp"]),
@@ -311,6 +407,14 @@ def _detect_window_event(
         closed_back_inside=reclaim,
         reclaim_delay_bars=0 if reclaim else None,
     )
+    event = _attach_pre_signal_integrity(
+        event,
+        one_minute,
+        start,
+        _bar_end(row),
+    )
+    if event.status == "INELIGIBLE":
+        return event
     if not reclaim:
         return replace(event, rejection_reason="no_same_bar_reclaim")
 
@@ -321,21 +425,77 @@ def _detect_window_event(
     elif cfg.variant == AsiaSweepVariant.DISPLACEMENT:
         midpoint = (float(row["high"]) + float(row["low"])) / 2.0
         entry_pos, delay = _find_displacement(
-            wb, sweep_pos, direction, midpoint, asia_high, asia_low, cfg
+            wb,
+            sweep_pos,
+            direction,
+            midpoint,
+            asia_high,
+            asia_low,
+            cfg,
         )
         if entry_pos is None:
+            deadline = min(
+                end,
+                _bar_end(row)
+                + pd.Timedelta(minutes=5 * cfg.displacement_max_bars),
+            )
+            audit_start = min(
+                start,
+                pd.Timestamp(row["timestamp"])
+                - pd.Timedelta(minutes=5 * cfg.displacement_median_length),
+            )
+            event = _attach_pre_signal_integrity(
+                event,
+                one_minute,
+                audit_start,
+                deadline,
+            )
+            if event.status == "INELIGIBLE":
+                return event
             return replace(event, rejection_reason="no_displacement")
-        event = replace(event, displacement_present=True, displacement_delay_bars=delay)
+        event = replace(
+            event,
+            displacement_present=True,
+            displacement_delay_bars=delay,
+        )
     elif cfg.variant == AsiaSweepVariant.FAILED_RETEST:
         asia_level = asia_low if direction > 0 else asia_high
         entry_pos = _find_failed_retest(
-            wb, sweep_pos, direction, sweep_extreme, asia_level, cfg
+            wb,
+            sweep_pos,
+            direction,
+            sweep_extreme,
+            asia_level,
+            cfg,
         )
         if entry_pos is None:
+            deadline = min(
+                end,
+                _bar_end(row)
+                + pd.Timedelta(minutes=5 * cfg.failed_retest_max_bars),
+            )
+            event = _attach_pre_signal_integrity(
+                event,
+                one_minute,
+                start,
+                deadline,
+            )
+            if event.status == "INELIGIBLE":
+                return event
             return replace(event, rejection_reason="no_failed_retest")
         event = replace(event, failed_retest_present=True)
 
     entry_row = wb.iloc[int(entry_pos)]
+    audit_start = _variant_audit_start(cfg, start, entry_row)
+    event = _attach_pre_signal_integrity(
+        event,
+        one_minute,
+        audit_start,
+        _bar_end(entry_row),
+    )
+    if event.status == "INELIGIBLE":
+        return event
+
     entry = float(entry_row["close"])
     stop = (
         sweep_extreme - cfg.stop_buffer_ticks * cfg.tick_size
