@@ -30,24 +30,28 @@ _REQUIRED_EVENT_COLUMNS = {
     "stop_price_raw",
     "target_price_raw",
 }
-_IDENTITY_COLUMNS = (
-    "instrument",
-    "trade_date",
-    "execution_window",
-    "variant",
-)
 _FROZEN_TARGET_RR = 2.0
+
+
+def _strict_text(value: object, *, name: str) -> str:
+    if not isinstance(value, str):
+        raise ValueError(f"{name} must be a string")
+    if not value or value != value.strip():
+        raise ValueError(f"{name} must be non-empty and contain no edge whitespace")
+    return value
 
 
 @dataclass(frozen=True)
 class IntegrationConfig:
-    """Strict synthetic event-to-execution integration contract."""
+    """Strict one-instrument synthetic event-to-execution contract."""
 
+    instrument: str
     execution: ExecutionConfig
     session_timezone: str = "America/New_York"
     price_tolerance: float = 1e-9
 
     def __post_init__(self) -> None:
+        _strict_text(self.instrument, name="instrument")
         if not self.session_timezone:
             raise ValueError("session_timezone must be non-empty")
         try:
@@ -73,13 +77,6 @@ def _canonical_trade_date(value: object) -> str:
     if pd.isna(timestamp):
         raise ValueError("trade_date is missing")
     return timestamp.strftime("%Y-%m-%d")
-
-
-def _strict_text(value: object, *, name: str) -> str:
-    text = str(value)
-    if not text or text != text.strip():
-        raise ValueError(f"{name} must be non-empty and contain no edge whitespace")
-    return text
 
 
 def _canonical_event_identity(event: Mapping[str, object]) -> str:
@@ -169,7 +166,10 @@ def _window_end(
     return _window_bounds(event, cfg)[1]
 
 
-def _validate_event_packet(frame: pd.DataFrame) -> pd.DataFrame:
+def _validate_event_packet(
+    frame: pd.DataFrame,
+    cfg: IntegrationConfig,
+) -> pd.DataFrame:
     if frame.attrs.get("asia_sweep_event_source_kind") != _EVENT_SOURCE_KIND:
         raise ValueError("event integration is synthetic-packet-only")
     missing = _REQUIRED_EVENT_COLUMNS.difference(frame.columns)
@@ -177,7 +177,15 @@ def _validate_event_packet(frame: pd.DataFrame) -> pd.DataFrame:
         raise ValueError(f"event packet missing required columns: {sorted(missing)}")
     if frame.empty:
         raise ValueError("event packet is empty")
-    return frame.copy(deep=True)
+    packet = frame.copy(deep=True)
+    instruments = {
+        _strict_text(value, name="instrument") for value in packet["instrument"]
+    }
+    if instruments != {cfg.instrument}:
+        raise ValueError(
+            "event packet instruments must equal the one configured instrument"
+        )
+    return packet
 
 
 def _strict_direction(value: object) -> int:
@@ -208,7 +216,9 @@ def _validate_event_geometry(
     except ValueError as exc:
         raise ValueError(f"unknown Asia Sweep variant: {variant_text}") from exc
 
-    _strict_text(event["instrument"], name="instrument")
+    instrument = _strict_text(event["instrument"], name="instrument")
+    if instrument != cfg.instrument:
+        raise ValueError("event instrument does not match integration economics")
     direction = _strict_direction(event["direction"])
     try:
         entry_time = pd.Timestamp(event["entry_timestamp"])
@@ -261,7 +271,7 @@ def map_event_to_execution_signal(
 
     direction, entry_time, _, stop, _ = _validate_event_geometry(event, cfg)
     return ExecutionSignal(
-        instrument=_strict_text(event["instrument"], name="instrument"),
+        instrument=cfg.instrument,
         direction=direction,
         signal_timestamp=entry_time,
         window_end=_window_end(event, cfg),
@@ -317,9 +327,9 @@ def replay_synthetic_event_packet(
     minute_frames: Mapping[str, pd.DataFrame],
     cfg: IntegrationConfig,
 ) -> pd.DataFrame:
-    """Replay a marked synthetic packet deterministically, sorted by stable key."""
+    """Replay a one-instrument marked packet, sorted by stable key."""
 
-    packet = _validate_event_packet(events)
+    packet = _validate_event_packet(events, cfg)
     keys = packet.apply(lambda row: stable_event_key(row), axis=1)
     if bool(keys.duplicated(keep=False).any()):
         duplicates = sorted(keys[keys.duplicated(keep=False)].unique())
