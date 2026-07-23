@@ -19,6 +19,7 @@ from pathlib import Path
 SYMBOL = "USATECHIDXUSD"
 RECORD = struct.Struct(">5if")
 DIVISOR = 1000.0
+CandleRow = tuple[str, float, float, float, float, float]
 
 
 def _sha256(path: Path) -> str:
@@ -29,7 +30,7 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def _fetch_day(day: dt.date) -> tuple[dt.date, list[tuple[str, float, float, float, float, float]], str, int]:
+def _fetch_day(day: dt.date) -> tuple[dt.date, list[CandleRow], str, int]:
     url = (
         f"https://datafeed.dukascopy.com/datafeed/{SYMBOL}/"
         f"{day.year:04d}/{day.month - 1:02d}/{day.day:02d}/BID_candles_min_1.bi5"
@@ -50,13 +51,11 @@ def _fetch_day(day: dt.date) -> tuple[dt.date, list[tuple[str, float, float, flo
                 raise ValueError(f"record-size mismatch on {day}")
 
             midnight = dt.datetime.combine(day, dt.time(), tzinfo=dt.timezone.utc)
-            rows: list[tuple[str, float, float, float, float, float]] = []
+            rows: list[CandleRow] = []
             zero_volume = 0
             for offset in range(0, len(payload), RECORD.size):
-                seconds, open_raw, close_raw, low_raw, high_raw, volume_raw = RECORD.unpack_from(
-                    payload,
-                    offset,
-                )
+                unpacked = RECORD.unpack_from(payload, offset)
+                seconds, open_raw, close_raw, low_raw, high_raw, volume_raw = unpacked
                 volume = float(volume_raw) * 1_000_000.0
                 if volume <= 0:
                     zero_volume += 1
@@ -96,7 +95,9 @@ def _open_deterministic_gzip_text(path: Path) -> io.TextIOWrapper:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Acquire a fixed USATECH M1 BID partition")
+    parser = argparse.ArgumentParser(
+        description="Acquire a fixed USATECH M1 BID partition"
+    )
     parser.add_argument("--start", type=dt.date.fromisoformat, required=True)
     parser.add_argument("--end", type=dt.date.fromisoformat, required=True)
     parser.add_argument("--label", required=True)
@@ -111,7 +112,7 @@ def main() -> None:
         days.append(current)
         current += dt.timedelta(days=1)
 
-    results: dict[dt.date, list[tuple[str, float, float, float, float, float]]] = {}
+    results: dict[dt.date, list[CandleRow]] = {}
     statuses: dict[str, int] = {}
     zero_volume_rows = 0
     with ThreadPoolExecutor(max_workers=args.workers) as pool:
@@ -129,7 +130,17 @@ def main() -> None:
     seen: set[str] = set()
     with _open_deterministic_gzip_text(output) as handle:
         writer = csv.writer(handle, lineterminator="\n")
-        writer.writerow(["timestamp UTC", "open", "high", "low", "close", "volume", "is_active_quote"])
+        writer.writerow(
+            [
+                "timestamp UTC",
+                "open",
+                "high",
+                "low",
+                "close",
+                "volume",
+                "is_active_quote",
+            ]
+        )
         for day in sorted(results):
             for timestamp, open_, high, low, close, volume in results[day]:
                 if timestamp in seen:
@@ -156,7 +167,10 @@ def main() -> None:
         "sha256": _sha256(output),
     }
     audit_path = Path(f"usatechidxusd_m1_bid_{args.label}_audit.json")
-    audit_path.write_text(json.dumps(audit, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    audit_path.write_text(
+        json.dumps(audit, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
     print(json.dumps(audit, indent=2, sort_keys=True))
 
 
