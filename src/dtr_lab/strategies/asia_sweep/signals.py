@@ -26,15 +26,25 @@ def _timestamp(day: pd.Timestamp, hour: int, minute: int) -> pd.Timestamp:
     return day.normalize() + pd.Timedelta(hours=hour, minutes=minute)
 
 
-def _asia_bounds(trade_date: pd.Timestamp, cfg: AsiaSweepConfig) -> tuple[pd.Timestamp, pd.Timestamp]:
+def _asia_bounds(
+    trade_date: pd.Timestamp,
+    cfg: AsiaSweepConfig,
+) -> tuple[pd.Timestamp, pd.Timestamp]:
     end = _timestamp(trade_date, cfg.asia_end_hour, cfg.asia_end_minute)
-    start = _timestamp(trade_date - pd.Timedelta(days=1), cfg.asia_start_hour, cfg.asia_start_minute)
+    start = _timestamp(
+        trade_date - pd.Timedelta(days=1),
+        cfg.asia_start_hour,
+        cfg.asia_start_minute,
+    )
     if start >= end:
         raise ValueError("Asia range start must precede end")
     return start, end
 
 
-def _window_bounds(trade_date: pd.Timestamp, window: ExecutionWindow) -> tuple[pd.Timestamp, pd.Timestamp]:
+def _window_bounds(
+    trade_date: pd.Timestamp,
+    window: ExecutionWindow,
+) -> tuple[pd.Timestamp, pd.Timestamp]:
     start = _timestamp(trade_date, window.start_hour, window.start_minute)
     end = _timestamp(trade_date, window.end_hour, window.end_minute)
     if end <= start:
@@ -102,22 +112,35 @@ def _find_displacement(
     asia_low: float,
     cfg: AsiaSweepConfig,
 ) -> tuple[int | None, int | None]:
-    bodies = (window_bars["close"] - window_bars["open"]).abs()
-    causal_median = bodies.shift(1).rolling(
-        cfg.displacement_median_length,
-        min_periods=max(3, min(cfg.displacement_median_length, 5)),
-    ).median()
     final = min(len(window_bars), sweep_position + cfg.displacement_max_bars + 1)
     for pos in range(sweep_position + 1, final):
         row = window_bars.iloc[pos]
-        body_reference = float(causal_median.iloc[pos])
+        body_reference = float(row["_causal_body_median"])
         if not np.isfinite(body_reference) or body_reference <= 0:
             continue
         body = abs(float(row["close"]) - float(row["open"]))
-        directional = float(row["close"]) > float(row["open"]) if direction > 0 else float(row["close"]) < float(row["open"])
-        midpoint_pass = float(row["close"]) > sweep_midpoint if direction > 0 else float(row["close"]) < sweep_midpoint
-        inside = float(row["close"]) >= asia_low if direction > 0 else float(row["close"]) <= asia_high
-        if directional and midpoint_pass and inside and body >= cfg.displacement_body_mult * body_reference:
+        directional = (
+            float(row["close"]) > float(row["open"])
+            if direction > 0
+            else float(row["close"]) < float(row["open"])
+        )
+        midpoint_pass = (
+            float(row["close"]) > sweep_midpoint
+            if direction > 0
+            else float(row["close"]) < sweep_midpoint
+        )
+        inside = (
+            float(row["close"]) >= asia_low
+            if direction > 0
+            else float(row["close"]) <= asia_high
+        )
+        qualifies = (
+            directional
+            and midpoint_pass
+            and inside
+            and body >= cfg.displacement_body_mult * body_reference
+        )
+        if qualifies:
             return pos, pos - sweep_position
     return None, None
 
@@ -150,12 +173,18 @@ def _find_failed_retest(
         nxt = window_bars.iloc[pos]
         if reaction_level is None:
             if direction > 0:
-                is_pivot = float(mid["high"]) > float(prev["high"]) and float(mid["high"]) > float(nxt["high"])
+                is_pivot = (
+                    float(mid["high"]) > float(prev["high"])
+                    and float(mid["high"]) > float(nxt["high"])
+                )
                 if is_pivot:
                     reaction_level = float(mid["high"])
                     reaction_confirmed_at = pos
             else:
-                is_pivot = float(mid["low"]) < float(prev["low"]) and float(mid["low"]) < float(nxt["low"])
+                is_pivot = (
+                    float(mid["low"]) < float(prev["low"])
+                    and float(mid["low"]) < float(nxt["low"])
+                )
                 if is_pivot:
                     reaction_level = float(mid["low"])
                     reaction_confirmed_at = pos
@@ -167,12 +196,22 @@ def _find_failed_retest(
         row = window_bars.iloc[pos]
         if not retest_seen:
             if direction > 0:
-                retest_seen = float(row["low"]) <= asia_level + band and float(row["low"]) > sweep_extreme
+                retest_seen = (
+                    float(row["low"]) <= asia_level + band
+                    and float(row["low"]) > sweep_extreme
+                )
             else:
-                retest_seen = float(row["high"]) >= asia_level - band and float(row["high"]) < sweep_extreme
+                retest_seen = (
+                    float(row["high"]) >= asia_level - band
+                    and float(row["high"]) < sweep_extreme
+                )
             continue
 
-        broke = float(row["close"]) > reaction_level if direction > 0 else float(row["close"]) < reaction_level
+        broke = (
+            float(row["close"]) > reaction_level
+            if direction > 0
+            else float(row["close"]) < reaction_level
+        )
         if broke:
             return pos
     return None
@@ -187,7 +226,10 @@ def _detect_window_event(
     cfg: AsiaSweepConfig,
 ) -> AsiaSweepEvent:
     asia_start, asia_end = _asia_bounds(trade_date, cfg)
-    asia = one_minute[(one_minute["timestamp"] >= asia_start) & (one_minute["timestamp"] < asia_end)]
+    asia = one_minute[
+        (one_minute["timestamp"] >= asia_start)
+        & (one_minute["timestamp"] < asia_end)
+    ]
     if asia.empty:
         return _base_event(
             instrument, trade_date, window, cfg, asia_start, asia_end, np.nan, np.nan,
@@ -202,7 +244,16 @@ def _detect_window_event(
         )
 
     start, end = _window_bounds(trade_date, window)
-    wb = bars_5m[(bars_5m["timestamp"] >= start) & (bars_5m["timestamp"] < end)].copy().reset_index(drop=True)
+    bars_with_reference = bars_5m.copy()
+    bodies = (bars_with_reference["close"] - bars_with_reference["open"]).abs()
+    bars_with_reference["_causal_body_median"] = bodies.shift(1).rolling(
+        cfg.displacement_median_length,
+        min_periods=max(3, min(cfg.displacement_median_length, 5)),
+    ).median()
+    wb = bars_with_reference[
+        (bars_with_reference["timestamp"] >= start)
+        & (bars_with_reference["timestamp"] < end)
+    ].copy().reset_index(drop=True)
     if wb.empty:
         return _base_event(
             instrument, trade_date, window, cfg, asia_start, asia_end, asia_high, asia_low,
@@ -286,7 +337,11 @@ def _detect_window_event(
 
     entry_row = wb.iloc[int(entry_pos)]
     entry = float(entry_row["close"])
-    stop = sweep_extreme - cfg.stop_buffer_ticks * cfg.tick_size if direction > 0 else sweep_extreme + cfg.stop_buffer_ticks * cfg.tick_size
+    stop = (
+        sweep_extreme - cfg.stop_buffer_ticks * cfg.tick_size
+        if direction > 0
+        else sweep_extreme + cfg.stop_buffer_ticks * cfg.tick_size
+    )
     risk = entry - stop if direction > 0 else stop - entry
     if risk <= cfg.tick_size:
         return replace(event, rejection_reason="nonpositive_or_too_small_risk")
