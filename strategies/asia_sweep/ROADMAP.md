@@ -25,7 +25,7 @@ The simple reclaim is the control. The research question is whether wick, displa
 
 ## Hard separation rules
 
-- Development branches are phase-specific; current execution-contract work uses `agent/asia-sweep-neutral-execution-contract`.
+- Development branches are phase-specific; current integration work uses `agent/asia-sweep-event-execution-integration`.
 - Governance, manifests, reports and tests: `strategies/asia_sweep/`.
 - Code: `src/dtr_lab/strategies/asia_sweep/`.
 - Runner: `scripts/run_asia_sweep_manifest.py`.
@@ -79,7 +79,7 @@ The proxy snapshots may support descriptive market-structure and event-semantic 
 
 ## Phase 3 — Shared infrastructure boundary
 
-**Status:** signal boundary, strict source adapter, manifest execution guard, proxy event adapter and isolated synthetic neutral-execution contract complete. Event-to-execution integration and all real-data execution remain blocked.
+**Status:** signal boundary, strict source adapter, manifest execution guard, proxy event adapter, isolated synthetic neutral-execution contract and synthetic event-to-execution integration are complete. Real proxy/futures execution remains blocked.
 
 Permitted reuse:
 
@@ -87,7 +87,7 @@ Permitted reuse:
 - checksum verification;
 - generic five-minute resampling;
 - causal generic features;
-- the standalone synthetic neutral-execution contract after a separate integration adapter passes review;
+- the standalone synthetic neutral-execution contract through the frozen integration adapter;
 - later, neutral reporting utilities.
 
 Prohibited reuse:
@@ -97,7 +97,8 @@ Prohibited reuse:
 - DTR selected configuration;
 - DTR result and promotion logic;
 - shared DTR execution extraction before exact locked-benchmark replay;
-- direct real-data calls into the synthetic execution simulator.
+- direct real-data calls into the synthetic execution simulator;
+- mixed-instrument execution under one economics configuration.
 
 ## Phase 4 — Event ledger and manual audit
 
@@ -150,19 +151,21 @@ AS-A plus a right-side-confirmed reaction swing, a later retest that stays insid
 
 ## Phase 6 — Causality and adversarial tests
 
-**Status:** signal, data, manifest, proxy event and synthetic execution adversarial coverage passes in dedicated Python 3.11/3.12 CI; original repository Ruff/tests pass independently. Real-data integration and portfolio-level cases remain pending.
+**Status:** signal, data, manifest, proxy event, synthetic execution and synthetic event-to-execution integration coverage pass in dedicated Python 3.11/3.12 CI; original repository Ruff/tests pass independently. Real-data source adaptation and portfolio-level cases remain pending.
 
 Completed signal/event coverage includes threshold edges, no reclaim, double sweep, wick boundaries, displacement timing and pre-window warmup, causal pivot confirmation, first-sweep ownership, incomplete ranges, missing pre-signal data, future gaps, duplicate timestamps, deterministic output, instrument-neutral signal semantics, blocked-manifest handling, activity-staleness boundaries, DST-aware proxy conversion and entry exactly at window end.
 
 Completed synthetic execution coverage includes exact-minute entry, missing/inactive entry, gap-through-stop, one-tick risk, entry/later stop-target collisions, long/short stop and target gaps, missing-minute liquidation, first-active-quote handling, 10/11-minute inactivity boundaries, first-unsafe-condition precedence, unresolved paths, time exits, slippage, commission, target-RR lock, input immutability and prefix replay.
 
-Future coverage must include event-to-execution mapping, price-grid normalization, roll boundaries, MFE/MAE reporting and simultaneous NQ/ES portfolio constraints.
+Completed integration coverage includes all four variants, long/short mapping, UTC/New York and DST wall-calendar conversion, local-date and half-open-window membership, strict tick grids, one-instrument economics, stable identity keys, event-contract digests, event-bound minute fixtures, duplicate/missing/orphan/malformed frame-map rejection, batch/row equality, order invariance, immutability and integrated prefix replay. The complete isolated suite contains 185 passing tests.
+
+Future coverage must include proxy source identity, price normalization and tick translation, futures-valid instrument economics, roll boundaries, MFE/MAE reporting and simultaneous NQ/ES portfolio constraints.
 
 For every emitted signal or completed synthetic exit, truncate data at the determining timestamp and reproduce the same decision. Any change under prefix replay is a lookahead failure.
 
 ## Phase 7 — Controlled development research
 
-**Blocked until the event-to-execution integration and deterministic replay package passes. Real-data P&L remains prohibited.**
+**Blocked until a separately reviewed proxy execution-source adapter passes. Real-data P&L remains prohibited.**
 
 Partitions:
 
@@ -229,6 +232,6 @@ After Python validation, build Pine Script v6 with the same sessions, state mach
 
 ## Current decision
 
-`SYNTHETIC_NEUTRAL_EXECUTION_FROZEN_REAL_DATA_PNL_BLOCKED`
+`SYNTHETIC_EVENT_EXECUTION_INTEGRATION_FROZEN_REAL_DATA_PNL_BLOCKED`
 
-The isolated execution contract may merge after final exact-head CI and unchanged event-audit stability gates pass. Proceed next with a separate event-to-execution integration and deterministic replay package. Do not calculate or inspect real proxy/futures P&L until source-kind mapping, price-grid policy, immutable event mapping, integration replay and futures/proxy limitations are frozen.
+The synthetic event-to-execution integration may merge after final exact-head repository CI, isolated Asia Sweep CI and unchanged private no-P&L event-audit stability gates pass. Proceed next only with a separate proxy execution-source adapter design and synthetic adversarial normalization tests. Do not calculate or inspect real proxy/futures P&L until source identity, price normalization, instrument economics, source activity, unresolved exits and proxy-versus-futures limitations are frozen and independently reviewed.

@@ -1,5 +1,77 @@
 # Asia Sweep Changelog
 
+## v0.6.0 — 2026-07-23
+
+### Added
+
+- Added a strict standalone event-to-execution integration adapter.
+- Added deterministic SHA-256 stable event identities.
+- Added separate SHA-256 digests for all execution-relevant event facts.
+- Added one-instrument-per-configuration economics binding.
+- Added event-bound synthetic minute-frame sealing by identity and payload digest.
+- Added deterministic packet replay sorted by stable event key.
+- Added explicit output columns for configured tick size, point value, commission and slippage.
+- Added integrated prefix replay for every packet row.
+- Expanded the isolated Asia Sweep suite to 185 tests.
+
+### Changed
+
+- Required every packet event to match the instrument bound to its execution economics.
+- Required event timestamps to be timezone-aware, one-minute aligned, on the declared trade date and inside the declared half-open execution window.
+- Required event entry, stop, target and every one-minute OHLC value to lie on the configured tick grid.
+- Required minute-frame dictionaries to contain exactly the expected lowercase SHA-256 keys.
+- Kept stable identity separate from execution-payload revisions so row identity can remain fixed while contract drift remains visible.
+- Kept the integration package synthetic-only and disconnected from manifests, private data and real-data execution.
+
+### Corrected during review
+
+- Prevented mixed NQ-like and ES-like events from silently sharing one point value, commission and slippage schedule.
+- Prevented a generic synthetic minute fixture from being swapped between events without detection.
+- Added payload-digest rejection for changed stop, target, direction or timestamp under an unchanged identity key.
+- Added strict local-date and execution-window membership checks.
+- Rejected fractional, boolean and non-finite directions.
+- Rejected missing or non-string identity values and malformed frame-map keys.
+- Applied the pinned Ruff model-import order exactly and removed the temporary diagnostic workflow.
+
+### Reason
+
+A frozen signal and a frozen execution simulator are not sufficient unless the bridge between them is deterministic, instrument-specific and auditable. Event identity, event payload, minute-frame ownership and execution economics must remain distinct so a replay cannot silently use the wrong data path, wrong point value or revised event geometry.
+
+### Validation
+
+- Isolated Asia Sweep suite: 185 passed on Python 3.11.
+- Isolated Asia Sweep suite: 185 passed on Python 3.12.
+- Repository Ruff passed on the reviewed implementation head.
+- Full repository tests passed on Python 3.11 and 3.12 on the reviewed implementation head.
+- All four preregistered variants map without selection.
+- Long and short mapping, UTC/New York conversion and DST wall-calendar mapping passed.
+- One-instrument economics separation passed.
+- Swapped-frame, same-identity payload-drift and malformed-key rejection passed.
+- Batch replay equaled independent row replay and remained invariant to input order.
+- Target and data-gap integrated prefix replay passed.
+- Branch changes remain confined to standalone Asia Sweep code, tests and governance.
+- No private proxy/futures execution, real-data P&L, optimization or variant ranking was performed.
+- Final exact-head repository CI, isolated CI and unchanged no-P&L event-audit stability remain required before merge.
+
+### Known limits
+
+- The integration path remains synthetic-only.
+- No proxy-to-futures price normalization or tick translation exists.
+- No private proxy or CME futures source is connected to execution.
+- Real-data MFE, MAE, holding-time, P&L and portfolio reporting remain blocked.
+- CME timestamp, continuous-contract, roll, volume, spread, commission and fill validity remain unresolved.
+- Provider authorization for future automated proxy acquisition remains unresolved.
+- Repository-wide NumPy/pandas timedelta deprecation warnings remain warning debt.
+- The independent review is a same-session clean-room pass, not an external human audit.
+
+### Next
+
+- Design a separate proxy execution-source adapter under a new work package.
+- Freeze source identity, price normalization, instrument economics and unresolved-exit behavior before connecting private data.
+- Add synthetic adversarial tests for proxy tick translation and source-bound replay.
+- Reproduce the locked DTR benchmark before extracting any shared execution utility.
+- Keep all real-data P&L disabled until the proxy adapter is independently reviewed and merged.
+
 ## v0.5.0 — 2026-07-23
 
 ### Added
