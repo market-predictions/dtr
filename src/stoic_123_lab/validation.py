@@ -1,7 +1,5 @@
 """Preregistered NQ direction, mechanism-control, and validation helpers."""
 
-VALIDATION_STUDY_ID = "STOIC123-WP-20260724-02"
-
 from .validation_direction import (
     DirectionMode,
     EntryModel,
@@ -19,6 +17,8 @@ from .validation_metrics import (
     run_scenario,
     session_attribution,
 )
+
+VALIDATION_STUDY_ID = "STOIC123-WP-20260724-02"
 
 __all__ = [
     "DirectionMode",
