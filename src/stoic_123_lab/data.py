@@ -126,9 +126,9 @@ def _load_full_grid_proxy(path: str | Path, spec: InstrumentSpec) -> pd.DataFram
     frame = raw.loc[active, ["timestamp UTC", "open", "high", "low", "close", "volume"]].rename(
         columns={"timestamp UTC": "timestamp"}
     )
-    frame["timestamp"] = pd.to_datetime(frame["timestamp"], utc=True, errors="raise").dt.tz_localize(
-        None
-    )
+    frame["timestamp"] = pd.to_datetime(
+        frame["timestamp"], utc=True, errors="raise"
+    ).dt.tz_localize(None)
     frame = validate_one_minute(frame)
     frame.attrs.update(
         {
@@ -208,7 +208,9 @@ def _load_gbpusd_normalized(source: Path, observed: str) -> pd.DataFrame:
     if "timestamp UTC" not in raw.columns:
         raise ValueError("Normalized GBPUSD source missing timestamp UTC")
     frame = raw.rename(columns={"timestamp UTC": "timestamp"})
-    frame["timestamp"] = pd.to_datetime(frame["timestamp"], utc=True, errors="raise").dt.tz_localize(None)
+    frame["timestamp"] = pd.to_datetime(
+        frame["timestamp"], utc=True, errors="raise"
+    ).dt.tz_localize(None)
     frame = validate_bid_ask(frame)
     frame.attrs.update(
         {
