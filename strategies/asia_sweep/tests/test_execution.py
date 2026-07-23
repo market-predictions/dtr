@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import inspect
 from dataclasses import asdict, replace
+import inspect
 
 import pandas as pd
 import pytest
