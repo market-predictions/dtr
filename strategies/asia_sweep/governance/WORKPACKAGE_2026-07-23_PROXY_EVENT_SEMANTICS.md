@@ -97,6 +97,10 @@ Minimum additions:
 - Private audit workflow `30003836567` passes both proxy jobs and removes source data before artifact upload.
 - No execution simulation, P&L, optimization or variant selection was performed.
 
+## Review identity
+
+The independent review is a clean-room analytical and programmatic pass in the same AI work session. It is not an external human, legal or exchange-data audit.
+
 ## Decision
 
 `APPROVE_PROXY_EVENT_SEMANTICS_FOR_MERGE_BLOCK_EXECUTION_AND_PNL`
