@@ -33,6 +33,7 @@ def _run_chunk(
     start: date,
     end: date,
     package_version: str,
+    executable: Path,
     output_root: Path,
     cache_root: Path,
     log_path: Path,
@@ -49,9 +50,7 @@ def _run_chunk(
 
     chunk_directory.mkdir(parents=True, exist_ok=True)
     command = [
-        "npx",
-        "--yes",
-        f"dukascopy-node@{package_version}",
+        str(executable),
         "-i",
         instrument,
         "-from",
@@ -92,6 +91,7 @@ def _run_chunk(
         with log_path.open("a") as log:
             log.write(
                 f"\nRUN {chunk_name} attempt={attempt}/{max_attempts}\n"
+                f"PACKAGE_VERSION {package_version}\n"
                 f"COMMAND {' '.join(command)}\n"
             )
             log.flush()
@@ -126,6 +126,11 @@ def main() -> None:
     parser.add_argument("--date-from", type=date.fromisoformat, required=True)
     parser.add_argument("--date-to", type=date.fromisoformat, required=True)
     parser.add_argument("--package-version", required=True)
+    parser.add_argument(
+        "--executable",
+        type=Path,
+        default=Path("node_modules/.bin/dukascopy-node"),
+    )
     parser.add_argument("--output-root", type=Path, required=True)
     parser.add_argument("--cache-root", type=Path, required=True)
     parser.add_argument("--log-path", type=Path, required=True)
@@ -136,6 +141,8 @@ def main() -> None:
         raise ValueError("date-to must be after date-from")
     if args.max_attempts < 1:
         raise ValueError("max-attempts must be positive")
+    if not args.executable.exists():
+        raise FileNotFoundError(f"Dukascopy executable not found: {args.executable}")
 
     args.output_root.mkdir(parents=True, exist_ok=True)
     args.cache_root.mkdir(parents=True, exist_ok=True)
@@ -149,6 +156,7 @@ def main() -> None:
             start=start,
             end=end,
             package_version=args.package_version,
+            executable=args.executable,
             output_root=args.output_root,
             cache_root=args.cache_root,
             log_path=args.log_path,
