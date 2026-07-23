@@ -1,4 +1,5 @@
 name: Asia Sweep PDH PDL Cluster Challenger
+# Exact-head replay trigger after checksum-bound installation.
 
 on:
   pull_request:
