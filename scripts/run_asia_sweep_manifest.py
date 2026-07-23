@@ -10,6 +10,7 @@ import yaml
 
 from dtr_lab.research.engine import resample_5m
 from dtr_lab.strategies.asia_sweep.data import ZipCsvSchema, load_one_minute_zip
+from dtr_lab.strategies.asia_sweep.manifest_guard import event_runner_block_reason
 from dtr_lab.strategies.asia_sweep.model import AsiaSweepConfig, AsiaSweepVariant
 from dtr_lab.strategies.asia_sweep.signals import build_event_ledger
 
@@ -69,6 +70,9 @@ def main(manifest_path: Path) -> None:
 
     manifest = _load_manifest(manifest_path)
     dataset = manifest["dataset"]
+    block_reason = event_runner_block_reason(dataset)
+    if block_reason:
+        raise typer.BadParameter(f"Event runner is blocked: {block_reason}")
     if dataset["qualification_status"] == "DATA_NOT_REGISTERED":
         raise typer.BadParameter(
             "Dataset is not registered; fill path, checksum and semantics first"
