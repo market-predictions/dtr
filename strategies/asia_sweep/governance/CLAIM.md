@@ -10,4 +10,5 @@
 - Mechanism boundary: external-liquidity rejection and compressed-range acceptance only
 - Output boundary: fixed-horizon signed returns, MFE/MAE and hit rates; no strategy P&L
 - Constraint: no lockbox access, parameter optimization, weekday/direction/instrument selection, DTR combination, Pine or deployment work
-- Status: diagnostic implementation and protected workflow in progress
+- Review correction: opposite-side breaches are checked through the actual causal confirmation bar and fixed forward horizons are half-open
+- Status: corrected exact-head repository, isolated, event-audit and private diagnostic validation in progress
