@@ -31,7 +31,7 @@ def entry_config(base: SequenceConfig, mode: DirectionMode) -> SequenceConfig:
 
 
 def management_config(base: SequenceConfig) -> SequenceConfig:
-    """Restrict entries independently while retaining both management directions."""
+    """Keep both directions observable even when entries are direction restricted."""
 
     return replace(base.management_config(), allow_long=True, allow_short=True)
 
@@ -143,6 +143,7 @@ def detect_long_stage_events(
         return StageDetection(pd.DataFrame(), funnel, bars)
 
     open_ = bars["open"].to_numpy(float)
+    high = bars["high"].to_numpy(float)
     low = bars["low"].to_numpy(float)
     close = bars["close"].to_numpy(float)
     ema_fast = bars["ema_fast"].to_numpy(float)
