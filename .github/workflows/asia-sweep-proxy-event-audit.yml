@@ -6,6 +6,7 @@ on:
       - ".github/workflows/asia-sweep-proxy-event-audit.yml"
       - "scripts/run_asia_sweep_manifest.py"
       - "scripts/build_asia_sweep_audit_packet.py"
+      - "scripts/validate_asia_sweep_audit_sample.py"
       - "src/dtr_lab/strategies/asia_sweep/**"
       - "strategies/asia_sweep/configs/manifests/*proxy*"
       - "strategies/asia_sweep/tests/**"
@@ -79,6 +80,14 @@ jobs:
             --instrument "${{ matrix.instrument }}" \
             --sample-size 50
 
+      - name: Independently reconstruct sampled events
+        run: |
+          python scripts/validate_asia_sweep_audit_sample.py \
+            --source-zip "data/private/asia_sweep/${{ matrix.dataset }}" \
+            --manifest "${{ matrix.manifest }}" \
+            --sample "${{ matrix.report_root }}/manual_audit_sample_50.csv" \
+            --output-root "${{ matrix.report_root }}"
+
       - name: Verify no execution or P&L output
         run: |
           python - <<'PY'
@@ -86,9 +95,17 @@ jobs:
           from pathlib import Path
 
           root = Path("${{ matrix.report_root }}")
-          summary = json.loads((root / "event_audit_summary.json").read_text())
-          assert summary["pnl_calculated"] is False
-          assert summary["execution_simulated"] is False
+          event_summary = json.loads((root / "event_audit_summary.json").read_text())
+          validation = json.loads(
+              (root / "independent_validation_summary.json").read_text()
+          )
+          assert event_summary["pnl_calculated"] is False
+          assert event_summary["execution_simulated"] is False
+          assert validation["pnl_calculated"] is False
+          assert validation["execution_simulated"] is False
+          assert validation["all_events_valid"] is True
+          assert validation["validation_errors"] == 0
+          assert validation["sample_rows"] == 50
           forbidden = ("pnl", "realized", "exit_price", "mfe", "mae")
           for ledger in root.glob("*_event_ledger.csv"):
               header = ledger.open().readline().lower()
