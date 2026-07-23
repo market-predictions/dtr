@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import argparse
+from dataclasses import asdict, dataclass
 import gzip
 import hashlib
 import json
-import shutil
-from dataclasses import asdict, dataclass
 from pathlib import Path
+import shutil
 from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 
 import numpy as np
