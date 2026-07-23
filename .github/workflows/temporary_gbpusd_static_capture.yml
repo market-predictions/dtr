@@ -1,0 +1,163 @@
+name: Temporary GBPUSD static capture
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/temporary_gbpusd_static_capture.yml
+      - temporary/gbpusd_static_capture.trigger
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    name: GBPUSD static bid ask ${{ matrix.year }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        include:
+          - {year: 2022, start: 2022-01-01, end: 2023-01-01}
+          - {year: 2023, start: 2023-01-01, end: 2024-01-01}
+          - {year: 2024, start: 2024-01-01, end: 2025-01-01}
+          - {year: 2025, start: 2025-01-01, end: 2026-01-01}
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Download annual bid and ask candles
+        env:
+          START_DATE: ${{ matrix.start }}
+          END_DATE: ${{ matrix.end }}
+          YEAR_LABEL: ${{ matrix.year }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p temporary-data
+          cat > /tmp/capture_gbpusd.py <<'PY'
+          from __future__ import annotations
+
+          import csv
+          import datetime as dt
+          import gzip
+          import lzma
+          import os
+          import random
+          import struct
+          import time
+          import urllib.error
+          import urllib.request
+          from concurrent.futures import ThreadPoolExecutor, as_completed
+          from pathlib import Path
+
+          SYMBOL = "GBPUSD"
+          RECORD = struct.Struct(">5if")
+          DIVISOR = 100000.0
+          START = dt.date.fromisoformat(os.environ["START_DATE"])
+          END = dt.date.fromisoformat(os.environ["END_DATE"])
+          YEAR = os.environ["YEAR_LABEL"]
+          OUT = Path("temporary-data")
+
+          def fetch_day(day: dt.date, side: str):
+              url = (
+                  f"https://datafeed.dukascopy.com/datafeed/{SYMBOL}/"
+                  f"{day.year:04d}/{day.month - 1:02d}/{day.day:02d}/"
+                  f"{side}_candles_min_1.bi5"
+              )
+              last = None
+              for attempt in range(9):
+                  try:
+                      request = urllib.request.Request(
+                          url,
+                          headers={"User-Agent": "DTR-private-research/1.0"},
+                      )
+                      with urllib.request.urlopen(request, timeout=90) as response:
+                          raw = response.read()
+                      if not raw:
+                          return day, [], "empty"
+                      payload = lzma.decompress(raw)
+                      if len(payload) % RECORD.size:
+                          raise ValueError(f"record-size mismatch {len(payload)}")
+                      midnight = dt.datetime.combine(
+                          day, dt.time(), tzinfo=dt.timezone.utc
+                      )
+                      rows = []
+                      for offset in range(0, len(payload), RECORD.size):
+                          seconds, open_, high, low, close, volume = RECORD.unpack_from(
+                              payload, offset
+                          )
+                          timestamp = midnight + dt.timedelta(seconds=seconds)
+                          rows.append(
+                              (
+                                  int(timestamp.timestamp() * 1000),
+                                  open_ / DIVISOR,
+                                  high / DIVISOR,
+                                  low / DIVISOR,
+                                  close / DIVISOR,
+                                  float(volume),
+                              )
+                          )
+                      return day, rows, "ok"
+                  except urllib.error.HTTPError as error:
+                      if error.code == 404:
+                          return day, [], "404"
+                      last = f"HTTP {error.code}"
+                  except Exception as error:  # noqa: BLE001
+                      last = repr(error)
+                  time.sleep(min(120, 2 * (2**attempt)) + random.random())
+              raise RuntimeError(f"{day} {side}: {last}")
+
+          days = []
+          current = START
+          while current < END:
+              days.append(current)
+              current += dt.timedelta(days=1)
+
+          audit = [
+              f"symbol={SYMBOL}",
+              f"year={YEAR}",
+              f"calendar_days={len(days)}",
+              f"divisor={DIVISOR}",
+          ]
+          for side in ("BID", "ASK"):
+              results = {}
+              statuses = {}
+              with ThreadPoolExecutor(max_workers=6) as pool:
+                  futures = {pool.submit(fetch_day, day, side): day for day in days}
+                  for future in as_completed(futures):
+                      day, rows, status = future.result()
+                      results[day] = rows
+                      statuses[status] = statuses.get(status, 0) + 1
+
+              path = OUT / f"gbpusd_m1_{side.lower()}_{YEAR}.csv.gz"
+              count = 0
+              with gzip.open(path, "wt", newline="", encoding="utf-8") as handle:
+                  writer = csv.writer(handle)
+                  writer.writerow(
+                      ["timestamp", "open", "high", "low", "close", "volume"]
+                  )
+                  for day in sorted(results):
+                      writer.writerows(results[day])
+                      count += len(results[day])
+              audit.append(f"{side.lower()}_rows={count}")
+              for key, value in sorted(statuses.items()):
+                  audit.append(f"{side.lower()}_status_{key}={value}")
+
+          (OUT / f"gbpusd_m1_{YEAR}_audit.txt").write_text(
+              "\n".join(audit) + "\n", encoding="utf-8"
+          )
+          print("\n".join(audit))
+          PY
+          python /tmp/capture_gbpusd.py
+          sha256sum temporary-data/*.csv.gz > temporary-data/sha256.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gbpusd-static-${{ matrix.year }}
+          path: temporary-data/*
+          retention-days: 1
+          compression-level: 0
+          if-no-files-found: error
