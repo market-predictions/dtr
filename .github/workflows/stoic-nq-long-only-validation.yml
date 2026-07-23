@@ -8,6 +8,8 @@ on:
     paths:
       - ".github/workflows/stoic-nq-long-only-validation.yml"
       - "scripts/run_stoic_nq_long_only_validation.py"
+      - "scripts/preflight_stoic_nq_long_only_validation.py"
+      - "scripts/finalize_stoic_nq_long_only_validation.py"
       - "src/stoic_123_lab/**"
       - "strategies/stoic_123/configs/nq_long_only_validation.yaml"
       - "strategies/stoic_123/configs/phase1.yaml"
@@ -20,6 +22,8 @@ on:
     paths:
       - ".github/workflows/stoic-nq-long-only-validation.yml"
       - "scripts/run_stoic_nq_long_only_validation.py"
+      - "scripts/preflight_stoic_nq_long_only_validation.py"
+      - "scripts/finalize_stoic_nq_long_only_validation.py"
       - "src/stoic_123_lab/**"
       - "strategies/stoic_123/configs/nq_long_only_validation.yaml"
       - "strategies/stoic_123/configs/phase1.yaml"
@@ -77,6 +81,14 @@ jobs:
           echo "Observed NQ archive SHA-256: ${observed}"
           test "${observed}" = "8d3f157a422636e5b8dda51cc3a3d9209c50cb53f9b279d3e14b627ce59370dc"
 
+      - name: Enforce frozen input contract
+        run: |
+          python scripts/preflight_stoic_nq_long_only_validation.py \
+            --nq private-data/NQ_Futures_-_1min_Bar_2022_2025.zip \
+            --phase1 strategies/stoic_123/configs/phase1.yaml \
+            --design strategies/stoic_123/configs/nq_long_only_validation.yaml \
+            --out reports/stoic_123/nq_long_only_validation
+
       - name: Execute preregistered study
         run: |
           python scripts/run_stoic_nq_long_only_validation.py \
@@ -85,6 +97,11 @@ jobs:
             --design strategies/stoic_123/configs/nq_long_only_validation.yaml \
             --out reports/stoic_123/nq_long_only_validation \
             --iterations 10000
+
+      - name: Apply frozen matched-control veto
+        run: |
+          python scripts/finalize_stoic_nq_long_only_validation.py \
+            --out reports/stoic_123/nq_long_only_validation
 
       - name: Remove raw market data
         if: always()
