@@ -10,6 +10,8 @@ from .config import SequenceConfig
 from .detector import attach_map
 from .validation_direction import _event_row, _map_allows_long, _selected_map_direction
 
+MINIMUM_MATCH_FRACTION = 0.90
+
 
 def _session_label(timestamp: pd.Timestamp) -> str:
     clock = timestamp.time()
@@ -141,5 +143,12 @@ def matched_time_events(
         )
 
     if not rows:
-        return pd.DataFrame()
-    return pd.DataFrame(rows).sort_values("signal_time").reset_index(drop=True)
+        raise RuntimeError("Matched-time control produced no events")
+    result = pd.DataFrame(rows).sort_values("signal_time").reset_index(drop=True)
+    match_fraction = len(result) / len(full_events)
+    if match_fraction < MINIMUM_MATCH_FRACTION:
+        raise RuntimeError(
+            "Matched-time control coverage below frozen 90% minimum: "
+            f"{match_fraction:.6f}"
+        )
+    return result
