@@ -69,7 +69,9 @@ def main(manifest_path: Path) -> None:
     manifest = _load_manifest(manifest_path)
     dataset = manifest["dataset"]
     if dataset["qualification_status"] == "DATA_NOT_REGISTERED":
-        raise typer.BadParameter("Dataset is not registered; fill path, checksum and semantics first")
+        raise typer.BadParameter(
+            "Dataset is not registered; fill path, checksum and semantics first"
+        )
     if dataset["loader"] != "dtr_zip_v1":
         raise typer.BadParameter("Foundation runner currently supports only dtr_zip_v1")
     source = Path(dataset["path"])
@@ -85,14 +87,22 @@ def main(manifest_path: Path) -> None:
     start = pd.Timestamp(manifest["periods"]["development_start"])
     end = pd.Timestamp(manifest["periods"]["development_end"])
     one = one[(one["timestamp"] >= start - pd.Timedelta(days=1)) & (one["timestamp"] < end)]
-    bars = bars[(bars["timestamp"] >= start) & (bars["timestamp"] < end)]
+    bars = bars[
+        (bars["timestamp"] >= start - pd.Timedelta(days=1))
+        & (bars["timestamp"] < end)
+    ]
 
     out_root = Path(manifest["outputs"]["root"])
     out_root.mkdir(parents=True, exist_ok=True)
     summaries: list[dict[str, object]] = []
     for variant_name in manifest["strategy"]["variants"]:
         variant = AsiaSweepVariant(variant_name)
-        ledger = build_event_ledger(str(dataset["instrument"]), one, bars, _config(manifest, variant))
+        ledger = build_event_ledger(
+            str(dataset["instrument"]),
+            one,
+            bars,
+            _config(manifest, variant),
+        )
         ledger_path = out_root / f"{variant.value.lower()}_event_ledger.csv"
         ledger.to_csv(ledger_path, index=False)
         counts = ledger["status"].value_counts(dropna=False).to_dict()
@@ -115,7 +125,9 @@ def main(manifest_path: Path) -> None:
         "pnl_calculated": False,
         "variants": summaries,
     }
-    (out_root / "event_summary.json").write_text(json.dumps(summary, indent=2, default=str) + "\n")
+    (out_root / "event_summary.json").write_text(
+        json.dumps(summary, indent=2, default=str) + "\n"
+    )
     typer.echo(json.dumps(summary, indent=2, default=str))
 
 
