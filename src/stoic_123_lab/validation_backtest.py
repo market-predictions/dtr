@@ -222,7 +222,7 @@ def simulate_validation(
 ) -> pd.DataFrame:
     """Equivalent cached/vectorized simulator for NQ validation repetitions."""
 
-    if spec.execution_model != "single_ohlcv":
+    if spec.execution_model != "single_ohlc":
         return simulate(one_minute, entry_events, management_events, spec, config)
     return _simulate_single_prepared(
         one_minute,
