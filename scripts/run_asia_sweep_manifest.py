@@ -8,7 +8,8 @@ import pandas as pd
 import typer
 import yaml
 
-from dtr_lab.research.engine import load_zip, resample_5m
+from dtr_lab.research.engine import resample_5m
+from dtr_lab.strategies.asia_sweep.data import ZipCsvSchema, load_one_minute_zip
 from dtr_lab.strategies.asia_sweep.model import AsiaSweepConfig, AsiaSweepVariant
 from dtr_lab.strategies.asia_sweep.signals import build_event_ledger
 
@@ -72,8 +73,10 @@ def main(manifest_path: Path) -> None:
         raise typer.BadParameter(
             "Dataset is not registered; fill path, checksum and semantics first"
         )
-    if dataset["loader"] != "dtr_zip_v1":
-        raise typer.BadParameter("Foundation runner currently supports only dtr_zip_v1")
+    if dataset["loader"] != "asia_sweep_zip_csv_v1":
+        raise typer.BadParameter(
+            "Runner currently supports only asia_sweep_zip_csv_v1"
+        )
     source = Path(dataset["path"])
     if not source.exists():
         raise typer.BadParameter(f"Dataset not found: {source}")
@@ -82,7 +85,13 @@ def main(manifest_path: Path) -> None:
     if actual != expected:
         raise typer.BadParameter(f"Dataset checksum mismatch: expected {expected}, got {actual}")
 
-    one = load_zip(source)
+    schema_data = dataset.get("schema", {})
+    schema = ZipCsvSchema(
+        timestamp_column=str(schema_data["timestamp_column"]),
+        timestamp_format=schema_data.get("timestamp_format"),
+        required_columns=tuple(schema_data["required_columns"]),
+    )
+    one = load_one_minute_zip(source, schema)
     bars = resample_5m(one)
     start = pd.Timestamp(manifest["periods"]["development_start"])
     end = pd.Timestamp(manifest["periods"]["development_end"])
