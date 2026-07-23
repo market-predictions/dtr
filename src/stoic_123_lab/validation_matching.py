@@ -141,7 +141,11 @@ def matched_time_events(
             prepared.broad.get((original.year, session, bucket)),
         )
         pool = next(
-            (candidate for candidate in candidate_pools if candidate is not None and len(candidate) >= 2),
+            (
+                candidate
+                for candidate in candidate_pools
+                if candidate is not None and len(candidate) >= 2
+            ),
             None,
         )
         if pool is None:
