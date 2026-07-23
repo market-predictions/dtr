@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+from dataclasses import dataclass
 from datetime import time
 
 import numpy as np
@@ -11,6 +12,17 @@ from .detector import attach_map
 from .validation_direction import _event_row, _map_allows_long, _selected_map_direction
 
 MINIMUM_MATCH_FRACTION = 0.90
+
+
+@dataclass(frozen=True)
+class _PreparedPools:
+    bars: pd.DataFrame
+    exact: dict[tuple[object, ...], np.ndarray]
+    weekday: dict[tuple[object, ...], np.ndarray]
+    broad: dict[tuple[object, ...], np.ndarray]
+
+
+_POOL_CACHE: dict[tuple[int, int, SequenceConfig], _PreparedPools] = {}
 
 
 def _session_label(timestamp: pd.Timestamp) -> str:
@@ -27,21 +39,30 @@ def _stable_offset(*, arm_id: str, signal_time: pd.Timestamp, seed: int, pool_si
     return int.from_bytes(hashlib.sha256(payload).digest()[:8], "big") % pool_size
 
 
-def matched_time_events(
-    full_events: pd.DataFrame,
+def _group_indices(
+    bars: pd.DataFrame,
+    columns: list[str],
+) -> dict[tuple[object, ...], np.ndarray]:
+    result: dict[tuple[object, ...], np.ndarray] = {}
+    for key, group in bars.groupby(columns, sort=False, observed=True):
+        normalized = key if isinstance(key, tuple) else (key,)
+        result[normalized] = group.index.to_numpy(dtype=np.int64)
+    return result
+
+
+def _prepare_pools(
     execution_bars: pd.DataFrame,
     map_bars: pd.DataFrame,
     config: SequenceConfig,
-    *,
-    seed: int,
-) -> pd.DataFrame:
-    """Build deterministic risk- and time-matched pseudo entries without future returns."""
-
-    if full_events.empty:
-        return pd.DataFrame()
+) -> _PreparedPools:
+    key = (id(execution_bars), id(map_bars), config)
+    cached = _POOL_CACHE.get(key)
+    if cached is not None:
+        return cached
 
     bars = attach_map(execution_bars, map_bars, config).reset_index(drop=True).copy()
     bars["signal_time"] = pd.to_datetime(bars["bar_end"])
+    bars = bars.sort_values("signal_time").reset_index(drop=True)
     bars["year"] = bars["signal_time"].dt.year
     bars["month"] = bars["signal_time"].dt.month
     bars["weekday"] = bars["signal_time"].dt.weekday
@@ -63,6 +84,41 @@ def matched_time_events(
         eligible &= bars["gap_minutes"].fillna(0).le(config.gap_reset_minutes)
     bars = bars.loc[eligible].reset_index(drop=True)
 
+    prepared = _PreparedPools(
+        bars=bars,
+        exact=_group_indices(
+            bars,
+            ["year", "month", "weekday", "session", "bucket"],
+        ),
+        weekday=_group_indices(
+            bars,
+            ["year", "weekday", "session", "bucket"],
+        ),
+        broad=_group_indices(
+            bars,
+            ["year", "session", "bucket"],
+        ),
+    )
+    _POOL_CACHE.clear()
+    _POOL_CACHE[key] = prepared
+    return prepared
+
+
+def matched_time_events(
+    full_events: pd.DataFrame,
+    execution_bars: pd.DataFrame,
+    map_bars: pd.DataFrame,
+    config: SequenceConfig,
+    *,
+    seed: int,
+) -> pd.DataFrame:
+    """Build deterministic risk- and time-matched pseudo entries without future returns."""
+
+    if full_events.empty:
+        return pd.DataFrame()
+
+    prepared = _prepare_pools(execution_bars, map_bars, config)
+    bars = prepared.bars
     original_times = set(pd.to_datetime(full_events["signal_time"]))
     used: set[pd.Timestamp] = set()
     rows: list[dict[str, object]] = []
@@ -73,32 +129,24 @@ def matched_time_events(
         if not np.isfinite(risk_width) or risk_width <= 0:
             continue
 
-        exact = bars.loc[
-            (bars["year"] == original.year)
-            & (bars["month"] == original.month)
-            & (bars["weekday"] == original.weekday())
-            & (bars["session"] == _session_label(original))
-            & (bars["bucket"] == _half_hour_bucket(original))
-        ]
-        pools = [
-            exact,
-            bars.loc[
-                (bars["year"] == original.year)
-                & (bars["weekday"] == original.weekday())
-                & (bars["session"] == _session_label(original))
-                & (bars["bucket"] == _half_hour_bucket(original))
-            ],
-            bars.loc[
-                (bars["year"] == original.year)
-                & (bars["session"] == _session_label(original))
-                & (bars["bucket"] == _half_hour_bucket(original))
-            ],
-        ]
-        pool = next((candidate for candidate in pools if len(candidate) >= 2), pd.DataFrame())
-        if pool.empty:
+        session = _session_label(original)
+        bucket = _half_hour_bucket(original)
+        candidate_pools = (
+            prepared.exact.get(
+                (original.year, original.month, original.weekday(), session, bucket)
+            ),
+            prepared.weekday.get(
+                (original.year, original.weekday(), session, bucket)
+            ),
+            prepared.broad.get((original.year, session, bucket)),
+        )
+        pool = next(
+            (candidate for candidate in candidate_pools if candidate is not None and len(candidate) >= 2),
+            None,
+        )
+        if pool is None:
             continue
 
-        pool = pool.sort_values("signal_time").reset_index(drop=True)
         start = _stable_offset(
             arm_id=config.arm_id,
             signal_time=original,
@@ -107,7 +155,7 @@ def matched_time_events(
         )
         selected = None
         for step in range(len(pool)):
-            candidate = pool.iloc[(start + step) % len(pool)]
+            candidate = bars.iloc[int(pool[(start + step) % len(pool)])]
             candidate_time = pd.Timestamp(candidate["signal_time"])
             if candidate_time in used or candidate_time in original_times:
                 continue
