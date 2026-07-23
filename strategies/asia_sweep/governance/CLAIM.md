@@ -5,4 +5,4 @@
 - Claimed scope: Dukascopy proxy acquisition, provenance and event-audit preparation
 - Started: 2026-07-23
 - Constraint: proxy/futures separation, no P&L, no parameter tuning, no active DTR changes
-- Status: acquisition workflow and deterministic preparation code committed; download run pending
+- Status: two acquisition attempts failed before normalization; diagnostic artifacts and exact Ruff preview are being executed before the next retry
