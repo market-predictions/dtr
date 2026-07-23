@@ -323,7 +323,7 @@ def main() -> None:
         "configs": [asdict(configs[arm_id]) for arm_id in candidate_ids],
     }
     (args.out / "run_manifest.json").write_text(
-        json.dumps(manifest, indent=2, sort_keys=True) + "\n",
+        json.dumps(manifest, indent=2, sort_keys=True, default=str) + "\n",
         encoding="utf-8",
     )
     print(summary_frame.to_string(index=False))
