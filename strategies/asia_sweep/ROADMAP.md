@@ -8,7 +8,7 @@
 **Execution source:** one-minute  
 **Deployment:** prohibited
 
-This roadmap implements the accepted Asia-range sweep research plan as a strategy distinct from Daytrading Rauf. It may borrow audited DTR infrastructure and registered data, but it has independent signal logic, tests, manifests, reports, validation and promotion decisions. The detailed user-approved source roadmap is the basis for this canonical repository version. fileciteturn32file0
+This roadmap implements the accepted Asia-range sweep research plan as a strategy distinct from Daytrading Rauf. It may borrow audited DTR infrastructure and registered data, but it has independent signal logic, tests, manifests, reports, validation and promotion decisions. The detailed user-approved source roadmap is the basis for this canonical repository version.
 
 ## Research question
 
