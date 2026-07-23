@@ -25,7 +25,7 @@ The simple reclaim is the control. The research question is whether wick, displa
 
 ## Hard separation rules
 
-- Development branches are phase-specific; current proxy registration uses `agent/asia-sweep-dukascopy-proxy-registration-v2`.
+- Development branches are phase-specific; current event-semantic work uses `agent/asia-sweep-proxy-event-semantics`.
 - Governance, manifests, reports and tests: `strategies/asia_sweep/`.
 - Code: `src/dtr_lab/strategies/asia_sweep/`.
 - Runner: `scripts/run_asia_sweep_manifest.py`.
@@ -59,7 +59,7 @@ Use half-open windows. Include Monday through Friday initially and report weekda
 
 ## Phase 2 — Qualify NQ and ES data
 
-**Status:** private Dukascopy NQ and ES proxy snapshots structurally qualified and checksummed; proxy event generation remains blocked pending timezone/activity adaptation. CME futures timestamp, roll and execution validation remain unresolved.
+**Status:** private Dukascopy NQ and ES proxy snapshots are structurally qualified, checksummed and enabled for event-only research through the frozen timezone/activity adapter. CME futures timestamp, continuous-contract, roll, volume, cost and fill validation remain unresolved.
 
 Each instrument needs:
 
@@ -73,13 +73,13 @@ Each instrument needs:
 - roll dates and adjustment method;
 - tick size, point value and commissions.
 
-The Asia-specific source adapter rejects duplicate and off-grid timestamps and does not silently remove the final date. The canonical proxy archives retain the complete one-minute quote grid, keep UTC authoritative, serialize New York timestamps with explicit offsets and separate quote continuity from source activity. The frozen activity gate requires a complete one-minute interval, at least one positive-volume minute and no zero-volume run longer than 10 minutes.
+The Asia-specific source adapter rejects duplicate and off-grid timestamps and does not silently remove the final date. The canonical proxy archives retain the complete one-minute quote grid, keep UTC authoritative, convert causally to offset-aware New York timestamps and separate quote continuity from source activity. The frozen activity gate requires a complete one-minute interval, at least one positive-volume minute and no zero-volume run longer than 10 minutes.
 
-The proxy snapshots may support descriptive market-structure and event-semantics research. They do not establish CME futures roll, volume, cost, fill or deployment validity. Headline NQ/ES comparisons use only the intersection of qualified dates.
+The proxy snapshots may support descriptive market-structure and event-semantic research. They do not establish CME futures roll, volume, cost, fill or deployment validity. Headline NQ/ES comparisons use only the intersection of qualified dates.
 
 ## Phase 3 — Shared infrastructure boundary
 
-**Status:** signal boundary, strict source adapter and manifest execution guard complete; neutral execution adapter pending.
+**Status:** signal boundary, strict source adapter, manifest execution guard and proxy event adapter complete; neutral execution adapter pending.
 
 Permitted reuse:
 
@@ -98,7 +98,7 @@ Prohibited reuse:
 
 ## Phase 4 — Event ledger and manual audit
 
-**Status:** deterministic event ledger and causal completeness metadata implemented; official proxy generation is blocked by the timezone/activity adapter and end-of-window entry correction. Manual audit remains pending.
+**Status:** official no-P&L proxy ledgers, deterministic 50-event samples per proxy, independent clean-room reconstruction and private five-minute OHLC evidence are complete. Proxy event semantics are frozen; post-entry execution and P&L remain blocked.
 
 Store one record per instrument/date/window, including no-sweep and rejected events. Minimum content includes Asia range, interval-integrity status, swept side, sweep timestamp and depth, candle morphology, reclaim, displacement, failed retest, entry, stop, target, status and rejection reason.
 
@@ -107,16 +107,17 @@ Causal integrity rules:
 - an incomplete Asia range is ineligible;
 - missing or stale source data before the determining signal bar blocks the event;
 - a future data-quality event cannot retroactively erase an observable signal;
-- `NO_SWEEP` requires a complete execution window;
+- `NO_SWEEP` requires a complete and active execution window;
 - an entry timestamp must be strictly earlier than execution-window end.
 
-Before P&L:
+Completed before P&L:
 
-- inspect at least 50 NQ-proxy events;
-- inspect at least 50 ES-proxy events;
-- cover both directions and windows;
-- include DST, source-revision, missing/stale-data and same-bar edge cases;
-- retain deterministic OHLC/chart evidence.
+- 50 NQ-proxy records independently reconstructed;
+- 50 ES-proxy records independently reconstructed;
+- all four variants, both directions and both windows represented;
+- DST, stale-data, no-activity, ambiguous-sweep and boundary cases retained;
+- complete private five-minute OHLC paths retained for every sampled Asia range and execution window;
+- 100/100 sampled events reproduced exactly without calling the production signal builder.
 
 ## Phase 5 — Preregistered variants
 
@@ -146,17 +147,17 @@ AS-A plus a right-side-confirmed reaction swing, a later retest that stays insid
 
 ## Phase 6 — Causality and adversarial tests
 
-**Status:** isolated signal/data/manifest-guard tests run in dedicated Python 3.11/3.12 CI; original DTR lint/tests also run independently. Proxy activity, timezone and late-entry adversarial cases remain the next test gate. Post-entry execution cases remain pending because execution is not connected.
+**Status:** signal/data/manifest tests and proxy activity, DST, future-staleness and late-entry adversarial cases pass in dedicated Python 3.11/3.12 CI; original DTR lint/tests pass independently. Post-entry execution cases remain pending because execution is not connected.
 
-Completed coverage includes threshold edges, no reclaim, double sweep, wick boundaries, displacement timing and pre-window warmup, causal pivot confirmation, first-sweep ownership, incomplete ranges, missing pre-signal data, future gaps, duplicate timestamps, deterministic output, instrument-neutral signal semantics and blocked-manifest handling.
+Completed coverage includes threshold edges, no reclaim, double sweep, wick boundaries, displacement timing and pre-window warmup, causal pivot confirmation, first-sweep ownership, incomplete ranges, missing pre-signal data, future gaps, duplicate timestamps, deterministic output, instrument-neutral signal semantics, blocked-manifest handling, activity-staleness boundaries, DST-aware proxy conversion and entry exactly at window end.
 
-Future coverage must include activity-staleness edges, DST-aware proxy conversion, entry exactly at window end, same-minute stop/target collision, entry-stop collision, post-entry gaps, time exits, roll boundaries and simultaneous NQ/ES portfolio constraints.
+Future execution coverage must include same-minute stop/target collision, entry-stop collision, post-entry gaps, time exits, roll boundaries and simultaneous NQ/ES portfolio constraints.
 
 For every emitted signal, truncate data at the entry timestamp and reproduce the same decision. Any change under prefix replay is a lookahead failure.
 
 ## Phase 7 — Controlled development research
 
-**Blocked until Phases 2 and 4 pass and execution-specific Phase 6 tests are complete.**
+**Blocked until the neutral execution contract and execution-specific Phase 6 tests pass. Real-data P&L remains prohibited.**
 
 Partitions:
 
@@ -223,6 +224,6 @@ After Python validation, build Pine Script v6 with the same sessions, state mach
 
 ## Current decision
 
-`PRIVATE_PROXY_DATA_REGISTERED_EVENT_SEMANTICS_AND_PNL_BLOCKED`
+`PROXY_EVENT_SEMANTICS_FROZEN_EXECUTION_AND_PNL_BLOCKED`
 
-The private proxy-data registration may merge after final CI. Proceed next with UTC-to-New-York proxy adaptation, source-activity integrity, the end-of-window entry correction and official no-P&L event audits. Do not calculate or inspect strategy P&L until event semantics, execution contracts and futures-confirmation requirements are frozen.
+The proxy event-semantic layer may merge after final exact-head CI. Proceed next with a separate neutral-execution contract and synthetic adversarial simulator tests. Do not calculate or inspect strategy P&L until execution semantics, conservative collision handling, gap/time-exit behavior, the locked DTR benchmark and futures-confirmation requirements are frozen.
