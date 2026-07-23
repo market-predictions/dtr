@@ -7,10 +7,12 @@
     "end_exclusive_utc": "2026-01-01T00:00:00Z"
   },
   "data_handling": {
-    "temporary_private_use": true,
+    "private_persistent_cache": true,
+    "cache_location": "private Google Drive market-data cache",
     "commit_raw_data": false,
     "redistribute_raw_data": false,
-    "delete_after_research": true,
+    "delete_after_research": false,
+    "reuse_before_redownload": true,
     "remove_flat_zero_volume_placeholders": true
   },
   "price_construction": {
