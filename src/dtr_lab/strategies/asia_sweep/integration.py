@@ -12,12 +12,15 @@ from .execution import (
     ExecutionConfig,
     ExecutionOutcome,
     ExecutionSignal,
+    mark_synthetic_fixture,
     simulate_execution,
     validate_execution_prefix,
 )
 from .model import DEFAULT_WINDOWS, AsiaSweepVariant
 
 _EVENT_SOURCE_KIND = "SYNTHETIC_EVENT_PACKET"
+_MINUTE_EVENT_KEY_ATTR = "asia_sweep_event_key"
+_MINUTE_EVENT_DIGEST_ATTR = "asia_sweep_event_contract_digest"
 _REQUIRED_EVENT_COLUMNS = {
     "instrument",
     "trade_date",
@@ -31,6 +34,7 @@ _REQUIRED_EVENT_COLUMNS = {
     "target_price_raw",
 }
 _FROZEN_TARGET_RR = 2.0
+_SHA256_HEX = frozenset("0123456789abcdef")
 
 
 def _strict_text(value: object, *, name: str) -> str:
@@ -94,6 +98,14 @@ def stable_event_key(event: Mapping[str, object]) -> str:
 
     identity = _canonical_event_identity(event)
     return hashlib.sha256(identity.encode("utf-8")).hexdigest()
+
+
+def _is_sha256_key(value: object) -> bool:
+    return (
+        isinstance(value, str)
+        and len(value) == 64
+        and set(value).issubset(_SHA256_HEX)
+    )
 
 
 def _is_on_grid(value: float, tick_size: float, tolerance: float) -> bool:
@@ -263,6 +275,42 @@ def _validate_event_geometry(
     return direction, entry_time, entry, stop, target
 
 
+def event_contract_digest(
+    event: Mapping[str, object],
+    cfg: IntegrationConfig,
+) -> str:
+    """Hash all execution-relevant event facts after strict canonical validation."""
+
+    direction, entry_time, entry, stop, target = _validate_event_geometry(event, cfg)
+    tick_size = cfg.execution.tick_size
+    payload = "|".join(
+        (
+            _canonical_event_identity(event),
+            "SIGNAL",
+            str(direction),
+            entry_time.isoformat(),
+            str(int(round(entry / tick_size))),
+            str(int(round(stop / tick_size))),
+            str(int(round(target / tick_size))),
+            str(_FROZEN_TARGET_RR),
+        )
+    )
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def mark_synthetic_event_minute_frame(
+    frame: pd.DataFrame,
+    event: Mapping[str, object],
+    cfg: IntegrationConfig,
+) -> pd.DataFrame:
+    """Bind one synthetic minute fixture to a validated event identity and payload."""
+
+    mark_synthetic_fixture(frame)
+    frame.attrs[_MINUTE_EVENT_KEY_ATTR] = stable_event_key(event)
+    frame.attrs[_MINUTE_EVENT_DIGEST_ATTR] = event_contract_digest(event, cfg)
+    return frame
+
+
 def map_event_to_execution_signal(
     event: Mapping[str, object],
     cfg: IntegrationConfig,
@@ -291,17 +339,32 @@ def _validate_minute_grid(frame: pd.DataFrame, cfg: IntegrationConfig) -> None:
             _require_grid_price(value, name=f"minute {column}", cfg=cfg)
 
 
+def _validate_minute_binding(
+    event: Mapping[str, object],
+    one_minute: pd.DataFrame,
+    cfg: IntegrationConfig,
+) -> tuple[str, str]:
+    key = stable_event_key(event)
+    digest = event_contract_digest(event, cfg)
+    if one_minute.attrs.get(_MINUTE_EVENT_KEY_ATTR) != key:
+        raise ValueError("minute frame event key does not match mapped event")
+    if one_minute.attrs.get(_MINUTE_EVENT_DIGEST_ATTR) != digest:
+        raise ValueError("minute frame event contract digest does not match mapped event")
+    return key, digest
+
+
 def execute_mapped_event(
     event: Mapping[str, object],
     one_minute: pd.DataFrame,
     cfg: IntegrationConfig,
 ) -> tuple[str, ExecutionSignal, ExecutionOutcome]:
-    """Map and execute one synthetic event without mutating either input."""
+    """Map and execute one bound synthetic event without mutating either input."""
 
     signal = map_event_to_execution_signal(event, cfg)
+    key, _ = _validate_minute_binding(event, one_minute, cfg)
     _validate_minute_grid(one_minute, cfg)
     outcome = simulate_execution(signal, one_minute, cfg.execution)
-    return stable_event_key(event), signal, outcome
+    return key, signal, outcome
 
 
 def validate_integrated_prefix(
@@ -312,11 +375,13 @@ def validate_integrated_prefix(
     """Validate mapping determinism and execution prefix causality."""
 
     signal = map_event_to_execution_signal(event, cfg)
+    key, digest = _validate_minute_binding(event, one_minute, cfg)
     _validate_minute_grid(one_minute, cfg)
     replay_event = dict(event)
     replay_signal = map_event_to_execution_signal(replay_event, cfg)
     return (
-        stable_event_key(event) == stable_event_key(replay_event)
+        key == stable_event_key(replay_event)
+        and digest == event_contract_digest(replay_event, cfg)
         and signal == replay_signal
         and validate_execution_prefix(signal, one_minute, cfg.execution)
     )
@@ -335,8 +400,10 @@ def replay_synthetic_event_packet(
         duplicates = sorted(keys[keys.duplicated(keep=False)].unique())
         raise ValueError(f"event packet contains duplicate stable keys: {duplicates[:3]}")
 
-    expected_keys = set(keys)
     supplied_keys = set(minute_frames)
+    if any(not _is_sha256_key(key) for key in supplied_keys):
+        raise ValueError("minute frame keys must be lowercase SHA-256 strings")
+    expected_keys = set(keys)
     missing_frames = sorted(expected_keys.difference(supplied_keys))
     orphan_frames = sorted(supplied_keys.difference(expected_keys))
     if missing_frames:
@@ -349,6 +416,7 @@ def replay_synthetic_event_packet(
         key = keys.iloc[position]
         one_minute = minute_frames[key]
         signal_key, signal, outcome = execute_mapped_event(event, one_minute, cfg)
+        digest = event_contract_digest(event, cfg)
         if not validate_integrated_prefix(event, one_minute, cfg):
             raise ValueError(f"integrated prefix replay failed for event key: {key}")
         if signal_key != key:
@@ -356,6 +424,7 @@ def replay_synthetic_event_packet(
         rows.append(
             {
                 "stable_event_key": key,
+                "event_contract_digest": digest,
                 "trade_date": _canonical_trade_date(event["trade_date"]),
                 "execution_window": _strict_text(
                     event["execution_window"],
@@ -367,6 +436,14 @@ def replay_synthetic_event_packet(
                 "event_target_price_raw": float(event["target_price_raw"]),
                 "mapped_signal_timestamp": signal.signal_timestamp,
                 "mapped_window_end": signal.window_end,
+                "configured_tick_size": cfg.execution.tick_size,
+                "configured_point_value": cfg.execution.point_value,
+                "configured_commission_per_side": cfg.execution.commission_per_side,
+                "configured_entry_slippage_ticks": cfg.execution.entry_slippage_ticks,
+                "configured_stop_slippage_ticks": cfg.execution.stop_slippage_ticks,
+                "configured_market_exit_slippage_ticks": (
+                    cfg.execution.market_exit_slippage_ticks
+                ),
                 **outcome.as_dict(),
             }
         )
