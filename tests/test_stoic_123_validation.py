@@ -14,11 +14,7 @@ from stoic_123_lab.validation import (
 )
 
 
-def _bars(
-    closes: list[float],
-    minutes: int = 5,
-    start: str = "2025-01-02 09:00",
-) -> pd.DataFrame:
+def _bars(closes: list[float], minutes: int = 5, start: str = "2025-01-02 09:00") -> pd.DataFrame:
     timestamps = pd.date_range(start, periods=len(closes), freq=f"{minutes}min")
     close = np.asarray(closes, dtype=float)
     open_ = np.r_[close[0], close[:-1]]
@@ -55,7 +51,8 @@ def _config() -> SequenceConfig:
 
 
 def test_direction_restriction_does_not_disable_management_direction() -> None:
-    entry = entry_config(_config(), "long_only")
+    base = _config()
+    entry = entry_config(base, "long_only")
     management = management_config(entry)
     assert entry.allow_long is True
     assert entry.allow_short is False
@@ -93,7 +90,87 @@ def test_retest_control_waits_for_retest_and_uses_causal_low() -> None:
 
 
 def test_matched_time_control_is_deterministic_and_excludes_originals() -> None:
-    execution = _bars(list(np.linspace(100, 110, 400)), start="2025-01-01 00:00")
+    execution = _bars(
+        list(np.linspace(100, 110, 400)),
+        start="2025-01-01 00:00",
+    )
+    map_bars = _bars(list(np.linspace(100, 110, 40)), minutes=60, start="2025-01-01 00:00")
+    full = pd.DataFrame(
+        {
+            "arm_id": ["TEST", "TEST"],
+            "direction": [1, 1],
+            "signal_time": [
+                pd.Timestamp("2025-01-02 10:05"),
+                pd.Timestamp("2025-01-03 10:05"),
+            ],
+            "breakout_close": [102.0, 103.0],
+            "protective_boundary": [100.0, 101.0],
+            "base_lock_time": [
+                pd.Timestamp("2025-01-02 10:00"),
+                pd.Timestamp("2025-01-03 10:00"),
+            ],
+        }
+    )
+    first = matched_time_events(full, execution, map_bars, _config(), seed=7)
+    second = matched_time_events(full, execution, map_bars, _config(), seed=7)
+    pd.testing.assert_frame_equal(first, second)
+    assert not set(pd.to_datetime(first["signal_time"])) & set(pd.to_datetime(full["signal_time"]))
+    assert first["signal_time"].is_unique
+
+
+def test_management_config_preserves_original_timeframe() -> None:
+    base = replace(_config(), management_minutes=15)
+    management = management_config(base)
+    assert management.execution_minutes == 15
+
+
+def test_delay_events_shifts_only_entry_availability() -> None:
+    from stoic_123_lab.validation import delay_events
+
+    events = pd.DataFrame(
+        {
+            "signal_time": [pd.Timestamp("2025-01-02 10:00")],
+            "base_lock_time": [pd.Timestamp("2025-01-02 09:55")],
+            "protective_boundary": [99.0],
+        }
+    )
+    delayed = delay_events(events, 5)
+    assert delayed.loc[0, "signal_time"] == pd.Timestamp("2025-01-02 10:05")
+    assert delayed.loc[0, "base_lock_time"] == events.loc[0, "base_lock_time"]
+    assert delayed.loc[0, "protective_boundary"] == events.loc[0, "protective_boundary"]
+    assert events.loc[0, "signal_time"] == pd.Timestamp("2025-01-02 10:00")
+
+
+def test_session_attribution_separates_rth_and_overnight() -> None:
+    from stoic_123_lab.validation import session_attribution
+
+    trades = pd.DataFrame(
+        {
+            "instrument": ["NQ", "NQ"],
+            "pnl_r": [1.0, -0.5],
+            "entry_time": [
+                pd.Timestamp("2025-01-02 10:00"),
+                pd.Timestamp("2025-01-02 18:00"),
+            ],
+            "exit_time": [
+                pd.Timestamp("2025-01-02 10:30"),
+                pd.Timestamp("2025-01-02 18:30"),
+            ],
+        }
+    )
+    result = session_attribution(trades).set_index("session_bucket")
+    assert set(result.index) == {"RTH", "OVERNIGHT"}
+    assert result.loc["RTH", "net_r"] == 1.0
+    assert result.loc["OVERNIGHT", "net_r"] == -0.5
+
+
+def test_matched_time_control_uses_only_complete_nonreset_bars() -> None:
+    execution = _bars(
+        list(np.linspace(100, 110, 400)),
+        start="2025-01-01 00:00",
+    )
+    execution.loc[20:40, "full_bar"] = False
+    execution.loc[60:80, "gap_minutes"] = 30.0
     map_bars = _bars(
         list(np.linspace(100, 110, 40)),
         minutes=60,
@@ -115,15 +192,9 @@ def test_matched_time_control_is_deterministic_and_excludes_originals() -> None:
             ],
         }
     )
-    first = matched_time_events(full, execution, map_bars, _config(), seed=7)
-    second = matched_time_events(full, execution, map_bars, _config(), seed=7)
-    pd.testing.assert_frame_equal(first, second)
-    original_times = set(pd.to_datetime(full["signal_time"]))
-    assert not set(pd.to_datetime(first["signal_time"])) & original_times
-    assert first["signal_time"].is_unique
-
-
-def test_management_config_preserves_original_timeframe() -> None:
-    base = replace(_config(), management_minutes=15)
-    management = management_config(base)
-    assert management.execution_minutes == 15
+    matched = matched_time_events(full, execution, map_bars, _config(), seed=11)
+    eligible = execution.set_index("bar_end")
+    for signal_time in pd.to_datetime(matched["signal_time"]):
+        source = eligible.loc[signal_time]
+        assert bool(source["full_bar"])
+        assert float(source["gap_minutes"]) <= _config().gap_reset_minutes
