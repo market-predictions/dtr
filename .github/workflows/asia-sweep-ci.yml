@@ -49,32 +49,8 @@ jobs:
           echo "exit_code=$status" >> "$GITHUB_OUTPUT"
           exit 0
 
-      - name: Upload Asia Sweep pytest report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: asia-pytest-report-${{ matrix.python-version }}
-          path: asia-pytest-report.txt
-          if-no-files-found: error
-          retention-days: 7
-
-      - name: Enforce Asia Sweep test gate
-        run: test "${{ steps.asia_tests.outputs.exit_code }}" = "0"
-
-  temporary-wp6-changelog:
-    needs: isolated-tests
-    if: github.head_ref == 'agent/asia-sweep-proxy-normalization-contract'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Checkout branch
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
-          show-progress: false
-
-      - name: Prepend v0.7.0 if absent
+      - name: Build WP6 changelog candidate
+        if: matrix.python-version == '3.11'
         run: |
           python - <<'PY'
           from pathlib import Path
@@ -85,7 +61,7 @@ jobs:
           if not current.startswith(marker):
               raise SystemExit("unexpected changelog header")
           if "## v0.7.0 — 2026-07-23" in current:
-              Path("wp6-changelog-unchanged").write_text("unchanged")
+              Path("CHANGELOG.wp6.md").write_text(current)
               raise SystemExit(0)
           entry = r'''
 
@@ -157,17 +133,28 @@ Dukascopy proxy quotes have finer observed precision than the intended futures-l
 - Keep execution and P&L disabled throughout that audit.
 - Reproduce the locked DTR benchmark before extracting shared execution utilities.
 '''
-          path.write_text(marker + entry + current[len(marker):])
+          Path("CHANGELOG.wp6.md").write_text(
+              marker + entry + current[len(marker):]
+          )
           PY
 
-      - name: Commit changelog if changed
-        run: |
-          if git diff --quiet; then
-            echo "Changelog already current"
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add strategies/asia_sweep/CHANGELOG.md
-          git commit -m "Add Asian Sweep v0.7.0 changelog"
-          git push origin "HEAD:${{ github.head_ref }}"
+      - name: Upload WP6 changelog candidate
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: asia-sweep-changelog-wp6
+          path: CHANGELOG.wp6.md
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Upload Asia Sweep pytest report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: asia-pytest-report-${{ matrix.python-version }}
+          path: asia-pytest-report.txt
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Enforce Asia Sweep test gate
+        run: test "${{ steps.asia_tests.outputs.exit_code }}" = "0"
