@@ -1,4 +1,4 @@
-name: Temporary WP6 Roadmap Update
+name: Temporary WP6 Governance Commit
 
 on:
   pull_request:
@@ -11,6 +11,7 @@ permissions:
 jobs:
   update:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Checkout branch
         uses: actions/checkout@v4
@@ -18,46 +19,95 @@ jobs:
           ref: ${{ github.head_ref }}
           show-progress: false
 
-      - name: Apply roadmap transitions
+      - name: Prepend changelog v0.7.0
         run: |
           python - <<'PY'
           from pathlib import Path
 
-          path = Path("strategies/asia_sweep/ROADMAP.md")
-          text = path.read_text()
-          replacements = {
-              "- Development branches are phase-specific; current integration work uses `agent/asia-sweep-event-execution-integration`.":
-              "- Development branches are phase-specific; current normalization work uses `agent/asia-sweep-proxy-normalization-contract`.",
-              "**Status:** signal boundary, strict source adapter, manifest execution guard, proxy event adapter, isolated synthetic neutral-execution contract and synthetic event-to-execution integration are complete. Real proxy/futures execution remains blocked.":
-              "**Status:** signal boundary, strict source adapter, manifest execution guard, proxy event adapter, synthetic neutral execution, event-to-execution integration and synthetic proxy normalization are complete. Private normalization audit and real proxy/futures execution remain blocked.",
-              "- the standalone synthetic neutral-execution contract through the frozen integration adapter;":
-              "- the standalone synthetic neutral-execution contract through the frozen integration adapter;\n- the reviewed `DIRECTIONAL_PESSIMISTIC_V1` synthetic proxy normalization contract;",
-              "- mixed-instrument execution under one economics configuration.":
-              "- mixed-instrument execution under one economics configuration;\n- private normalization or execution before a protected no-P&L audit package passes.",
-              "**Status:** signal, data, manifest, proxy event, synthetic execution and synthetic event-to-execution integration coverage pass in dedicated Python 3.11/3.12 CI; original repository Ruff/tests pass independently. Real-data source adaptation and portfolio-level cases remain pending.":
-              "**Status:** signal, data, manifest, proxy event, synthetic execution, event-to-execution integration and synthetic proxy normalization coverage pass in dedicated Python 3.11/3.12 CI; original repository Ruff/tests pass independently. Private normalization evidence, real execution and portfolio-level cases remain pending.",
-              "Completed integration coverage includes all four variants, long/short mapping, UTC/New York and DST wall-calendar conversion, local-date and half-open-window membership, strict tick grids, one-instrument economics, stable identity keys, event-contract digests, event-bound minute fixtures, duplicate/missing/orphan/malformed frame-map rejection, batch/row equality, order invariance, immutability and integrated prefix replay. The complete isolated suite contains 185 passing tests.":
-              "Completed integration coverage includes all four variants, long/short mapping, UTC/New York and DST wall-calendar conversion, local-date and half-open-window membership, strict tick grids, one-instrument economics, stable identity keys, event-contract digests, event-bound minute fixtures, duplicate/missing/orphan/malformed frame-map rejection, batch/row equality, order invariance, immutability and integrated prefix replay.\n\nCompleted normalization coverage includes exact provider-symbol and BID-side binding, locked policy identity, Decimal source-grid operations, directionally pessimistic long/short normalization, derived-target noise canonicalization, risk-collapse rejection, raw OHLC validation, timestamp/gap/activity preservation, source/event/frame digests, wrong-source and stale-payload rejection, source-row order invariance and compatibility with the frozen WP5 binding. The complete isolated suite contains 223 passing tests.",
-              "Future coverage must include proxy source identity, price normalization and tick translation, futures-valid instrument economics, roll boundaries, MFE/MAE reporting and simultaneous NQ/ES portfolio constraints.":
-              "Future coverage must include protected private normalization evidence, futures-valid basis and instrument economics, roll boundaries, MFE/MAE reporting and simultaneous NQ/ES portfolio constraints.",
-              "**Blocked until a separately reviewed proxy execution-source adapter passes. Real-data P&L remains prohibited.**":
-              "**Blocked until a protected private normalization-only audit passes and a later real-execution package is separately preregistered and reviewed. Real-data execution and P&L remain prohibited.**",
-              "`SYNTHETIC_EVENT_EXECUTION_INTEGRATION_FROZEN_REAL_DATA_PNL_BLOCKED`":
-              "`SYNTHETIC_PROXY_NORMALIZATION_FROZEN_PRIVATE_EXECUTION_AND_PNL_BLOCKED`",
-              "The synthetic event-to-execution integration may merge after final exact-head repository CI, isolated Asia Sweep CI and unchanged private no-P&L event-audit stability gates pass. Proceed next only with a separate proxy execution-source adapter design and synthetic adversarial normalization tests. Do not calculate or inspect real proxy/futures P&L until source identity, price normalization, instrument economics, source activity, unresolved exits and proxy-versus-futures limitations are frozen and independently reviewed.":
-              "The synthetic proxy normalization contract may merge after final exact-head repository CI, isolated Asian Sweep CI and unchanged private no-P&L event-audit stability gates pass. Proceed next only with a protected private normalization-only audit package. That package may inspect raw-versus-normalized evidence but must not call execution or calculate P&L. Real proxy/futures execution remains blocked until normalization evidence, source limitations and instrument economics are independently reviewed."
-          }
-          for old, new in replacements.items():
-              if text.count(old) != 1:
-                  raise SystemExit(f"roadmap replacement count failed: {old[:80]!r}")
-              text = text.replace(old, new)
-          path.write_text(text)
+          path = Path("strategies/asia_sweep/CHANGELOG.md")
+          current = path.read_text()
+          marker = "# Asia Sweep Changelog\n"
+          if not current.startswith(marker):
+              raise SystemExit("unexpected changelog header")
+          if "## v0.7.0 — 2026-07-23" in current:
+              raise SystemExit("v0.7.0 already exists")
+          entry = r'''
+
+## v0.7.0 — 2026-07-23
+
+### Added
+
+- Added a synthetic Dukascopy-style proxy normalization adapter using Decimal arithmetic.
+- Added exact provider-source-instrument and BID-side binding.
+- Added locked policy `DIRECTIONAL_PESSIMISTIC_V1`.
+- Added source-event, source-frame and normalization digests.
+- Added directionally pessimistic event and one-minute OHLC normalization.
+- Added raw-versus-normalized audit columns and envelope-repair flags.
+- Added source-bound compatibility with the frozen WP5 integration contract.
+- Expanded the isolated Asian Sweep suite to 223 tests.
+
+### Changed
+
+- Required the execution tick to be an exact integer multiple of the source quote increment.
+- Required observed entry, stop and every source OHLC value to be strictly source-grid aligned.
+- Allowed only negligible arithmetic noise in the derived 2.0R source target while retaining reported and canonical values separately.
+- Preserved source timestamps, gaps and activity flags exactly.
+- Restricted rows to the entry-through-window-end horizon.
+- Kept normalization disconnected from private loaders and automatic execution.
+
+### Corrected during review
+
+- Bound NQ-like and ES-like fixtures to exact provider source symbols.
+- Locked the source side to BID and included source identity in event/frame markers and digests.
+- Removed arbitrary normalization-policy versioning.
+- Separated derived-target tolerance from strict observed-price validation.
+- Corrected an off-grid fixture whose Python float literal canonicalized to the on-grid value.
+- Applied pinned Ruff import ordering and removed temporary diagnostic/correction workflows.
+
+### Reason
+
+Dukascopy proxy quotes have finer observed precision than the intended futures-like execution grid. Every translation must be explicit, deterministic and pessimistic while preserving source identity, missing rows and activity. The result is a stress scenario, not a reconstruction of CME trades.
+
+### Validation
+
+- Repository Ruff passed.
+- Full repository tests passed on Python 3.11 and 3.12.
+- Isolated Asian Sweep suite: 223 passed on Python 3.11 and 3.12.
+- Provider-symbol, BID-side and policy locks passed.
+- Decimal grid, long/short pessimism and risk-collapse cases passed.
+- Timestamp, gap and activity preservation passed.
+- Wrong-source, wrong-side, swapped-frame and stale-payload rejection passed.
+- Source-row order invariance and digest determinism passed.
+- Normalized outputs satisfied the frozen WP5 binding contract.
+- No private data, real execution, P&L, optimization or variant ranking was produced.
+- Final exact-head CI and unchanged no-P&L event-audit stability remain merge gates.
+
+### Known limits
+
+- No private normalization audit packet exists.
+- BID proxy data do not establish ask-side, exchange-trade or CME futures behavior.
+- The directional policy is a conservative scenario, not observed execution truth.
+- CME timestamp, roll, volume, spread, commission, basis and fill validity remain unresolved.
+- Real-data execution, MFE, MAE, P&L and portfolio reporting remain blocked.
+- Provider authorization for future automated acquisition remains unresolved.
+- Repository-wide NumPy/pandas timedelta deprecation warnings remain warning debt.
+- The independent review is a same-session clean-room pass, not an external human audit.
+
+### Next
+
+- Generate a private normalization-only audit packet in a separate work package.
+- Retain raw and normalized paths, adjustment metrics and all digests privately.
+- Complete independent programmatic and manual normalization review.
+- Keep execution and P&L disabled throughout that audit.
+- Reproduce the locked DTR benchmark before extracting shared execution utilities.
+'''
+          path.write_text(marker + entry + current[len(marker):])
           PY
 
-      - name: Commit roadmap
+      - name: Commit changelog
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add strategies/asia_sweep/ROADMAP.md
-          git commit -m "Update roadmap for frozen proxy normalization"
+          git add strategies/asia_sweep/CHANGELOG.md
+          git commit -m "Add Asian Sweep v0.7.0 changelog"
           git push origin "HEAD:${{ github.head_ref }}"
