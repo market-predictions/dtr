@@ -9,6 +9,8 @@
 - raw stop and 2R target construction;
 - prefix-replay causality validator;
 - nine passing synthetic tests;
+- dedicated Asia Sweep CI passing on Python 3.11 and 3.12;
+- original repository CI passing, including Ruff and existing DTR tests;
 - corrected AS-C displacement reference using causal pre-window history;
 - NQ registered as development-only using the existing data reference;
 - ES blocked pending registration;
@@ -22,8 +24,7 @@
 - historical performance results;
 - manual 50+50 event audit;
 - qualified ES data;
-- DTR baseline rerun in this environment;
-- confirmed GitHub CI result.
+- direct canonical DTR baseline rerun against the raw local dataset.
 
 ## Next work package
 
@@ -33,7 +34,7 @@ Required order:
 
 1. register ES source and checksum;
 2. formalize session completeness and unsafe-gap exclusions;
-3. rerun the locked DTR baseline in CI/local repository environment;
+3. rerun the locked DTR baseline in a full data checkout before shared execution extraction;
 4. generate event ledgers without P&L;
 5. manually audit at least 50 NQ and 50 ES events;
 6. resolve any signal-semantic defects;
