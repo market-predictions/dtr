@@ -7,7 +7,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from .engine import StrategyConfig, metrics, prepare_market_arrays, run_backtest
+from .engine import StrategyConfig, metrics
+from .integrity import GapPolicy, prepare_market_arrays, run_backtest
 
 
 def candidate_grid(base: StrategyConfig, pack: str) -> list[StrategyConfig]:
@@ -47,7 +48,10 @@ def candidate_grid(base: StrategyConfig, pack: str) -> list[StrategyConfig]:
             )
     elif pack == "sweep":
         values = product(
-            [0.00, 0.01, 0.02, 0.04, 0.06], [0, 1, 2, 3], [0.40, 0.60, 0.80], [0.8, 1.0]
+            [0.00, 0.01, 0.02, 0.04, 0.06],
+            [0, 1, 2, 3],
+            [0.40, 0.60, 0.80],
+            [0.8, 1.0],
         )
         for pct, threshold, ideal, expand in values:
             name = f"SW_pct{pct:.2f}_q{threshold}_ideal{ideal:.2f}_exp{expand:.1f}"
@@ -102,7 +106,10 @@ def candidate_grid(base: StrategyConfig, pack: str) -> list[StrategyConfig]:
             )
     elif pack == "timing":
         values = product(
-            [5, 10, 15, 20], [30, 40, 60, 90], [0.01, 0.02, 0.04, 0.06], [1, 2, 3]
+            [5, 10, 15, 20],
+            [30, 40, 60, 90],
+            [0.01, 0.02, 0.04, 0.06],
+            [1, 2, 3],
         )
         for reaction, max_bars, pivot_pct, accept in values:
             name = f"TIME_react{reaction}_max{max_bars}_piv{pivot_pct:.2f}_a{accept}"
@@ -118,7 +125,9 @@ def candidate_grid(base: StrategyConfig, pack: str) -> list[StrategyConfig]:
             )
     elif pack == "risk":
         values = product(
-            [0.00, 0.05, 0.10, 0.20, 0.30], [1, 2, 4, 8], [0.5, 1.0, 2.0, 4.0]
+            [0.00, 0.05, 0.10, 0.20, 0.30],
+            [1, 2, 4, 8],
+            [0.5, 1.0, 2.0, 4.0],
         )
         for atr_frac, ticks, slip in values:
             name = f"RISK_atr{atr_frac:.2f}_ticks{ticks}_slip{slip:.1f}"
@@ -188,12 +197,19 @@ def evaluate_configs(
     train_end: pd.Timestamp,
     validation_end: pd.Timestamp,
     progress_every: int = 25,
+    *,
+    gap_policy: GapPolicy = "liquidate_unsafe",
 ) -> pd.DataFrame:
     rows: list[dict[str, object]] = []
     market_arrays = prepare_market_arrays(one)
     for n, cfg in enumerate(configs, 1):
         trades, funnel = run_backtest(
-            one, bars, sessions, cfg, market_arrays=market_arrays
+            one,
+            bars,
+            sessions,
+            cfg,
+            market_arrays=market_arrays,
+            gap_policy=gap_policy,
         )
         train = trades[trades["entry_time"] < train_end] if not trades.empty else trades
         val = (
@@ -207,6 +223,7 @@ def evaluate_configs(
         row: dict[str, object] = {
             "name": cfg.name,
             **asdict(cfg),
+            "gap_policy": gap_policy,
             **{f"funnel_{k}": v for k, v in funnel.as_dict().items()},
         }
         row.update({f"train_{k}": v for k, v in metrics(train).items()})

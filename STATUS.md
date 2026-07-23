@@ -2,13 +2,13 @@
 
 ## Current work package
 
-`DTR-NQ-WP-20260722-06 — Baseline validity reset`
+`DTR-NQ-WP-20260722-07 — Selection robustness and explicit execution contract`
 
-Status: **complete; final GitHub CI passed; ready for adversarial review and merge**
+Status: **exact historical reconstruction classified; architecture refactor and inference primitives implemented; clean-head CI running**
 
-Decision: `CONTINUE_RESEARCH_DO_NOT_DEPLOY`
+Decision state: `EXACT_RECONSTRUCTION_BLOCKED_CURRENT_CAUSAL_UNIVERSE_IN_PROGRESS`
 
-## Corrected benchmark
+## Accepted causal benchmark
 
 `DTR_PY_NQ_CANDIDATE_0_1_CAUSAL_GAP`
 
@@ -17,52 +17,50 @@ Decision: `CONTINUE_RESEARCH_DO_NOT_DEPLOY`
 - 86.004761R net;
 - PF 1.366383;
 - maximum drawdown 14.107858R;
-- return/DD 6.096231;
-- four causal gap liquidations.
+- return/DD 6.096231.
 
-## Historical references
+This benchmark is an exact regression gate and may not be retuned.
 
-- Observe-only: 504 trades and 84.164359R.
-- Suspended retrospective rejection: 491 trades and 88.495783R.
-- Historical rolling walk-forward: 289 trades and 0.151217R expectancy.
+## Original 904 audit
 
-## Validity gates
+The six grid definitions, pack sizes, optimizer score, runner, final candidate and narrative pack order are preserved. The original pack leaderboards, selected winner per pack, stage-transition base configurations and candidate return streams are not preserved in Git history.
+
+Decision: `EXACT_RECONSTRUCTION_BLOCKED`.
+
+A newly frozen experiment is permitted only under the separate label `CURRENT_CODE_CAUSAL_904_UNIVERSE`; it may not be represented as reconstructing the original staged selection path.
+
+## Architecture progress
+
+- canonical package import no longer mutates `engine.py` symbols;
+- optimizer imports the integrity-safe orchestration layer directly;
+- optimizer gap policy is explicit and defaults to `liquidate_unsafe`;
+- every new leaderboard row records the gap policy;
+- old monkey-patch identity tests were replaced with explicit public-package contract tests;
+- obsolete publisher, staged archives and diagnostic artifacts were removed.
+
+## Inference progress
+
+Committed deterministic primitives for:
+
+- session-date × session and calendar-date return alignment;
+- zero return assignment when a candidate takes no trade;
+- candidate return-stream SHA-256 hashes independent of candidate labels;
+- exact duplicate stream detection;
+- joint market-date block max-t testing;
+- reality-check-style best-mean testing;
+- bootstrap winner reselection frequencies and effective candidate count.
+
+Synthetic fixtures now separate duplicate-stream behavior from winner-instability behavior. Clean-head CI is running on the corrected contracts.
+
+## Existing unresolved gates
 
 - timestamp semantics: `UNRESOLVED`;
 - continuous-contract methodology: `UNRESOLVED`;
-- 904-search familywise adjustment: `UNRESOLVED`;
+- original 904-search familywise adjustment: `UNRESOLVED_EXACT_RECONSTRUCTION_BLOCKED`;
+- current-code causal universe inference: `IN_PROGRESS`;
 - fresh qualified OOS: `NOT_RUN_PREREGISTERED`;
 - Python/Pine parity: `NOT_RUN`.
 
-## No-retune module decisions
+## Scope restrictions
 
-- continuation: `HOLD_FOR_FRESH_DATA`;
-- IFVG: `REJECT_NO_INCREMENTAL_VALUE`;
-- CISD: `REJECT_NO_INCREMENTAL_VALUE`;
-- entry routing: `REJECT_NO_INCREMENTAL_VALUE`, PR #5 draft pending supersession decision.
-
-## Reproducibility
-
-- local suite: 75 tests passed;
-- baseline validity: 15/15 artifacts identical;
-- IFVG: 52/52;
-- CISD: 52/52;
-- continuation structural: 30/30;
-- continuation late-60: 30/30;
-- entry routing: 33/33;
-- source publication archive: checksum verified and self-cleaned;
-- evidence publication archive: checksum verified and self-cleaned;
-- pinned Ruff: passed;
-- pytest Python 3.11: passed;
-- pytest Python 3.12: passed;
-- GitHub CI run `29884201823`: success.
-
-## Remaining closure gates
-
-- final adversarial PR review;
-- squash merge of PR #6;
-- retire or rebuild PR #5 against the accepted causal benchmark.
-
-## Deployment restriction
-
-No deployment, Pine strategy release, sizing recommendation, current-sample retuning, or rescue combination is authorized.
+No fresh 2026 performance inspection, strategy retuning, new candidate family, module combination, Pine port, sizing recommendation, or deployment is authorized.
