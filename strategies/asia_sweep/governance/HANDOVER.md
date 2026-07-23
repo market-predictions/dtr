@@ -8,11 +8,13 @@
 - causal five-minute close timestamps;
 - raw stop and 2R target construction;
 - prefix-replay causality validator;
-- eight passing synthetic tests;
+- nine passing synthetic tests;
+- corrected AS-C displacement reference using causal pre-window history;
 - NQ registered as development-only using the existing data reference;
 - ES blocked pending registration;
 - roadmap, changelog, separation contract, specification and preregistration;
-- reviewer findings and next-gate recommendation.
+- reviewer findings and next-gate recommendation;
+- draft PR #22 opened and reviewed against its published diff.
 
 ## Not delivered
 
@@ -21,7 +23,7 @@
 - manual 50+50 event audit;
 - qualified ES data;
 - DTR baseline rerun in this environment;
-- CI result.
+- confirmed GitHub CI result.
 
 ## Next work package
 
@@ -35,4 +37,5 @@ Required order:
 4. generate event ledgers without P&L;
 5. manually audit at least 50 NQ and 50 ES events;
 6. resolve any signal-semantic defects;
-7. freeze event logic before connecting execution.
+7. complete the remaining adversarial tests;
+8. freeze event logic before connecting execution.
