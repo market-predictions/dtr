@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import hashlib
 import math
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Mapping
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import pandas as pd
 
@@ -11,7 +12,6 @@ from .execution import (
     ExecutionConfig,
     ExecutionOutcome,
     ExecutionSignal,
-    mark_synthetic_fixture,
     simulate_execution,
     validate_execution_prefix,
 )
@@ -50,30 +50,44 @@ class IntegrationConfig:
     def __post_init__(self) -> None:
         if not self.session_timezone:
             raise ValueError("session_timezone must be non-empty")
+        try:
+            ZoneInfo(self.session_timezone)
+        except ZoneInfoNotFoundError as exc:
+            raise ValueError(f"unknown session_timezone: {self.session_timezone}") from exc
         if not math.isfinite(self.price_tolerance) or self.price_tolerance <= 0:
             raise ValueError("price_tolerance must be positive and finite")
 
 
 def mark_synthetic_event_packet(frame: pd.DataFrame) -> pd.DataFrame:
-    """Mark a synthetic event packet; this prevents accidental real-data use."""
+    """Opt in a synthetic packet; this is a workflow guard, not a security boundary."""
 
     frame.attrs["asia_sweep_event_source_kind"] = _EVENT_SOURCE_KIND
     return frame
 
 
 def _canonical_trade_date(value: object) -> str:
-    timestamp = pd.Timestamp(value)
-    if timestamp is pd.NaT:
+    try:
+        timestamp = pd.Timestamp(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("trade_date is invalid") from exc
+    if pd.isna(timestamp):
         raise ValueError("trade_date is missing")
     return timestamp.strftime("%Y-%m-%d")
 
 
+def _strict_text(value: object, *, name: str) -> str:
+    text = str(value)
+    if not text or text != text.strip():
+        raise ValueError(f"{name} must be non-empty and contain no edge whitespace")
+    return text
+
+
 def _canonical_event_identity(event: Mapping[str, object]) -> str:
     values = [
-        str(event["instrument"]),
+        _strict_text(event["instrument"], name="instrument"),
         _canonical_trade_date(event["trade_date"]),
-        str(event["execution_window"]),
-        str(event["variant"]),
+        _strict_text(event["execution_window"], name="execution_window"),
+        _strict_text(event["variant"], name="variant"),
     ]
     return "|".join(values)
 
@@ -96,7 +110,10 @@ def _require_grid_price(
     name: str,
     cfg: IntegrationConfig,
 ) -> float:
-    price = float(value)
+    try:
+        price = float(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{name} must be numeric") from exc
     if not math.isfinite(price):
         raise ValueError(f"{name} must be finite")
     if not _is_on_grid(
@@ -108,28 +125,48 @@ def _require_grid_price(
     return price
 
 
-def _window_end(
+def _window_bounds(
     event: Mapping[str, object],
     cfg: IntegrationConfig,
-) -> pd.Timestamp:
-    window_name = str(event["execution_window"])
+) -> tuple[pd.Timestamp, pd.Timestamp]:
+    window_name = _strict_text(event["execution_window"], name="execution_window")
     windows = {window.name: window for window in DEFAULT_WINDOWS}
     if window_name not in windows:
         raise ValueError(f"unknown execution window: {window_name}")
     window = windows[window_name]
     day = pd.Timestamp(_canonical_trade_date(event["trade_date"]))
-    naive = pd.Timestamp(
+    start_naive = pd.Timestamp(
+        year=day.year,
+        month=day.month,
+        day=day.day,
+        hour=window.start_hour,
+        minute=window.start_minute,
+    )
+    end_naive = pd.Timestamp(
         year=day.year,
         month=day.month,
         day=day.day,
         hour=window.end_hour,
         minute=window.end_minute,
     )
-    return naive.tz_localize(
+    start = start_naive.tz_localize(
         cfg.session_timezone,
         ambiguous="raise",
         nonexistent="raise",
     )
+    end = end_naive.tz_localize(
+        cfg.session_timezone,
+        ambiguous="raise",
+        nonexistent="raise",
+    )
+    return start, end
+
+
+def _window_end(
+    event: Mapping[str, object],
+    cfg: IntegrationConfig,
+) -> pd.Timestamp:
+    return _window_bounds(event, cfg)[1]
 
 
 def _validate_event_packet(frame: pd.DataFrame) -> pd.DataFrame:
@@ -143,22 +180,41 @@ def _validate_event_packet(frame: pd.DataFrame) -> pd.DataFrame:
     return frame.copy(deep=True)
 
 
+def _strict_direction(value: object) -> int:
+    if isinstance(value, bool):
+        raise ValueError("event direction must be -1 or 1")
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("event direction must be -1 or 1") from exc
+    if not math.isfinite(numeric) or not numeric.is_integer():
+        raise ValueError("event direction must be -1 or 1")
+    direction = int(numeric)
+    if direction not in (-1, 1):
+        raise ValueError("event direction must be -1 or 1")
+    return direction
+
+
 def _validate_event_geometry(
     event: Mapping[str, object],
     cfg: IntegrationConfig,
 ) -> tuple[int, pd.Timestamp, float, float, float]:
-    if str(event["status"]) != "SIGNAL":
+    if _strict_text(event["status"], name="status") != "SIGNAL":
         raise ValueError("only SIGNAL events may be mapped to execution")
-    try:
-        AsiaSweepVariant(str(event["variant"]))
-    except ValueError as exc:
-        raise ValueError(f"unknown Asia Sweep variant: {event['variant']}") from exc
 
-    direction = int(event["direction"])
-    if direction not in (-1, 1):
-        raise ValueError("event direction must be -1 or 1")
-    entry_time = pd.Timestamp(event["entry_timestamp"])
-    if entry_time.tzinfo is None:
+    variant_text = _strict_text(event["variant"], name="variant")
+    try:
+        AsiaSweepVariant(variant_text)
+    except ValueError as exc:
+        raise ValueError(f"unknown Asia Sweep variant: {variant_text}") from exc
+
+    _strict_text(event["instrument"], name="instrument")
+    direction = _strict_direction(event["direction"])
+    try:
+        entry_time = pd.Timestamp(event["entry_timestamp"])
+    except (TypeError, ValueError) as exc:
+        raise ValueError("event entry_timestamp is invalid") from exc
+    if pd.isna(entry_time) or entry_time.tzinfo is None:
         raise ValueError("event entry_timestamp must be timezone-aware")
     entry_time = entry_time.tz_convert(cfg.session_timezone)
     if (
@@ -168,12 +224,16 @@ def _validate_event_geometry(
     ):
         raise ValueError("event entry_timestamp must be one-minute aligned")
 
+    trade_date = _canonical_trade_date(event["trade_date"])
+    if entry_time.strftime("%Y-%m-%d") != trade_date:
+        raise ValueError("event entry_timestamp local date must equal trade_date")
+    window_start, window_end = _window_bounds(event, cfg)
+    if not window_start <= entry_time < window_end:
+        raise ValueError("event entry_timestamp must fall inside its execution window")
+
     entry = _require_grid_price(event["entry_price_raw"], name="event entry", cfg=cfg)
     stop = _require_grid_price(event["stop_price_raw"], name="event stop", cfg=cfg)
     target = _require_grid_price(event["target_price_raw"], name="event target", cfg=cfg)
-    window_end = _window_end(event, cfg)
-    if entry_time >= window_end:
-        raise ValueError("event entry_timestamp must precede execution-window end")
 
     risk = entry - stop if direction > 0 else stop - entry
     if risk <= cfg.execution.tick_size:
@@ -201,7 +261,7 @@ def map_event_to_execution_signal(
 
     direction, entry_time, _, stop, _ = _validate_event_geometry(event, cfg)
     return ExecutionSignal(
-        instrument=str(event["instrument"]),
+        instrument=_strict_text(event["instrument"], name="instrument"),
         direction=direction,
         signal_timestamp=entry_time,
         window_end=_window_end(event, cfg),
@@ -211,11 +271,11 @@ def map_event_to_execution_signal(
 
 
 def _validate_minute_grid(frame: pd.DataFrame, cfg: IntegrationConfig) -> None:
-    required = {"open", "high", "low", "close"}
+    required = {"timestamp", "open", "high", "low", "close"}
     missing = required.difference(frame.columns)
     if missing:
         raise ValueError(f"minute frame missing grid columns: {sorted(missing)}")
-    for column in sorted(required):
+    for column in ("open", "high", "low", "close"):
         values = pd.to_numeric(frame[column], errors="raise")
         for value in values:
             _require_grid_price(value, name=f"minute {column}", cfg=cfg)
@@ -239,15 +299,16 @@ def validate_integrated_prefix(
     one_minute: pd.DataFrame,
     cfg: IntegrationConfig,
 ) -> bool:
-    """Validate both mapping determinism and execution prefix causality."""
+    """Validate mapping determinism and execution prefix causality."""
 
     signal = map_event_to_execution_signal(event, cfg)
     _validate_minute_grid(one_minute, cfg)
-    replay_signal = map_event_to_execution_signal(dict(event), cfg)
-    return signal == replay_signal and validate_execution_prefix(
-        signal,
-        one_minute,
-        cfg.execution,
+    replay_event = dict(event)
+    replay_signal = map_event_to_execution_signal(replay_event, cfg)
+    return (
+        stable_event_key(event) == stable_event_key(replay_event)
+        and signal == replay_signal
+        and validate_execution_prefix(signal, one_minute, cfg.execution)
     )
 
 
@@ -264,22 +325,39 @@ def replay_synthetic_event_packet(
         duplicates = sorted(keys[keys.duplicated(keep=False)].unique())
         raise ValueError(f"event packet contains duplicate stable keys: {duplicates[:3]}")
 
+    expected_keys = set(keys)
+    supplied_keys = set(minute_frames)
+    missing_frames = sorted(expected_keys.difference(supplied_keys))
+    orphan_frames = sorted(supplied_keys.difference(expected_keys))
+    if missing_frames:
+        raise ValueError(f"missing minute frame for event key: {missing_frames[0]}")
+    if orphan_frames:
+        raise ValueError(f"orphan minute frame key: {orphan_frames[0]}")
+
     rows: list[dict[str, object]] = []
     for position, (_, event) in enumerate(packet.iterrows()):
         key = keys.iloc[position]
-        if key not in minute_frames:
-            raise ValueError(f"missing minute frame for event key: {key}")
-        signal_key, signal, outcome = execute_mapped_event(
-            event,
-            minute_frames[key],
-            cfg,
+        one_minute = minute_frames[key]
+        signal_key, signal, outcome = execute_mapped_event(event, one_minute, cfg)
+        if not validate_integrated_prefix(event, one_minute, cfg):
+            raise ValueError(f"integrated prefix replay failed for event key: {key}")
+        if signal_key != key:
+            raise ValueError("stable event key changed during execution mapping")
+        rows.append(
+            {
+                "stable_event_key": key,
+                "trade_date": _canonical_trade_date(event["trade_date"]),
+                "execution_window": _strict_text(
+                    event["execution_window"],
+                    name="execution_window",
+                ),
+                "variant": _strict_text(event["variant"], name="variant"),
+                "event_entry_price_raw": float(event["entry_price_raw"]),
+                "event_stop_price_raw": float(event["stop_price_raw"]),
+                "event_target_price_raw": float(event["target_price_raw"]),
+                "mapped_signal_timestamp": signal.signal_timestamp,
+                "mapped_window_end": signal.window_end,
+                **outcome.as_dict(),
+            }
         )
-        record = {
-            "stable_event_key": signal_key,
-            **{column: event[column] for column in _IDENTITY_COLUMNS},
-            "signal_timestamp": signal.signal_timestamp,
-            "window_end": signal.window_end,
-            **outcome.as_dict(),
-        }
-        rows.append(record)
     return pd.DataFrame(rows).sort_values("stable_event_key").reset_index(drop=True)
