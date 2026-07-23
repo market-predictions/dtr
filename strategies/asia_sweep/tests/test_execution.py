@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from dataclasses import asdict, replace
 import inspect
+from dataclasses import asdict, replace
 
 import pandas as pd
 import pytest
@@ -15,7 +15,6 @@ from dtr_lab.strategies.asia_sweep.execution import (
     simulate_execution,
     validate_execution_prefix,
 )
-
 
 _CONFIG = ExecutionConfig(
     tick_size=0.25,
@@ -64,6 +63,15 @@ def _keep_marker(frame: pd.DataFrame) -> pd.DataFrame:
     return mark_synthetic_fixture(frame.copy())
 
 
+def _set_bar(
+    frame: pd.DataFrame,
+    timestamp: str,
+    values: tuple[float, float, float, float],
+) -> None:
+    mask = frame["timestamp"] == pd.Timestamp(timestamp)
+    frame.loc[mask, ["open", "high", "low", "close"]] = values
+
+
 def test_real_or_unmarked_source_is_rejected() -> None:
     frame = _frame()
     frame.attrs.clear()
@@ -86,6 +94,7 @@ def test_inactive_entry_minute_blocks_trade() -> None:
     frame = _frame()
     frame.loc[0, "is_active_quote"] = 0
     outcome = simulate_execution(_signal(), frame, _CONFIG)
+    assert outcome.status == ExecutionStatus.BLOCKED
     assert outcome.reason == ExecutionReason.INACTIVE_ENTRY_MINUTE
 
 
@@ -140,6 +149,14 @@ def test_entry_minute_target_and_long_short_symmetry(
     assert outcome.net_r < outcome.gross_r
 
 
+def test_entry_minute_stop_only() -> None:
+    frame = _frame()
+    frame.loc[0, "low"] = 98.0
+    outcome = simulate_execution(_signal(), frame, _CONFIG)
+    assert outcome.reason == ExecutionReason.STOP
+    assert outcome.collision is False
+
+
 def test_entry_minute_collision_is_stop_first() -> None:
     frame = _frame()
     frame.loc[0, ["high", "low"]] = [103.0, 98.0]
@@ -149,49 +166,73 @@ def test_entry_minute_collision_is_stop_first() -> None:
     assert outcome.gross_r < -1.0
 
 
-def test_later_minute_collision_is_stop_first() -> None:
+def test_later_minute_stop_only_target_only_and_collision() -> None:
+    frame = _frame()
+    frame.loc[2, "low"] = 98.0
+    assert simulate_execution(_signal(), frame, _CONFIG).reason == ExecutionReason.STOP
+
+    frame = _frame()
+    frame.loc[2, "high"] = 103.0
+    assert simulate_execution(_signal(), frame, _CONFIG).reason == ExecutionReason.TARGET
+
     frame = _frame()
     frame.loc[2, ["high", "low"]] = [103.0, 98.0]
     outcome = simulate_execution(_signal(), frame, _CONFIG)
     assert outcome.reason == ExecutionReason.STOP
-    assert outcome.exit_timestamp == pd.Timestamp("2024-01-02 02:07")
     assert outcome.collision is True
 
 
-def test_stop_gap_exits_at_open_with_adverse_slippage() -> None:
+@pytest.mark.parametrize(
+    ("direction", "stop", "bar", "reason", "expected_exit"),
+    [
+        (1, 99.0, (98.5, 98.8, 98.0, 98.4), ExecutionReason.STOP_GAP, 98.25),
+        (-1, 101.0, (101.5, 102.0, 101.2, 101.6), ExecutionReason.STOP_GAP, 101.75),
+        (1, 99.0, (104.0, 104.2, 103.8, 104.0), ExecutionReason.TARGET_GAP, None),
+        (-1, 101.0, (96.0, 96.2, 95.8, 96.0), ExecutionReason.TARGET_GAP, None),
+    ],
+)
+def test_stop_and_target_gap_symmetry(
+    direction: int,
+    stop: float,
+    bar: tuple[float, float, float, float],
+    reason: ExecutionReason,
+    expected_exit: float | None,
+) -> None:
     frame = _frame()
-    frame.loc[2, ["open", "high", "low", "close"]] = [98.5, 98.8, 98.0, 98.4]
-    outcome = simulate_execution(_signal(), frame, _CONFIG)
-    assert outcome.reason == ExecutionReason.STOP_GAP
-    assert outcome.exit_price_raw == pytest.approx(98.5)
-    assert outcome.exit_price == pytest.approx(98.25)
+    _set_bar(frame, "2024-01-02 02:07", bar)
+    outcome = simulate_execution(
+        _signal(direction=direction, stop=stop),
+        frame,
+        _CONFIG,
+    )
+    assert outcome.reason == reason
+    if expected_exit is None:
+        assert outcome.exit_price == pytest.approx(outcome.target_price)
+        assert outcome.gross_r == pytest.approx(2.0)
+    else:
+        assert outcome.exit_price == pytest.approx(expected_exit)
 
 
-def test_target_gap_fills_at_target_without_favorable_improvement() -> None:
-    frame = _frame()
-    frame.loc[2, ["open", "high", "low", "close"]] = [104.0, 104.2, 103.8, 104.0]
-    outcome = simulate_execution(_signal(), frame, _CONFIG)
-    assert outcome.reason == ExecutionReason.TARGET_GAP
-    assert outcome.exit_price_raw == pytest.approx(outcome.target_price)
-    assert outcome.exit_price == pytest.approx(outcome.target_price)
-    assert outcome.gross_r == pytest.approx(2.0)
-
-
-def test_missing_post_entry_minute_liquidates_at_next_open() -> None:
+def test_missing_post_entry_minute_liquidates_at_next_active_open() -> None:
     frame = _frame()
     missing = pd.Timestamp("2024-01-02 02:07")
     frame = _keep_marker(frame[frame["timestamp"] != missing])
-    resume = frame["timestamp"] == pd.Timestamp("2024-01-02 02:08")
-    frame.loc[resume, "open"] = 99.5
+    frame.loc[
+        frame["timestamp"] == pd.Timestamp("2024-01-02 02:08"),
+        "is_active_quote",
+    ] = 0
+    _set_bar(frame, "2024-01-02 02:09", (99.5, 99.7, 99.3, 99.5))
     outcome = simulate_execution(_signal(), frame, _CONFIG)
     assert outcome.reason == ExecutionReason.DATA_GAP_LIQUIDATION
-    assert outcome.exit_timestamp == pd.Timestamp("2024-01-02 02:08")
+    assert outcome.exit_timestamp == pd.Timestamp("2024-01-02 02:09")
     assert outcome.exit_price == pytest.approx(99.25)
-    assert outcome.gap_minutes == 1
+    assert outcome.gap_minutes == 2
 
 
-def test_missing_data_without_observation_by_window_end_is_unresolved() -> None:
-    outcome = simulate_execution(_signal(), _frame(periods=2), _CONFIG)
+def test_missing_data_without_active_observation_by_window_end_is_unresolved() -> None:
+    frame = _frame(periods=5)
+    frame = _keep_marker(frame.iloc[:2])
+    outcome = simulate_execution(_signal(), frame, _CONFIG)
     assert outcome.status == ExecutionStatus.UNRESOLVED
     assert outcome.reason == ExecutionReason.UNRESOLVED_DATA_EXIT
     assert outcome.net_r is None
@@ -228,8 +269,7 @@ def test_stale_run_without_active_time_exit_is_unresolved() -> None:
 
 def test_exact_window_end_uses_bar_open_and_market_slippage() -> None:
     frame = _frame()
-    exit_row = frame["timestamp"] == pd.Timestamp("2024-01-02 02:15")
-    frame.loc[exit_row, "open"] = 100.5
+    _set_bar(frame, "2024-01-02 02:15", (100.5, 100.7, 100.3, 100.5))
     outcome = simulate_execution(_signal(), frame, _CONFIG)
     assert outcome.reason == ExecutionReason.TIME_EXIT
     assert outcome.exit_price_raw == pytest.approx(100.5)
@@ -259,9 +299,10 @@ def test_commission_is_separate_from_slippage_and_net_r() -> None:
     assert outcome.net_r == pytest.approx(2.0 - expected_commission_r)
 
 
-@pytest.mark.parametrize("exit_case", ["target", "stop", "gap", "time"])
+@pytest.mark.parametrize("exit_case", ["target", "stop", "gap", "stale", "time"])
 def test_prefix_replay_reproduces_determining_exit(exit_case: str) -> None:
-    frame = _frame()
+    frame = _frame(periods=20)
+    signal = _signal()
     if exit_case == "target":
         frame.loc[2, "high"] = 103.0
     elif exit_case == "stop":
@@ -269,7 +310,10 @@ def test_prefix_replay_reproduces_determining_exit(exit_case: str) -> None:
     elif exit_case == "gap":
         missing = pd.Timestamp("2024-01-02 02:07")
         frame = _keep_marker(frame[frame["timestamp"] != missing])
-    assert validate_execution_prefix(_signal(), frame, _CONFIG) is True
+    elif exit_case == "stale":
+        frame.loc[1:11, "is_active_quote"] = 0
+        signal = _signal(end="2024-01-02 02:18")
+    assert validate_execution_prefix(signal, frame, _CONFIG) is True
 
 
 def test_signal_and_input_frame_are_not_mutated() -> None:
@@ -281,7 +325,26 @@ def test_signal_and_input_frame_are_not_mutated() -> None:
     assert asdict(_signal()) == before_signal
 
 
-def test_duplicate_and_off_grid_timestamps_fail_loudly() -> None:
+def test_invalid_source_geometry_fails_loudly() -> None:
+    frame = _frame()
+    frame.loc[0, "high"] = 99.0
+    with pytest.raises(ValueError, match="OHLC invariants"):
+        simulate_execution(_signal(), frame, _CONFIG)
+
+    frame = _frame()
+    frame.loc[0, "open"] = float("nan")
+    with pytest.raises(ValueError, match="non-finite"):
+        simulate_execution(_signal(), frame, _CONFIG)
+
+    frame = _frame()
+    frame.loc[0, "timestamp"] = (
+        pd.Timestamp(frame.loc[0, "timestamp"]) + pd.Timedelta(seconds=30)
+    )
+    with pytest.raises(ValueError, match="off-grid timestamps"):
+        simulate_execution(_signal(), frame, _CONFIG)
+
+
+def test_duplicate_timestamps_fail_loudly() -> None:
     duplicate = pd.concat(
         [_frame().iloc[:2], _frame().iloc[:1]],
         ignore_index=True,
@@ -290,15 +353,35 @@ def test_duplicate_and_off_grid_timestamps_fail_loudly() -> None:
     with pytest.raises(ValueError, match="duplicate timestamps"):
         simulate_execution(_signal(), duplicate, _CONFIG)
 
-    off_grid = _frame()
-    off_grid.loc[0, "timestamp"] = (
-        pd.Timestamp(off_grid.loc[0, "timestamp"]) + pd.Timedelta(seconds=30)
-    )
-    with pytest.raises(ValueError, match="off-grid timestamps"):
-        simulate_execution(_signal(), off_grid, _CONFIG)
+
+def test_signal_clock_and_bar_timezone_must_be_compatible() -> None:
+    with pytest.raises(ValueError, match="one-minute aligned"):
+        _signal(start="2024-01-02 02:05:30")
+
+    aware_end = pd.Timestamp("2024-01-02 02:15", tz="UTC")
+    with pytest.raises(ValueError, match="timezone awareness must match"):
+        ExecutionSignal(
+            instrument="NQ_SYNTHETIC",
+            direction=1,
+            signal_timestamp=pd.Timestamp("2024-01-02 02:05"),
+            window_end=aware_end,
+            stop_price=99.0,
+        )
+
+    frame = _frame()
+    frame["timestamp"] = frame["timestamp"].dt.tz_localize("UTC")
+    with pytest.raises(ValueError, match="bar and signal timezone awareness"):
+        simulate_execution(_signal(), frame, _CONFIG)
 
 
-def test_activity_audit_can_be_disabled_for_generic_synthetic_bars() -> None:
+def test_invalid_config_inputs_fail_loudly() -> None:
+    with pytest.raises(ValueError, match="non-negative and finite"):
+        replace(_CONFIG, entry_slippage_ticks=-1.0)
+    with pytest.raises(ValueError, match="non-empty or None"):
+        replace(_CONFIG, activity_column="")
+
+
+def test_activity_audit_can_be_disabled_for_synthetic_bars() -> None:
     frame = _frame().drop(columns="is_active_quote")
     mark_synthetic_fixture(frame)
     config = replace(_CONFIG, activity_column=None)
