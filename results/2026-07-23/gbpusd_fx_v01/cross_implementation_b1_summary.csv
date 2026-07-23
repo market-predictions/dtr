@@ -1,0 +1,3 @@
+implementation,trades,net_r,net_expectancy_r,gross_expectancy_r,profit_factor,stress_1p5x_cost_expectancy_r,locked_2025_expectancy_r,ci_crosses_zero,promoted
+A_BRANCH,55,9.6861980886,0.1761126925,0.2549031030,1.4240428268,0.1294962015,-0.0385059247,true,false
+B_CLEAN_ROOM,144,13.7979740000,0.0958190000,0.1759620000,1.1798610000,0.0476530000,-0.2464410000,true,false
