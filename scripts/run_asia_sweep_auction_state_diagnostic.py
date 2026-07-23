@@ -36,6 +36,12 @@ def _load_yaml(path: Path) -> dict[str, object]:
     return value
 
 
+def _frozen_manifest_periods(periods: dict[str, object]) -> bool:
+    start = pd.Timestamp(periods["development_start"])
+    end = pd.Timestamp(periods["development_end"])
+    return start == pd.Timestamp("2023-01-01") and end == pd.Timestamp("2024-07-01")
+
+
 @app.command()
 def main(manifest_path: Path, output_root: Path) -> None:
     """Run the development-only auction-state diagnostic without P&L."""
@@ -43,10 +49,8 @@ def main(manifest_path: Path, output_root: Path) -> None:
     manifest = _load_yaml(manifest_path)
     dataset = manifest["dataset"]
     periods = manifest["periods"]
-    if str(periods["development_start"]) != "2023-01-01T00:00:00":
-        raise typer.BadParameter("development_start differs from frozen diagnostic")
-    if str(periods["development_end"]) != "2024-07-01T00:00:00":
-        raise typer.BadParameter("development_end differs from frozen diagnostic")
+    if not _frozen_manifest_periods(periods):
+        raise typer.BadParameter("manifest periods differ from frozen diagnostic")
     if dataset["source_kind"] != "DUKASCOPY_INDEX_CFD_PROXY":
         raise typer.BadParameter("diagnostic requires the registered Dukascopy proxy")
     if dataset["session_timezone"] != "America/New_York":
