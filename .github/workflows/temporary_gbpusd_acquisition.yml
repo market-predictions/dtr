@@ -1,4 +1,4 @@
-name: Temporary GBPUSD acquisition
+name: Temporary GBPUSD acquisition and analysis
 
 on:
   push:
@@ -7,13 +7,18 @@ on:
     paths:
       - .github/workflows/temporary_gbpusd_acquisition.yml
       - temporary/gbpusd_acquisition.trigger
+      - temporary/gbpusd_runners.tar.gz.b64
   pull_request:
     paths:
       - .github/workflows/temporary_gbpusd_acquisition.yml
       - temporary/gbpusd_acquisition.trigger
 
+concurrency:
+  group: gbpusd-dtr-replication
+  cancel-in-progress: true
+
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   acquire:
@@ -180,3 +185,141 @@ jobs:
           retention-days: 1
           compression-level: 0
           if-no-files-found: error
+
+  analyze:
+    name: GBPUSD DTR analysis and independent review
+    needs: acquire
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/gbpusd-dtr-replication
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: gbpusd-m1-bid-ask-*
+          path: /tmp/gbpusd_data
+          merge-multiple: true
+
+      - name: Materialize reproducible runners
+        shell: bash
+        run: |
+          set -euo pipefail
+          base64 -d temporary/gbpusd_runners.tar.gz.b64 | tar -xz -C scripts
+          python -m py_compile \
+            scripts/run_gbpusd_replication.py \
+            scripts/review_gbpusd_replication.py
+
+      - name: Install research environment
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e .
+          python -m pip install matplotlib tabulate
+
+      - name: Run frozen GBPUSD study
+        run: |
+          python scripts/run_gbpusd_replication.py \
+            --input-dir /tmp/gbpusd_data \
+            --out /tmp/gbpusd_results \
+            --iterations 20000
+
+      - name: Run independent verifier
+        run: |
+          python scripts/review_gbpusd_replication.py \
+            --results /tmp/gbpusd_results \
+            --out /tmp/gbpusd_review \
+            --iterations 20000
+
+      - name: Stage compact evidence only
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p \
+            results/2026-07-23/gbpusd \
+            docs \
+            reviews \
+            changelogs \
+            handovers
+
+          cp /tmp/gbpusd_results/stage1_calendar_factorial.csv \
+             results/2026-07-23/gbpusd/
+          cp /tmp/gbpusd_results/stage1_paired_bootstrap.csv \
+             results/2026-07-23/gbpusd/
+          cp /tmp/gbpusd_results/stage1b_session_decomposition.csv \
+             results/2026-07-23/gbpusd/
+          cp /tmp/gbpusd_results/spread_summary.csv \
+             results/2026-07-23/gbpusd/
+          cp /tmp/gbpusd_results/data_audit.json \
+             results/2026-07-23/gbpusd/
+          cp /tmp/gbpusd_results/decision.json \
+             results/2026-07-23/gbpusd/
+          cp /tmp/gbpusd_results/artifact_hashes.json \
+             results/2026-07-23/gbpusd/
+          cp /tmp/gbpusd_results/charts/*.png \
+             results/2026-07-23/gbpusd/
+          cp /tmp/gbpusd_review/independent_review.json \
+             results/2026-07-23/gbpusd/
+          cp /tmp/gbpusd_review/independent_metrics.csv \
+             results/2026-07-23/gbpusd/
+          cp /tmp/gbpusd_review/independent_bootstrap.csv \
+             results/2026-07-23/gbpusd/
+          cp /tmp/gbpusd_results/GBPUSD_DTR_REPLICATION_RESEARCH_2026-07-23.md \
+             docs/
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          results = Path("results/2026-07-23/gbpusd")
+          decision = json.loads((results / "decision.json").read_text())
+          review = json.loads((results / "independent_review.json").read_text())
+
+          Path("reviews/DTR-FX-WP-20260723-22-independent-review.md").write_text(
+              "# Independent review — DTR-FX-WP-20260723-22\n\n"
+              f"- Conclusion: `{review['conclusion']}`\n"
+              f"- Research decision: `{decision['decision']}`\n"
+              "- Metrics were reconstructed from the saved trade streams before raw data deletion.\n"
+              "- The Monday × Asia ordering, conditional session decomposition, spread model and no-deployment boundary were verified.\n",
+              encoding="utf-8",
+          )
+          Path("changelogs/DTR-FX-WP-20260723-22.md").write_text(
+              "# Changelog — DTR-FX-WP-20260723-22\n\n"
+              "## v0.5.0-fx.1 — 2026-07-23\n\n"
+              "- Added temporary Dukascopy GBPUSD bid/ask acquisition.\n"
+              "- Added midpoint/spread qualification and frozen DTR cross-asset replication.\n"
+              "- Added Monday × Asia factorial, conditional session decomposition and independent review.\n"
+              f"- Decision: `{decision['decision']}`.\n"
+              "- Known limit: Dukascopy FX evidence is exploratory and is not a live-broker execution validation.\n",
+              encoding="utf-8",
+          )
+          Path("handovers/DTR-FX-WP-20260723-22.md").write_text(
+              "# Handover — DTR-FX-WP-20260723-22\n\n"
+              f"Decision: `{decision['decision']}`\n\n"
+              f"Selected arm: `{decision.get('selected_arm')}`\n\n"
+              "The compact evidence, runners and independent review are preserved. Raw GBPUSD candles were not committed and must not be redistributed.\n",
+              encoding="utf-8",
+          )
+          PY
+
+          git rm temporary/gbpusd_runners.tar.gz.b64
+          git rm temporary/gbpusd_acquisition.trigger
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            scripts/run_gbpusd_replication.py \
+            scripts/review_gbpusd_replication.py \
+            results/2026-07-23/gbpusd \
+            docs/GBPUSD_DTR_REPLICATION_RESEARCH_2026-07-23.md \
+            reviews/DTR-FX-WP-20260723-22-independent-review.md \
+            changelogs/DTR-FX-WP-20260723-22.md \
+            handovers/DTR-FX-WP-20260723-22.md
+          git commit -m "Complete GBPUSD DTR replication"
+          git push origin HEAD:agent/gbpusd-dtr-replication
+
+      - name: Remove temporary working data
+        if: always()
+        run: rm -rf /tmp/gbpusd_data /tmp/gbpusd_results /tmp/gbpusd_review
