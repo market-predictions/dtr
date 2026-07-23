@@ -14,6 +14,7 @@ import pandas as pd
 
 _REQUIRED_COLUMNS = ("timestamp", "open", "high", "low", "close", "volume")
 _ET_ZONE = "America/New_York"
+_MAX_STALE_RUN_MINUTES = 10
 
 
 @dataclass(frozen=True)
@@ -31,15 +32,18 @@ class PreparedDataset:
     display_name: str
     source_files: tuple[str, ...]
     downloaded_rows: int
-    zero_volume_rows_removed: int
-    source_rows: int
+    retained_rows: int
+    positive_volume_rows: int
+    zero_volume_rows: int
     first_timestamp_utc: str
     last_timestamp_utc: str
     first_timestamp_et: str
     last_timestamp_et: str
     duplicate_timestamps: int
     off_grid_timestamps: int
+    adjacent_non_one_minute_gaps: int
     observed_min_quote_increment: float | None
+    maximum_consecutive_zero_volume_rows: int
     normalized_zip: str
     normalized_zip_sha256: str
     normalized_gzip: str
@@ -86,6 +90,16 @@ def _minimum_quote_increment(frame: pd.DataFrame) -> float | None:
     return min(candidates) if candidates else None
 
 
+def _maximum_false_run(values: pd.Series) -> int:
+    false_values = (~values.astype(bool)).to_numpy(dtype=bool)
+    if not len(false_values) or not bool(false_values.any()):
+        return 0
+    changes = np.diff(np.r_[False, false_values, False].astype(np.int8))
+    starts = np.flatnonzero(changes == 1)
+    ends = np.flatnonzero(changes == -1)
+    return int((ends - starts).max())
+
+
 def _write_deterministic_gzip(source: Path, destination: Path) -> None:
     with source.open("rb") as source_handle:
         with destination.open("wb") as raw_destination:
@@ -123,14 +137,14 @@ def _read_sources(spec: ProxySpec) -> tuple[pd.DataFrame, tuple[str, ...]]:
 def _prepare(spec: ProxySpec, output_directory: Path) -> PreparedDataset:
     frame, source_names = _read_sources(spec)
     downloaded_rows = int(len(frame))
-    volume = pd.to_numeric(frame["volume"], errors="raise")
-    active_mask = volume > 0
-    zero_volume_rows_removed = int((~active_mask).sum())
-    frame = frame.loc[active_mask].reset_index(drop=True)
     if frame.empty:
-        raise ValueError(f"{spec.source_instrument} has no positive-volume rows")
+        raise ValueError(f"{spec.source_instrument} produced no source rows")
 
     timestamp_utc = _parse_utc_timestamps(frame["timestamp"])
+    order = np.argsort(timestamp_utc.to_numpy())
+    frame = frame.iloc[order].reset_index(drop=True)
+    timestamp_utc = timestamp_utc.iloc[order].reset_index(drop=True)
+
     duplicate_count = int(timestamp_utc.duplicated(keep=False).sum())
     if duplicate_count:
         duplicate_values = timestamp_utc[timestamp_utc.duplicated(keep=False)]
@@ -151,20 +165,31 @@ def _prepare(spec: ProxySpec, output_directory: Path) -> PreparedDataset:
             f"{spec.source_instrument} contains {off_grid_count} off-grid timestamps"
         )
 
+    differences = timestamp_utc.diff().dropna()
+    non_one_minute_gaps = int((differences != pd.Timedelta(minutes=1)).sum())
+    if non_one_minute_gaps:
+        preview = ", ".join(differences[differences != pd.Timedelta(minutes=1)].astype(str)[:3])
+        raise ValueError(
+            f"{spec.source_instrument} contains {non_one_minute_gaps} non-one-minute "
+            f"adjacent gaps: {preview}"
+        )
+
+    volume = pd.to_numeric(frame["volume"], errors="raise")
+    active_quote = volume > 0
     normalized = pd.DataFrame(
         {
-            "timestamp ET": timestamp_utc.dt.tz_convert(_ET_ZONE).dt.strftime(
-                "%Y-%m-%d %H:%M"
-            ),
             "timestamp UTC": timestamp_utc.dt.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "timestamp ET": timestamp_utc.dt.tz_convert(_ET_ZONE).dt.strftime(
+                "%Y-%m-%dT%H:%M:%S%z"
+            ),
             "open": pd.to_numeric(frame["open"], errors="raise"),
             "high": pd.to_numeric(frame["high"], errors="raise"),
             "low": pd.to_numeric(frame["low"], errors="raise"),
             "close": pd.to_numeric(frame["close"], errors="raise"),
-            "volume": pd.to_numeric(frame["volume"], errors="raise"),
+            "volume": volume,
+            "is_active_quote": active_quote.astype(np.int8),
         }
     )
-    normalized = normalized.sort_values("timestamp UTC").reset_index(drop=True)
 
     invalid_ohlc = (
         (normalized["high"] < normalized[["open", "close", "low"]].max(axis=1))
@@ -176,32 +201,34 @@ def _prepare(spec: ProxySpec, output_directory: Path) -> PreparedDataset:
         )
 
     output_directory.mkdir(parents=True, exist_ok=True)
-    csv_name = f"{spec.research_id}_M1_BID_UTC_ET.csv"
+    csv_name = f"{spec.research_id}_M1_BID_FULL_GRID_UTC_ET.csv"
     csv_path = output_directory / csv_name
     normalized.to_csv(csv_path, index=False)
 
     gzip_path = output_directory / f"{csv_name}.gz"
-    zip_path = output_directory / f"{spec.research_id}_M1_BID_UTC_ET.zip"
+    zip_path = output_directory / f"{spec.research_id}_M1_BID_FULL_GRID_UTC_ET.zip"
     _write_deterministic_gzip(csv_path, gzip_path)
     _write_deterministic_zip(csv_path, zip_path)
 
-    utc_series = pd.to_datetime(normalized["timestamp UTC"], utc=True)
-    et_series = pd.to_datetime(normalized["timestamp ET"])
+    et_series = timestamp_utc.dt.tz_convert(_ET_ZONE)
     result = PreparedDataset(
         research_id=spec.research_id,
         source_instrument=spec.source_instrument,
         display_name=spec.display_name,
         source_files=source_names,
         downloaded_rows=downloaded_rows,
-        zero_volume_rows_removed=zero_volume_rows_removed,
-        source_rows=int(len(normalized)),
-        first_timestamp_utc=utc_series.iloc[0].isoformat(),
-        last_timestamp_utc=utc_series.iloc[-1].isoformat(),
+        retained_rows=int(len(normalized)),
+        positive_volume_rows=int(active_quote.sum()),
+        zero_volume_rows=int((~active_quote).sum()),
+        first_timestamp_utc=timestamp_utc.iloc[0].isoformat(),
+        last_timestamp_utc=timestamp_utc.iloc[-1].isoformat(),
         first_timestamp_et=et_series.iloc[0].isoformat(),
         last_timestamp_et=et_series.iloc[-1].isoformat(),
         duplicate_timestamps=duplicate_count,
         off_grid_timestamps=off_grid_count,
+        adjacent_non_one_minute_gaps=non_one_minute_gaps,
         observed_min_quote_increment=_minimum_quote_increment(normalized),
+        maximum_consecutive_zero_volume_rows=_maximum_false_run(active_quote),
         normalized_zip=zip_path.name,
         normalized_zip_sha256=_sha256(zip_path),
         normalized_gzip=gzip_path.name,
@@ -245,13 +272,28 @@ def main() -> None:
         "timeframe": "m1",
         "price_type": "bid",
         "source_timezone": "UTC",
-        "normalized_session_timezone": _ET_ZONE,
+        "session_timezone": _ET_ZONE,
         "volume_units": "feed_volume_scaled_to_units",
-        "zero_volume_rows_removed": True,
+        "zero_volume_rows_retained": True,
+        "zero_volume_interpretation": (
+            "source-provided carry-forward quote rows; preserve price continuity but "
+            "do not treat them as evidence of market activity"
+        ),
+        "activity_gate": {
+            "scope": ["asia_range", "execution_window", "pre_signal_path"],
+            "expected_grid": "complete one-minute half-open interval",
+            "minimum_positive_volume_minutes": 1,
+            "maximum_consecutive_zero_volume_minutes": _MAX_STALE_RUN_MINUTES,
+            "rationale": (
+                "a longer stale run would create more than two consecutive synthetic "
+                "five-minute signal bars"
+            ),
+            "pnl_used_to_select_gate": False,
+        },
         "datasets": [asdict(item) for item in prepared],
     }
-    inventory_path = args.output_root / "dukascopy_proxy_inventory.json"
-    inventory_path.write_text(json.dumps(inventory, indent=2) + "\n")
+    inventory_path = output_directory = args.output_root / "dukascopy_proxy_inventory.json"
+    output_directory.write_text(json.dumps(inventory, indent=2) + "\n")
     print(json.dumps(inventory, indent=2))
 
 
