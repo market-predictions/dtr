@@ -185,7 +185,11 @@ def test_all_zero_activity_is_distinct_from_missing_grid() -> None:
             "is_active_quote": 0,
         }
     )
-    grid = audit_minute_interval(frame.iloc[:-1], timestamps[0], timestamps[-1] + pd.Timedelta(minutes=1))
+    grid = audit_minute_interval(
+        frame.iloc[:-1],
+        timestamps[0],
+        timestamps[-1] + pd.Timedelta(minutes=1),
+    )
     activity = audit_activity_interval(
         frame,
         timestamps[0],
@@ -209,8 +213,8 @@ def test_future_stale_run_does_not_erase_prior_signal() -> None:
     event = ledger.iloc[0]
     assert event["status"] == "SIGNAL"
     assert event["entry_timestamp"] == pd.Timestamp("2024-01-08 02:05")
-    assert event["execution_activity_eligible"] == False  # noqa: E712
-    assert event["pre_signal_activity_eligible"] == True  # noqa: E712
+    assert not bool(event["execution_activity_eligible"])
+    assert bool(event["pre_signal_activity_eligible"])
 
 
 def test_reclaim_closing_at_window_end_is_rejected() -> None:
