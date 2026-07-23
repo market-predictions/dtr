@@ -253,7 +253,7 @@ def test_derived_target_float_noise_is_canonicalized_but_market_prices_are_not()
     )
 
     with pytest.raises(ValueError, match="off the source quote grid"):
-        normalize_proxy_event(_event(entry=100.12300000000001), _CONFIG)
+        normalize_proxy_event(_event(entry="100.1230001"), _CONFIG)
 
 
 def test_long_event_normalization_is_directionally_adverse_and_exact_2r() -> None:
