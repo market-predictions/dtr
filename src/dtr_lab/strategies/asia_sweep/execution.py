@@ -8,6 +8,7 @@ import pandas as pd
 
 _SYNTHETIC_SOURCE_KIND = "SYNTHETIC_TEST_FIXTURE"
 _REQUIRED_COLUMNS = ("open", "high", "low", "close")
+_FROZEN_TARGET_RR = 2.0
 
 
 class ExecutionStatus(StrEnum):
@@ -58,7 +59,7 @@ class ExecutionSignal:
     signal_timestamp: pd.Timestamp
     window_end: pd.Timestamp
     stop_price: float
-    target_rr: float = 2.0
+    target_rr: float = _FROZEN_TARGET_RR
 
     def __post_init__(self) -> None:
         signal_time = pd.Timestamp(self.signal_timestamp)
@@ -69,8 +70,11 @@ class ExecutionSignal:
             raise ValueError("instrument must be non-empty")
         if not math.isfinite(float(self.stop_price)):
             raise ValueError("stop_price must be finite")
-        if not math.isfinite(float(self.target_rr)) or self.target_rr <= 0:
-            raise ValueError("target_rr must be positive and finite")
+        if not math.isfinite(float(self.target_rr)) or not math.isclose(
+            float(self.target_rr),
+            _FROZEN_TARGET_RR,
+        ):
+            raise ValueError("only the frozen target_rr of 2.0 is supported")
         if not _minute_aligned(signal_time) or not _minute_aligned(window_end):
             raise ValueError("signal timestamps must be one-minute aligned")
         if _tz_aware(signal_time) != _tz_aware(window_end):
@@ -493,6 +497,33 @@ def simulate_execution(
         row = by_time.get(timestamp)
         if row is None:
             next_row = _first_active_after(bars, timestamp, window_end, cfg)
+            if stale_unsafe:
+                if next_row is None:
+                    return _unresolved(
+                        signal,
+                        ExecutionReason.UNRESOLVED_STALE_EXIT,
+                        entry_time=signal_time,
+                        entry_raw=entry_raw,
+                        entry=entry,
+                        target=target,
+                    )
+                next_time = pd.Timestamp(next_row["timestamp"])
+                missing_minutes = int(
+                    (next_time - timestamp).total_seconds() // 60
+                )
+                return _market_exit(
+                    signal=signal,
+                    cfg=cfg,
+                    entry_time=signal_time,
+                    entry_raw=entry_raw,
+                    entry=entry,
+                    target=target,
+                    exit_time=next_time,
+                    exit_raw=float(next_row["open"]),
+                    reason=ExecutionReason.STALE_ACTIVITY_LIQUIDATION,
+                    slippage_ticks=cfg.market_exit_slippage_ticks,
+                    gap_minutes=inactive_run + missing_minutes,
+                )
             if next_row is None:
                 return _unresolved(
                     signal,
