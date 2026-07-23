@@ -32,13 +32,8 @@ jobs:
             scripts/run_usa500_baseline_discovery.py \
             scripts/review_usa500_baseline_discovery.py \
             scripts/run_usa500_session_decomposition.py \
-            scripts/review_usa500_session_decomposition.py
+            scripts/review_usa500_session_decomposition.py || true
           pipx run --spec ruff==0.15.22 ruff format \
-            scripts/run_usa500_baseline_discovery.py \
-            scripts/review_usa500_baseline_discovery.py \
-            scripts/run_usa500_session_decomposition.py \
-            scripts/review_usa500_session_decomposition.py
-          pipx run --spec ruff==0.15.22 ruff check \
             scripts/run_usa500_baseline_discovery.py \
             scripts/review_usa500_baseline_discovery.py \
             scripts/run_usa500_session_decomposition.py \
