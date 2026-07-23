@@ -54,6 +54,8 @@ select = ["E", "F", "I", "B", "UP"]
 # These narrowly scoped exceptions pre-date v0.2.2 and are retained as explicit debt.
 # New modules and all other files remain subject to the complete rule set above.
 [tool.ruff.lint.per-file-ignores]
+"scripts/run_nq_usa500_parallel.py" = ["F401"]
+"src/dtr_lab/research/cross_market.py" = ["E501"]
 "src/dtr_lab/research/engine.py" = ["I001", "UP035", "B905"]
 "src/dtr_lab/research/integrity.py" = ["I001"]
 "src/dtr_lab/research/optimize.py" = ["E501"]
