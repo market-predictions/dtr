@@ -1,18 +1,13 @@
-# Released Claim
+# Active Claim
 
-- Work package: `AS-WP-20260723-07`
-- Branch: `agent/asia-sweep-first-baseline`
-- Pull request: `#35`
-- Claimed scope: first frozen development-period NQ/ES proxy baseline and independent shadow replay
+- Work package: `AS-WP-20260723-08`
+- Branch: `agent/asia-sweep-auction-state-diagnostic`
+- Claimed scope: development-only session-specific auction-state diagnostic
 - Started: 2026-07-23
-- Released: 2026-07-23
-- Input boundary: frozen proxy normalization merge `88d695222b8367e478f55cc5bfa96804058a3334`
-- Data boundary preserved: registered private Dukascopy NQ/ES BID proxies; development period through 2024-06-30 only
-- Strategy boundary preserved: all four preregistered variants; no tuning, filtering, combination or lockbox access
-- Delivered: shadow replay, parity tests, protected workflow, official aggregate result, independent ledger replication and stop decision
-- Official workflow: run `30022356560`; 690 exits; zero blocked; zero unresolved
-- Result: `NOT_PROMISING_CURRENT_SPEC`
-- Review: `APPROVE_BASELINE_RESULT_STOP_CURRENT_SPEC`
-- Decision: `STOP_CURRENT_SPEC_NO_LOCKBOX_NO_POSTHOC_FILTER_MINING`
-- Handover: `HANDOVER_2026-07-23_FIRST_PROXY_BASELINE.md`
-- Next claim: none for the current AS-A through AS-D specification; only a separately preregistered conceptual redesign is permitted
+- Input boundary: failed AS-A through AS-D baseline merge `c739b4fe67c3d96edf9507d5999d1c18aec39291`
+- Data boundary: private Dukascopy NQ/ES BID proxies; outcomes through 2024-06-30 only
+- State boundary: acceptance, rejection, two-sided and unresolved labels frozen in the work package
+- Mechanism boundary: external-liquidity rejection and compressed-range acceptance only
+- Output boundary: fixed-horizon signed returns, MFE/MAE and hit rates; no strategy P&L
+- Constraint: no lockbox access, parameter optimization, weekday/direction/instrument selection, DTR combination, Pine or deployment work
+- Status: diagnostic implementation and protected workflow in progress
