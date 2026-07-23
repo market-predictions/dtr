@@ -25,7 +25,7 @@ The simple reclaim is the control. The research question is whether wick, displa
 
 ## Hard separation rules
 
-- Development branch: `agent/asia-sweep-standalone-foundation`.
+- Development branches are phase-specific; current data-integrity work uses `agent/asia-sweep-data-event-audit`.
 - Governance, manifests, reports and tests: `strategies/asia_sweep/`.
 - Code: `src/dtr_lab/strategies/asia_sweep/`.
 - Runner: `scripts/run_asia_sweep_manifest.py`.
@@ -37,7 +37,7 @@ The simple reclaim is the control. The research question is whether wick, displa
 
 ## Phase 0 — Protect DTR and establish isolation
 
-**Status:** foundation and both CI tracks complete; direct canonical DTR data replay remains pending before shared extraction.
+**Status:** foundation and both CI tracks complete; direct canonical DTR data replay remains pending before shared execution extraction.
 
 - Create separate branch and namespace.
 - Record separation contract.
@@ -59,7 +59,7 @@ Use half-open windows. Include Monday through Friday initially and report weekda
 
 ## Phase 2 — Qualify NQ and ES data
 
-**Status:** NQ development reference registered with unresolved timestamp/roll status; ES blocked.
+**Status:** strict source-schema and interval-integrity contracts implemented; NQ timestamp/roll semantics remain unresolved; ES remains blocked.
 
 Each instrument needs:
 
@@ -73,17 +73,16 @@ Each instrument needs:
 - roll dates and adjustment method;
 - tick size, point value and commissions.
 
-Headline NQ/ES comparisons use only the intersection of qualified dates. A source with unresolved timestamp or roll construction may support ingestion and descriptive development, but not decisive validation.
+The Asia-specific source adapter now rejects duplicate and off-grid timestamps and does not silently remove the final date. Headline NQ/ES comparisons use only the intersection of qualified dates. A source with unresolved timestamp or roll construction may support ingestion and descriptive event development, but not decisive validation.
 
 ## Phase 3 — Shared infrastructure boundary
 
-**Status:** signal boundary complete; neutral execution adapter pending.
+**Status:** signal boundary and strict source adapter complete; neutral execution adapter pending.
 
 Permitted reuse:
 
 - registered market data;
 - checksum verification;
-- generic one-minute loading;
 - generic five-minute resampling;
 - causal generic features;
 - later, neutral conservative execution and reporting utilities.
@@ -91,14 +90,22 @@ Permitted reuse:
 Prohibited reuse:
 
 - DTR signal generation;
+- DTR source-loader repairs that conceal duplicates or incomplete dates;
 - DTR selected configuration;
 - DTR result and promotion logic.
 
 ## Phase 4 — Event ledger and manual audit
 
-**Status:** initial deterministic event ledger implemented; completeness and gap metadata pending.
+**Status:** deterministic event ledger and causal completeness metadata implemented; real-data generation and manual audit are blocked by unavailable qualified NQ/ES files.
 
-Store one record per instrument/date/window, including no-sweep and rejected events. Minimum content includes Asia range, swept side, sweep timestamp and depth, candle morphology, reclaim, displacement, failed retest, entry, stop, target, status and rejection reason.
+Store one record per instrument/date/window, including no-sweep and rejected events. Minimum content includes Asia range, interval-integrity status, swept side, sweep timestamp and depth, candle morphology, reclaim, displacement, failed retest, entry, stop, target, status and rejection reason.
+
+Causal integrity rules:
+
+- an incomplete Asia range is ineligible;
+- missing data before the determining signal bar blocks the event;
+- a future gap cannot retroactively erase an observable signal;
+- `NO_SWEEP` requires a complete execution window.
 
 Before P&L:
 
@@ -120,7 +127,7 @@ AS-A plus rejection-wick ratio at least 0.50 and direction-adjusted close-locati
 
 ### AS-C displacement
 
-AS-A plus an opposing candle within three bars. Its body is at least 1.25 times the causal trailing median body, the close passes the sweep-candle midpoint, and price remains back inside the Asia range. The median is computed from all available preceding five-minute bars and does not reset at the London or New York window boundary.
+AS-A plus an opposing candle within three bars. Its body is at least 1.25 times the causal trailing median body, the close passes the sweep-candle midpoint, and price remains back inside the Asia range. The median is computed from a complete 20-bar causal history and does not reset at the London or New York window boundary.
 
 ### AS-D failed retest
 
@@ -136,15 +143,17 @@ AS-A plus a right-side-confirmed reaction swing, a later retest that stays insid
 
 ## Phase 6 — Causality and adversarial tests
 
-**Status:** initial nine-test suite and dedicated Python 3.11/3.12 CI passed; full twenty-case suite pending.
+**Status:** 25 isolated signal/data tests pass locally and in dedicated Python 3.11/3.12 CI; original DTR lint/tests also pass. Post-entry execution cases remain pending because execution is not connected.
 
-Required coverage includes threshold edges, no reclaim, double sweep, wick boundary, displacement timing and pre-window warmup, causal pivot confirmation, same-minute stop/target collision, entry-stop collision, missing gaps before and during trades, DST, roll boundaries, simultaneous NQ/ES signals and deterministic repeated output.
+Completed coverage includes threshold edges, no reclaim, double sweep, wick boundaries, displacement timing and pre-window warmup, causal pivot confirmation, first-sweep ownership, incomplete ranges, missing pre-signal data, future gaps, duplicate timestamps, deterministic output and instrument-neutral signal semantics.
+
+Future execution coverage must include same-minute stop/target collision, entry-stop collision, post-entry gaps, time exits, DST, roll boundaries and simultaneous NQ/ES portfolio constraints.
 
 For every emitted signal, truncate data at the entry timestamp and reproduce the same decision. Any change under prefix replay is a lookahead failure.
 
 ## Phase 7 — Controlled development research
 
-**Blocked until Phases 2, 4 and 6 pass.**
+**Blocked until Phases 2 and 4 pass and execution-specific Phase 6 tests are complete.**
 
 Partitions:
 
@@ -211,6 +220,6 @@ After Python validation, build Pine Script v6 with the same sessions, state mach
 
 ## Current decision
 
-`FOUNDATION_CI_PASSED_PNL_BLOCKED`
+`DATA_INTEGRITY_CI_PASSED_EVENT_AUDIT_AND_PNL_BLOCKED`
 
-The isolated foundation may merge. Proceed next with data qualification, session/gap completeness and manual event audit. Do not calculate or inspect strategy P&L until those contracts are frozen.
+The causal data-integrity gate may merge. Proceed next with qualified data registration and event-only manual audit. Do not calculate or inspect strategy P&L until timestamp, roll, ES, event-audit and execution contracts are frozen.
