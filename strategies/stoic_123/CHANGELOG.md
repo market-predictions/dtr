@@ -1,42 +1,52 @@
 # Changelog — Stoic Edge 1-2-3
 
-## v0.3.0-research-preregistered — 2026-07-23
+## v0.3.0-research-complete — 2026-07-23
 
 ### Added
 
-- Preregistered `STOIC123-WP-20260723-02` for NQ long-only mechanism and futures replication.
-- Dedicated validation design with frozen candidate roles and nine all-required promotion gates.
-- Causal EMA-break-only and EMA-break-plus-retest controls.
-- Deterministic matched-time controls preserving calendar, session, map eligibility, and risk width.
-- Both-direction, long-only, and short-only full-sequence comparators.
-- Two-tick cost stress, one-minute and five-minute entry delays, expanding-year folds, RTH/overnight attribution, concentration, and exposure-normalized reporting.
-- Dedicated NQ validation workflow with exact source-checksum enforcement and raw-data removal.
-- Eight direction, management, attribution, delay, and matched-control regression tests; 26 focused Stoic tests pass locally.
+- Preregistered and executed `STOIC123-WP-20260723-02` on the checksum-qualified NQ futures archive.
+- Both-direction, long-only, short-only, EMA-break-only, EMA-break-plus-retest, cost-stress, and delayed-entry scenarios.
+- Fifty deterministic matched-time controls per candidate with frozen event-coverage and holding-period comparability gates.
+- Cached validation simulator and matched-pool engine with exact parity tests against the reference execution engine.
+- Exact source/config preflight, retained diagnostic artifacts, raw-data removal, compact result publication, and independent reconstruction.
+- Final result report, decision JSON, compact summaries, mechanism evidence, inference, matched-control evidence, and veto output.
 
 ### Corrected
 
-- Identified that the informal long-only counterfactual inherited `allow_short: false` into the management detector, unintentionally removing opposite short exit signals.
-- The new contract restricts entry direction only; management remains two-directional.
-- Earlier informal long-only results are superseded and cannot be promoted.
-- Corrected compact summaries and inference are committed for NQ proxy, ES proxy, and GBPUSD; all 18 corrected ledgers passed independent review.
-- The NQ EMA-map and strict-close trade streams were unchanged; only the no-map controls changed.
+- Separated entry-direction restrictions from the two-direction management detector.
+- Superseded the flawed informal long-only artifacts.
+- Corrected the validation workflow session helper, NQ execution-model discriminator, manifest date serialization, and final matched-control coverage veto.
+- Preserved the 90% matched-control coverage rule after one mapped arm exposed insufficient coverage; no matching rule was broadened after returns were inspected.
 
-### Reason
+### Result
 
-A long-only historical improvement is not decision-useful until actual NQ futures reproduce it, the original technical-exit contract is preserved, and the full sequence beats simpler long-drift and EMA-break controls.
+- No-map long-only: 555 trades, +75.71R, +0.136R expectancy; 4/9 gates.
+- EMA-map long-only: 252 trades, -1.83R, -0.007R expectancy; 2/9 gates.
+- Strict-close long-only: 226 trades, +10.97R, +0.049R expectancy; 4/9 gates.
+- EMA-plus-breakout long-only: 147 trades, +41.56R, +0.283R expectancy; 5/9 gates.
+- Every 95% date-block interval crossed zero.
+- No arm passed all numerical gates.
+- All four arms were vetoed by the matched-control contract.
+
+### Decision
+
+`NO_PROMOTION_STOP_NQ_LONG_ONLY_CURRENT_SAMPLE`
+
+The actual NQ archive does not confirm the proxy-derived EMA-map long-only thesis. Strict close adds negligible expectancy over a simple EMA break. EMA-plus-breakout is historically interesting but chronologically unstable and statistically uncertain.
 
 ### Known limitations
 
-- The registered NQ archive has unresolved continuous-contract roll and exact timestamp semantics.
-- The source starts late in December 2022, so 2022 is only a partial year.
-- The matched-time control is a causal benchmark, not a complete market-factor model.
-- Each matched replicate must cover at least 90% of full-sequence events, but realized holding periods can still differ.
+- Continuous-contract roll and exact timestamp semantics remain unresolved.
+- December 2022 is only a partial year.
+- Matched-time controls are causal benchmarks, not complete factor models.
+- The observed no-map short-side strength is post-hoc and cannot be selected on this sample.
 
 ### Next
 
-- Verify the exact NQ archive checksum.
-- Execute the preregistered study without modifying the frozen design.
-- Publish independent reconstruction and a pass/fail result for every promotion gate.
+- Stop same-sample long-only research and tuning.
+- Retain directional asymmetry only as a fresh-data hypothesis.
+- Require qualified unseen or materially longer contract-audited data before any new Stoic selection work.
+- Keep Pine, sizing, alerts, paper deployment, and live use blocked.
 
 ## v0.2.0-research — 2026-07-23
 
@@ -73,13 +83,10 @@ All six GBPUSD arms are `NO_EDGE`. Net expectancy ranges from -0.451R to -0.788R
 - GBPUSD is one Dukascopy spot-FX quote stream, not a broker-neutral consolidated tape.
 - NQ and ES proxy archives are bid-only CFDs, not CME futures.
 - Provider volume is not centralized futures volume.
-- The combined proxy phase-one run still requires a clean official execution package after the newly exposed transition-performance issue is resolved.
 
 ### Next
 
-- Profile and resolve the proxy multi-source transition bottleneck without changing signal rules.
-- Execute clean, separate official NQ-proxy and ES-proxy phase-one packages.
-- Compare proxy results against the qualified NQ futures archive when mounted.
+- Compare proxy results against qualified futures evidence.
 - Stop GBPUSD research unless a genuinely different mechanism is preregistered.
 
 ## v0.1.0-research — 2026-07-23
