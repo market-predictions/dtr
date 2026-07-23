@@ -20,13 +20,7 @@ def _half_hour_bucket(timestamp: pd.Timestamp) -> int:
     return timestamp.hour * 2 + timestamp.minute // 30
 
 
-def _stable_offset(
-    *,
-    arm_id: str,
-    signal_time: pd.Timestamp,
-    seed: int,
-    pool_size: int,
-) -> int:
+def _stable_offset(*, arm_id: str, signal_time: pd.Timestamp, seed: int, pool_size: int) -> int:
     payload = f"{arm_id}|{signal_time.isoformat()}|{seed}".encode()
     return int.from_bytes(hashlib.sha256(payload).digest()[:8], "big") % pool_size
 
@@ -43,6 +37,7 @@ def matched_time_events(
 
     if full_events.empty:
         return pd.DataFrame()
+
     bars = attach_map(execution_bars, map_bars, config).reset_index(drop=True).copy()
     bars["signal_time"] = pd.to_datetime(bars["bar_end"])
     bars["year"] = bars["signal_time"].dt.year
@@ -58,7 +53,14 @@ def matched_time_events(
             strict=True,
         )
     ]
-    bars = bars.loc[np.isfinite(bars["atr"]) & bars["map_allows"]].reset_index(drop=True)
+
+    eligible = np.isfinite(bars["atr"]) & bars["map_allows"]
+    if "full_bar" in bars:
+        eligible &= bars["full_bar"].fillna(False).astype(bool)
+    if "gap_minutes" in bars:
+        eligible &= bars["gap_minutes"].fillna(0).le(config.gap_reset_minutes)
+    bars = bars.loc[eligible].reset_index(drop=True)
+
     original_times = set(pd.to_datetime(full_events["signal_time"]))
     used: set[pd.Timestamp] = set()
     rows: list[dict[str, object]] = []
@@ -68,6 +70,7 @@ def matched_time_events(
         risk_width = float(event.breakout_close) - float(event.protective_boundary)
         if not np.isfinite(risk_width) or risk_width <= 0:
             continue
+
         exact = bars.loc[
             (bars["year"] == original.year)
             & (bars["month"] == original.month)
@@ -92,6 +95,7 @@ def matched_time_events(
         pool = next((candidate for candidate in pools if len(candidate) >= 2), pd.DataFrame())
         if pool.empty:
             continue
+
         pool = pool.sort_values("signal_time").reset_index(drop=True)
         start = _stable_offset(
             arm_id=config.arm_id,
@@ -111,10 +115,11 @@ def matched_time_events(
             break
         if selected is None:
             continue
+
         signal_time = pd.Timestamp(selected["signal_time"])
         used.add(signal_time)
         close_price = float(selected["close"])
-        map_direction = _selected_map_direction(
+        selected_map = _selected_map_direction(
             int(selected["ema_map_direction"]),
             int(selected["breakout_map_direction"]),
             config,
@@ -130,10 +135,11 @@ def matched_time_events(
                 protective_boundary=close_price - risk_width,
                 breakout_close=close_price,
                 atr_at_signal=float(selected["atr"]),
-                map_direction_step1=map_direction,
-                map_direction_signal=map_direction,
+                map_direction_step1=selected_map,
+                map_direction_signal=selected_map,
             )
         )
+
     if not rows:
         return pd.DataFrame()
     return pd.DataFrame(rows).sort_values("signal_time").reset_index(drop=True)
