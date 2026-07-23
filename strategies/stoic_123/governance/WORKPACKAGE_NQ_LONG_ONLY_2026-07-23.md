@@ -2,85 +2,92 @@
 
 Work package: `STOIC123-WP-20260723-02`
 Date opened: 2026-07-23
+Date closed: 2026-07-23
 Branch: `agent/stoic-nq-long-only-validation`
-Status: `PREREGISTERED_EXECUTION_PENDING`
+Status: `COMPLETE_NO_PROMOTION`
 
 ## Strategic question
 
 Does the exploratory long-only result represent a genuine Stoic 1-2-3 continuation effect, or merely generic Nasdaq long drift, altered exit behavior, or CFD-proxy-specific evidence?
 
-## Root-cause correction before execution
+## Root-cause correction
 
-The informal long-only counterfactual disabled short entries by setting `allow_short: false`. Because the management detector inherited that setting, it also removed opposite short 1-2-3 signals that normally exit long positions. That mixed an entry-direction restriction with an unplanned exit-system change.
-
-This work package supersedes that interpretation. Entry direction may be restricted, but management remains two-directional. Long trades can still exit on a complete opposite short management sequence.
+The informal long-only counterfactual disabled short entries and opposite short management signals. This package corrected the contract so entry direction may be restricted while the management detector remains two-directional.
 
 ## Frozen source
 
-- Instrument: NQ futures research archive.
-- Expected archive SHA-256: `8d3f157a422636e5b8dda51cc3a3d9209c50cb53f9b279d3e14b627ce59370dc`.
+- NQ futures research archive.
+- SHA-256: `8d3f157a422636e5b8dda51cc3a3d9209c50cb53f9b279d3e14b627ce59370dc`.
 - Period: 2022-12-26 18:00 ET through 2025-12-10 23:58 ET.
-- Raw data remains outside Git and outside result artifacts.
-- Continuous-contract roll and exact timestamp semantics remain unresolved limitations.
+- 1,047,382 rows.
+- Continuous-contract roll and exact timestamp semantics remain unresolved.
+- Raw data remained outside Git and were removed before artifact upload.
 
-## Frozen candidates
+## Frozen candidates and controls
 
-1. `S123_M0_NO_MAP_CONTROL` — simplicity benchmark.
-2. `S123_M1_EMA_MAP` — primary candidate.
-3. `S123_C1_STRICT_CLOSE` — secondary candidate.
-4. `S123_M3_EMA_PLUS_BREAKOUT` — diagnostic candidate.
+Candidates:
 
-No other phase-one arm may be selected from the historical result.
+1. `S123_M0_NO_MAP_CONTROL`;
+2. `S123_M1_EMA_MAP`;
+3. `S123_C1_STRICT_CLOSE`;
+4. `S123_M3_EMA_PLUS_BREAKOUT`.
 
-## Mechanism controls
+Controls and tests:
 
-Each candidate is evaluated using:
+- both-direction, long-only, and short-only full sequences;
+- EMA break only;
+- EMA break plus retest;
+- 50 deterministic matched-time controls;
+- one-tick baseline and two-tick stress;
+- one-minute and five-minute delays;
+- annual, expanding-year, RTH/overnight, concentration, exposure, and date-block inference;
+- nine all-required numerical gates;
+- matched-control holding-period, coverage, and p95 veto.
 
-- both-direction full 1-2-3 comparator;
-- long-only full 1-2-3;
-- short-only full 1-2-3 diagnostic;
-- long EMA break only, with the Step-1 bar low as the causal protective boundary;
-- long EMA break plus retest, with the lowest observed low from Step 1 through retest as the protective boundary;
-- 50 deterministic matched-time long-entry controls preserving year, month when available, weekday, RTH/overnight status, 30-minute time bucket, map eligibility, and signal-to-protective-boundary distance. Every replicate must match at least 90% of the full-sequence events before its performance is accepted.
+## Execution
 
-## Robustness tests
+Workflow run: `30036385787`
+Artifact SHA-256: `92f747b5ae07d252abb4bb0720b3aeaab8f3ebb3264ac27310425b4918c2a6e9`
 
-- one tick per side baseline;
-- two ticks per side cost stress with unchanged commission;
-- one-minute entry delay;
-- one-five-minute-bar entry delay;
-- calendar-year and expanding-year test attribution;
-- RTH versus overnight attribution;
-- year/month concentration;
-- exposure-normalized return;
-- independent trade-ledger reconstruction.
+The workflow passed:
 
-## Promotion gates
+- Ruff;
+- 28 focused validation and Stoic tests;
+- exact source and phase-one checksum preflight;
+- complete scenario execution;
+- final matched-control veto;
+- raw-data removal and no-raw-data artifact gate;
+- compact artifact upload.
 
-Every gate is required:
+Full repository CI passed on the final validation implementation.
 
-1. Positive long-only expectancy.
-2. At least three of four observed years positive.
-3. Every full year from 2023 through 2025 positive.
-4. No positive year contributes more than 60% of positive net R.
-5. Positive under two ticks of slippage per side.
-6. Positive with a one-minute delayed entry.
-7. At least 25% lower maximum drawdown than the both-direction comparator.
-8. Full sequence exceeds EMA-break-only by at least 0.05R expectancy or 20% return-to-drawdown.
-9. Positive 95% date-block bootstrap lower bound.
+## Results
 
-## Matched-control interpretation veto
+- No-map: 555 long trades, +75.71R, +0.136R expectancy, 4/9 gates.
+- EMA map: 252 long trades, -1.83R, -0.007R expectancy, 2/9 gates.
+- Strict close: 226 long trades, +10.97R, +0.049R expectancy, 4/9 gates.
+- EMA plus breakout: 147 long trades, +41.56R, +0.283R expectancy, 5/9 gates.
+- Every 95% date-block interval crossed zero.
+- No arm passed every numerical gate.
+- All four arms were vetoed by the matched-control contract.
 
-The nine numerical gates are necessary but not sufficient. Promotion is also vetoed when either condition holds:
+## Independent review
 
-- the matched-time control is not comparable, defined as a median holding-period ratio outside 0.75 to 1.25 or insufficient event coverage; or
-- the full-sequence expectancy does not exceed the 95th percentile of the 50 matched-time control expectancies.
+All 32 scenario trade ledgers were independently reconstructed. Trade counts, net R, expectancy, direction, chronology, positive risk, and non-overlap passed. All 36 numerical gate results were independently reproduced. The final matched-control veto was verified against the frozen 90% event-coverage rule.
 
-This veto is frozen before any NQ futures result is inspected. It prevents generic Nasdaq long drift or unmatched exposure duration from being mistaken for sequence-specific alpha.
+## Decision
 
-## Restrictions
+`NO_PROMOTION_STOP_NQ_LONG_ONLY_CURRENT_SAMPLE`
 
-- No parameter, timeframe, threshold, session, stop, target, exit, or matched-control redesign after performance inspection.
-- No pooled NQ/proxy result.
-- No ES-proxy or GBPUSD result may tune NQ.
-- No Pine port, sizing, deployment, alert, or profitability authorization.
+- Reject EMA-map long-only on actual NQ futures.
+- Do not promote strict close or EMA plus breakout.
+- Do not retune the current sample.
+- Preserve the observed no-map short-side asymmetry only as a post-hoc fresh-data hypothesis.
+- Keep Pine, sizing, alerts, paper deployment, and live use blocked.
+
+## Restrictions retained
+
+- No DTR changes.
+- No pooled instrument result.
+- No same-sample parameter, timeframe, session, delay, stop, target, exit, or matched-control redesign.
+- No deployment or profitability authorization.
