@@ -81,6 +81,26 @@ Minimum additions:
 6. Original repository CI and isolated Asia Sweep CI pass on Python 3.11 and 3.12.
 7. Independent review confirms causality, isolation and the continuing P&L prohibition.
 
+## Completion evidence
+
+**Status:** `COMPLETE_EVENT_SEMANTICS_FROZEN_EXECUTION_AND_PNL_BLOCKED`
+
+- Proxy manifests are enabled only for event-ledger generation; execution remains blocked.
+- Four development ledgers were generated per proxy, with 780 records per variant.
+- Deterministic audit samples contain 50 NQ-proxy and 50 ES-proxy records.
+- A clean-room validator independently reconstructed all 100 sampled events directly from canonical one-minute data without calling the production signal builder.
+- Validation result: 100/100 exact, zero mismatches.
+- Private five-minute OHLC evidence contains 6,900 NQ rows and 6,888 ES rows.
+- One NQ AS-C entry at exactly 06:00 is correctly rejected.
+- Two ES signals remain valid despite later full-window staleness because their causal pre-signal paths are active.
+- Repository Ruff/tests and isolated Asia Sweep tests pass on Python 3.11 and 3.12.
+- Private audit workflow `30003836567` passes both proxy jobs and removes source data before artifact upload.
+- No execution simulation, P&L, optimization or variant selection was performed.
+
+## Decision
+
+`APPROVE_PROXY_EVENT_SEMANTICS_FOR_MERGE_BLOCK_EXECUTION_AND_PNL`
+
 ## Next gate
 
-Successful completion freezes proxy event semantics and permits design of a neutral execution adapter. It does not authorize P&L until the event audits are accepted and futures-confirmation requirements remain explicit.
+Successful completion freezes proxy event semantics and permits a separate neutral execution-adapter design work package. It does not authorize P&L. The execution work package must freeze collision, gap, cost and time-exit semantics and pass synthetic adversarial tests before real-data performance research is considered.
