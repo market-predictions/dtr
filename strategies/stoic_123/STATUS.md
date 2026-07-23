@@ -15,7 +15,9 @@ Decision state: `FRAMEWORK_COMPLETE_DATA_RUN_PENDING`
 - Next-open execution, base-derived stop, cost model, gap liquidation, maximum hold, and opposite-sequence exit.
 - Event, trade, funnel, summary, bootstrap, manifest, and decision outputs.
 - Independent trade-ledger reconstruction gate.
-- Ten synthetic tests passing locally.
+- Ten dedicated synthetic tests passing locally.
+- Repository Ruff gate passing.
+- Complete repository test suite passing on Python 3.11 and Python 3.12.
 
 ## Pending
 
