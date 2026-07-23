@@ -1,0 +1,136 @@
+name: Stoic RTH long proxy source qualification
+
+on:
+  push:
+    branches:
+      - agent/stoic-rth-long-proxy-validation
+    paths:
+      - ".github/workflows/stoic-rth-long-proxy-source-qualification.yml"
+      - "scripts/acquire_stoic_usatech_partition.py"
+      - "strategies/stoic_123/configs/rth_long_proxy_validation.yaml"
+      - "strategies/stoic_123/governance/workpackages/STOIC123-WP-20260724-04.md"
+  workflow_dispatch:
+
+concurrency:
+  group: stoic-rth-long-source-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  acquire:
+    name: Qualify USATECH ${{ matrix.label }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        include:
+          - {label: 2010, start: 2010-01-01, end: 2011-01-01}
+          - {label: 2011, start: 2011-01-01, end: 2012-01-01}
+          - {label: 2012, start: 2012-01-01, end: 2013-01-01}
+          - {label: 2013, start: 2013-01-01, end: 2014-01-01}
+          - {label: 2014, start: 2014-01-01, end: 2015-01-01}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Ruff acquisition script
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff==0.14.10
+          ruff check scripts/acquire_stoic_usatech_partition.py
+      - name: Acquire fixed source partition only
+        run: |
+          python scripts/acquire_stoic_usatech_partition.py \
+            --start '${{ matrix.start }}' \
+            --end '${{ matrix.end }}' \
+            --label '${{ matrix.label }}' \
+            --workers 8
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stoic-rth-source-${{ matrix.label }}
+          path: |
+            usatechidxusd_m1_bid_${{ matrix.label }}.csv.gz
+            usatechidxusd_m1_bid_${{ matrix.label }}_audit.json
+          retention-days: 2
+          compression-level: 0
+          if-no-files-found: error
+
+  summarize:
+    needs: acquire
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: stoic-rth-source-*
+          path: qualified-source
+          merge-multiple: true
+      - name: Build source-only qualification summary
+        shell: bash
+        run: |
+          python - <<'PY'
+          import csv
+          import json
+          from pathlib import Path
+
+          rows = []
+          for path in sorted(Path("qualified-source").glob("*_audit.json")):
+              payload = json.loads(path.read_text(encoding="utf-8"))
+              rows.append(payload)
+          if len(rows) != 5:
+              raise SystemExit(f"Expected 5 source audits, found {len(rows)}")
+          fields = [
+              "label",
+              "active_rows",
+              "first_timestamp_utc",
+              "last_timestamp_utc",
+              "zero_volume_rows_removed",
+              "duplicate_timestamps",
+              "sha256",
+              "classification",
+              "statuses",
+          ]
+          with Path("qualification_summary.csv").open("w", newline="", encoding="utf-8") as handle:
+              writer = csv.DictWriter(handle, fieldnames=fields)
+              writer.writeheader()
+              for row in rows:
+                  projected = {key: row.get(key) for key in fields}
+                  projected["statuses"] = json.dumps(projected["statuses"], sort_keys=True)
+                  writer.writerow(projected)
+          sufficient_labels = [
+              str(row["label"])
+              for row in rows
+              if int(row.get("active_rows", 0)) >= 100000
+          ]
+          decision = {
+              "study_id": "STOIC123-WP-20260724-04",
+              "performance_inspected": False,
+              "qualified_labels_with_at_least_100000_rows": sufficient_labels,
+              "all_five_partitions_sufficient": len(sufficient_labels) == 5,
+              "next_action": (
+                  "FREEZE_CHECKSUMS_THEN_IMPLEMENT_PERFORMANCE_RUNNER"
+                  if len(sufficient_labels) == 5
+                  else "REVIEW_SOURCE_COVERAGE_BEFORE_ANY_PERFORMANCE_RUN"
+              ),
+          }
+          Path("source_qualification_decision.json").write_text(
+              json.dumps(decision, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          print(json.dumps(decision, indent=2, sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stoic-rth-source-qualification-summary
+          path: |
+            qualification_summary.csv
+            source_qualification_decision.json
+          retention-days: 7
+          if-no-files-found: error
