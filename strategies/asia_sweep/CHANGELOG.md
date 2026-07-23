@@ -1,5 +1,47 @@
 # Asia Sweep Changelog
 
+
+## v0.7.0 — 2026-07-23
+
+### Added
+
+- Added deterministic Decimal-based normalization from Dukascopy-style 0.001-grid BID proxy prices to the frozen 0.25 execution grid.
+- Added exact provider-symbol, BID-side and `DIRECTIONAL_PESSIMISTIC_V1` policy binding.
+- Added source-event, source-frame and normalization digests plus raw-versus-normalized audit fields.
+- Expanded the isolated Asia Sweep suite to 223 tests.
+
+### Changed
+
+- Preserved timestamps, missing minutes and activity flags exactly through normalization.
+- Kept normalization disconnected from private loaders and automatic execution.
+- Required normalized outputs to satisfy the frozen event-to-execution binding contract.
+
+### Corrected during review
+
+- Separated exact observed-price grid validation from negligible derived-target arithmetic noise.
+- Bound NQ-like and ES-like fixtures to exact source instruments and instrument-specific economics.
+- Removed arbitrary normalization-policy versioning and corrected a misleading float-based off-grid fixture.
+
+### Reason
+
+Proxy quote precision differs from the intended futures-like execution grid. Translation must therefore be deterministic, directionally pessimistic and auditable before any private-data execution research.
+
+### Validation
+
+- Repository Ruff and full tests passed on Python 3.11 and 3.12.
+- Isolated Asia Sweep suite: 223 passed on Python 3.11 and 3.12.
+- Exact-head NQ/ES no-P&L event-audit stability passed.
+- No real-data execution, P&L, optimization or variant ranking was performed.
+
+### Known limits
+
+- This is a conservative proxy stress scenario, not CME futures reconstruction.
+- Ask-side, basis, roll, volume, spread and exchange-fill validity remain unresolved.
+- Private execution and P&L remained blocked at this version.
+
+### Next
+
+- Run a protected private normalization audit and preregister the first development-period baseline before viewing outcomes.
 ## v0.6.0 — 2026-07-23
 
 ### Added
