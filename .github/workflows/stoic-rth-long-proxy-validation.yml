@@ -1,149 +1,16 @@
 name: Stoic RTH long proxy validation
 
 on:
-  push:
-    branches:
-      - agent/stoic-rth-long-proxy-validation
-    paths:
-      - ".github/workflows/stoic-rth-long-proxy-validation.yml"
-      - "scripts/run_stoic_rth_long_proxy.py"
-      - "src/stoic_123_lab/rth_long_proxy_gates.py"
-      - "src/stoic_123_lab/rth_long_proxy_study.py"
-      - "src/stoic_123_lab/validation_rth_long.py"
-      - "strategies/stoic_123/configs/phase1.yaml"
-      - "strategies/stoic_123/configs/rth_long_proxy_validation.yaml"
-      - "tests/test_stoic_123_rth_long_validation.py"
-      - "tests/test_stoic_123_rth_long_gates.py"
-  pull_request:
-    branches:
-      - agent/stoic-short-unseen-proxy-validation
-    types: [opened, synchronize, reopened]
-    paths:
-      - ".github/workflows/stoic-rth-long-proxy-validation.yml"
-      - "scripts/run_stoic_rth_long_proxy.py"
-      - "src/stoic_123_lab/rth_long_proxy_gates.py"
-      - "src/stoic_123_lab/rth_long_proxy_study.py"
-      - "src/stoic_123_lab/validation_rth_long.py"
-      - "strategies/stoic_123/configs/phase1.yaml"
-      - "strategies/stoic_123/configs/rth_long_proxy_validation.yaml"
-      - "tests/test_stoic_123_rth_long_validation.py"
-      - "tests/test_stoic_123_rth_long_gates.py"
   workflow_dispatch:
-
-concurrency:
-  group: stoic-rth-long-validation-${{ github.ref }}
-  cancel-in-progress: true
 
 permissions:
   contents: read
 
 jobs:
-  acquire:
-    name: Reacquire frozen USATECH ${{ matrix.label }}
+  archived:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
-    strategy:
-      fail-fast: false
-      max-parallel: 3
-      matrix:
-        include:
-          - {label: 2012, start: 2012-01-01, end: 2013-01-01}
-          - {label: 2013, start: 2013-01-01, end: 2014-01-01}
-          - {label: 2014, start: 2014-01-01, end: 2015-01-01}
     steps:
-      - uses: actions/checkout@v4
-        with:
-          show-progress: false
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Install acquisition dependency gate
+      - name: Validation already completed
         run: |
-          python -m pip install --upgrade pip
-          pip install ruff==0.14.10
-          ruff check scripts/acquire_stoic_usatech_partition.py
-      - name: Reacquire frozen partition
-        run: |
-          python scripts/acquire_stoic_usatech_partition.py \
-            --start '${{ matrix.start }}' \
-            --end '${{ matrix.end }}' \
-            --label '${{ matrix.label }}' \
-            --workers 8
-      - uses: actions/upload-artifact@v4
-        with:
-          name: stoic-rth-validation-source-${{ matrix.label }}
-          path: |
-            usatechidxusd_m1_bid_${{ matrix.label }}.csv.gz
-            usatechidxusd_m1_bid_${{ matrix.label }}_audit.json
-          retention-days: 1
-          compression-level: 0
-          if-no-files-found: error
-
-  execute:
-    needs: acquire
-    runs-on: ubuntu-latest
-    timeout-minutes: 120
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          show-progress: false
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Install
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[dev,research]"
-      - name: Ruff and focused tests
-        run: |
-          ruff check .
-          pytest -q \
-            tests/test_stoic_123_rth_long_validation.py \
-            tests/test_stoic_123_rth_long_gates.py \
-            tests/test_stoic_123_validation.py \
-            tests/test_stoic_123_validation_backtest.py \
-            tests/test_stoic_123.py
-      - name: Download frozen source partitions
-        uses: actions/download-artifact@v4
-        with:
-          pattern: stoic-rth-validation-source-*
-          path: private-data
-          merge-multiple: true
-      - name: Execute frozen RTH long validation
-        shell: bash
-        run: |
-          set +e
-          mkdir -p reports/stoic_123/rth_long_proxy
-          python scripts/run_stoic_rth_long_proxy.py \
-            --sources private-data \
-            --phase1 strategies/stoic_123/configs/phase1.yaml \
-            --design strategies/stoic_123/configs/rth_long_proxy_validation.yaml \
-            --out reports/stoic_123/rth_long_proxy \
-            --iterations 10000 \
-            > reports/stoic_123/rth_long_proxy/execution.log 2>&1
-          status=$?
-          echo "$status" > reports/stoic_123/rth_long_proxy/execution.status
-          cat reports/stoic_123/rth_long_proxy/execution.log
-          exit 0
-      - name: Remove raw market data
-        if: always()
-        run: rm -rf private-data
-      - name: Enforce compact result payload
-        if: always()
-        shell: bash
-        run: |
-          set -euo pipefail
-          if find reports -type f \( -name '*.gz' -o -name '*.zip' -o -name '*.parquet' \) | grep -q .; then
-            echo "Unexpected raw-like object in result payload"
-            exit 1
-          fi
-      - name: Upload compact result or diagnostics
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: stoic-rth-long-proxy-validation
-          path: reports/stoic_123/rth_long_proxy
-          retention-days: 7
-          if-no-files-found: error
-      - name: Enforce execution gate
-        run: test "$(cat reports/stoic_123/rth_long_proxy/execution.status)" = "0"
+          echo "RTH long proxy validation completed in workflow run 30055431023."
+          echo "Compact results and independent review are committed under strategies/stoic_123."
