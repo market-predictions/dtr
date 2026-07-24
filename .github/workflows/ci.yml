@@ -8,6 +8,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -156,13 +160,15 @@ jobs:
             --ytd-end-exclusive 2026-07-24 \
             --out "${RUNNER_TEMP}/sb-qualification/${{ matrix.symbol }}_source_qualification.json"
 
-      - name: Upload preserved pair source
-        if: always()
+      - name: Upload newly acquired pair source
+        if: >-
+          steps.source-cache.outputs.cache-hit != 'true' &&
+          steps.acquire.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: stacey-burke-fx-source-${{ matrix.symbol }}
           path: ${{ runner.temp }}/sb-source/${{ matrix.symbol }}
-          if-no-files-found: warn
+          if-no-files-found: error
           compression-level: 0
           retention-days: 90
 
@@ -248,5 +254,133 @@ jobs:
           retention-days: 90
 
       - name: Enforce universe source gate
+        if: always()
+        run: test "${{ steps.aggregate.outcome }}" = "success"
+
+  stacey_burke_census:
+    name: Census ${{ matrix.symbol }}
+    needs: stacey_burke_aggregate
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.head_ref == 'agent/stacey-burke-fx-source-census'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        symbol:
+          - EURUSD
+          - GBPUSD
+          - USDCHF
+          - AUDUSD
+          - NZDUSD
+          - USDCAD
+          - USDJPY
+          - EURJPY
+          - GBPJPY
+          - EURGBP
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+
+      - name: Restore qualified immutable source cache
+        id: source-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/sb-source/${{ matrix.symbol }}
+          key: stacey-burke-fx-v1-${{ matrix.symbol }}-2015-2026-07-24
+
+      - name: Enforce cached source availability
+        run: test "${{ steps.source-cache.outputs.cache-hit }}" = "true"
+
+      - name: Run preregistered event census
+        run: |
+          mkdir -p "${RUNNER_TEMP}/sb-census/${{ matrix.symbol }}"
+          python -m stacey_burke_lab.event_census \
+            --data "${RUNNER_TEMP}/sb-source/${{ matrix.symbol }}" \
+            --symbol "${{ matrix.symbol }}" \
+            --start-year 2015 \
+            --end-year 2021 \
+            --out "${RUNNER_TEMP}/sb-census/${{ matrix.symbol }}"
+
+      - name: Upload compact pair census
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stacey-burke-event-census-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/sb-census/${{ matrix.symbol }}
+          if-no-files-found: warn
+          retention-days: 90
+
+  stacey_burke_census_aggregate:
+    name: Aggregate Stacey Burke event census
+    needs: stacey_burke_census
+    if: >-
+      always() &&
+      github.event_name == 'pull_request' &&
+      github.head_ref == 'agent/stacey-burke-fx-source-census'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+
+      - name: Download available pair census evidence
+        id: download-evidence
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          pattern: stacey-burke-event-census-*
+          path: ${{ runner.temp }}/sb-census-inputs
+          merge-multiple: true
+
+      - name: Build and enforce event census decision
+        id: aggregate
+        continue-on-error: true
+        run: |
+          mkdir -p "${RUNNER_TEMP}/sb-census-inputs"
+          python -m stacey_burke_lab.census_gate \
+            --inputs "${RUNNER_TEMP}/sb-census-inputs" \
+            --out "${RUNNER_TEMP}/sb-census-result"
+
+      - name: Upload event-census decision
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stacey-burke-event-census-decision
+          path: ${{ runner.temp }}/sb-census-result
+          if-no-files-found: warn
+          retention-days: 90
+
+      - name: Enforce event census gate
         if: always()
         run: test "${{ steps.aggregate.outcome }}" = "success"
