@@ -20,19 +20,30 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref || 'agent/gbpusd-dtr-replication' }}
-          fetch-depth: 0
+          fetch-depth: 1
 
       - name: Apply Ruff-only formatting fixes
         run: |
-          set -euo pipefail
+          set -u
+          : > /tmp/ruff-format-report.txt
           uvx --from ruff==0.15.22 ruff format \
             scripts/acquire_gbpusd_dukascopy.py \
             scripts/review_gbpusd_replication.py \
-            scripts/run_gbpusd_replication.py
+            scripts/run_gbpusd_replication.py \
+            >> /tmp/ruff-format-report.txt 2>&1 || true
           uvx --from ruff==0.15.22 ruff check --fix --exit-zero \
             scripts/acquire_gbpusd_dukascopy.py \
             scripts/review_gbpusd_replication.py \
-            scripts/run_gbpusd_replication.py
+            scripts/run_gbpusd_replication.py \
+            >> /tmp/ruff-format-report.txt 2>&1 || true
+          cat /tmp/ruff-format-report.txt
+
+      - name: Preserve formatter diagnostics
+        uses: actions/upload-artifact@v4
+        with:
+          name: gbpusd-parent-format-report
+          path: /tmp/ruff-format-report.txt
+          retention-days: 7
 
       - name: Commit formatting-only cleanup
         env:
