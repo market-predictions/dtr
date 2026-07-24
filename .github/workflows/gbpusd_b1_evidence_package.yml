@@ -1,0 +1,155 @@
+name: GBPUSD B1 evidence reconstruction and package
+
+on:
+  pull_request:
+    paths:
+      - temporary/gbpusd_b1_evidence_package.trigger
+
+permissions:
+  contents: read
+
+jobs:
+  verify-and-package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/gbpusd-b1-contract-reconciliation
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install verification dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pandas numpy
+
+      - name: Reconstruct and verify full trade ledger
+        run: |
+          set -euo pipefail
+          ledger_dir=results/2026-07-24/gbpusd_b1_older_validation/trade_ledger
+          mkdir -p /tmp/gbpusd_b1_validation
+          cat "$ledger_dir"/part00.b64 \
+              "$ledger_dir"/part01.b64 \
+              "$ledger_dir"/part02.b64 \
+              "$ledger_dir"/part03.b64 \
+            > /tmp/trades.csv.gz.b64
+          printf '%s  %s\n' \
+            '53db9ff98fabdf14c650b1b3829b5b3e3e68c3df8391c12f1b68978ea4d9ad0d' \
+            /tmp/trades.csv.gz.b64 | sha256sum -c -
+          base64 -d /tmp/trades.csv.gz.b64 > /tmp/trades.csv.gz
+          printf '%s  %s\n' \
+            '16a1e7903ed318a535261c687304e71233d738b6cbeeea607362cf5ed4c4f5e0' \
+            /tmp/trades.csv.gz | sha256sum -c -
+          gzip -dc /tmp/trades.csv.gz \
+            > /tmp/gbpusd_b1_validation/FX_B1_PREVDAY_LONDON_BOS_MID__trades.csv
+          printf '%s  %s\n' \
+            'ea2fff239a4707315b4a4cfdfd7398808dbf2177f99ab52aa5f4c1ec91d269e3' \
+            /tmp/gbpusd_b1_validation/FX_B1_PREVDAY_LONDON_BOS_MID__trades.csv \
+            | sha256sum -c -
+
+      - name: Independently reconstruct metrics and decision
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import importlib.util
+          import json
+          import math
+          from pathlib import Path
+
+          import pandas as pd
+
+          root = Path('results/2026-07-24/gbpusd_b1_older_validation')
+          trades = pd.read_csv(
+              '/tmp/gbpusd_b1_validation/FX_B1_PREVDAY_LONDON_BOS_MID__trades.csv'
+          )
+          summary = pd.read_csv(root / 'dtr_fx_b1_summary.csv').iloc[0].to_dict()
+          decision = json.loads((root / 'decision.json').read_text())
+
+          spec = importlib.util.spec_from_file_location(
+              'reviewer', 'scripts/review_dtr_fx_b1_older.py'
+          )
+          reviewer = importlib.util.module_from_spec(spec)
+          assert spec.loader is not None
+          spec.loader.exec_module(reviewer)
+
+          years = tuple(range(2015, 2022))
+          reconstructed = reviewer.recompute(trades, years, 5000)
+          mismatches = {}
+          for key, value in reconstructed.items():
+              if key not in summary or not reviewer.equal_value(summary[key], value):
+                  mismatches[key] = {
+                      'reported': summary.get(key),
+                      'reconstructed': value,
+                  }
+          expected = reviewer.expected_decision(reconstructed, years)
+          checks = {
+              'trade_rows': len(trades) == 105,
+              'summary_parity': not mismatches,
+              'decision_parity': decision['decision'] == expected,
+              'rejection': expected == 'REJECT_B1_ON_OLDER_HISTORY',
+              'positive_year_gate_failed': not bool(
+                  reconstructed['gate_positive_years']
+              ),
+              'ci_gate_failed': not bool(reconstructed['gate_ci']),
+          }
+          evidence_review = {
+              'study_id': 'DTR-FX-WP-20260724-23',
+              'review_type': 'repository_only_trade_ledger_reconstruction',
+              'checks': checks,
+              'mismatches': mismatches,
+              'reconstructed_decision': expected,
+              'reconstructed_metrics': reconstructed,
+              'conclusion': 'PASS' if all(checks.values()) else 'FAIL',
+          }
+          Path('/tmp/gbpusd_b1_validation/repository_evidence_review.json').write_text(
+              json.dumps(evidence_review, indent=2), encoding='utf-8'
+          )
+          if evidence_review['conclusion'] != 'PASS':
+              raise SystemExit(json.dumps(evidence_review, indent=2))
+          PY
+
+      - name: Build final evidence package
+        run: |
+          set -euo pipefail
+          package=/tmp/gbpusd_b1_final_package
+          mkdir -p "$package/results" "$package/docs" "$package/governance"
+          cp results/2026-07-24/gbpusd_b1_older_validation/*.csv \
+             results/2026-07-24/gbpusd_b1_older_validation/*.json \
+             "$package/results"/
+          cp /tmp/gbpusd_b1_validation/FX_B1_PREVDAY_LONDON_BOS_MID__trades.csv \
+             /tmp/gbpusd_b1_validation/repository_evidence_review.json \
+             "$package/results"/
+          cp docs/DTR_FX_B1_OLDER_VALIDATION_2026-07-24.md \
+             docs/DTR_FX_B1_CONTRACT_2026-07-24.md \
+             "$package/docs"/
+          cp workpackages/DTR-FX-WP-20260724-23.md \
+             changelogs/DTR-FX-WP-20260724-23.md \
+             reviews/DTR-FX-WP-20260724-23-older-history-review.md \
+             handovers/DTR-FX-WP-20260724-23.md \
+             "$package/governance"/
+          cp results/2026-07-24/gbpusd_b1_older/source_qualification.json \
+             results/2026-07-24/gbpusd_b1_older/annual_sha256.txt \
+             results/2026-07-24/gbpusd_b1_older/source_package_manifest.json \
+             "$package/results"/
+          find "$package" -type f -print0 | sort -z | xargs -0 sha256sum \
+            > "$package/PACKAGE_SHA256.txt"
+          cd /tmp
+          zip -q -r DTR_FX_B1_GBPUSD_2015_2021_VALIDATION_FINAL.zip \
+            gbpusd_b1_final_package
+          sha256sum DTR_FX_B1_GBPUSD_2015_2021_VALIDATION_FINAL.zip \
+            > DTR_FX_B1_GBPUSD_2015_2021_VALIDATION_FINAL.zip.sha256
+
+      - name: Preserve final evidence package
+        uses: actions/upload-artifact@v4
+        with:
+          name: dtr-fx-b1-gbpusd-2015-2021-validation-final
+          path: |
+            /tmp/DTR_FX_B1_GBPUSD_2015_2021_VALIDATION_FINAL.zip
+            /tmp/DTR_FX_B1_GBPUSD_2015_2021_VALIDATION_FINAL.zip.sha256
+          retention-days: 90
+          compression-level: 0
+          if-no-files-found: error
