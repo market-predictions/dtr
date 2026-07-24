@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import argparse
-import datetime as dt
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
