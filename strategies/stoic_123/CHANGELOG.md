@@ -1,5 +1,50 @@
 # Changelog — Stoic Edge 1-2-3
 
+## v0.8.0-research-platform — 2026-07-24
+
+### Added
+
+- Completed `STOIC123-WP-20260724-07` through `-09` as a research-cycle acceleration programme.
+- Added explicit `screen`, `validate`, `certify` and `legacy` execution plans.
+- Added content-addressed Parquet caches for resampled bars and detected events.
+- Added exact ledger-based cost repricing for single-stream execution.
+- Added deterministic batched bootstrapping with exact parity to the former loop.
+- Added stage-level JSON/CSV profiling and deterministic primary-futility stopping.
+- Added four-way parallel certification with deterministic aggregation.
+- Added a discovery-only multi-variation contract with holdout and promotion safeguards.
+
+### Performance
+
+- Cold-cache screen: `9.81s`.
+- Warm-cache screen: `4.54s`.
+- Staged validation with primary futility rejection: `5.58s`.
+- Full accelerated sequential certification: `52.56s`.
+- Four-way parallel compute lower bound: `21.45s` versus `61.24s` serial partition compute.
+- Parallel compute acceleration: `2.85x`.
+
+### Verification
+
+- Accelerated candidate summaries matched 17 frozen reference rows within `1e-12`.
+- All 19 promotion gates and the final decision matched exactly.
+- Python 3.11 and 3.12 CI passed.
+- Raw market data remained outside published result artifacts.
+
+### Decision
+
+The research platform is materially faster without lowering certification standards. Fast modes may reject but cannot promote. The mechanical Stoic strategy family remains closed; the new batch engine may be used only for a genuinely new preregistered mechanism on designated discovery data.
+
+### Known limitations
+
+- Persistent source storage is not yet integrated with an external private object registry.
+- GitHub-hosted matrix jobs include environment and artifact overhead beyond measured compute time.
+- Numba/GPU acceleration is deferred because ordinary simulation was not the dominant measured cost.
+
+### Next
+
+- Reuse the staged and parallel framework for future strategy families.
+- Add source-grid, bid/ask and execution-realism improvements as separate platform work.
+- Reconsider JIT only when profiling shows simulation as a dominant bottleneck.
+
 ## v0.7.0-research-closed — 2026-07-24
 
 ### Added
