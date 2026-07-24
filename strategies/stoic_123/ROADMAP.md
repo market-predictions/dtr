@@ -40,38 +40,60 @@ Work package: `STOIC123-WP-20260723-03`
 
 - [x] Freeze the post-hoc no-map short result as one unchanged hypothesis.
 - [x] Qualify disjoint 2015-2021 and 2026 YTD USATECH proxy partitions.
-- [x] Freeze and enforce exact annual/YTD source checksums.
 - [x] Preserve both-direction technical management.
-- [x] Run short EMA-break and EMA-break-plus-retest controls.
-- [x] Run 50 New-York-session-aware matched-time short controls per partition.
-- [x] Run cost, delay, year breadth, concentration, uncertainty, and mechanism gates.
+- [x] Run short EMA-break, retest, cost, delay, uncertainty and matched-time controls.
 - [x] Independently reconstruct all 16 ledgers and all 12 gates.
 
 Decision: `REJECT_CURRENT_SHORT_SIDE_HYPOTHESIS_NO_PAID_NQ_VALIDATION`.
 
-## Phase 4 — Selection gate
+## Phase 4 — Fresh-history RTH long validation
+
+Status: **complete; rejected**
+
+Work package: `STOIC123-WP-20260724-04`
+
+- [x] Freeze a single `09:30-16:00 America/New_York` entry window before new performance execution.
+- [x] Apply the RTH rule to entries only while retaining full-session management.
+- [x] Qualify earlier USATECH coverage without inspecting returns.
+- [x] Exclude unavailable 2010 and the insufficient 2011 fragment.
+- [x] Freeze 2012-2013 as fresh history and 2014 as untouched holdout.
+- [x] Run RTH EMA-break, full 1-2-3, retest, full-session and overnight comparators.
+- [x] Run cost, delay, year, uncertainty and fifty-replicate matched-time controls.
+- [x] Independently reconstruct 22 ledgers, session classification and all 17 gates.
+
+Result:
+
+- RTH EMA break, fresh history: 858 trades, `-30.35R`, `-0.035R` expectancy.
+- RTH EMA break, 2014 holdout: 522 trades, `-104.84R`, `-0.201R` expectancy.
+- Full RTH 1-2-3 was negative in both partitions and underperformed EMA break.
+- Only two of seventeen gates passed, both sample-size gates.
+
+Decision: `REJECT_RTH_LONG_PROXY_HYPOTHESIS_NO_ACTUAL_NQ_VALIDATION`.
+
+## Phase 5 — Selection gate
 
 Status: **closed; no finalist**
 
 - Actual-NQ long-only candidates failed.
 - The unseen short-only proxy hypothesis failed.
-- No direction or sequence variant has reproducible incremental value over simpler controls.
-- No paid futures-data acquisition is justified for this exact mechanical formulation.
+- The fresh-history RTH long proxy hypothesis failed.
+- No direction, session or sequence variant has reproducible incremental value over simpler controls.
+- No paid futures-data acquisition is justified for this mechanical formulation.
 
-## Phase 5 — TradingView parity
+## Phase 6 — TradingView parity
 
 Status: **closed for current family**
 
 - No Pine port is authorized because there is no data-supported finalist.
-- No alerts, sizing, dashboard, strategy publication, or paper-forward deployment are authorized.
+- No alerts, sizing, dashboard, strategy publication or paper-forward deployment are authorized.
 
-## Phase 6 — Future research boundary
+## Phase 7 — Future research boundary
 
 Status: **new mechanism required**
 
 A future Stoic project may start only when all conditions hold:
 
-- the market mechanism is genuinely different from direction, session, filter, threshold, stop, target, delay, or exit retuning;
+- the market mechanism is genuinely different from direction, session, filter, threshold, stop, target, delay or exit retuning;
 - the hypothesis is independently motivated before inspecting new returns;
 - data and decision gates are preregistered;
 - instrument and source identities remain explicit;
