@@ -1,0 +1,127 @@
+name: GBPUSD B1 older source qualification v2
+
+on:
+  pull_request:
+    paths:
+      - temporary/gbpusd_b1_older_source_qualification_v2.trigger
+
+permissions:
+  contents: read
+
+jobs:
+  acquire-year:
+    name: acquire-${{ matrix.year }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        year: [2015, 2016, 2017, 2018, 2019, 2020, 2021]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/gbpusd-b1-contract-reconciliation
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Acquire canonical annual BID and ASK source
+        run: |
+          set -euo pipefail
+          mkdir -p "/tmp/gbpusd_${{ matrix.year }}"
+          python scripts/acquire_gbpusd_dukascopy_canonical.py \
+            --out "/tmp/gbpusd_${{ matrix.year }}" \
+            --start-year "${{ matrix.year }}" \
+            --end-year "${{ matrix.year }}" \
+            --workers 24
+
+      - name: Preserve annual source
+        uses: actions/upload-artifact@v4
+        with:
+          name: gbpusd-${{ matrix.year }}-source
+          path: /tmp/gbpusd_${{ matrix.year }}
+          retention-days: 90
+          compression-level: 0
+          if-no-files-found: error
+
+  qualify-combined-source:
+    name: qualify-combined-source
+    needs: acquire-year
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/gbpusd-b1-contract-reconciliation
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install qualification dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pandas numpy
+
+      - name: Restore annual source artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: gbpusd-*-source
+          path: /tmp/annual
+          merge-multiple: true
+
+      - name: Assemble and qualify 2015-2021 source
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/gbpusd_2015_2021 /tmp/gbpusd_source_evidence
+          find /tmp/annual -maxdepth 1 -type f -print -exec cp {} /tmp/gbpusd_2015_2021/ \;
+          python scripts/qualify_gbpusd_bid_ask.py \
+            --data /tmp/gbpusd_2015_2021 \
+            --start-year 2015 \
+            --end-year 2021 \
+            --out /tmp/gbpusd_source_evidence/source_qualification.json
+          sha256sum /tmp/gbpusd_2015_2021/*.csv.gz \
+            > /tmp/gbpusd_source_evidence/annual_sha256.txt
+          cp /tmp/gbpusd_2015_2021/gbpusd_m1_*_audit.json \
+            /tmp/gbpusd_source_evidence/
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          annual = []
+          for path in sorted(Path('/tmp/gbpusd_2015_2021').glob('gbpusd_m1_*_audit.json')):
+              annual.append(json.loads(path.read_text()))
+          manifest = {
+              'symbol': 'GBPUSD',
+              'period': [2015, 2021],
+              'canonical_ohlc': True,
+              'acquisition_topology': 'seven_independent_annual_runners',
+              'annual_audits': annual,
+          }
+          Path('/tmp/gbpusd_source_evidence/gbpusd_2015_2021_manifest.json').write_text(
+              json.dumps(manifest, indent=2), encoding='utf-8'
+          )
+          PY
+          tar -C /tmp -czf /tmp/gbpusd_2015_2021_private_cache.tar.gz \
+            gbpusd_2015_2021
+
+      - name: Preserve private combined cache
+        uses: actions/upload-artifact@v4
+        with:
+          name: gbpusd-2015-2021-private-cache-v2
+          path: /tmp/gbpusd_2015_2021_private_cache.tar.gz
+          retention-days: 90
+          compression-level: 0
+          if-no-files-found: error
+
+      - name: Preserve compact qualification evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: gbpusd-2015-2021-source-qualification-v2
+          path: /tmp/gbpusd_source_evidence
+          retention-days: 90
+          compression-level: 6
+          if-no-files-found: error
