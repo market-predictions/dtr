@@ -52,9 +52,7 @@ def fetch_day(day: dt.date, side: str) -> tuple[dt.date, list[tuple], str]:
             midnight = dt.datetime.combine(day, dt.time(), tzinfo=dt.UTC)
             rows = []
             for offset in range(0, len(payload), RECORD.size):
-                seconds, open_, close, low, high, volume = RECORD.unpack_from(
-                    payload, offset
-                )
+                seconds, open_, close, low, high, volume = RECORD.unpack_from(payload, offset)
                 timestamp = midnight + dt.timedelta(seconds=seconds)
                 rows.append(
                     (
