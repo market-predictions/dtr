@@ -1,163 +1,18 @@
 name: Stoic USA500 2015+ forward validation
 
 on:
-  push:
-    branches:
-      - agent/stoic-usa500-forward-2015plus
-    paths:
-      - ".github/workflows/stoic-usa500-forward-2015plus-validation.yml"
-      - "scripts/acquire_stoic_usa500_partition.py"
-      - "scripts/run_stoic_usa500_forward_2015plus.py"
-      - "src/stoic_123_lab/index_proxy_source.py"
-      - "src/stoic_123_lab/usa500_forward_gates.py"
-      - "src/stoic_123_lab/usa500_rth_study.py"
-      - "src/stoic_123_lab/validation_rth_long.py"
-      - "strategies/stoic_123/configs/phase1.yaml"
-      - "strategies/stoic_123/configs/usa500_forward_2015plus.yaml"
-      - "tests/test_stoic_123_usa500_forward.py"
-  pull_request:
-    branches:
-      - agent/stoic-usa500-rth-long-replication
-    types: [opened, synchronize, reopened]
-    paths:
-      - ".github/workflows/stoic-usa500-forward-2015plus-validation.yml"
-      - "scripts/acquire_stoic_usa500_partition.py"
-      - "scripts/run_stoic_usa500_forward_2015plus.py"
-      - "src/stoic_123_lab/index_proxy_source.py"
-      - "src/stoic_123_lab/usa500_forward_gates.py"
-      - "src/stoic_123_lab/usa500_rth_study.py"
-      - "src/stoic_123_lab/validation_rth_long.py"
-      - "strategies/stoic_123/configs/phase1.yaml"
-      - "strategies/stoic_123/configs/usa500_forward_2015plus.yaml"
-      - "tests/test_stoic_123_usa500_forward.py"
   workflow_dispatch:
-
-concurrency:
-  group: stoic-usa500-forward-validation-${{ github.ref }}
-  cancel-in-progress: true
 
 permissions:
   contents: read
 
 jobs:
-  acquire:
-    name: Reacquire frozen USA500 ${{ matrix.label }}
+  archived:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
-    strategy:
-      fail-fast: false
-      max-parallel: 4
-      matrix:
-        include:
-          - {label: 2015, start: 2015-01-01, end: 2016-01-01}
-          - {label: 2016, start: 2016-01-01, end: 2017-01-01}
-          - {label: 2017, start: 2017-01-01, end: 2018-01-01}
-          - {label: 2018, start: 2018-01-01, end: 2019-01-01}
-          - {label: 2019, start: 2019-01-01, end: 2020-01-01}
-          - {label: 2020, start: 2020-01-01, end: 2021-01-01}
-          - {label: 2021, start: 2021-01-01, end: 2022-01-01}
-          - {label: 2022, start: 2022-01-01, end: 2023-01-01}
-          - {label: 2023, start: 2023-01-01, end: 2024-01-01}
-          - {label: 2024, start: 2024-01-01, end: 2025-01-01}
-          - {label: 2025, start: 2025-01-01, end: 2026-01-01}
-          - {label: 2026_ytd, start: 2026-01-01, end: 2026-07-24}
-
     steps:
-      - uses: actions/checkout@v4
-        with:
-          show-progress: false
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Install acquisition dependency gate
+      - name: Forward validation already completed
         run: |
-          python -m pip install --upgrade pip
-          pip install ruff==0.15.22
-          ruff check scripts/acquire_stoic_usa500_partition.py
-      - name: Reacquire exact annual partition
-        run: |
-          python scripts/acquire_stoic_usa500_partition.py \
-            --start '${{ matrix.start }}' \
-            --end '${{ matrix.end }}' \
-            --label '${{ matrix.label }}' \
-            --workers 8
-      - uses: actions/upload-artifact@v4
-        with:
-          name: stoic-usa500-forward-validation-source-${{ matrix.label }}
-          path: |
-            usa500idxusd_m1_bid_${{ matrix.label }}.csv.gz
-            usa500idxusd_m1_bid_${{ matrix.label }}_audit.json
-          retention-days: 1
-          compression-level: 0
-          if-no-files-found: error
-
-  execute:
-    needs: acquire
-    runs-on: ubuntu-latest
-    timeout-minutes: 360
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          show-progress: false
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Install
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[dev,research]"
-      - name: Ruff and focused tests
-        run: |
-          ruff check .
-          pytest -q \
-            tests/test_stoic_123_usa500_forward.py \
-            tests/test_stoic_123_usa500_rth.py \
-            tests/test_stoic_123_rth_long_validation.py \
-            tests/test_stoic_123_rth_long_gates.py \
-            tests/test_stoic_123_validation.py \
-            tests/test_stoic_123_validation_backtest.py \
-            tests/test_stoic_123.py
-      - name: Download frozen annual partitions
-        uses: actions/download-artifact@v4
-        with:
-          pattern: stoic-usa500-forward-validation-source-*
-          path: private-data
-          merge-multiple: true
-      - name: Execute frozen 2015+ forward validation
-        shell: bash
-        run: |
-          set +e
-          mkdir -p reports/stoic_123/usa500_forward_2015plus
-          python scripts/run_stoic_usa500_forward_2015plus.py \
-            --sources private-data \
-            --phase1 strategies/stoic_123/configs/phase1.yaml \
-            --design strategies/stoic_123/configs/usa500_forward_2015plus.yaml \
-            --out reports/stoic_123/usa500_forward_2015plus \
-            --iterations 10000 \
-            > reports/stoic_123/usa500_forward_2015plus/execution.log 2>&1
-          status=$?
-          echo "$status" > reports/stoic_123/usa500_forward_2015plus/execution.status
-          cat reports/stoic_123/usa500_forward_2015plus/execution.log
-          exit 0
-      - name: Remove raw market data
-        if: always()
-        run: rm -rf private-data
-      - name: Enforce compact result payload
-        if: always()
-        shell: bash
-        run: |
-          set -euo pipefail
-          if find reports -type f \( -name '*.gz' -o -name '*.zip' -o -name '*.parquet' \) | grep -q .; then
-            echo "Unexpected raw-like object in result payload"
-            exit 1
-          fi
-      - name: Upload compact result or diagnostics
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: stoic-usa500-forward-2015plus-validation
-          path: reports/stoic_123/usa500_forward_2015plus
-          retention-days: 7
-          if-no-files-found: error
-      - name: Enforce execution gate
-        run: test "$(cat reports/stoic_123/usa500_forward_2015plus/execution.status)" = "0"
+          echo "USA500 2015+ forward validation completed in workflow run 30083576930."
+          echo "Decision: REJECT_USA500_RTH_FULL_123_FORWARD_FAILURE."
+          echo "Compact results are committed under strategies/stoic_123/results/usa500_forward_2015plus."
+          echo "Raw market data were removed before artifact publication."
