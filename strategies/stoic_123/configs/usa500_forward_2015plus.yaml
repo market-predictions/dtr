@@ -1,0 +1,124 @@
+study_id: STOIC123-WP-20260724-06
+frozen_on: 2026-07-24
+status: SOURCE_QUALIFICATION_PENDING
+matched_control_replicates: 50
+
+candidate:
+  id: RTH_LONG_FULL_123_NO_MAP_NO_EMA200
+  source_arm_id: S123_M0_NO_MAP_CONTROL
+  direction_mode: long_only
+  entry_model: full_123
+  map_mode: none
+  ema200_filter: false
+  parameter_changes_allowed: false
+  phase1_config_path: strategies/stoic_123/configs/phase1.yaml
+  phase1_expected_sha256: 5d6909bd5740e1cdea9bd3d47a9818289a6faa8b9a61338726afdc53289ff805
+
+session_contract:
+  source_timezone: UTC
+  session_timezone: America/New_York
+  entry_window_start_inclusive: "09:30:00"
+  entry_window_end_exclusive: "16:00:00"
+  entry_filter_only: true
+  management_and_exits: full_session
+  daylight_saving_rule: IANA_America_New_York
+
+source_contract:
+  classification: Dukascopy USA500 bid-CFD S&P-500 proxy; not CME ES futures
+  symbol: USA500IDXUSD
+  filename_prefix: usa500idxusd_m1_bid
+  price_stream: bid_only
+  signal_and_execution_prices: same_bid_ohlc_stream
+  execution_tick_size: 0.25
+  point_value_usd: 50.0
+  commission_per_side_usd: 2.25
+  source_quote_increment: 0.001
+  inactive_definition: volume_lte_zero
+  timestamp_basis: UTC converted to naive UTC before existing resampling
+  partitions:
+    primary_forward:
+      start_inclusive_utc: 2015-01-01
+      end_exclusive_utc: 2020-01-01
+      labels: [2015, 2016, 2017, 2018, 2019]
+      expected_sha256_by_label:
+        2015: PENDING_SOURCE_QUALIFICATION
+        2016: PENDING_SOURCE_QUALIFICATION
+        2017: PENDING_SOURCE_QUALIFICATION
+        2018: PENDING_SOURCE_QUALIFICATION
+        2019: PENDING_SOURCE_QUALIFICATION
+    crisis_regime:
+      start_inclusive_utc: 2020-01-01
+      end_exclusive_utc: 2023-01-01
+      labels: [2020, 2021, 2022]
+      expected_sha256_by_label:
+        2020: PENDING_SOURCE_QUALIFICATION
+        2021: PENDING_SOURCE_QUALIFICATION
+        2022: PENDING_SOURCE_QUALIFICATION
+    recent_holdout:
+      start_inclusive_utc: 2023-01-01
+      end_exclusive_utc: 2026-01-01
+      labels: [2023, 2024, 2025]
+      expected_sha256_by_label:
+        2023: PENDING_SOURCE_QUALIFICATION
+        2024: PENDING_SOURCE_QUALIFICATION
+        2025: PENDING_SOURCE_QUALIFICATION
+    monitoring_2026_ytd:
+      start_inclusive_utc: 2026-01-01
+      end_exclusive_utc: 2026-07-24
+      labels: [2026_ytd]
+      expected_sha256_by_label:
+        2026_ytd: PENDING_SOURCE_QUALIFICATION
+      decision_gates_enabled: false
+
+execution_tests:
+  baseline_slippage_ticks_each_side: 1.0
+  stressed_slippage_ticks_each_side: 2.0
+  entry_delays_minutes: [1, 5]
+  max_hold_minutes: 1440
+  management_direction: both
+
+required_scenarios:
+  - full_session_long_full_123
+  - overnight_entry_long_full_123
+  - rth_long_full_123
+  - rth_long_full_123_cost_2t
+  - rth_long_full_123_delay_1m
+  - rth_long_full_123_delay_5m
+  - rth_long_ema_break_diagnostic
+  - rth_long_ema_break_retest_diagnostic
+  - fifty_deterministic_rth_matched_time_controls
+
+promotion_gates:
+  primary_forward_all_required:
+    minimum_trades: 100
+    expectancy_positive: true
+    date_block_lo95_positive: true
+    minimum_positive_years: 4
+    total_years: 5
+    largest_positive_year_share_max: 0.50
+    two_tick_expectancy_positive: true
+    one_minute_delay_expectancy_positive: true
+    return_to_drawdown_min: 1.50
+    max_drawdown_r_max: 35.0
+    matched_time_control_passed: true
+  cross_block_all_required:
+    crisis_regime_expectancy_positive: true
+    crisis_regime_minimum_positive_years: 2
+    crisis_regime_total_years: 3
+    recent_holdout_expectancy_positive: true
+    recent_holdout_minimum_positive_years: 2
+    recent_holdout_total_years: 3
+    recent_holdout_two_tick_expectancy_positive: true
+    crisis_regime_max_drawdown_r_max: 35.0
+    recent_holdout_max_drawdown_r_max: 35.0
+    combined_2015_2025_expectancy_positive: true
+    combined_2015_2025_return_to_drawdown_min: 1.50
+
+restrictions:
+  - No EMA200 or other trend filter.
+  - No change to EMA lengths, ATR, retest, base, stop, target, holding period, management, execution, or matching rules.
+  - No RTH subwindow, weekday, month, volatility, regime, or news filter search.
+  - No removal of losing years or partitions.
+  - No pooling with NQ or USATECH evidence.
+  - No raw market-data publication.
+  - No CME ES claim, Pine port, sizing, alerts, paper deployment, or live use.
