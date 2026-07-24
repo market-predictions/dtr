@@ -1,0 +1,48 @@
+name: GBPUSD parent formatting cleanup
+
+on:
+  push:
+    branches:
+      - agent/gbpusd-dtr-replication
+    paths:
+      - temporary/gbpusd_parent_format_cleanup.trigger
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/gbpusd-dtr-replication
+          fetch-depth: 0
+
+      - name: Apply Ruff-only formatting fixes
+        run: |
+          set -euo pipefail
+          uvx --from ruff==0.15.22 ruff check --fix \
+            scripts/acquire_gbpusd_dukascopy.py \
+            scripts/review_gbpusd_replication.py \
+            scripts/run_gbpusd_replication.py
+          uvx --from ruff==0.15.22 ruff format \
+            scripts/acquire_gbpusd_dukascopy.py \
+            scripts/review_gbpusd_replication.py \
+            scripts/run_gbpusd_replication.py
+          uvx --from ruff==0.15.22 ruff check \
+            scripts/acquire_gbpusd_dukascopy.py \
+            scripts/review_gbpusd_replication.py \
+            scripts/run_gbpusd_replication.py
+
+      - name: Commit formatting-only cleanup
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scripts/acquire_gbpusd_dukascopy.py \
+                  scripts/review_gbpusd_replication.py \
+                  scripts/run_gbpusd_replication.py
+          git rm temporary/gbpusd_parent_format_cleanup.trigger
+          git commit -m "Normalize GBPUSD research formatting"
+          git push origin HEAD:agent/gbpusd-dtr-replication
