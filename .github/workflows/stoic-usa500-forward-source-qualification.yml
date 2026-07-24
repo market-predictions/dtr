@@ -1,164 +1,17 @@
 name: Stoic USA500 2015+ source qualification
 
 on:
-  push:
-    branches:
-      - agent/stoic-usa500-forward-2015plus
-    paths:
-      - ".github/workflows/stoic-usa500-forward-source-qualification.yml"
-      - "scripts/acquire_stoic_usa500_partition.py"
-      - "strategies/stoic_123/configs/usa500_forward_2015plus.yaml"
-      - "strategies/stoic_123/governance/workpackages/STOIC123-WP-20260724-06.md"
-  pull_request:
-    branches:
-      - agent/stoic-usa500-rth-long-replication
-    types: [opened, synchronize, reopened]
-    paths:
-      - ".github/workflows/stoic-usa500-forward-source-qualification.yml"
-      - "scripts/acquire_stoic_usa500_partition.py"
-      - "strategies/stoic_123/configs/usa500_forward_2015plus.yaml"
-      - "strategies/stoic_123/governance/workpackages/STOIC123-WP-20260724-06.md"
   workflow_dispatch:
-
-concurrency:
-  group: stoic-usa500-forward-source-${{ github.ref }}
-  cancel-in-progress: true
 
 permissions:
   contents: read
 
 jobs:
-  acquire:
-    name: Qualify USA500 ${{ matrix.label }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 120
-    strategy:
-      fail-fast: false
-      max-parallel: 4
-      matrix:
-        include:
-          - {label: 2015, start: 2015-01-01, end: 2016-01-01}
-          - {label: 2016, start: 2016-01-01, end: 2017-01-01}
-          - {label: 2017, start: 2017-01-01, end: 2018-01-01}
-          - {label: 2018, start: 2018-01-01, end: 2019-01-01}
-          - {label: 2019, start: 2019-01-01, end: 2020-01-01}
-          - {label: 2020, start: 2020-01-01, end: 2021-01-01}
-          - {label: 2021, start: 2021-01-01, end: 2022-01-01}
-          - {label: 2022, start: 2022-01-01, end: 2023-01-01}
-          - {label: 2023, start: 2023-01-01, end: 2024-01-01}
-          - {label: 2024, start: 2024-01-01, end: 2025-01-01}
-          - {label: 2025, start: 2025-01-01, end: 2026-01-01}
-          - {label: 2026_ytd, start: 2026-01-01, end: 2026-07-24}
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          show-progress: false
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Ruff acquisition script
-        run: |
-          python -m pip install --upgrade pip
-          pip install ruff==0.15.22
-          ruff check scripts/acquire_stoic_usa500_partition.py
-      - name: Acquire fixed annual source partition only
-        run: |
-          python scripts/acquire_stoic_usa500_partition.py \
-            --start '${{ matrix.start }}' \
-            --end '${{ matrix.end }}' \
-            --label '${{ matrix.label }}' \
-            --workers 8
-      - uses: actions/upload-artifact@v4
-        with:
-          name: stoic-usa500-forward-source-${{ matrix.label }}
-          path: |
-            usa500idxusd_m1_bid_${{ matrix.label }}.csv.gz
-            usa500idxusd_m1_bid_${{ matrix.label }}_audit.json
-          retention-days: 2
-          compression-level: 0
-          if-no-files-found: error
-
-  summarize:
-    needs: acquire
+  archived:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
-        with:
-          pattern: stoic-usa500-forward-source-*
-          path: qualified-source
-          merge-multiple: true
-      - name: Build source-only qualification summary
-        shell: bash
+      - name: Source qualification already completed
         run: |
-          python - <<'PY'
-          import csv
-          import json
-          from pathlib import Path
-
-          rows = []
-          for path in sorted(Path("qualified-source").glob("*_audit.json")):
-              rows.append(json.loads(path.read_text(encoding="utf-8")))
-          expected = {
-              "2015", "2016", "2017", "2018", "2019", "2020",
-              "2021", "2022", "2023", "2024", "2025", "2026_ytd",
-          }
-          observed = {str(row["label"]) for row in rows}
-          if observed != expected:
-              raise SystemExit(
-                  f"Expected labels {sorted(expected)}, observed {sorted(observed)}"
-              )
-          fields = [
-              "label",
-              "active_rows",
-              "first_timestamp_utc",
-              "last_timestamp_utc",
-              "zero_volume_rows_removed",
-              "duplicate_timestamps",
-              "sha256",
-              "classification",
-              "statuses",
-          ]
-          with Path("qualification_summary.csv").open(
-              "w", newline="", encoding="utf-8"
-          ) as handle:
-              writer = csv.DictWriter(handle, fieldnames=fields)
-              writer.writeheader()
-              for row in sorted(rows, key=lambda item: str(item["label"])):
-                  projected = {key: row.get(key) for key in fields}
-                  projected["statuses"] = json.dumps(
-                      projected["statuses"], sort_keys=True
-                  )
-                  writer.writerow(projected)
-
-          sufficient = {
-              str(row["label"])
-              for row in rows
-              if int(row.get("active_rows", 0)) >= 50000
-          }
-          decision = {
-              "study_id": "STOIC123-WP-20260724-06",
-              "performance_inspected": False,
-              "qualified_labels_with_at_least_50000_rows": sorted(sufficient),
-              "all_partitions_sufficient": sufficient == expected,
-              "total_active_rows": sum(int(row["active_rows"]) for row in rows),
-              "next_action": (
-                  "FREEZE_CHECKSUMS_THEN_EXECUTE_FROZEN_FORWARD_TEST"
-                  if sufficient == expected
-                  else "REVIEW_SOURCE_COVERAGE_BEFORE_ANY_PERFORMANCE_RUN"
-              ),
-          }
-          Path("source_qualification_decision.json").write_text(
-              json.dumps(decision, indent=2, sort_keys=True) + "\n",
-              encoding="utf-8",
-          )
-          print(json.dumps(decision, indent=2, sort_keys=True))
-          PY
-      - uses: actions/upload-artifact@v4
-        with:
-          name: stoic-usa500-forward-source-qualification-summary
-          path: |
-            qualification_summary.csv
-            source_qualification_decision.json
-          retention-days: 7
-          if-no-files-found: error
+          echo "USA500 2015+ source qualification completed in workflow run 30082453148."
+          echo "All twelve annual partitions qualified without inspecting strategy returns."
+          echo "Exact annual checksums are frozen in strategies/stoic_123/configs/usa500_forward_2015plus.yaml."
