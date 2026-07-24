@@ -137,7 +137,9 @@ def _partition_wall_seconds(directory: Path) -> float | None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Aggregate parallel USA500 certification partitions")
+    parser = argparse.ArgumentParser(
+        description="Aggregate parallel USA500 certification partitions"
+    )
     parser.add_argument("--inputs", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--iterations", type=int, default=10_000)
