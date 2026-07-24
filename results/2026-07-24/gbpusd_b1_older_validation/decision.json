@@ -1,0 +1,22 @@
+{
+  "study_id": "DTR-FX-WP-20260724-23",
+  "decision": "REJECT_B1_ON_OLDER_HISTORY",
+  "arm": {
+    "name": "FX_B1_PREVDAY_LONDON_BOS_MID",
+    "reference": "PREV_DAY",
+    "window": "LONDON",
+    "entry_mode": "BOS_CLOSE",
+    "target_mode": "MIDPOINT"
+  },
+  "years": [
+    2015,
+    2016,
+    2017,
+    2018,
+    2019,
+    2020,
+    2021
+  ],
+  "frozen_london_spread_gate_pips": 1.2000000000012,
+  "no_pine_sizing_or_deployment_authorization": true
+}
