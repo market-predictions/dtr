@@ -130,4 +130,41 @@ A future Stoic-style project may start only when all conditions hold:
 - instrument and source identities remain explicit;
 - failed artifacts and recent positive subsets are not reused for candidate selection.
 
-Until then, the current mechanical Stoic 1-2-3 roadmap is complete and closed.
+## Phase 10 — Research-cycle acceleration platform
+
+Status: **complete; platform available**
+
+Work packages:
+
+- `STOIC123-WP-20260724-07` — staged execution and caching;
+- `STOIC123-WP-20260724-08` — parallel certification;
+- `STOIC123-WP-20260724-09` — discovery-only batch screening.
+
+Delivered:
+
+- [x] Separate `screen`, `validate`, `certify` and `legacy` modes.
+- [x] Restrict promotion to certification output.
+- [x] Add deterministic futility stopping for fast modes.
+- [x] Add content-addressed caches for resampled bars and detected events.
+- [x] Add exact ledger-based cost repricing.
+- [x] Add batched bootstrap parity and stage-level timing telemetry.
+- [x] Parallelize the four frozen certification partitions.
+- [x] Add deterministic aggregation and frozen-evidence parity checks.
+- [x] Add a discovery-only multi-variation contract that blocks holdout access and promotion.
+- [x] Preserve the former full runner as a legacy regression reference.
+
+Measured evidence:
+
+- cold screen: `9.81s`;
+- warm screen: `4.54s`;
+- staged validation with futility rejection: `5.58s`;
+- full accelerated sequential certification: `52.56s`;
+- parallel partition compute lower bound: `21.45s` versus `61.24s` serial compute;
+- all decision-relevant summaries matched within `1e-12`;
+- all 19 promotion gates and the final decision matched exactly.
+
+Platform decision:
+
+The testing cycle is materially faster without reducing certification standards. The profiler does not currently justify a Numba or GPU rewrite because ordinary simulation is not the dominant cost. The next platform priorities are persistent private source storage, fuller source-grid audits, bid/ask index data and execution-realism improvements.
+
+This platform work does not reopen the rejected mechanical Stoic family. Future batch screens require a genuinely new preregistered mechanism and a designated discovery partition.

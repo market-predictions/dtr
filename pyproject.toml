@@ -59,3 +59,5 @@ select = ["E", "F", "I", "B", "UP"]
 "src/dtr_lab/research/engine.py" = ["I001", "UP035", "B905"]
 "src/dtr_lab/research/integrity.py" = ["I001"]
 "src/dtr_lab/research/optimize.py" = ["E501"]
+# Temporary connector-edit exception; remove when the file is next structurally rewritten.
+"src/stoic_123_lab/usa500_rth_study.py" = ["UP035"]
