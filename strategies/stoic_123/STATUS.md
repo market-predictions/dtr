@@ -1,52 +1,59 @@
 # Status — Stoic Edge 1-2-3
 
 Date: 2026-07-24
-Version: `v0.5.0-research-closed`
+Version: `v0.7.0-research-closed`
 Active work package: none
-Decision state: `REJECT_RTH_LONG_PROXY_HYPOTHESIS_NO_ACTUAL_NQ_VALIDATION`
+Decision state: `REJECT_USA500_RTH_FULL_123_FORWARD_FAILURE`
 
-## Completed evidence
+## Final evidence state
 
-- Separate causal Stoic namespace, governance tree, runner, and frozen six-arm phase-one family.
-- Qualified NQ futures, `NQ_PROXY`, `ES_PROXY`, and GBPUSD source contracts.
-- Rejected GBPUSD phase one and failed to confirm proxy-derived NQ long candidates on actual NQ futures.
-- Corrected entry-direction restrictions so opposite-direction technical management remains available.
-- Rejected the post-hoc no-map short hypothesis on disjoint 2015-2021 and 2026 proxy data.
-- Froze the post-hoc RTH long observation as a separate work package.
-- Qualified previously uninspected USATECH history before RTH performance execution.
-- Implemented UTC-to-New-York daylight-saving-aware entry classification, with full-session management retained.
-- Completed the fresh 2012-2013 history and untouched 2014 holdout validation.
-- Independently reconstructed 22 ledgers, 12 session-classification files and all 17 gates.
+The current mechanical Stoic Edge 1-2-3 research family is complete and closed without a finalist.
 
-## RTH long result
+Completed work includes:
 
-Primary RTH EMA-break long-only:
+- separate causal namespace, governance tree, execution engine and frozen phase-one family;
+- qualified NQ futures, NQ proxy, USA500 proxy and GBPUSD source contracts;
+- corrected entry-direction restrictions while retaining opposite-direction technical management;
+- actual-NQ long-only validation;
+- unseen short-side proxy falsification;
+- fresh-history RTH long validation on USATECH;
+- USA500 cross-asset screen;
+- full USA500 forward validation from 2015 through 2025 plus 2026 YTD monitoring;
+- cost, delay, uncertainty, annual, exit, matched-control and independent-reconstruction checks.
 
-- fresh 2012-2013: 858 trades, `-30.35R`, `-0.035R` expectancy, 106.95R drawdown;
-- 2014 holdout: 522 trades, `-104.84R`, `-0.201R` expectancy, 108.76R drawdown;
-- holdout date-block interval: `[-0.340R, -0.051R]`;
-- negative under two-tick costs and delayed entries.
+## Final USA500 forward result
 
-Secondary full RTH 1-2-3 long-only:
+Frozen candidate: USA500 RTH full 1-2-3, no-map, long-only, no EMA200.
 
-- fresh 2012-2013: 76 trades, `-13.31R`, `-0.175R` expectancy;
-- 2014 holdout: 49 trades, `-11.24R`, `-0.229R` expectancy;
-- underperformed EMA-break-only by `0.140R` expectancy on fresh history and `0.029R` on holdout.
+| Partition | Trades | Net R | Expectancy | Max DD |
+|---|---:|---:|---:|---:|
+| 2015–2019 | 177 | −57.98R | −0.328R | 61.43R |
+| 2020–2022 | 134 | +3.12R | +0.023R | 16.06R |
+| 2023–2025 | 148 | +10.55R | +0.071R | 15.37R |
+| **2015–2025 combined** | **459** | **−44.31R** | **−0.097R** | **70.46R** |
+| 2026 YTD monitoring | 29 | +4.27R | +0.147R | 5.87R |
 
-The EMA-break-plus-retest diagnostic was also negative in both partitions. Both matched-time candidate tests failed. Only two of seventeen gates passed, both being sample-size gates.
+The 2015–2019 confidence interval was wholly negative. Only one of five primary years and four of eleven combined years were positive. Doubled-cost and matched-time controls failed. Six of nineteen gates passed.
+
+## Independent verification
+
+- 45/45 ledgers reconstructed exactly.
+- Zero metric, chronology, risk, overlap, RTH-classification, source-contract, annual-attribution or gate-reconstruction failures.
+- All 19 gate outcomes reproduced.
+- Both management directions remained active.
+- Raw source data were removed before compact artifact publication.
 
 ## Scientific decision
 
-`REJECT_RTH_LONG_PROXY_HYPOTHESIS_NO_ACTUAL_NQ_VALIDATION`
+`REJECT_USA500_RTH_FULL_123_FORWARD_FAILURE`
 
-RTH filtering reduced full-sequence losses relative to broader entry sets but did not produce positive expectancy. The earlier positive RTH attribution did not transfer to fresh proxy history. Additional actual-NQ validation is not justified for this formulation.
-
-The current mechanical Stoic 1-2-3 family remains closed without a finalist.
+The positive 2012–2014 USA500 screen did not survive broad 2015–2025 forward history. Positive results in 2024–2026 cannot be selected retrospectively as a new regime without a genuinely new preregistered mechanism and new unseen data.
 
 ## Restrictions
 
 - No DTR or Asian Sweep result is changed.
-- No Stoic direction, threshold, timeframe, session subdivision, weekday, volatility, stop, target, delay, matching-rule or exit optimization.
-- No new candidate may be selected from the inspected artifacts.
+- No Stoic direction, threshold, timeframe, session subdivision, weekday, month, volatility, regime, EMA200, stop, target, delay, matching-rule or exit optimization.
+- No candidate may be selected from the inspected diagnostics or recent-year subset.
+- No paid actual-ES or actual-NQ acquisition for this formulation.
 - No proxy result may be represented as CME futures evidence.
-- No Pine, sizing, deployment, alert, paper-trading or profitability authorization.
+- No Pine, sizing, alert, paper-trading, deployment or profitability authorization.
