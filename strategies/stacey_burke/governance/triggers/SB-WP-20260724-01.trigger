@@ -1,4 +1,5 @@
 STACEY_BURKE_FX_SOURCE_ACQUISITION_AUTHORIZED
-created_at=2026-07-24T16:40:00+02:00
+created_at=2026-07-24T16:48:00+02:00
+attempt=2
 performance_execution=false
 universe_version=fx_source_universe_v1
