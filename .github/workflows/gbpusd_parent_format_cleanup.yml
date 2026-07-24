@@ -6,6 +6,9 @@ on:
       - agent/gbpusd-dtr-replication
     paths:
       - temporary/gbpusd_parent_format_cleanup.trigger
+  pull_request:
+    paths:
+      - temporary/gbpusd_parent_format_cleanup.trigger
 
 permissions:
   contents: write
@@ -16,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: agent/gbpusd-dtr-replication
+          ref: ${{ github.head_ref || 'agent/gbpusd-dtr-replication' }}
           fetch-depth: 0
 
       - name: Apply Ruff-only formatting fixes
@@ -36,6 +39,8 @@ jobs:
             scripts/run_gbpusd_replication.py
 
       - name: Commit formatting-only cleanup
+        env:
+          TARGET_BRANCH: ${{ github.head_ref || 'agent/gbpusd-dtr-replication' }}
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
@@ -45,4 +50,4 @@ jobs:
                   scripts/run_gbpusd_replication.py
           git rm temporary/gbpusd_parent_format_cleanup.trigger
           git commit -m "Normalize GBPUSD research formatting"
-          git push origin HEAD:agent/gbpusd-dtr-replication
+          git push origin HEAD:"$TARGET_BRANCH"
