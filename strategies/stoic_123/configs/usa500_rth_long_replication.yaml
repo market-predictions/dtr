@@ -1,6 +1,6 @@
 study_id: STOIC123-WP-20260724-05
 frozen_on: 2026-07-24
-status: SOURCE_QUALIFICATION_PENDING
+status: SOURCE_QUALIFIED_EXECUTION_AUTHORIZED
 matched_control_replicates: 50
 
 hypotheses:
@@ -34,6 +34,7 @@ session_contract:
 source_contract:
   classification: Dukascopy USA500 bid-CFD S&P-500 proxy; not CME ES futures
   symbol: USA500IDXUSD
+  qualification_workflow_run: 30057778561
   price_stream: bid_only
   signal_and_execution_prices: same_bid_ohlc_stream
   execution_tick_size: 0.25
@@ -47,15 +48,17 @@ source_contract:
       start_inclusive_utc: 2012-01-01
       end_exclusive_utc: 2014-01-01
       labels: [2012, 2013]
+      active_rows: 282845
       expected_sha256_by_label:
-        2012: PENDING_SOURCE_QUALIFICATION
-        2013: PENDING_SOURCE_QUALIFICATION
+        2012: 60da23d4eda1f093df12db65722636ad24f5e5c91cf6ec2ef5645cf43bc02134
+        2013: 59d91f964819dfeee185ea4976e9c956c80b454eb2cb1adc61d619ac5c8c9dca
     fresh_holdout:
       start_inclusive_utc: 2014-01-01
       end_exclusive_utc: 2015-01-01
       labels: [2014]
+      active_rows: 286092
       expected_sha256_by_label:
-        2014: PENDING_SOURCE_QUALIFICATION
+        2014: 02df31b0a09fd2b14f73a0fefb57b674fc26a6ee33d5b5566eaea24fc5a1bd89
 
 comparators:
   - full_session_long_full_123
