@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 import gzip
+import json
 from datetime import date
 from pathlib import Path
 
@@ -16,6 +17,7 @@ from stacey_burke_lab.fx_source import (
     pip_size,
     price_divisor,
     qualify_partition,
+    write_json,
 )
 
 
@@ -49,6 +51,24 @@ def test_annual_partitions_include_monitoring_ytd() -> None:
     assert [item.label for item in partitions] == ["2024", "2025", "2026_ytd"]
     assert partitions[-1].monitoring_only
     assert partitions[-1].end_exclusive == date(2026, 7, 24)
+
+
+def test_write_json_serializes_dates_as_iso_strings(tmp_path: Path) -> None:
+    output = tmp_path / "qualification.json"
+    write_json(
+        {
+            "partition": {
+                "start_inclusive": date(2026, 1, 1),
+                "end_exclusive": date(2026, 7, 24),
+            }
+        },
+        output,
+    )
+    payload = json.loads(output.read_text(encoding="utf-8"))
+    assert payload["partition"] == {
+        "start_inclusive": "2026-01-01",
+        "end_exclusive": "2026-07-24",
+    }
 
 
 def _write_side(path: Path, *, ask_offset: float) -> None:
