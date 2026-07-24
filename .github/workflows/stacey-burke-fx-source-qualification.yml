@@ -1,0 +1,187 @@
+name: Stacey Burke FX source qualification
+
+on:
+  push:
+    branches:
+      - agent/stacey-burke-fx-source-census
+    paths:
+      - "strategies/stacey_burke/governance/triggers/SB-WP-20260724-01.trigger"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: stacey-burke-fx-source-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  bootstrap:
+    name: Validate and publish source programme
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout source branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/stacey-burke-fx-source-census
+          fetch-depth: 1
+          show-progress: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Materialize reviewed programme files
+        run: python temporary/apply_stacey_burke_fx_source_payload.py
+
+      - name: Install and validate
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+          ruff check .
+          pytest
+
+      - name: Commit validated programme
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pyproject.toml src/stacey_burke_lab scripts tests strategies/stacey_burke
+          git rm --ignore-unmatch temporary/apply_stacey_burke_fx_source_payload.py
+          git commit -m "Build Stacey Burke multi-asset FX source programme"
+          git push origin HEAD:agent/stacey-burke-fx-source-census
+
+  source:
+    name: Qualify ${{ matrix.symbol }}
+    needs: bootstrap
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        symbol:
+          - EURUSD
+          - GBPUSD
+          - USDCHF
+          - AUDUSD
+          - NZDUSD
+          - USDCAD
+          - USDJPY
+          - EURJPY
+          - GBPJPY
+          - EURGBP
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: agent/stacey-burke-fx-source-census
+          show-progress: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+
+      - name: Restore immutable source cache
+        id: source-cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/sb-source/${{ matrix.symbol }}
+          key: stacey-burke-fx-v1-${{ matrix.symbol }}-2015-2026-07-24
+
+      - name: Acquire canonical BID and ASK data
+        if: steps.source-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p "${RUNNER_TEMP}/sb-source/${{ matrix.symbol }}"
+          python scripts/acquire_stacey_burke_fx.py \
+            --symbol "${{ matrix.symbol }}" \
+            --start-year 2015 \
+            --end-year 2025 \
+            --ytd-end-exclusive 2026-07-24 \
+            --workers 8 \
+            --out "${RUNNER_TEMP}/sb-source/${{ matrix.symbol }}"
+
+      - name: Qualify source without performance execution
+        run: |
+          mkdir -p "${RUNNER_TEMP}/sb-qualification"
+          python scripts/qualify_stacey_burke_fx.py \
+            --data "${RUNNER_TEMP}/sb-source/${{ matrix.symbol }}" \
+            --symbol "${{ matrix.symbol }}" \
+            --start-year 2015 \
+            --end-year 2025 \
+            --ytd-end-exclusive 2026-07-24 \
+            --out "${RUNNER_TEMP}/sb-qualification/${{ matrix.symbol }}_source_qualification.json"
+
+      - name: Upload private source artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: stacey-burke-fx-source-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/sb-source/${{ matrix.symbol }}
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 90
+
+      - name: Upload compact qualification evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: stacey-burke-fx-qualification-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/sb-qualification/${{ matrix.symbol }}_source_qualification.json
+          if-no-files-found: error
+          retention-days: 90
+
+  aggregate:
+    name: Aggregate source gate
+    needs: source
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: agent/stacey-burke-fx-source-census
+          show-progress: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+
+      - name: Download compact qualification evidence
+        uses: actions/download-artifact@v4
+        with:
+          pattern: stacey-burke-fx-qualification-*
+          path: ${{ runner.temp }}/sb-qualification-inputs
+          merge-multiple: true
+
+      - name: Build universe source decision
+        run: |
+          python scripts/summarize_stacey_burke_fx_qualification.py \
+            --inputs "${RUNNER_TEMP}/sb-qualification-inputs" \
+            --out "${RUNNER_TEMP}/sb-universe-result"
+
+      - name: Upload source-universe decision
+        uses: actions/upload-artifact@v4
+        with:
+          name: stacey-burke-fx-source-universe-decision
+          path: ${{ runner.temp }}/sb-universe-result
+          if-no-files-found: error
+          retention-days: 90
