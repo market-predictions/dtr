@@ -1,0 +1,23 @@
+{
+  "study_id": "DTR-FX-WP-20260724-23",
+  "output_file": "FX_B1_PREVDAY_LONDON_BOS_MID__trades.csv",
+  "encoding": "concatenated base64 of gzip-compressed CSV",
+  "parts_in_order": [
+    "part00.b64",
+    "part01.b64",
+    "part02.b64",
+    "part03.b64"
+  ],
+  "part_sha256": {
+    "part00.b64": "cbb745878b5fb0dcd6c5dda86944e7bd3446870be191a3a89b2e1ee3a64960ca",
+    "part01.b64": "5f1d9b3dbb4564a1b65362cfc6278efacdefb65247cf450231f89e09fe82c47c",
+    "part02.b64": "804dd6e9b35d73350a33b60abb16d605baf518dba97703fcd8f9edef9d6d4c11",
+    "part03.b64": "785d0e9b6c8289bfc51b698726c4b3309a0722d6ce6796e77d96f4d693b19a54"
+  },
+  "concatenated_base64_sha256": "53db9ff98fabdf14c650b1b3829b5b3e3e68c3df8391c12f1b68978ea4d9ad0d",
+  "gzip_sha256": "16a1e7903ed318a535261c687304e71233d738b6cbeeea607362cf5ed4c4f5e0",
+  "csv_sha256": "ea2fff239a4707315b4a4cfdfd7398808dbf2177f99ab52aa5f4c1ec91d269e3",
+  "csv_bytes": 63849,
+  "trade_rows": 105,
+  "reconstruct": "cat part00.b64 part01.b64 part02.b64 part03.b64 | base64 -d | gzip -d > FX_B1_PREVDAY_LONDON_BOS_MID__trades.csv"
+}
