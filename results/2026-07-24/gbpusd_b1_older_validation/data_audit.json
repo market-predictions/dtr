@@ -1,0 +1,45 @@
+{
+  "rows_full_grid": 3682080,
+  "rows_active_bid_ask": 2612846,
+  "start_utc": "2015-01-01 00:00:00+00:00",
+  "end_utc": "2021-12-31 23:59:00+00:00",
+  "duplicate_timestamps": 0,
+  "median_spread_active_pips": 0.9000000000014552,
+  "q75_spread_active_pips": 1.100000000000545,
+  "q90_spread_active_pips": 1.500000000000945,
+  "source_formats": {
+    "gbpusd_m1_bid_2015.csv.gz": "CANONICAL_OHLC",
+    "gbpusd_m1_bid_2016.csv.gz": "CANONICAL_OHLC",
+    "gbpusd_m1_bid_2017.csv.gz": "CANONICAL_OHLC",
+    "gbpusd_m1_bid_2018.csv.gz": "CANONICAL_OHLC",
+    "gbpusd_m1_bid_2019.csv.gz": "CANONICAL_OHLC",
+    "gbpusd_m1_bid_2020.csv.gz": "CANONICAL_OHLC",
+    "gbpusd_m1_bid_2021.csv.gz": "CANONICAL_OHLC",
+    "gbpusd_m1_ask_2015.csv.gz": "CANONICAL_OHLC",
+    "gbpusd_m1_ask_2016.csv.gz": "CANONICAL_OHLC",
+    "gbpusd_m1_ask_2017.csv.gz": "CANONICAL_OHLC",
+    "gbpusd_m1_ask_2018.csv.gz": "CANONICAL_OHLC",
+    "gbpusd_m1_ask_2019.csv.gz": "CANONICAL_OHLC",
+    "gbpusd_m1_ask_2020.csv.gz": "CANONICAL_OHLC",
+    "gbpusd_m1_ask_2021.csv.gz": "CANONICAL_OHLC"
+  },
+  "frozen_spread_gate_pips_by_window": {
+    "LONDON": 1.2000000000012
+  },
+  "source_files": {
+    "gbpusd_m1_ask_2015.csv.gz": "697fa01018aacffbfbde5b03a0a61d8ae9c9c52394bf6fa759336b41e4f1920c",
+    "gbpusd_m1_ask_2016.csv.gz": "9603d91bd58effb874f17ca4423eaadc17120a84f2e9f8c5d87fbc884aeb9e25",
+    "gbpusd_m1_ask_2017.csv.gz": "ec9e5a8375c4679c6f8172dd8f9683ae440a7be89a6c0d40bc3d6a10b5184094",
+    "gbpusd_m1_ask_2018.csv.gz": "c18cefaa7f862fa60b0f34ef1daec18bfc7ca416f548b8b5b9ed080a1acc660f",
+    "gbpusd_m1_ask_2019.csv.gz": "bf121ab5ef0bc0c3eeab129f1a012748a4007b1a1f280dc0be9a18db40981f12",
+    "gbpusd_m1_ask_2020.csv.gz": "0982ff6ebe682e96173f3180db6d66eacb1517c56814fb8b02087f1399457cfc",
+    "gbpusd_m1_ask_2021.csv.gz": "96e8944e3255d4a773a3eca9cfb5b4eca8f0ad838d23353c3caca4de4b1efbca",
+    "gbpusd_m1_bid_2015.csv.gz": "86e071c4640af9be0d11f7cd18c45bfcd30dd1157a4be600529fd80c13ec144e",
+    "gbpusd_m1_bid_2016.csv.gz": "e3d5880c53fccc353c3fdb8426872167990359200c8ec1926271570e623c97ce",
+    "gbpusd_m1_bid_2017.csv.gz": "65e98bfe777b73bb5c9511430ba6cded65dafe5f1ec9549768a05947d58a90ad",
+    "gbpusd_m1_bid_2018.csv.gz": "d8ffcd277e2fcaea725ee533768ae02e3ce8c7369941f0021ba227194ccea552",
+    "gbpusd_m1_bid_2019.csv.gz": "21d21617c3c77d2a870a7616b4cc37270dafa689f50d919dfc0408a42c55e062",
+    "gbpusd_m1_bid_2020.csv.gz": "414539d8a5e34d022534b2a91ffb6f6309fef4271ce141a4d214b89100a1d97e",
+    "gbpusd_m1_bid_2021.csv.gz": "a77b661965ad5c28cc50acc41fbdc0957f0b97103c01efdcd695a81efbba8220"
+  }
+}
