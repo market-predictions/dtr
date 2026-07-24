@@ -1,0 +1,148 @@
+study_id: STOIC123-WP-20260724-04
+frozen_on: 2026-07-24
+status: SOURCE_QUALIFIED_EXECUTION_AUTHORIZED
+purpose: >-
+  Test whether restricting long entries to the canonical Nasdaq regular trading
+  session improves the no-map Stoic family, and whether a simple EMA-break entry
+  is superior to the full 1-2-3 sequence. Dukascopy USATECH is a bid-CFD proxy,
+  not CME NQ futures.
+matched_control_replicates: 50
+
+hypotheses:
+  primary:
+    id: RTH_LONG_EMA_BREAK
+    direction_mode: long_only
+    entry_model: ema_break
+  secondary:
+    id: RTH_LONG_FULL_123
+    direction_mode: long_only
+    entry_model: full_123
+  diagnostic:
+    id: RTH_LONG_EMA_BREAK_RETEST
+    direction_mode: long_only
+    entry_model: ema_break_retest
+  source_arm_id: S123_M0_NO_MAP_CONTROL
+  phase1_config_path: strategies/stoic_123/configs/phase1.yaml
+  phase1_expected_sha256: 5d6909bd5740e1cdea9bd3d47a9818289a6faa8b9a61338726afdc53289ff805
+  parameter_changes_allowed: false
+
+session_contract:
+  source_timezone: UTC
+  session_timezone: America/New_York
+  entry_window_start_inclusive: "09:30:00"
+  entry_window_end_exclusive: "16:00:00"
+  entry_filter_only: true
+  management_and_exits: full_session
+  daylight_saving_rule: IANA_America_New_York
+  session_subdivision_search_allowed: false
+
+source_contract:
+  classification: Dukascopy USATECH bid-CFD Nasdaq-100 proxy; not CME NQ futures
+  qualification_workflow_run: 30054529747
+  price_stream: bid_only
+  signal_and_execution_prices: same_bid_ohlc_stream
+  execution_tick_size: 0.25
+  point_value_usd: 20.0
+  commission_per_side_usd: 2.25
+  source_quote_increment: 0.001
+  inactive_definition: volume_lte_zero
+  timestamp_basis: UTC converted to naive UTC before existing resampling
+  coverage_findings:
+    2010: unavailable_365_of_365_days_404
+    2011: insufficient_fragment_1515_rows_2011_09_18_through_2011_09_23
+    2012: partial_but_usable_92177_rows_starting_2012_01_19
+    2013: qualified_194528_rows
+    2014: qualified_316579_rows
+  partitions:
+    fresh_history:
+      role: fresh_proxy_history
+      start_inclusive_utc: 2012-01-01
+      end_exclusive_utc: 2014-01-01
+      labels: [2012, 2013]
+      expected_sha256_by_label:
+        2012: 794af390136b1e0b03b615544d8a40d96bf50aa8018e76b0cb6f6b15f57bb27d
+        2013: aff83ca33342c2b8bf3c86acdab6c49eeb7a3c2dfad62864e323220f8b39e434
+    fresh_holdout:
+      role: final_proxy_holdout
+      start_inclusive_utc: 2014-01-01
+      end_exclusive_utc: 2015-01-01
+      labels: [2014]
+      expected_sha256_by_label:
+        2014: 7014f3d44cf6e270ff7699b2c0ee0d254dcfe2887dc11097e8a147a6dbbc484f
+    inspected_mechanism_screen:
+      role: exploratory_only_no_promotion
+      already_inspected: true
+      start_inclusive_utc: 2015-01-01
+      end_exclusive_utc: 2022-01-01
+      labels: [2015, 2016, 2017, 2018, 2019, 2020, 2021]
+      expected_sha256_by_label:
+        2015: b9688d228fb1955c36c3ff98121ce65e703c718ff6d346c3acc2cc8a91cc1bbe
+        2016: f7d398b9e191159494fc447196b5b9b17e58908dd49079aa22063fc23bf42d44
+        2017: 1a46dc15b980b0e969adf65b5fa9327123ab82c270b0e3f65fb9bff2a536585e
+        2018: a5c8c549bb5879a900ffbfc656e7888e0dc45146da7a30d5f7c588c53a97e04f
+        2019: 5b91e33480ace01d1f4f930d464756d28fb480d525e6a4523c09b7787a7fa845
+        2020: 6e4f9212e0ffcc604c5d8bb791c5ebc592061b594fe65b76c56e051f4ddb6f89
+        2021: 674121b3766e586e8bbca84c199035f136990a6f889939458083bf6666fa5a55
+    inspected_forward_screen:
+      role: exploratory_only_no_promotion
+      already_inspected: true
+      start_inclusive_utc: 2026-01-01
+      end_exclusive_utc: 2026-07-23
+      labels: [2026_YTD]
+      expected_sha256_by_label:
+        2026_YTD: f8e46ff444879e51b149d8a2fe675b8a499186da279cc5d53c3947037059d3fc
+
+comparators:
+  - full_session_long_full_123
+  - overnight_entry_long_full_123
+  - rth_long_full_123
+  - rth_long_ema_break
+  - rth_long_ema_break_retest
+  - fifty_deterministic_rth_matched_time_long_controls_per_candidate
+
+execution_tests:
+  baseline_slippage_ticks_each_side: 1.0
+  stressed_slippage_ticks_each_side: 2.0
+  entry_delays_minutes: [1, 5]
+  max_hold_minutes: 1440
+  management_direction: both
+
+fresh_data_decision_screen:
+  classification_if_primary_passes: RETAIN_RTH_EMA_BREAK_FOR_ACTUAL_NQ_FUTURES_VALIDATION
+  classification_if_secondary_also_passes: RETAIN_RTH_FULL_123_AS_HIGH_SELECTIVITY_CHALLENGER
+  otherwise: REJECT_OR_HOLD_NO_PROMOTION
+  primary_all_required:
+    - fresh_history_trade_count_gte_250
+    - fresh_history_expectancy_positive
+    - fresh_history_date_block_lo95_positive
+    - both_fresh_history_years_positive
+    - largest_positive_year_share_lte_0_65
+    - fresh_history_two_tick_expectancy_positive
+    - fresh_history_one_minute_delay_expectancy_positive
+    - fresh_history_return_to_drawdown_gte_1_50
+    - fresh_history_max_drawdown_lte_50R
+    - fresh_holdout_trade_count_gte_75
+    - fresh_holdout_expectancy_positive
+    - fresh_holdout_two_tick_expectancy_positive
+    - primary_matched_time_control_passes
+  secondary_additional_required:
+    - fresh_history_full_sequence_expectancy_positive
+    - fresh_holdout_full_sequence_expectancy_positive
+    - full_sequence_mechanism_value_over_ema_break
+    - secondary_matched_time_control_passes
+  mechanism_value_rule: >-
+    Full RTH 1-2-3 must exceed RTH EMA-break-only by at least 0.05R expectancy
+    or 20% return-to-drawdown on fresh history, and must not underperform EMA
+    break on the 2014 holdout.
+  matched_control_rule: >-
+    Every replicate must cover at least 90% of source events, median holding
+    period ratio must remain between 0.75 and 1.25, and candidate expectancy
+    must exceed the 95th percentile of matched-control expectancy.
+
+restrictions:
+  - Inspected 2015-2021 and 2026 data may describe mechanisms but cannot promote a candidate.
+  - No 2022-2025 USATECH or inspected NQ performance may be used for selection or promotion.
+  - No RTH subwindow, opening-range, lunch, weekday, volatility, EMA-length, stop, target, delay, timeframe, or exit search.
+  - No pooling of fresh history, holdout, and inspected mechanism screens for promotion decisions.
+  - No proxy result may be represented as CME NQ futures evidence.
+  - No Pine port, sizing, alerts, paper deployment, or live trading authorization.

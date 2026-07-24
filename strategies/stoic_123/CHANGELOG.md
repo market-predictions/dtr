@@ -1,5 +1,59 @@
 # Changelog — Stoic Edge 1-2-3
 
+## v0.5.0-research-closed — 2026-07-24
+
+### Added
+
+- Preregistered and executed `STOIC123-WP-20260724-04` as a fresh-history RTH long falsification.
+- Source-only qualification of Dukascopy USATECH 2010-2014 before performance execution.
+- Frozen 2012-2013 fresh history and untouched 2014 holdout after source coverage showed no usable 2010 and only a one-week 2011 fragment.
+- UTC-to-`America/New_York` daylight-saving-aware RTH entry classification.
+- Fixed `09:30` inclusive through `16:00` exclusive entry window, with full-session management retained.
+- RTH EMA-break primary, full 1-2-3 secondary, retest diagnostic, full-session and overnight comparators.
+- Two-tick cost, one-minute and five-minute delay, annual, exposure, exit-reason, uncertainty and fifty-replicate matched-time controls.
+- Dedicated RTH session and gate tests with full Python 3.11/3.12 CI coverage.
+- Compact result package and independent reconstruction of 22 ledgers, 12 session files and 17 gates.
+
+### Source result
+
+- 2010: unavailable.
+- 2011: insufficient 1,515-row fragment.
+- 2012: 92,177 active rows beginning January 19.
+- 2013: 194,528 active rows.
+- 2014: 316,579 active rows reserved as holdout.
+- Every executed source matched its frozen SHA-256 and had zero duplicate timestamps.
+
+### Performance result
+
+- RTH EMA break, 2012-2013: 858 trades, `-30.35R`, `-0.035R` expectancy, 106.95R drawdown.
+- RTH EMA break, 2014 holdout: 522 trades, `-104.84R`, `-0.201R` expectancy, with a wholly negative date-block interval.
+- Full RTH 1-2-3, 2012-2013: 76 trades, `-13.31R`, `-0.175R` expectancy.
+- Full RTH 1-2-3, 2014 holdout: 49 trades, `-11.24R`, `-0.229R` expectancy.
+- The full sequence underperformed EMA break by `0.140R` expectancy on fresh history and `0.029R` on holdout.
+- EMA-break-plus-retest was negative in both partitions.
+- Both matched-time candidate comparisons failed.
+- Only two of seventeen gates passed, both sample-size gates.
+
+### Decision
+
+`REJECT_RTH_LONG_PROXY_HYPOTHESIS_NO_ACTUAL_NQ_VALIDATION`
+
+The earlier positive RTH attribution did not transfer to fresh proxy history. RTH filtering reduced some full-sequence losses but did not produce positive expectancy. Additional actual-NQ validation is not justified for this formulation.
+
+### Known limitations
+
+- The validation source is a Dukascopy bid-CFD proxy, not CME NQ futures.
+- 2012 is partial and starts on January 19.
+- Fresh history contains only two calendar years before the one-year holdout.
+- Matched-time controls are causal benchmarks, not complete factor models.
+
+### Next
+
+- Close the RTH long hypothesis without further session or parameter subdivision.
+- Do not acquire paid actual-NQ data for this formulation.
+- Start future research only from a genuinely different preregistered mechanism.
+- Keep Pine, sizing, alerts, paper deployment and live use blocked.
+
 ## v0.4.0-research-closed — 2026-07-23
 
 ### Added

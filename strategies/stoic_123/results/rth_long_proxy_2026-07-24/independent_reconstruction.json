@@ -1,0 +1,25 @@
+{
+  "ledger_count": 22,
+  "ledger_pass_count": 22,
+  "session_file_count": 12,
+  "session_invalid_total": 0,
+  "management": [
+    {
+      "file": "fresh_history__management_events.csv",
+      "events": 104,
+      "long": 66,
+      "short": 38,
+      "directions": "[-1, 1]"
+    },
+    {
+      "file": "fresh_holdout__management_events.csv",
+      "events": 148,
+      "long": 88,
+      "short": 60,
+      "directions": "[-1, 1]"
+    }
+  ],
+  "gate_count": 17,
+  "gate_pass_count": 2,
+  "issues": []
+}

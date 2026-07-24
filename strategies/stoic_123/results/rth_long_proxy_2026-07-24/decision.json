@@ -1,0 +1,15 @@
+{
+  "design_sha256": "878eb953334416006dbd7d850cfec9d4da3c3a2af91703253056b6d59d3e3ccf",
+  "entry_filter_only": true,
+  "management_direction_retained": true,
+  "passed_gate_count": 2,
+  "phase1_sha256": "5d6909bd5740e1cdea9bd3d47a9818289a6faa8b9a61338726afdc53289ff805",
+  "primary_all_gates_passed": false,
+  "raw_source_published": false,
+  "rth_entry_window": "09:30:00-16:00:00 America/New_York",
+  "secondary_all_gates_passed": false,
+  "source_classification": "Dukascopy USATECH bid-CFD RTH validation partitions; not CME NQ futures",
+  "status": "REJECT_OR_HOLD_NO_PROMOTION",
+  "study_id": "STOIC123-WP-20260724-04",
+  "total_gate_count": 17
+}

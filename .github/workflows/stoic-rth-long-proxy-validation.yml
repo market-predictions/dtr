@@ -1,0 +1,16 @@
+name: Stoic RTH long proxy validation
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  archived:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validation already completed
+        run: |
+          echo "RTH long proxy validation completed in workflow run 30055431023."
+          echo "Compact results and independent review are committed under strategies/stoic_123."

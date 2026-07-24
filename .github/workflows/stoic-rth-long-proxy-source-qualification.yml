@@ -1,0 +1,16 @@
+name: Stoic RTH long proxy source qualification
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  archived:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Source qualification already completed
+        run: |
+          echo "Source qualification completed in workflow run 30054529747."
+          echo "Frozen checksums are recorded in rth_long_proxy_validation.yaml."
