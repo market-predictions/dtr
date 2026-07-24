@@ -112,13 +112,15 @@ jobs:
 
       - name: Restore immutable source cache
         id: source-cache
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: ${{ runner.temp }}/sb-source/${{ matrix.symbol }}
           key: stacey-burke-fx-v1-${{ matrix.symbol }}-2015-2026-07-24
 
       - name: Acquire canonical BID and ASK data
+        id: acquire
         if: steps.source-cache.outputs.cache-hit != 'true'
+        continue-on-error: true
         run: |
           mkdir -p "${RUNNER_TEMP}/sb-source/${{ matrix.symbol }}"
           python scripts/acquire_stacey_burke_fx.py \
@@ -129,7 +131,21 @@ jobs:
             --workers 8 \
             --out "${RUNNER_TEMP}/sb-source/${{ matrix.symbol }}"
 
+      - name: Save completed immutable source cache
+        if: >-
+          steps.source-cache.outputs.cache-hit != 'true' &&
+          steps.acquire.outcome == 'success'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ runner.temp }}/sb-source/${{ matrix.symbol }}
+          key: stacey-burke-fx-v1-${{ matrix.symbol }}-2015-2026-07-24
+
       - name: Qualify source without performance execution
+        id: qualify
+        if: >-
+          steps.source-cache.outputs.cache-hit == 'true' ||
+          steps.acquire.outcome == 'success'
+        continue-on-error: true
         run: |
           mkdir -p "${RUNNER_TEMP}/sb-qualification"
           python scripts/qualify_stacey_burke_fx.py \
@@ -140,27 +156,48 @@ jobs:
             --ytd-end-exclusive 2026-07-24 \
             --out "${RUNNER_TEMP}/sb-qualification/${{ matrix.symbol }}_source_qualification.json"
 
-      - name: Upload private source artifact
+      - name: Upload preserved pair source
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: stacey-burke-fx-source-${{ matrix.symbol }}
           path: ${{ runner.temp }}/sb-source/${{ matrix.symbol }}
-          if-no-files-found: error
+          if-no-files-found: warn
           compression-level: 0
           retention-days: 90
 
       - name: Upload compact qualification evidence
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: stacey-burke-fx-qualification-${{ matrix.symbol }}
           path: ${{ runner.temp }}/sb-qualification/${{ matrix.symbol }}_source_qualification.json
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 90
+
+      - name: Enforce pair source gate
+        if: always()
+        shell: bash
+        run: |
+          cache_hit="${{ steps.source-cache.outputs.cache-hit }}"
+          acquire_outcome="${{ steps.acquire.outcome }}"
+          qualify_outcome="${{ steps.qualify.outcome }}"
+
+          if [[ "$cache_hit" != "true" && "$acquire_outcome" != "success" ]]; then
+            echo "Source acquisition failed for ${{ matrix.symbol }}."
+            exit 1
+          fi
+
+          if [[ "$qualify_outcome" != "success" ]]; then
+            echo "Source qualification failed for ${{ matrix.symbol }}."
+            exit 1
+          fi
 
   stacey_burke_aggregate:
     name: Aggregate Stacey Burke source gate
     needs: stacey_burke_source
     if: >-
+      always() &&
       github.event_name == 'pull_request' &&
       github.head_ref == 'agent/stacey-burke-fx-source-census'
     runs-on: ubuntu-latest
@@ -183,7 +220,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e .
 
-      - name: Download compact qualification evidence
+      - name: Download available qualification evidence
+        id: download-evidence
+        continue-on-error: true
         uses: actions/download-artifact@v4
         with:
           pattern: stacey-burke-fx-qualification-*
@@ -191,15 +230,23 @@ jobs:
           merge-multiple: true
 
       - name: Build universe source decision
+        id: aggregate
+        continue-on-error: true
         run: |
+          mkdir -p "${RUNNER_TEMP}/sb-qualification-inputs"
           python scripts/summarize_stacey_burke_fx_qualification.py \
             --inputs "${RUNNER_TEMP}/sb-qualification-inputs" \
             --out "${RUNNER_TEMP}/sb-universe-result"
 
       - name: Upload source-universe decision
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: stacey-burke-fx-source-universe-decision
           path: ${{ runner.temp }}/sb-universe-result
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 90
+
+      - name: Enforce universe source gate
+        if: always()
+        run: test "${{ steps.aggregate.outcome }}" = "success"
