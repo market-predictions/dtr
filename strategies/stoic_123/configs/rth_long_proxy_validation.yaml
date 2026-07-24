@@ -1,6 +1,6 @@
 study_id: STOIC123-WP-20260724-04
 frozen_on: 2026-07-24
-status: SOURCE_QUALIFICATION_PENDING
+status: SOURCE_QUALIFIED_EXECUTION_AUTHORIZED
 purpose: >-
   Test whether restricting long entries to the canonical Nasdaq regular trading
   session improves the no-map Stoic family, and whether a simple EMA-break entry
@@ -38,6 +38,7 @@ session_contract:
 
 source_contract:
   classification: Dukascopy USATECH bid-CFD Nasdaq-100 proxy; not CME NQ futures
+  qualification_workflow_run: 30054529747
   price_stream: bid_only
   signal_and_execution_prices: same_bid_ohlc_stream
   execution_tick_size: 0.25
@@ -46,24 +47,28 @@ source_contract:
   source_quote_increment: 0.001
   inactive_definition: volume_lte_zero
   timestamp_basis: UTC converted to naive UTC before existing resampling
+  coverage_findings:
+    2010: unavailable_365_of_365_days_404
+    2011: insufficient_fragment_1515_rows_2011_09_18_through_2011_09_23
+    2012: partial_but_usable_92177_rows_starting_2012_01_19
+    2013: qualified_194528_rows
+    2014: qualified_316579_rows
   partitions:
     fresh_history:
-      role: source_qualification_before_any_performance_inspection
-      start_inclusive_utc: 2010-01-01
+      role: fresh_proxy_history
+      start_inclusive_utc: 2012-01-01
       end_exclusive_utc: 2014-01-01
-      labels: [2010, 2011, 2012, 2013]
+      labels: [2012, 2013]
       expected_sha256_by_label:
-        2010: PENDING_SOURCE_QUALIFICATION
-        2011: PENDING_SOURCE_QUALIFICATION
-        2012: PENDING_SOURCE_QUALIFICATION
-        2013: PENDING_SOURCE_QUALIFICATION
+        2012: 794af390136b1e0b03b615544d8a40d96bf50aa8018e76b0cb6f6b15f57bb27d
+        2013: aff83ca33342c2b8bf3c86acdab6c49eeb7a3c2dfad62864e323220f8b39e434
     fresh_holdout:
       role: final_proxy_holdout
       start_inclusive_utc: 2014-01-01
       end_exclusive_utc: 2015-01-01
       labels: [2014]
       expected_sha256_by_label:
-        2014: PENDING_SOURCE_QUALIFICATION
+        2014: 7014f3d44cf6e270ff7699b2c0ee0d254dcfe2887dc11097e8a147a6dbbc484f
     inspected_mechanism_screen:
       role: exploratory_only_no_promotion
       already_inspected: true
@@ -107,11 +112,11 @@ fresh_data_decision_screen:
   classification_if_secondary_also_passes: RETAIN_RTH_FULL_123_AS_HIGH_SELECTIVITY_CHALLENGER
   otherwise: REJECT_OR_HOLD_NO_PROMOTION
   primary_all_required:
-    - fresh_history_trade_count_gte_400
+    - fresh_history_trade_count_gte_250
     - fresh_history_expectancy_positive
     - fresh_history_date_block_lo95_positive
-    - at_least_three_of_four_fresh_history_years_positive
-    - largest_positive_year_share_lte_0_40
+    - both_fresh_history_years_positive
+    - largest_positive_year_share_lte_0_65
     - fresh_history_two_tick_expectancy_positive
     - fresh_history_one_minute_delay_expectancy_positive
     - fresh_history_return_to_drawdown_gte_1_50
