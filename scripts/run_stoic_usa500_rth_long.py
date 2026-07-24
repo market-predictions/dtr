@@ -7,8 +7,12 @@ from pathlib import Path
 
 import pandas as pd
 
-from stoic_123_lab import load_config_family
-from stoic_123_lab import index_proxy_source, usa500_rth_gates, usa500_rth_study
+from stoic_123_lab import (
+    index_proxy_source,
+    load_config_family,
+    usa500_rth_gates,
+    usa500_rth_study,
+)
 from stoic_123_lab.data import file_sha256
 
 FROZEN_PHASE1_SHA256 = "5d6909bd5740e1cdea9bd3d47a9818289a6faa8b9a61338726afdc53289ff805"
