@@ -1,0 +1,182 @@
+name: Stoic research cycle acceleration benchmark
+
+on:
+  push:
+    branches:
+      - agent/research-cycle-acceleration-wp1
+    paths:
+      - ".github/workflows/stoic-research-cycle-benchmark.yml"
+      - "scripts/run_stoic_usa500_accelerated.py"
+      - "scripts/compare_stoic_acceleration_parity.py"
+      - "src/stoic_123_lab/research_cache.py"
+      - "src/stoic_123_lab/research_runtime.py"
+      - "src/stoic_123_lab/cost_repricing.py"
+      - "src/stoic_123_lab/reporting.py"
+      - "src/stoic_123_lab/usa500_rth_study.py"
+  workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: Workflow run containing frozen annual sources and reference evidence
+        required: true
+        default: "30083576930"
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: stoic-research-cycle-benchmark-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    env:
+      SOURCE_RUN_ID: ${{ inputs.source_run_id || '30083576930' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,research]"
+
+      - name: Download frozen annual source artifacts
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.SOURCE_RUN_ID }}
+          pattern: stoic-usa500-forward-validation-source-*
+          path: private-data
+          merge-multiple: true
+
+      - name: Download frozen reference evidence
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.SOURCE_RUN_ID }}
+          name: stoic-usa500-forward-2015plus-validation
+          path: reference
+
+      - name: Cold-cache screen
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .research-cache benchmark-results
+          mkdir -p benchmark-results/wall
+          /usr/bin/time -f '%e' -o benchmark-results/wall/screen_cold_seconds.txt \
+            python scripts/run_stoic_usa500_accelerated.py \
+              --sources private-data \
+              --phase1 strategies/stoic_123/configs/phase1.yaml \
+              --design strategies/stoic_123/configs/usa500_forward_2015plus.yaml \
+              --mode screen \
+              --cache-dir .research-cache/stoic-usa500 \
+              --out benchmark-results/screen-cold
+
+      - name: Warm-cache screen
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -f '%e' -o benchmark-results/wall/screen_warm_seconds.txt \
+            python scripts/run_stoic_usa500_accelerated.py \
+              --sources private-data \
+              --phase1 strategies/stoic_123/configs/phase1.yaml \
+              --design strategies/stoic_123/configs/usa500_forward_2015plus.yaml \
+              --mode screen \
+              --cache-dir .research-cache/stoic-usa500 \
+              --out benchmark-results/screen-warm
+
+      - name: Staged validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -f '%e' -o benchmark-results/wall/validate_seconds.txt \
+            python scripts/run_stoic_usa500_accelerated.py \
+              --sources private-data \
+              --phase1 strategies/stoic_123/configs/phase1.yaml \
+              --design strategies/stoic_123/configs/usa500_forward_2015plus.yaml \
+              --mode validate \
+              --cache-dir .research-cache/stoic-usa500 \
+              --out benchmark-results/validate
+
+      - name: Full accelerated certification
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -f '%e' -o benchmark-results/wall/certify_seconds.txt \
+            python scripts/run_stoic_usa500_accelerated.py \
+              --sources private-data \
+              --phase1 strategies/stoic_123/configs/phase1.yaml \
+              --design strategies/stoic_123/configs/usa500_forward_2015plus.yaml \
+              --mode certify \
+              --iterations 10000 \
+              --cache-dir .research-cache/stoic-usa500 \
+              --out benchmark-results/certify
+
+      - name: Enforce frozen evidence parity
+        run: |
+          python scripts/compare_stoic_acceleration_parity.py \
+            --reference reference \
+            --observed benchmark-results/certify \
+            --out benchmark-results/parity.json
+
+      - name: Build benchmark summary
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path('benchmark-results')
+          def seconds(name):
+              return float((root / 'wall' / name).read_text().strip())
+
+          cold = seconds('screen_cold_seconds.txt')
+          warm = seconds('screen_warm_seconds.txt')
+          validate = seconds('validate_seconds.txt')
+          certify = seconds('certify_seconds.txt')
+          cold_decision = json.loads((root / 'screen-cold' / 'decision.json').read_text())
+          warm_decision = json.loads((root / 'screen-warm' / 'decision.json').read_text())
+          summary = {
+              'status': 'PASS',
+              'screen_cold_seconds': cold,
+              'screen_warm_seconds': warm,
+              'screen_warm_speedup': cold / warm if warm else None,
+              'validate_seconds': validate,
+              'certify_seconds': certify,
+              'cold_cache': cold_decision['cache'],
+              'warm_cache': warm_decision['cache'],
+              'screen_decision': warm_decision['status'],
+              'certification_decision': json.loads(
+                  (root / 'certify' / 'decision.json').read_text()
+              )['status'],
+              'source_run_id': '${{ env.SOURCE_RUN_ID }}',
+          }
+          (root / 'benchmark_summary.json').write_text(
+              json.dumps(summary, indent=2, sort_keys=True) + '\n'
+          )
+          print(json.dumps(summary, indent=2, sort_keys=True))
+          PY
+
+      - name: Remove raw and derived market data
+        if: always()
+        run: rm -rf private-data .research-cache reference
+
+      - name: Upload benchmark and parity evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stoic-research-cycle-acceleration-benchmark
+          path: benchmark-results
+          retention-days: 14
+          if-no-files-found: error
