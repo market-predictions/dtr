@@ -25,11 +25,11 @@ jobs:
       - name: Apply Ruff-only formatting fixes
         run: |
           set -euo pipefail
-          uvx --from ruff==0.15.22 ruff check --fix \
+          uvx --from ruff==0.15.22 ruff format \
             scripts/acquire_gbpusd_dukascopy.py \
             scripts/review_gbpusd_replication.py \
             scripts/run_gbpusd_replication.py
-          uvx --from ruff==0.15.22 ruff format \
+          uvx --from ruff==0.15.22 ruff check --fix \
             scripts/acquire_gbpusd_dukascopy.py \
             scripts/review_gbpusd_replication.py \
             scripts/run_gbpusd_replication.py
