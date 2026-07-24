@@ -54,7 +54,9 @@ def _assert_equal_numbers(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Compare accelerated certification to frozen evidence")
+    parser = argparse.ArgumentParser(
+        description="Compare accelerated certification to frozen evidence"
+    )
     parser.add_argument("--reference", type=Path, required=True)
     parser.add_argument("--observed", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
