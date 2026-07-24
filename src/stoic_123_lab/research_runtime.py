@@ -3,11 +3,12 @@ from __future__ import annotations
 import csv
 import json
 import time
+from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Iterator, Literal
+from typing import Literal
 
 ResearchMode = Literal["screen", "validate", "certify", "legacy"]
 ReviewScope = Literal["none", "candidate", "all"]
