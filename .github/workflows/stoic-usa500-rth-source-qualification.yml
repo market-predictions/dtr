@@ -1,0 +1,146 @@
+name: Stoic USA500 RTH source qualification
+
+on:
+  push:
+    branches:
+      - agent/stoic-usa500-rth-long-replication
+    paths:
+      - ".github/workflows/stoic-usa500-rth-source-qualification.yml"
+      - "scripts/acquire_stoic_usa500_partition.py"
+      - "strategies/stoic_123/configs/usa500_rth_long_replication.yaml"
+      - "strategies/stoic_123/governance/workpackages/STOIC123-WP-20260724-05.md"
+  pull_request:
+    branches:
+      - agent/stoic-rth-long-proxy-validation
+    types: [opened, synchronize, reopened]
+    paths:
+      - ".github/workflows/stoic-usa500-rth-source-qualification.yml"
+      - "scripts/acquire_stoic_usa500_partition.py"
+      - "strategies/stoic_123/configs/usa500_rth_long_replication.yaml"
+      - "strategies/stoic_123/governance/workpackages/STOIC123-WP-20260724-05.md"
+  workflow_dispatch:
+
+concurrency:
+  group: stoic-usa500-rth-source-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  acquire:
+    name: Qualify USA500 ${{ matrix.label }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        include:
+          - {label: 2012, start: 2012-01-01, end: 2013-01-01}
+          - {label: 2013, start: 2013-01-01, end: 2014-01-01}
+          - {label: 2014, start: 2014-01-01, end: 2015-01-01}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Ruff acquisition script
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff==0.14.10
+          ruff check scripts/acquire_stoic_usa500_partition.py
+      - name: Acquire fixed source partition only
+        run: |
+          python scripts/acquire_stoic_usa500_partition.py \
+            --start '${{ matrix.start }}' \
+            --end '${{ matrix.end }}' \
+            --label '${{ matrix.label }}' \
+            --workers 8
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stoic-usa500-rth-source-${{ matrix.label }}
+          path: |
+            usa500idxusd_m1_bid_${{ matrix.label }}.csv.gz
+            usa500idxusd_m1_bid_${{ matrix.label }}_audit.json
+          retention-days: 2
+          compression-level: 0
+          if-no-files-found: error
+
+  summarize:
+    needs: acquire
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: stoic-usa500-rth-source-*
+          path: qualified-source
+          merge-multiple: true
+      - name: Build source-only qualification summary
+        shell: bash
+        run: |
+          python - <<'PY'
+          import csv
+          import json
+          from pathlib import Path
+
+          rows = []
+          for path in sorted(Path("qualified-source").glob("*_audit.json")):
+              rows.append(json.loads(path.read_text(encoding="utf-8")))
+          if len(rows) != 3:
+              raise SystemExit(f"Expected 3 source audits, found {len(rows)}")
+          fields = [
+              "label",
+              "active_rows",
+              "first_timestamp_utc",
+              "last_timestamp_utc",
+              "zero_volume_rows_removed",
+              "duplicate_timestamps",
+              "sha256",
+              "classification",
+              "statuses",
+          ]
+          with Path("qualification_summary.csv").open(
+              "w", newline="", encoding="utf-8"
+          ) as handle:
+              writer = csv.DictWriter(handle, fieldnames=fields)
+              writer.writeheader()
+              for row in rows:
+                  projected = {key: row.get(key) for key in fields}
+                  projected["statuses"] = json.dumps(
+                      projected["statuses"], sort_keys=True
+                  )
+                  writer.writerow(projected)
+          sufficient_labels = [
+              str(row["label"])
+              for row in rows
+              if int(row.get("active_rows", 0)) >= 50000
+          ]
+          decision = {
+              "study_id": "STOIC123-WP-20260724-05",
+              "performance_inspected": False,
+              "qualified_labels_with_at_least_50000_rows": sufficient_labels,
+              "all_three_partitions_sufficient": len(sufficient_labels) == 3,
+              "next_action": (
+                  "FREEZE_CHECKSUMS_THEN_IMPLEMENT_PERFORMANCE_RUNNER"
+                  if len(sufficient_labels) == 3
+                  else "REVIEW_SOURCE_COVERAGE_BEFORE_ANY_PERFORMANCE_RUN"
+              ),
+          }
+          Path("source_qualification_decision.json").write_text(
+              json.dumps(decision, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          print(json.dumps(decision, indent=2, sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stoic-usa500-rth-source-qualification-summary
+          path: |
+            qualification_summary.csv
+            source_qualification_decision.json
+          retention-days: 7
+          if-no-files-found: error
