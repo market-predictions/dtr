@@ -6,7 +6,7 @@ on:
   pull_request:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   lint:
@@ -23,9 +23,7 @@ jobs:
         shell: bash
         run: |
           set +e
-          pipx run ruff==0.15.22 check . \
-            --exclude temporary/apply_stacey_burke_fx_source_payload.py \
-            > ruff-report.txt 2>&1
+          pipx run ruff==0.15.22 check . > ruff-report.txt 2>&1
           status=$?
           cat ruff-report.txt
           echo "exit_code=$status" >> "$GITHUB_OUTPUT"
@@ -71,51 +69,9 @@ jobs:
       - name: Tests
         run: pytest
 
-  stacey_burke_bootstrap:
-    name: Validate Stacey Burke source programme
-    if: >-
-      github.event_name == 'pull_request' &&
-      github.head_ref == 'agent/stacey-burke-fx-source-census'
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-
-    steps:
-      - name: Checkout source branch
-        uses: actions/checkout@v4
-        with:
-          ref: agent/stacey-burke-fx-source-census
-          fetch-depth: 1
-          show-progress: false
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-          cache: pip
-
-      - name: Materialize reviewed programme files
-        run: python temporary/apply_stacey_burke_fx_source_payload.py
-
-      - name: Install and validate
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[dev]"
-          ruff check .
-          pytest
-
-      - name: Commit validated programme
-        run: |
-          set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add pyproject.toml src/stacey_burke_lab scripts tests strategies/stacey_burke
-          git rm --ignore-unmatch temporary/apply_stacey_burke_fx_source_payload.py
-          git commit -m "Build Stacey Burke multi-asset FX source programme"
-          git push origin HEAD:agent/stacey-burke-fx-source-census
-
   stacey_burke_source:
     name: Qualify ${{ matrix.symbol }}
-    needs: stacey_burke_bootstrap
+    needs: test
     if: >-
       github.event_name == 'pull_request' &&
       github.head_ref == 'agent/stacey-burke-fx-source-census'
@@ -138,10 +94,9 @@ jobs:
           - EURGBP
 
     steps:
-      - name: Checkout validated source branch
+      - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: agent/stacey-burke-fx-source-census
           show-progress: false
 
       - name: Set up Python
@@ -212,10 +167,9 @@ jobs:
     timeout-minutes: 20
 
     steps:
-      - name: Checkout validated source branch
+      - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: agent/stacey-burke-fx-source-census
           show-progress: false
 
       - name: Set up Python
