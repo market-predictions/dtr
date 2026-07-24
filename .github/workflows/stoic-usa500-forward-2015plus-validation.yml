@@ -1,0 +1,18 @@
+name: Stoic USA500 2015+ forward validation
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  archived:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Forward validation already completed
+        run: |
+          echo "USA500 2015+ forward validation completed in workflow run 30083576930."
+          echo "Decision: REJECT_USA500_RTH_FULL_123_FORWARD_FAILURE."
+          echo "Compact results are committed under strategies/stoic_123/results/usa500_forward_2015plus."
+          echo "Raw market data were removed before artifact publication."

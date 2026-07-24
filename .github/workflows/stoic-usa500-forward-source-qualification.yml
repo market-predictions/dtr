@@ -1,0 +1,17 @@
+name: Stoic USA500 2015+ source qualification
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  archived:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Source qualification already completed
+        run: |
+          echo "USA500 2015+ source qualification completed in workflow run 30082453148."
+          echo "All twelve annual partitions qualified without inspecting strategy returns."
+          echo "Exact annual checksums are frozen in strategies/stoic_123/configs/usa500_forward_2015plus.yaml."

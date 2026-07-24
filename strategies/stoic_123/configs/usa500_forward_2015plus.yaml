@@ -1,0 +1,131 @@
+study_id: STOIC123-WP-20260724-06
+frozen_on: 2026-07-24
+status: SOURCE_QUALIFIED_EXECUTION_AUTHORIZED
+matched_control_replicates: 50
+
+candidate:
+  id: RTH_LONG_FULL_123_NO_MAP_NO_EMA200
+  source_arm_id: S123_M0_NO_MAP_CONTROL
+  direction_mode: long_only
+  entry_model: full_123
+  map_mode: none
+  ema200_filter: false
+  parameter_changes_allowed: false
+  phase1_config_path: strategies/stoic_123/configs/phase1.yaml
+  phase1_expected_sha256: 5d6909bd5740e1cdea9bd3d47a9818289a6faa8b9a61338726afdc53289ff805
+
+session_contract:
+  source_timezone: UTC
+  session_timezone: America/New_York
+  entry_window_start_inclusive: "09:30:00"
+  entry_window_end_exclusive: "16:00:00"
+  entry_filter_only: true
+  management_and_exits: full_session
+  daylight_saving_rule: IANA_America_New_York
+
+source_contract:
+  classification: Dukascopy USA500 bid-CFD S&P-500 proxy; not CME ES futures
+  symbol: USA500IDXUSD
+  filename_prefix: usa500idxusd_m1_bid
+  qualification_workflow_run: 30082453148
+  qualification_performance_inspected: false
+  total_active_rows: 3424909
+  price_stream: bid_only
+  signal_and_execution_prices: same_bid_ohlc_stream
+  execution_tick_size: 0.25
+  point_value_usd: 50.0
+  commission_per_side_usd: 2.25
+  source_quote_increment: 0.001
+  inactive_definition: volume_lte_zero
+  timestamp_basis: UTC converted to naive UTC before existing resampling
+  partitions:
+    primary_forward:
+      start_inclusive_utc: 2015-01-01
+      end_exclusive_utc: 2020-01-01
+      labels: [2015, 2016, 2017, 2018, 2019]
+      active_rows: 1216158
+      expected_sha256_by_label:
+        2015: 9a6c32d769fd1561798bb4ae4e0534323e7a440de432b185f53fd03461a2a076
+        2016: 51c1ad36103663068bfbfb8219c01deb3a958af4c0f5c403e8a3736442de2848
+        2017: 80d7afb37d545501ff780c60b885acff1f228cc1a69d9a0d07caf5f32ae53276
+        2018: 3b24b54548e3e2358844684e49eab189323b18a31db430a6858685433aba2266
+        2019: 2872dd2a31a52c8a34581ced9160a94aafdd5568a1f67dfe2c9bab16b67b9ff0
+    crisis_regime:
+      start_inclusive_utc: 2020-01-01
+      end_exclusive_utc: 2023-01-01
+      labels: [2020, 2021, 2022]
+      active_rows: 1011346
+      expected_sha256_by_label:
+        2020: 6752f34278c6de78f2c4a3c2e07b168bed4686e795dec4b7d2ba70fcd1dac592
+        2021: 8ab221f74747863e07186f64d895f051372c9e85ab4fa68b42982d25fc2fe7bb
+        2022: da4616c32688f632625fa00cf82af703565fd42a7f001ac7480845ac9ed4e6b7
+    recent_holdout:
+      start_inclusive_utc: 2023-01-01
+      end_exclusive_utc: 2026-01-01
+      labels: [2023, 2024, 2025]
+      active_rows: 1006390
+      expected_sha256_by_label:
+        2023: 43bc304f74fd2636e6b9fac6c1a8a74a745b79222c37b75d02a6e0a3446f0799
+        2024: 58c53a712940f08c7fe7d72786d80bab008e60dab64c978c84bb860940ca89d2
+        2025: 66ea6ec448cd3afeb4e412f397228e59cdd3554d0f2ca6af77c654a99286c0a9
+    monitoring_2026_ytd:
+      start_inclusive_utc: 2026-01-01
+      end_exclusive_utc: 2026-07-24
+      labels: [2026_ytd]
+      active_rows: 191015
+      expected_sha256_by_label:
+        2026_ytd: 8c9a65e196eafbbb2d046fb2c5d8327c19f31d10ce7d0a1ad2fb1ee8f8b1c008
+      decision_gates_enabled: false
+
+execution_tests:
+  baseline_slippage_ticks_each_side: 1.0
+  stressed_slippage_ticks_each_side: 2.0
+  entry_delays_minutes: [1, 5]
+  max_hold_minutes: 1440
+  management_direction: both
+
+required_scenarios:
+  - full_session_long_full_123
+  - overnight_entry_long_full_123
+  - rth_long_full_123
+  - rth_long_full_123_cost_2t
+  - rth_long_full_123_delay_1m
+  - rth_long_full_123_delay_5m
+  - rth_long_ema_break_diagnostic
+  - rth_long_ema_break_retest_diagnostic
+  - fifty_deterministic_rth_matched_time_controls
+
+promotion_gates:
+  primary_forward_all_required:
+    minimum_trades: 100
+    expectancy_positive: true
+    date_block_lo95_positive: true
+    minimum_positive_years: 4
+    total_years: 5
+    largest_positive_year_share_max: 0.50
+    two_tick_expectancy_positive: true
+    one_minute_delay_expectancy_positive: true
+    return_to_drawdown_min: 1.50
+    max_drawdown_r_max: 35.0
+    matched_time_control_passed: true
+  cross_block_all_required:
+    crisis_regime_expectancy_positive: true
+    crisis_regime_minimum_positive_years: 2
+    crisis_regime_total_years: 3
+    recent_holdout_expectancy_positive: true
+    recent_holdout_minimum_positive_years: 2
+    recent_holdout_total_years: 3
+    recent_holdout_two_tick_expectancy_positive: true
+    crisis_regime_max_drawdown_r_max: 35.0
+    recent_holdout_max_drawdown_r_max: 35.0
+    combined_2015_2025_expectancy_positive: true
+    combined_2015_2025_return_to_drawdown_min: 1.50
+
+restrictions:
+  - No EMA200 or other trend filter.
+  - No change to EMA lengths, ATR, retest, base, stop, target, holding period, management, execution, or matching rules.
+  - No RTH subwindow, weekday, month, volatility, regime, or news filter search.
+  - No removal of losing years or partitions.
+  - No pooling with NQ or USATECH evidence.
+  - No raw market-data publication.
+  - No CME ES claim, Pine port, sizing, alerts, paper deployment, or live use.
