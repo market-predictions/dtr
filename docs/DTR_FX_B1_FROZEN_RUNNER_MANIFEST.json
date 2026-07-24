@@ -1,0 +1,11 @@
+{
+  "study_id": "DTR-FX-WP-20260724-23",
+  "file": "scripts/run_dtr_fx_b1_frozen.py",
+  "sha256": "dd95eefe2c44689c04c38c9835e225be965b1b59e43cc71e436fe7e00885f897",
+  "encoding": "gzip+base64",
+  "frozen_2022_2025_b1_ledger_sha256": "c1a9b6788d3a0f697614ee4c9f4c5a47a6c0fdf0e84f6444db2b5cdd6ffecddd",
+  "parity_original_legacy_cache": true,
+  "parity_corrected_canonical_cache": true,
+  "frozen_london_spread_gate_pips": 1.2000000000012,
+  "notes": "Readable source is materialized by the execution workflow; the archive is immutable contract evidence."
+}
