@@ -1,9 +1,9 @@
 # Stacey Burke FX Research Status
 
 Date: 2026-07-24  
-Version: `v0.1.0-source-programme`  
+Version: `v0.1.1-incremental-source-retention`  
 Active work package: `SB-WP-20260724-01`  
-State: `SOURCE_ACQUISITION_ACTIVE_PERFORMANCE_BLOCKED`
+State: `SOURCE_ACQUISITION_RECOVERY_ACTIVE_PERFORMANCE_BLOCKED`
 
 ## Current objective
 
@@ -20,11 +20,20 @@ EURUSD, GBPUSD, USDCHF, AUDUSD, NZDUSD, USDCAD, USDJPY, EURJPY, GBPJPY and EURGB
 - 2024–2025: untouched holdout.
 - 2026 YTD through 2026-07-23: monitoring only.
 
+## Retention and gating semantics
+
+- Every completed pair is preserved independently as a private source artifact.
+- A successfully acquired pair is cached before source qualification is enforced.
+- Qualification evidence is uploaded even when a pair fails a source gate.
+- A failed or missing pair does not delete or suppress artifacts from completed pairs.
+- All ten mandatory pairs remain required only for authorization of the pooled event census.
+
 ## Current authorization
 
 Authorized:
 
 - private source acquisition;
+- incremental pair-level source retention;
 - source integrity qualification;
 - BID/ASK synchronization and spread audits;
 - annual hash freezing;
@@ -32,7 +41,7 @@ Authorized:
 
 Blocked:
 
-- event-return inspection before source freeze;
+- event-return inspection before the complete source freeze;
 - strategy entries and P&L;
 - pair selection by result;
 - pair-specific parameters;
