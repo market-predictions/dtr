@@ -1,0 +1,9 @@
+{
+  "DTR_FX_B1_OLDER_VALIDATION_2026-07-24.md": "c531e7582fd60dd610d66fb4b04cdcc843c1989c6ab2027185c37d775607cfa7",
+  "FX_B1_PREVDAY_LONDON_BOS_MID__trades.csv": "ea2fff239a4707315b4a4cfdfd7398808dbf2177f99ab52aa5f4c1ec91d269e3",
+  "data_audit.json": "1ae292ce4b9146737b4b8a915d2182e0bc8fe3aee706f175e2d337b92dd94f0f",
+  "decision.json": "1d499fea4a82e9a22cbf5d54219d4cf5ace95cc2f5de3a18f6cf5ba27ce8d570",
+  "dtr_fx_b1_summary.csv": "d521fa550d964d53b0323b9d4cb3e4c6786a99816b2caf18547b9dd8b2245197",
+  "independent_review.json": "cdde9c57b5ccd8743967e3cc4c55fe343d48d37d07bf89bb6465b079a7dd2d4a",
+  "ledger_base64_parts_sha256": "53db9ff98fabdf14c650b1b3829b5b3e3e68c3df8391c12f1b68978ea4d9ad0d"
+}

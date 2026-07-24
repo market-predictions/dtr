@@ -1,0 +1,20 @@
+{
+  "study_id": "DTR-FX-WP-20260724-23",
+  "file": "scripts/run_dtr_fx_b1_frozen.py",
+  "sha256": "8bed9d9e0d7e198ff5a3d8f02cc8f4303ace7d1820885fcde13bcb5774a81e59",
+  "encoding": "gzip+base64",
+  "frozen_2022_2025_b1_ledger_sha256": "c1a9b6788d3a0f697614ee4c9f4c5a47a6c0fdf0e84f6444db2b5cdd6ffecddd",
+  "parity_original_legacy_cache": true,
+  "parity_corrected_canonical_cache": true,
+  "frozen_london_spread_gate_pips": 1.2000000000012,
+  "preregistered_hard_stops": [
+    "combined_expectancy_non_positive",
+    "one_point_five_x_cost_expectancy_non_positive",
+    "primary_2015_2019_expectancy_non_positive",
+    "crisis_2020_2021_expectancy_non_positive",
+    "fewer_than_four_positive_years",
+    "single_year_exceeds_sixty_percent_of_positive_net_r",
+    "source_or_execution_integrity_failure"
+  ],
+  "notes": "Readable source is materialized by the execution workflow; the archive is immutable contract evidence. No unregistered minimum-trade gate is applied."
+}
