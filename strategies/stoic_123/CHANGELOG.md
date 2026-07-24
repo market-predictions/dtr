@@ -1,12 +1,84 @@
 # Changelog — Stoic Edge 1-2-3
 
+## v0.7.0-research-closed — 2026-07-24
+
+### Added
+
+- Preregistered and executed `STOIC123-WP-20260724-06` as a broad USA500 forward validation.
+- Qualified twelve Dukascopy `USA500IDXUSD` annual/YTD partitions before return inspection.
+- Froze 2015–2019 as primary forward validation, 2020–2022 as crisis/regime stress, 2023–2025 as recent holdout and 2026 YTD as monitoring only.
+- Kept the candidate unchanged: RTH full 1-2-3, no-map, long-only and no EMA200.
+- Added multi-block cost, delay, uncertainty, annual, exit and matched-time validation gates.
+- Added compact decision evidence and independent reconstruction of 45 ledgers and 19 gates.
+
+### Source result
+
+- 3,424,909 active one-minute rows across twelve checksum-qualified partitions.
+- Every execution source matched its frozen SHA-256.
+- Zero duplicate timestamps.
+- Raw source data were removed before compact artifact upload.
+
+### Performance result
+
+- 2015–2019: 177 trades, `-57.98R`, `-0.328R` expectancy, 61.43R drawdown.
+- 2020–2022: 134 trades, `+3.12R`, `+0.023R` expectancy.
+- 2023–2025: 148 trades, `+10.55R`, `+0.071R` expectancy.
+- Combined 2015–2025: 459 trades, `-44.31R`, `-0.097R` expectancy, 70.46R drawdown.
+- 2026 YTD monitoring: 29 trades, `+4.27R`, `+0.147R` expectancy.
+- The primary date-block interval was wholly negative.
+- Four of eleven combined years were positive.
+- Cost stress and all full-sequence matched-time controls failed.
+- Six of nineteen gates passed.
+
+### Decision
+
+`REJECT_USA500_RTH_FULL_123_FORWARD_FAILURE`
+
+The positive 2012–2014 screen did not survive broad forward history. The current mechanical Stoic 1-2-3 family is closed without a finalist.
+
+### Known limitations
+
+- USA500 remains a Dukascopy bid-CFD proxy, not CME ES futures.
+- Proxy volume is not centralized futures volume.
+- The 2026 partition is incomplete and excluded from gates.
+- Matched-time controls are causal comparators, not complete factor models.
+
+### Next
+
+- Do not purchase actual ES or NQ data for this formulation.
+- Do not select the positive 2024–2026 subset or diagnostic EMA arms post hoc.
+- Do not tune EMA200, session windows, weekdays, regimes, stops, targets or exits.
+- Keep Pine, sizing, alerts, paper deployment and live use blocked.
+- Start future research only from a genuinely different preregistered mechanism.
+
+## v0.6.0-usa500-screen — 2026-07-24
+
+### Added
+
+- Preregistered `STOIC123-WP-20260724-05` as a USA500 cross-asset transfer of the frozen RTH-long family.
+- Qualified 2012–2014 Dukascopy USA500 BID M1 partitions.
+- Used explicit ES-equivalent research normalization without making a CME ES claim.
+- Compared the full sequence with EMA-break and retest controls.
+
+### Result
+
+- Full RTH 1-2-3, 2012–2013: 62 trades, `+11.17R`, `+0.180R` expectancy.
+- Full RTH 1-2-3, 2014: 47 trades, `+13.70R`, `+0.292R` expectancy.
+- EMA-break-only was negative in both partitions.
+- The candidate remained small-sample, cost-sensitive and matched-control weak.
+- Post-hoc EMA200 screens were inconsistent and not retained.
+
+### Decision
+
+Retain the unchanged full sequence only for a broad 2015+ forward falsification. No Pine, deployment or actual-ES validation was authorized.
+
 ## v0.5.0-research-closed — 2026-07-24
 
 ### Added
 
 - Preregistered and executed `STOIC123-WP-20260724-04` as a fresh-history RTH long falsification.
-- Source-only qualification of Dukascopy USATECH 2010-2014 before performance execution.
-- Frozen 2012-2013 fresh history and untouched 2014 holdout after source coverage showed no usable 2010 and only a one-week 2011 fragment.
+- Source-only qualification of Dukascopy USATECH 2010–2014 before performance execution.
+- Frozen 2012–2013 fresh history and untouched 2014 holdout after source coverage showed no usable 2010 and only a one-week 2011 fragment.
 - UTC-to-`America/New_York` daylight-saving-aware RTH entry classification.
 - Fixed `09:30` inclusive through `16:00` exclusive entry window, with full-session management retained.
 - RTH EMA-break primary, full 1-2-3 secondary, retest diagnostic, full-session and overnight comparators.
@@ -25,9 +97,9 @@
 
 ### Performance result
 
-- RTH EMA break, 2012-2013: 858 trades, `-30.35R`, `-0.035R` expectancy, 106.95R drawdown.
+- RTH EMA break, 2012–2013: 858 trades, `-30.35R`, `-0.035R` expectancy, 106.95R drawdown.
 - RTH EMA break, 2014 holdout: 522 trades, `-104.84R`, `-0.201R` expectancy, with a wholly negative date-block interval.
-- Full RTH 1-2-3, 2012-2013: 76 trades, `-13.31R`, `-0.175R` expectancy.
+- Full RTH 1-2-3, 2012–2013: 76 trades, `-13.31R`, `-0.175R` expectancy.
 - Full RTH 1-2-3, 2014 holdout: 49 trades, `-11.24R`, `-0.229R` expectancy.
 - The full sequence underperformed EMA break by `0.140R` expectancy on fresh history and `0.029R` on holdout.
 - EMA-break-plus-retest was negative in both partitions.
@@ -60,11 +132,11 @@ The earlier positive RTH attribution did not transfer to fresh proxy history. RT
 
 - Preregistered and executed `STOIC123-WP-20260723-03` as an unseen short-side falsification.
 - Deterministic Dukascopy USATECH annual/YTD source acquisition and audit workflow.
-- Exact source checksums for 2015-2021 and 2026 YTD, frozen before performance execution.
+- Exact source checksums for 2015–2021 and 2026 YTD, frozen before performance execution.
 - Checksum-gated partition loader with explicit sample-overlap rejection.
 - Mirrored causal short EMA-break and EMA-break-plus-retest controls.
 - New-York-session-aware deterministic matched-time short controls.
-- Twelve all-required gates covering sample size, expectancy, uncertainty, year breadth, concentration, costs, delay, mechanism value, and matched controls.
+- Twelve all-required gates covering sample size, expectancy, uncertainty, year breadth, concentration, costs, delay, mechanism value and matched controls.
 - Dedicated short-validation tests and full Python 3.11/3.12 CI coverage.
 - Compact result package and independent reconstruction of 16 ledgers and 12 gates.
 
@@ -76,7 +148,7 @@ The earlier positive RTH attribution did not transfer to fresh proxy history. RT
 
 ### Result
 
-- Older 2015-2021 short-only: 696 trades, `-86.13R`, `-0.124R` expectancy, 2/7 positive years.
+- Older 2015–2021 short-only: 696 trades, `-86.13R`, `-0.124R` expectancy, 2/7 positive years.
 - Older two-tick cost stress: `-142.73R`.
 - Older one-minute delay: `-102.16R`.
 - 2026 YTD short-only: 43 trades, `+2.12R`, `+0.049R` expectancy, but a very wide interval.
@@ -100,19 +172,19 @@ The post-hoc actual-NQ short strength did not reproduce on the long unseen proxy
 ### Next
 
 - Do not purchase actual-NQ data for this exact mechanical formulation.
-- Do not perform direction, session, filter, stop, target, delay, timeframe, or exit retuning.
+- Do not perform direction, session, filter, stop, target, delay, timeframe or exit retuning.
 - Start a future project only for a genuinely different preregistered mechanism.
-- Keep Pine, sizing, alerts, paper deployment, and live use blocked.
+- Keep Pine, sizing, alerts, paper deployment and live use blocked.
 
 ## v0.3.0-research-complete — 2026-07-23
 
 ### Added
 
 - Preregistered and executed `STOIC123-WP-20260723-02` on the checksum-qualified NQ futures archive.
-- Both-direction, long-only, short-only, EMA-break-only, EMA-break-plus-retest, cost-stress, and delayed-entry scenarios.
+- Both-direction, long-only, short-only, EMA-break-only, EMA-break-plus-retest, cost-stress and delayed-entry scenarios.
 - Fifty deterministic matched-time controls per candidate with frozen event-coverage and holding-period comparability gates.
 - Cached validation simulator and matched-pool engine with exact parity tests against the reference execution engine.
-- Exact source/config preflight, raw-data removal, compact result publication, and independent reconstruction.
+- Exact source/config preflight, raw-data removal, compact result publication and independent reconstruction.
 
 ### Corrected
 
@@ -134,11 +206,11 @@ The post-hoc actual-NQ short strength did not reproduce on the long unseen proxy
 
 ## v0.2.0-research — 2026-07-23
 
-- Added checksum-gated `NQ_PROXY`, `ES_PROXY`, and GBPUSD execution support.
+- Added checksum-gated `NQ_PROXY`, `ES_PROXY` and GBPUSD execution support.
 - Corrected GBPUSD BI5 field ordering and used midpoint signals with side-correct bid/ask execution.
 - Preserved frozen `phase1.yaml` SHA-256 `5d6909bd5740e1cdea9bd3d47a9818289a6faa8b9a61338726afdc53289ff805`.
 - Rejected all six GBPUSD arms.
 
 ## v0.1.0-research — 2026-07-23
 
-- Added the separate `stoic_123_lab` package, causal 1-2-3 detector, execution model, governance tree, frozen six-arm family, reporting, inference, and independent review.
+- Added the separate `stoic_123_lab` package, causal 1-2-3 detector, execution model, governance tree, frozen six-arm family, reporting, inference and independent review.
