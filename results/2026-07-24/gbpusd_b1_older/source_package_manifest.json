@@ -1,0 +1,31 @@
+{
+  "study_id": "DTR-FX-WP-20260724-23",
+  "source_workflow_run_id": 30099422471,
+  "source_workflow_head_sha": "d3043f3f410052ba7f58997373e27f9db59a9882",
+  "acquisition_topology": "seven independent annual GitHub Actions runners plus combined source qualification",
+  "performance_inspected_during_acquisition": false,
+  "source_qualified": true,
+  "qualification_artifact": {
+    "artifact_id": 8599125240,
+    "artifact_digest": "sha256:d09a151bc58e2cf60c039540f0a6086858a57dd0192a1e812cf5161e247de99e",
+    "drive_file_id": "1eYUHSjhdaU-joVdNYQiYWO1vb92YNHOF"
+  },
+  "private_cache_artifact": {
+    "artifact_id": 8599124668,
+    "artifact_digest": "sha256:5be9c8c26b1a1d35e271aa004e932e3ee77698cc29404f59be973f5678826013",
+    "drive_file_id": "1DLcHrkyFdrxWkya60XaQ5Qcn8LH9-N2P"
+  },
+  "canonical_bi5_mapping": [
+    "seconds",
+    "open",
+    "close",
+    "low",
+    "high",
+    "volume"
+  ],
+  "minute_grid_complete": true,
+  "bid_ask_timestamps_identical": true,
+  "negative_spread_rows": 0,
+  "annual_hash_file": "annual_sha256.txt",
+  "qualification_file": "source_qualification.json"
+}
