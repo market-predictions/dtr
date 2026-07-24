@@ -38,7 +38,7 @@ dev = [
 dtr-audit = "dtr_lab.cli:app"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/dtr_lab"]
+packages = ["src/dtr_lab", "src/stacey_burke_lab"]
 
 [tool.pytest.ini_options]
 addopts = "-q"
