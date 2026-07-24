@@ -48,6 +48,7 @@ def date_block_bootstrap(
     *,
     iterations: int = 10_000,
     seed: int = 20260723,
+    batch_size: int = 1_024,
 ) -> dict[str, float | int]:
     if trades.empty:
         return {
@@ -57,6 +58,10 @@ def date_block_bootstrap(
             "hi95_expectancy_r": np.nan,
             "prob_expectancy_positive": np.nan,
         }
+    if iterations <= 0:
+        raise ValueError("bootstrap iterations must be positive")
+    if batch_size <= 0:
+        raise ValueError("bootstrap batch_size must be positive")
     work = trades.copy()
     work["block"] = pd.to_datetime(work["entry_time"]).dt.normalize()
     grouped = work.groupby("block", sort=True)["pnl_r"]
@@ -64,11 +69,15 @@ def date_block_bootstrap(
     block_counts = grouped.size().to_numpy(np.int64)
     rng = np.random.default_rng(seed)
     means = np.empty(iterations)
-    for iteration in range(iterations):
-        selected = rng.integers(0, len(block_sums), size=len(block_sums))
-        means[iteration] = block_sums[selected].sum() / block_counts[selected].sum()
+    block_count = len(block_sums)
+    for start in range(0, iterations, batch_size):
+        end = min(start + batch_size, iterations)
+        selected = rng.integers(0, block_count, size=(end - start, block_count))
+        means[start:end] = block_sums[selected].sum(axis=1) / block_counts[selected].sum(
+            axis=1
+        )
     return {
-        "blocks": len(block_sums),
+        "blocks": block_count,
         "observed_expectancy_r": float(work["pnl_r"].mean()),
         "lo95_expectancy_r": float(np.quantile(means, 0.025)),
         "hi95_expectancy_r": float(np.quantile(means, 0.975)),
