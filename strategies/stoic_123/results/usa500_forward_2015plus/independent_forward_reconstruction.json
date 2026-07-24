@@ -1,0 +1,17 @@
+{
+  "all_checks_passed": true,
+  "annual_reconstruction_failures": 0,
+  "chronology_failures": 0,
+  "decision_status": "REJECT_USA500_RTH_FULL_123_FORWARD_FAILURE",
+  "gate_reconstruction_failures": 0,
+  "ledger_count": 45,
+  "ledger_metric_failures": 0,
+  "overlap_failures": 0,
+  "passed_gate_count_reproduced": 6,
+  "published_review_nonpass": 0,
+  "published_review_rows": 45,
+  "risk_failures": 0,
+  "rth_session_failures_undelayed": 0,
+  "source_contract_failures": 0,
+  "total_gate_count_reproduced": 19
+}
