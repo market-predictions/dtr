@@ -1,0 +1,106 @@
+name: GBPUSD B1 older source qualification
+
+on:
+  pull_request:
+    paths:
+      - temporary/gbpusd_b1_older_source_qualification.trigger
+
+permissions:
+  contents: write
+
+jobs:
+  qualify-source-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/gbpusd-b1-contract-reconciliation
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install qualification dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pandas numpy
+
+      - name: Acquire canonical GBPUSD BID and ASK M1 source
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/gbpusd_2015_2021
+          python scripts/acquire_gbpusd_dukascopy_canonical.py \
+            --out /tmp/gbpusd_2015_2021 \
+            --start-year 2015 \
+            --end-year 2021 \
+            --workers 16
+
+      - name: Qualify source without strategy execution
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/gbpusd_source_evidence
+          python scripts/qualify_gbpusd_bid_ask.py \
+            --data /tmp/gbpusd_2015_2021 \
+            --start-year 2015 \
+            --end-year 2021 \
+            --out /tmp/gbpusd_source_evidence/source_qualification.json
+          sha256sum /tmp/gbpusd_2015_2021/*.csv.gz \
+            > /tmp/gbpusd_source_evidence/annual_sha256.txt
+          cp /tmp/gbpusd_2015_2021/gbpusd_2015_2021_manifest.json \
+            /tmp/gbpusd_source_evidence/
+          tar -C /tmp -czf /tmp/gbpusd_2015_2021_private_cache.tar.gz \
+            gbpusd_2015_2021
+
+      - name: Preserve private older-history cache
+        uses: actions/upload-artifact@v4
+        with:
+          name: gbpusd-2015-2021-private-cache
+          path: /tmp/gbpusd_2015_2021_private_cache.tar.gz
+          retention-days: 90
+          compression-level: 0
+          if-no-files-found: error
+
+      - name: Preserve compact qualification evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: gbpusd-2015-2021-source-qualification
+          path: /tmp/gbpusd_source_evidence
+          retention-days: 90
+          compression-level: 6
+          if-no-files-found: error
+
+      - name: Commit compact source evidence and close source gate
+        run: |
+          set -euo pipefail
+          mkdir -p results/2026-07-24/gbpusd_b1_older
+          cp /tmp/gbpusd_source_evidence/* results/2026-07-24/gbpusd_b1_older/
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          source = Path('results/2026-07-24/gbpusd_b1_older/source_qualification.json')
+          qualification = json.loads(source.read_text())
+          status = Path('workpackages/DTR-FX-WP-20260724-23.md')
+          text = status.read_text()
+          text = text.replace(
+              '`SOURCE_QUALIFICATION_ACTIVE_PERFORMANCE_BLOCKED`',
+              '`SOURCE_QUALIFIED_HASHES_FROZEN_PERFORMANCE_BLOCKED`',
+              1,
+          )
+          text += (
+              '\n## Source qualification result\n\n'
+              f"Qualified: `{qualification['qualified']}`. "
+              'Annual source hashes and integrity evidence are frozen under '
+              '`results/2026-07-24/gbpusd_b1_older/`. Strategy returns remain uninspected.\n'
+          )
+          status.write_text(text)
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add results/2026-07-24/gbpusd_b1_older \
+                  workpackages/DTR-FX-WP-20260724-23.md
+          git rm temporary/gbpusd_b1_older_source_qualification.trigger
+          git commit -m "Qualify older GBPUSD source without returns"
+          git push origin HEAD:agent/gbpusd-b1-contract-reconciliation
