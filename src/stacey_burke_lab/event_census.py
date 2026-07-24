@@ -39,6 +39,43 @@ class EventCensusDefinition:
 
 DEFAULT_DEFINITION = EventCensusDefinition()
 
+EVENT_COLUMNS = (
+    "event_id",
+    "symbol",
+    "factor_block",
+    "trading_date",
+    "london_date",
+    "swept_side",
+    "reversal_direction",
+    "previous_day_high",
+    "previous_day_low",
+    "atr20",
+    "excursion_threshold",
+    "first_sweep_timestamp_utc",
+    "reclaim_timestamp_utc",
+    "reclaim_delay_minutes",
+    "sweep_extreme",
+    "excursion_price",
+    "excursion_pips",
+    "excursion_atr",
+    "reclaim_close",
+    "reclaim_distance_inside",
+    "same_minute_reclaim",
+    "active_minutes",
+    "active_coverage_fraction",
+    "source_partitions",
+)
+
+SESSION_BOOLEAN_COLUMNS = (
+    "eligible",
+    "high_swept",
+    "high_reclaimed",
+    "low_swept",
+    "low_reclaimed",
+    "ambiguous",
+    "retained_event",
+)
+
 
 def _load_side(path: Path, *, suffix: str) -> pd.DataFrame:
     if not path.exists():
@@ -436,8 +473,13 @@ def detect_pair_event_census(
 
         session_rows.append(session_record)
 
-    events = pd.DataFrame(event_rows)
+    events = pd.DataFrame(event_rows, columns=EVENT_COLUMNS)
     session_audit = pd.DataFrame(session_rows)
+    for column in SESSION_BOOLEAN_COLUMNS:
+        if column not in session_audit:
+            session_audit[column] = False
+        else:
+            session_audit[column] = session_audit[column].eq(True)
     eligible = (
         session_audit.loc[session_audit["eligible"]]
         if not session_audit.empty
