@@ -1,0 +1,100 @@
+name: GBPUSD B1 older-history execution v2
+
+on:
+  pull_request:
+    paths:
+      - temporary/gbpusd_b1_older_execution_v2.trigger
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  execute-frozen-b1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      SOURCE_RUN_ID: '30099422471'
+      SOURCE_ARTIFACT_NAME: gbpusd-2015-2021-private-cache-v2
+      RUNNER_SHA256: 8bed9d9e0d7e198ff5a3d8f02cc8f4303ace7d1820885fcde13bcb5774a81e59
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/gbpusd-b1-contract-reconciliation
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install frozen research environment
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pandas numpy
+
+      - name: Restore hash-frozen private source cache
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/gbpusd_source_artifact
+          gh run download "$SOURCE_RUN_ID" \
+            --repo market-predictions/dtr \
+            --name "$SOURCE_ARTIFACT_NAME" \
+            --dir /tmp/gbpusd_source_artifact
+          archive=$(find /tmp/gbpusd_source_artifact -name '*.tar.gz' -print -quit)
+          test -n "$archive"
+          tar -xzf "$archive" -C /tmp
+          test -d /tmp/gbpusd_2015_2021
+
+      - name: Verify source hashes before return calculation
+        run: |
+          set -euo pipefail
+          cd /tmp/gbpusd_2015_2021
+          sed 's#  .*/#  #' \
+            "$GITHUB_WORKSPACE/results/2026-07-24/gbpusd_b1_older/annual_sha256.txt" \
+            | sha256sum -c -
+
+      - name: Materialize and verify frozen B1 runner
+        run: |
+          set -euo pipefail
+          base64 -d temporary/run_dtr_fx_b1_frozen.py.gz.b64 \
+            | gzip -d > /tmp/run_dtr_fx_b1_frozen.py
+          printf '%s  %s\n' "$RUNNER_SHA256" /tmp/run_dtr_fx_b1_frozen.py \
+            | sha256sum -c -
+          python -m py_compile \
+            /tmp/run_dtr_fx_b1_frozen.py \
+            scripts/review_dtr_fx_b1_older.py
+
+      - name: Execute unchanged B1 and independent review
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/gbpusd_b1_results /tmp/gbpusd_b1_review
+          python /tmp/run_dtr_fx_b1_frozen.py \
+            --data /tmp/gbpusd_2015_2021 \
+            --out /tmp/gbpusd_b1_results \
+            --start-year 2015 \
+            --end-year 2021
+          python scripts/review_dtr_fx_b1_older.py \
+            --results /tmp/gbpusd_b1_results \
+            --out /tmp/gbpusd_b1_review/independent_review.json \
+            --start-year 2015 \
+            --end-year 2021 \
+            --iterations 5000 \
+            --runner /tmp/run_dtr_fx_b1_frozen.py \
+            --expected-runner-sha256 "$RUNNER_SHA256" \
+            --source-qualification \
+              results/2026-07-24/gbpusd_b1_older/source_qualification.json
+          sha256sum /tmp/gbpusd_b1_results/* /tmp/gbpusd_b1_review/* \
+            > /tmp/gbpusd_b1_results/artifact_sha256.txt
+
+      - name: Preserve complete validation evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: gbpusd-b1-2015-2021-validation-v2
+          path: |
+            /tmp/gbpusd_b1_results
+            /tmp/gbpusd_b1_review
+          retention-days: 90
+          compression-level: 6
+          if-no-files-found: error

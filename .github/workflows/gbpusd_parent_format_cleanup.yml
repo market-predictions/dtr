@@ -1,0 +1,56 @@
+name: GBPUSD parent formatting cleanup
+
+on:
+  push:
+    branches:
+      - agent/gbpusd-dtr-replication
+    paths:
+      - temporary/gbpusd_parent_format_cleanup.trigger
+  pull_request:
+    paths:
+      - temporary/gbpusd_parent_format_cleanup.trigger
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || 'agent/gbpusd-dtr-replication' }}
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install pinned formatter
+        run: python -m pip install ruff==0.15.22
+
+      - name: Apply formatting-only fixes
+        run: |
+          set -euo pipefail
+          ruff check --fix --exit-zero \
+            scripts/acquire_gbpusd_dukascopy.py \
+            scripts/review_gbpusd_replication.py \
+            scripts/run_gbpusd_replication.py
+          ruff format \
+            scripts/acquire_gbpusd_dukascopy.py \
+            scripts/review_gbpusd_replication.py \
+            scripts/run_gbpusd_replication.py
+
+      - name: Commit formatting-only cleanup
+        env:
+          TARGET_BRANCH: ${{ github.head_ref || 'agent/gbpusd-dtr-replication' }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scripts/acquire_gbpusd_dukascopy.py \
+                  scripts/review_gbpusd_replication.py \
+                  scripts/run_gbpusd_replication.py
+          git rm temporary/gbpusd_parent_format_cleanup.trigger
+          git commit -m "Normalize GBPUSD research formatting"
+          git push origin HEAD:"$TARGET_BRANCH"

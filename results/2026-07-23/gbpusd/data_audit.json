@@ -1,0 +1,104 @@
+{
+  "study_id": "DTR-FX-WP-20260723-22",
+  "bid_files": [
+    {
+      "side": "bid",
+      "year": 2022,
+      "source_file": "gbpusd_m1_bid_2022.csv.gz",
+      "source_sha256": "1f008d7b63c98fcecc765eccdb2a7dd24be0d8b34c36c6cdeeaedc3ee47c0249",
+      "raw_rows": 525600,
+      "flat_zero_rows_removed": 152973,
+      "active_rows": 372627,
+      "duplicate_rows_after_cleaning": 0
+    },
+    {
+      "side": "bid",
+      "year": 2023,
+      "source_file": "gbpusd_m1_bid_2023.csv.gz",
+      "source_sha256": "9ee3fa030f15bf58f26a734cb108f91b54566f539ef4af332daa964446038887",
+      "raw_rows": 525600,
+      "flat_zero_rows_removed": 153641,
+      "active_rows": 371959,
+      "duplicate_rows_after_cleaning": 0
+    },
+    {
+      "side": "bid",
+      "year": 2024,
+      "source_file": "gbpusd_m1_bid_2024.csv.gz",
+      "source_sha256": "cdf384a7eb2bce0fa3878c216a81af4ece23800c1442465d4a92bac3c9a63d77",
+      "raw_rows": 527040,
+      "flat_zero_rows_removed": 154579,
+      "active_rows": 372461,
+      "duplicate_rows_after_cleaning": 0
+    },
+    {
+      "side": "bid",
+      "year": 2025,
+      "source_file": "gbpusd_m1_bid_2025.csv.gz",
+      "source_sha256": "dc47ddf42cce1fd4274a162d89079ac160c2024f4b92e50141aa4c940031c2e2",
+      "raw_rows": 525600,
+      "flat_zero_rows_removed": 154505,
+      "active_rows": 371095,
+      "duplicate_rows_after_cleaning": 0
+    }
+  ],
+  "ask_files": [
+    {
+      "side": "ask",
+      "year": 2022,
+      "source_file": "gbpusd_m1_ask_2022.csv.gz",
+      "source_sha256": "1df74143c0ea44d344d907c8d56b6a36736da2fe459c6ad0d3da8dae9e8aba2c",
+      "raw_rows": 525600,
+      "flat_zero_rows_removed": 152973,
+      "active_rows": 372627,
+      "duplicate_rows_after_cleaning": 0
+    },
+    {
+      "side": "ask",
+      "year": 2023,
+      "source_file": "gbpusd_m1_ask_2023.csv.gz",
+      "source_sha256": "e528b13a3d6f06e9d9871032bdf7a1b369e97b4ac16decd0c93017a7743ee2e8",
+      "raw_rows": 525600,
+      "flat_zero_rows_removed": 153641,
+      "active_rows": 371959,
+      "duplicate_rows_after_cleaning": 0
+    },
+    {
+      "side": "ask",
+      "year": 2024,
+      "source_file": "gbpusd_m1_ask_2024.csv.gz",
+      "source_sha256": "28ac2ed76cb1ad8cd865cdf41dc973a421d12a6ec32ec7cb34fcabaad72c2e2e",
+      "raw_rows": 527040,
+      "flat_zero_rows_removed": 154579,
+      "active_rows": 372461,
+      "duplicate_rows_after_cleaning": 0
+    },
+    {
+      "side": "ask",
+      "year": 2025,
+      "source_file": "gbpusd_m1_ask_2025.csv.gz",
+      "source_sha256": "5a43e9b6f8458d5319077f1aa36e9499e83f1b5a5a85f61bd3e4f1353f595f2c",
+      "raw_rows": 525600,
+      "flat_zero_rows_removed": 154505,
+      "active_rows": 371095,
+      "duplicate_rows_after_cleaning": 0
+    }
+  ],
+  "bid_active_rows": 1488142,
+  "ask_active_rows": 1488142,
+  "synchronized_rows": 1488142,
+  "invalid_negative_spread_rows_removed": 0,
+  "active_start_et": "2022-01-02 17:01:00",
+  "active_end_et": "2025-12-31 16:58:00",
+  "duplicate_timestamps": 0,
+  "strictly_increasing": true,
+  "median_spread_pips": 0.8999999999992347,
+  "q75_spread_pips": 1.100000000000545,
+  "q90_spread_pips": 1.4999999999987246,
+  "q95_spread_pips": 1.9999999999997797,
+  "q99_spread_pips": 7.4000000000018495,
+  "base_slippage_pips_each_side": 0.6500000000002725,
+  "commission_per_side_usd_per_standard_lot": 3.5,
+  "strategy_tick_size": 0.0001,
+  "point_value_per_standard_lot": 100000.0
+}

@@ -1,0 +1,29 @@
+{
+  "study_id": "DTR-FX-WP-20260723-22",
+  "decision": "NO_VIABLE_GBPUSD_DTR_BASELINE",
+  "classification": "EXPLORATORY_CROSS_ASSET_REPLICATION",
+  "selected_arm": null,
+  "eligible_sessions": 3056,
+  "signals": 896,
+  "simulated_signals": 896,
+  "funnel": {
+    "sessions": 2850,
+    "sweep_depth_pass": 2795,
+    "sweep_quality_pass": 2795,
+    "reclaim_pass": 2162,
+    "pivot_ready": 2092,
+    "bos_pass": 1618,
+    "impulse_pass": 1496,
+    "acceptance_pass": 1010,
+    "trend_pass": 896,
+    "entry_signal": 896,
+    "skipped_position_open": 0,
+    "trades": 0
+  },
+  "base_slippage_pips_each_side": 0.6500000000002725,
+  "commission_per_side_usd_per_standard_lot": 3.5,
+  "session_decomposition_run": true,
+  "interpretation": "Neither the frozen broad arms nor the bounded session decomposition produced a cost-robust and year-stable GBPUSD baseline. No neighboring parameter search is authorized on this sample.",
+  "independent_review_required": true,
+  "no_deployment_authorization": true
+}

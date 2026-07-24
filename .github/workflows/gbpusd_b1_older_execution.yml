@@ -1,0 +1,267 @@
+name: GBPUSD B1 older-history execution
+
+on:
+  push:
+    branches:
+      - agent/gbpusd-b1-contract-reconciliation
+    paths:
+      - temporary/gbpusd_b1_older_execution.trigger
+  pull_request:
+    paths:
+      - temporary/gbpusd_b1_older_execution.trigger
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  execute-frozen-b1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    env:
+      SOURCE_RUN_ID: '30096882745'
+      RUNNER_SHA256: 8bed9d9e0d7e198ff5a3d8f02cc8f4303ace7d1820885fcde13bcb5774a81e59
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/gbpusd-b1-contract-reconciliation
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install frozen research environment
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pandas numpy
+
+      - name: Restore hash-frozen private source cache
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/gbpusd_source_artifact
+          gh run download "$SOURCE_RUN_ID" \
+            --repo market-predictions/dtr \
+            --name gbpusd-2015-2021-private-cache \
+            --dir /tmp/gbpusd_source_artifact
+          archive=$(find /tmp/gbpusd_source_artifact -name '*.tar.gz' -print -quit)
+          test -n "$archive"
+          tar -xzf "$archive" -C /tmp
+          test -d /tmp/gbpusd_2015_2021
+
+      - name: Materialize and verify frozen B1 runner
+        run: |
+          set -euo pipefail
+          base64 -d temporary/run_dtr_fx_b1_frozen.py.gz.b64 \
+            | gzip -d > /tmp/run_dtr_fx_b1_frozen.py
+          printf '%s  %s\n' "$RUNNER_SHA256" /tmp/run_dtr_fx_b1_frozen.py \
+            | sha256sum -c -
+          python -m py_compile \
+            /tmp/run_dtr_fx_b1_frozen.py \
+            scripts/review_dtr_fx_b1_older.py
+
+      - name: Verify source qualification remains frozen
+        run: |
+          set -euo pipefail
+          test -f results/2026-07-24/gbpusd_b1_older/source_qualification.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path('results/2026-07-24/gbpusd_b1_older/source_qualification.json')
+          qualification = json.loads(path.read_text())
+          if not qualification.get('qualified'):
+              raise SystemExit('older GBPUSD source is not qualified')
+          PY
+
+      - name: Execute unchanged B1 on 2015-2021
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/gbpusd_b1_results /tmp/gbpusd_b1_review
+          python /tmp/run_dtr_fx_b1_frozen.py \
+            --data /tmp/gbpusd_2015_2021 \
+            --out /tmp/gbpusd_b1_results \
+            --start-year 2015 \
+            --end-year 2021
+          python scripts/review_dtr_fx_b1_older.py \
+            --results /tmp/gbpusd_b1_results \
+            --out /tmp/gbpusd_b1_review/independent_review.json \
+            --start-year 2015 \
+            --end-year 2021 \
+            --iterations 5000 \
+            --runner /tmp/run_dtr_fx_b1_frozen.py \
+            --expected-runner-sha256 "$RUNNER_SHA256" \
+            --source-qualification \
+              results/2026-07-24/gbpusd_b1_older/source_qualification.json
+
+      - name: Build compact research report and hashes
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          import pandas as pd
+
+          results = Path('/tmp/gbpusd_b1_results')
+          review_path = Path('/tmp/gbpusd_b1_review/independent_review.json')
+          summary = pd.read_csv(results / 'dtr_fx_b1_summary.csv').iloc[0]
+          decision = json.loads((results / 'decision.json').read_text())
+          review = json.loads(review_path.read_text())
+
+          def fmt(value):
+              return 'n/a' if pd.isna(value) else f'{float(value):.6f}'
+
+          years = range(2015, 2022)
+          annual = '\n'.join(
+              f"| {year} | {int(summary[f'trades_{year}'])} | "
+              f"{fmt(summary[f'net_{year}'])} | {fmt(summary[f'exp_{year}'])} |"
+              for year in years
+          )
+          gates = [
+              ('Combined expectancy > 0', 'gate_combined_expectancy'),
+              ('1.5x-cost expectancy > 0', 'gate_cost_stress'),
+              ('2015-2019 expectancy > 0', 'gate_primary'),
+              ('2020-2021 expectancy > 0', 'gate_crisis'),
+              ('At least four positive years', 'gate_positive_years'),
+              ('No year > 60% positive net R', 'gate_concentration'),
+              ('Date-block CI lower bound > 0', 'gate_ci'),
+          ]
+          gate_rows = '\n'.join(
+              f"| {label} | {'PASS' if bool(summary[key]) else 'FAIL'} |"
+              for label, key in gates
+          )
+          report = f'''# DTR-FX B1 older-history validation
+
+Date: 2026-07-24  
+Work package: `DTR-FX-WP-20260724-23`
+
+## Decision
+
+`{decision['decision']}`
+
+This is an unchanged execution of the provenance-frozen B1 contract on source-qualified Dukascopy GBPUSD BID/ASK M1 data from 2015 through 2021. No parameter, session, direction, cost, stop, target, or selection rule was changed after older returns became visible.
+
+## Combined result
+
+- Trades: {int(summary['trades'])}
+- Net R: {fmt(summary['net_r'])}
+- Net expectancy: {fmt(summary['expectancy_r'])}R
+- Gross expectancy: {fmt(summary['gross_expectancy_r'])}R
+- Profit factor: {fmt(summary['profit_factor'])}
+- Maximum drawdown: {fmt(summary['max_drawdown_r'])}R
+- 1.5x-cost expectancy: {fmt(summary['stress_1p5x_cost_expectancy_r'])}R
+- 2015-2019 expectancy: {fmt(summary['primary_2015_2019_expectancy_r'])}R
+- 2020-2021 expectancy: {fmt(summary['crisis_2020_2021_expectancy_r'])}R
+- Date-block 95% interval: [{fmt(summary['ci_lo'])}, {fmt(summary['ci_hi'])}]
+- Probability of positive expectancy in the date-block resample: {fmt(summary['p_positive'])}
+
+## Annual decomposition
+
+| Year | Trades | Net R | Expectancy R |
+|---:|---:|---:|---:|
+{annual}
+
+## Frozen gates
+
+| Gate | Result |
+|---|---|
+{gate_rows}
+
+## Independent review
+
+- Conclusion: `{review['conclusion']}`
+- Trade ledger SHA-256: `{review['trade_ledger_sha256']}`
+- Runner SHA-256: `{review['runner_sha256']}`
+- Metric mismatches: `{len(review['mismatches'])}`
+
+## Scope boundary
+
+The result does not authorize Pine conversion, sizing, alerts, paper deployment, leverage, or live use. Any continuation must follow the preregistered decision and use unchanged prospective 2026+ evidence only.
+'''
+          Path('/tmp/gbpusd_b1_results/DTR_FX_B1_OLDER_VALIDATION_2026-07-24.md').write_text(report)
+
+          paths = sorted(results.glob('*')) + [review_path]
+          hashes = {}
+          for path in paths:
+              if not path.is_file():
+                  continue
+              digest = hashlib.sha256(path.read_bytes()).hexdigest()
+              hashes[path.name] = digest
+          (results / 'artifact_hashes.json').write_text(json.dumps(hashes, indent=2))
+          PY
+
+      - name: Preserve complete compact evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: gbpusd-b1-2015-2021-validation
+          path: |
+            /tmp/gbpusd_b1_results
+            /tmp/gbpusd_b1_review
+          retention-days: 90
+          compression-level: 6
+          if-no-files-found: error
+
+      - name: Commit older-history result and close the gate
+        run: |
+          set -euo pipefail
+          destination=results/2026-07-24/gbpusd_b1_older_validation
+          mkdir -p "$destination" docs reviews handovers
+          cp /tmp/gbpusd_b1_results/* "$destination"/
+          cp /tmp/gbpusd_b1_review/independent_review.json "$destination"/
+          cp /tmp/gbpusd_b1_results/DTR_FX_B1_OLDER_VALIDATION_2026-07-24.md docs/
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          result_dir = Path('results/2026-07-24/gbpusd_b1_older_validation')
+          decision = json.loads((result_dir / 'decision.json').read_text())
+          review = json.loads((result_dir / 'independent_review.json').read_text())
+          decision_name = decision['decision']
+
+          workpackage = Path('workpackages/DTR-FX-WP-20260724-23.md')
+          text = workpackage.read_text()
+          text = text.replace(
+              '`SOURCE_QUALIFIED_HASHES_FROZEN_PERFORMANCE_BLOCKED`',
+              f'`OLDER_HISTORY_EXECUTED_{decision_name}`',
+              1,
+          )
+          text += (
+              '\n## Older-history result\n\n'
+              f'Decision: `{decision_name}`. Independent review: '
+              f'`{review["conclusion"]}`. The current frozen B1 line is governed '
+              'by this result; no parameter rescue is authorized.\n'
+          )
+          workpackage.write_text(text)
+
+          Path('reviews/DTR-FX-WP-20260724-23-older-history-review.md').write_text(
+              '# Independent review — DTR-FX-WP-20260724-23\n\n'
+              f'- Conclusion: `{review["conclusion"]}`\n'
+              f'- Decision parity: `{review["checks"]["decision_parity"]}`\n'
+              f'- Summary parity: `{review["checks"]["summary_parity"]}`\n'
+              f'- Runner hash parity: `{review["checks"]["runner_hash_matches"]}`\n'
+              f'- Trade ledger SHA-256: `{review["trade_ledger_sha256"]}`\n',
+              encoding='utf-8',
+          )
+          Path('handovers/DTR-FX-WP-20260724-23.md').write_text(
+              '# Handover — DTR-FX-WP-20260724-23\n\n'
+              f'Decision: `{decision_name}`\n\n'
+              'The B1 contract was frozen by executable provenance, source-qualified '
+              'on 2015-2021 before return inspection, executed unchanged, and '
+              'independently reconstructed. No Pine, sizing, paper, or live '
+              'authorization follows.\n',
+              encoding='utf-8',
+          )
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$destination" docs/DTR_FX_B1_OLDER_VALIDATION_2026-07-24.md \
+                  reviews/DTR-FX-WP-20260724-23-older-history-review.md \
+                  handovers/DTR-FX-WP-20260724-23.md \
+                  workpackages/DTR-FX-WP-20260724-23.md
+          git rm temporary/gbpusd_b1_older_execution.trigger
+          git commit -m "Complete frozen GBPUSD B1 older-history validation"
+          git push origin HEAD:agent/gbpusd-b1-contract-reconciliation

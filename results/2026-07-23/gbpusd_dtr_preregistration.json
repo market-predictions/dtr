@@ -1,0 +1,60 @@
+{
+  "study_id": "DTR-FX-WP-20260723-22",
+  "classification": "EXPLORATORY_CROSS_ASSET_REPLICATION",
+  "instrument": "Dukascopy GBPUSD bid/ask one-minute candles",
+  "period": {
+    "start_utc": "2022-01-01T00:00:00Z",
+    "end_exclusive_utc": "2026-01-01T00:00:00Z"
+  },
+  "data_handling": {
+    "private_persistent_cache": true,
+    "cache_location": "private Google Drive market-data cache",
+    "commit_raw_data": false,
+    "redistribute_raw_data": false,
+    "delete_after_research": false,
+    "reuse_before_redownload": true,
+    "remove_flat_zero_volume_placeholders": true
+  },
+  "price_construction": {
+    "signal_price": "synchronized bid/ask midpoint OHLC approximation",
+    "spread_measurement": "ask close minus bid close on synchronized active candles",
+    "strategy_tick_size": 0.0001,
+    "strategy_tick_interpretation": "one pip",
+    "point_value_per_standard_lot": 100000.0,
+    "commission_per_side_usd_per_standard_lot": 3.5,
+    "base_slippage_model": "75th-percentile quoted spread divided equally across entry and exit sides, plus 0.1 pip per side"
+  },
+  "frozen_core": {
+    "sessions": ["ASIA_7PM", "LONDON_2AM", "NEW_YORK_9AM"],
+    "session_times_unchanged": true,
+    "sweep_reclaim_bos_logic_unchanged": true,
+    "stop_target_time_exit_unchanged": true,
+    "one_global_position": true,
+    "no_threshold_search": true,
+    "no_session_time_search": true
+  },
+  "primary_arms": [
+    "P0_TUE_FRI_ALL",
+    "P1_MON_FRI_ALL",
+    "P2_TUE_FRI_NO_ASIA",
+    "P3_MON_FRI_NO_ASIA"
+  ],
+  "conditional_session_decomposition": [
+    "LONDON_ONLY",
+    "NEW_YORK_ONLY",
+    "ASIA_ONLY",
+    "LONDON_NEW_YORK",
+    "LONDON_ASIA",
+    "ASIA_NEW_YORK"
+  ],
+  "promotion_requirements": {
+    "positive_net_r": true,
+    "positive_one_pip_each_side_expectancy": true,
+    "positive_years_minimum": 3,
+    "latest_year_non_negative": true,
+    "paired_date_block_interval_above_zero": true,
+    "no_single_year_majority_of_positive_net": true
+  },
+  "independent_review_required": true,
+  "deployment_authorized": false
+}

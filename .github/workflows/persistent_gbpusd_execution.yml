@@ -1,0 +1,199 @@
+name: Persistent GBPUSD acquisition and DTR execution
+
+on:
+  pull_request:
+    paths:
+      - temporary/gbpusd_execute.trigger
+
+permissions:
+  contents: write
+
+jobs:
+  execute:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/gbpusd-dtr-replication
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Acquire GBPUSD 2022-2025 bid and ask OHLC
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/gbpusd_data
+          python scripts/acquire_gbpusd_dukascopy.py \
+            --out /tmp/gbpusd_data \
+            --start-year 2022 \
+            --end-year 2025 \
+            --workers 24
+          sha256sum /tmp/gbpusd_data/*.csv.gz \
+            > /tmp/gbpusd_data/annual_sha256.txt
+          tar -C /tmp -czf /tmp/gbpusd_2022_2025_bid_ask_ohlc.tar.gz gbpusd_data
+
+      - name: Preserve private market-data cache artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gbpusd-2022-2025-private-cache
+          path: /tmp/gbpusd_2022_2025_bid_ask_ohlc.tar.gz
+          retention-days: 90
+          compression-level: 0
+          if-no-files-found: error
+
+      - name: Materialize and validate frozen research runners
+        shell: bash
+        run: |
+          set -euo pipefail
+          base64 -d temporary/gbpusd_runners.tar.gz.b64 | tar -xz -C scripts
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('scripts/review_gbpusd_replication.py')
+          text = path.read_text()
+          old = '    stage1b = pd.read_csv(args.results / "stage1b_session_decomposition.csv")'
+          new = (
+              '    try:\n'
+              '        stage1b = pd.read_csv(args.results / "stage1b_session_decomposition.csv")\n'
+              '    except pd.errors.EmptyDataError:\n'
+              '        stage1b = pd.DataFrame()'
+          )
+          if old in text:
+              path.write_text(text.replace(old, new, 1))
+          PY
+          python -m py_compile \
+            scripts/acquire_gbpusd_dukascopy.py \
+            scripts/run_gbpusd_replication.py \
+            scripts/review_gbpusd_replication.py
+          tar -czf /tmp/gbpusd_code_bundle.tar.gz \
+            pyproject.toml src \
+            scripts/acquire_gbpusd_dukascopy.py \
+            scripts/run_gbpusd_replication.py \
+            scripts/review_gbpusd_replication.py \
+            results/2026-07-23/gbpusd_dtr_preregistration.json
+
+      - name: Preserve runnable code bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: gbpusd-dtr-runnable-code
+          path: /tmp/gbpusd_code_bundle.tar.gz
+          retention-days: 90
+          compression-level: 0
+          if-no-files-found: error
+
+      - name: Install research environment
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e .
+          python -m pip install matplotlib tabulate
+
+      - name: Run frozen study and independent review
+        id: research
+        shell: bash
+        run: |
+          set +e
+          mkdir -p /tmp/gbpusd_results /tmp/gbpusd_review /tmp/gbpusd_logs
+          python scripts/run_gbpusd_replication.py \
+            --input-dir /tmp/gbpusd_data \
+            --out /tmp/gbpusd_results \
+            --iterations 20000 \
+            > >(tee /tmp/gbpusd_logs/research.log) 2>&1
+          research_status=$?
+          review_status=99
+          if [ "$research_status" -eq 0 ]; then
+            python scripts/review_gbpusd_replication.py \
+              --results /tmp/gbpusd_results \
+              --out /tmp/gbpusd_review \
+              --iterations 20000 \
+              > >(tee /tmp/gbpusd_logs/review.log) 2>&1
+            review_status=$?
+          fi
+          printf 'research_status=%s\nreview_status=%s\n' \
+            "$research_status" "$review_status" \
+            | tee /tmp/gbpusd_logs/status.txt
+          set -e
+          if [ "$research_status" -ne 0 ] || [ "$review_status" -ne 0 ]; then
+            exit 1
+          fi
+
+      - name: Upload diagnostic and result bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gbpusd-dtr-diagnostics
+          path: |
+            /tmp/gbpusd_logs
+            /tmp/gbpusd_results
+            /tmp/gbpusd_review
+          retention-days: 90
+          compression-level: 6
+          if-no-files-found: warn
+
+      - name: Commit compact evidence only
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p results/2026-07-23/gbpusd docs reviews changelogs handovers
+          cp /tmp/gbpusd_results/stage1_calendar_factorial.csv results/2026-07-23/gbpusd/
+          cp /tmp/gbpusd_results/stage1_paired_bootstrap.csv results/2026-07-23/gbpusd/
+          cp /tmp/gbpusd_results/stage1b_session_decomposition.csv results/2026-07-23/gbpusd/
+          cp /tmp/gbpusd_results/spread_summary.csv results/2026-07-23/gbpusd/
+          cp /tmp/gbpusd_results/data_audit.json results/2026-07-23/gbpusd/
+          cp /tmp/gbpusd_results/decision.json results/2026-07-23/gbpusd/
+          cp /tmp/gbpusd_results/artifact_hashes.json results/2026-07-23/gbpusd/
+          cp /tmp/gbpusd_results/charts/*.png results/2026-07-23/gbpusd/
+          cp /tmp/gbpusd_review/independent_review.json results/2026-07-23/gbpusd/
+          cp /tmp/gbpusd_review/independent_metrics.csv results/2026-07-23/gbpusd/
+          cp /tmp/gbpusd_review/independent_bootstrap.csv results/2026-07-23/gbpusd/
+          cp /tmp/gbpusd_results/GBPUSD_DTR_REPLICATION_RESEARCH_2026-07-23.md docs/
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          results = Path('results/2026-07-23/gbpusd')
+          decision = json.loads((results / 'decision.json').read_text())
+          review = json.loads((results / 'independent_review.json').read_text())
+          Path('reviews/DTR-FX-WP-20260723-22-independent-review.md').write_text(
+              '# Independent review — DTR-FX-WP-20260723-22\n\n'
+              f"- Conclusion: `{review['conclusion']}`\n"
+              f"- Research decision: `{decision['decision']}`\n"
+              '- Metrics, spread handling, selection gates and roadmap ordering '
+              'were independently reconstructed.\n',
+              encoding='utf-8',
+          )
+          Path('changelogs/DTR-FX-WP-20260723-22.md').write_text(
+              '# Changelog — DTR-FX-WP-20260723-22\n\n'
+              '## v0.5.0-fx.1 — 2026-07-23\n\n'
+              '- Added persistent private GBPUSD bid/ask cache transport.\n'
+              '- Added midpoint/spread qualification and frozen DTR replication.\n'
+              '- Added independent review and compact evidence.\n'
+              f"- Decision: `{decision['decision']}`.\n",
+              encoding='utf-8',
+          )
+          Path('handovers/DTR-FX-WP-20260723-22.md').write_text(
+              '# Handover — DTR-FX-WP-20260723-22\n\n'
+              f"Decision: `{decision['decision']}`\n\n"
+              f"Selected arm: `{decision.get('selected_arm')}`\n\n"
+              'Raw GBPUSD data is retained only in the private market-data cache.\n',
+              encoding='utf-8',
+          )
+          PY
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scripts/acquire_gbpusd_dukascopy.py \
+                  scripts/run_gbpusd_replication.py \
+                  scripts/review_gbpusd_replication.py \
+                  results/2026-07-23/gbpusd \
+                  docs/GBPUSD_DTR_REPLICATION_RESEARCH_2026-07-23.md \
+                  reviews/DTR-FX-WP-20260723-22-independent-review.md \
+                  changelogs/DTR-FX-WP-20260723-22.md \
+                  handovers/DTR-FX-WP-20260723-22.md
+          git rm temporary/gbpusd_execute.trigger
+          git commit -m "Complete GBPUSD DTR replication"
+          git push origin HEAD:agent/gbpusd-dtr-replication

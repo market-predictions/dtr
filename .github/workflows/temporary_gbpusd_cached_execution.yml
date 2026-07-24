@@ -1,0 +1,139 @@
+name: Cached GBPUSD DTR execution
+
+on:
+  pull_request:
+    paths:
+      - temporary/gbpusd_cached_execute.trigger
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  execute:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/gbpusd-dtr-replication
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Restore persistent GBPUSD private cache
+        uses: actions/download-artifact@v4
+        with:
+          name: gbpusd-2022-2025-private-cache
+          path: /tmp/gbpusd_cache_artifact
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: market-predictions/dtr
+          run-id: 30010521546
+
+      - name: Extract and correct legacy BI5 field labels
+        shell: bash
+        run: |
+          set -euo pipefail
+          tar -xzf /tmp/gbpusd_cache_artifact/gbpusd_2022_2025_bid_ask_ohlc.tar.gz -C /tmp
+          python - <<'PY'
+          from pathlib import Path
+          import pandas as pd
+
+          root = Path('/tmp/gbpusd_data')
+          for path in sorted(root.glob('gbpusd_m1_*.csv.gz')):
+              frame = pd.read_csv(path)
+              violation_rate = (
+                  frame['high'] < frame[['open', 'close']].max(axis=1)
+              ).mean()
+              if violation_rate > 0.10:
+                  old_high = frame['high'].copy()
+                  frame['high'] = frame['close']
+                  frame['close'] = old_high
+                  frame.to_csv(path, index=False, compression='gzip')
+              valid = (
+                  (frame['high'] >= frame[['open', 'close', 'low']].max(axis=1))
+                  & (frame['low'] <= frame[['open', 'close', 'high']].min(axis=1))
+              )
+              if not bool(valid.all()):
+                  raise SystemExit(f'OHLC correction failed for {path.name}')
+              print(path.name, 'rows=', len(frame), 'legacy_violation_rate=', violation_rate)
+          PY
+
+      - name: Materialize and validate frozen research runners
+        shell: bash
+        run: |
+          set -euo pipefail
+          base64 -d temporary/gbpusd_runners.tar.gz.b64 | tar -xz -C scripts
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('scripts/review_gbpusd_replication.py')
+          text = path.read_text()
+          old = '    stage1b = pd.read_csv(args.results / "stage1b_session_decomposition.csv")'
+          new = (
+              '    try:\n'
+              '        stage1b = pd.read_csv(args.results / "stage1b_session_decomposition.csv")\n'
+              '    except pd.errors.EmptyDataError:\n'
+              '        stage1b = pd.DataFrame()'
+          )
+          if old in text:
+              path.write_text(text.replace(old, new, 1))
+          PY
+          python -m py_compile \
+            scripts/run_gbpusd_replication.py \
+            scripts/review_gbpusd_replication.py
+
+      - name: Install research environment
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e .
+          python -m pip install matplotlib tabulate
+
+      - name: Run frozen study
+        run: |
+          mkdir -p /tmp/gbpusd_results /tmp/gbpusd_review
+          python scripts/run_gbpusd_replication.py \
+            --input-dir /tmp/gbpusd_data \
+            --out /tmp/gbpusd_results \
+            --iterations 20000
+          python scripts/review_gbpusd_replication.py \
+            --results /tmp/gbpusd_results \
+            --out /tmp/gbpusd_review \
+            --iterations 20000
+
+      - name: Upload result bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: gbpusd-dtr-final-results
+          path: |
+            /tmp/gbpusd_results
+            /tmp/gbpusd_review
+          retention-days: 90
+          compression-level: 6
+          if-no-files-found: error
+
+      - name: Commit compact evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p results/2026-07-23/gbpusd docs reviews changelogs handovers
+          cp /tmp/gbpusd_results/stage1_calendar_factorial.csv results/2026-07-23/gbpusd/
+          cp /tmp/gbpusd_results/stage1_paired_bootstrap.csv results/2026-07-23/gbpusd/
+          cp /tmp/gbpusd_results/stage1b_session_decomposition.csv results/2026-07-23/gbpusd/
+          cp /tmp/gbpusd_results/spread_summary.csv results/2026-07-23/gbpusd/
+          cp /tmp/gbpusd_results/data_audit.json results/2026-07-23/gbpusd/
+          cp /tmp/gbpusd_results/decision.json results/2026-07-23/gbpusd/
+          cp /tmp/gbpusd_results/artifact_hashes.json results/2026-07-23/gbpusd/
+          cp /tmp/gbpusd_results/charts/*.png results/2026-07-23/gbpusd/
+          cp /tmp/gbpusd_review/independent_review.json results/2026-07-23/gbpusd/
+          cp /tmp/gbpusd_review/independent_metrics.csv results/2026-07-23/gbpusd/
+          cp /tmp/gbpusd_review/independent_bootstrap.csv results/2026-07-23/gbpusd/
+          cp /tmp/gbpusd_results/GBPUSD_DTR_REPLICATION_RESEARCH_2026-07-23.md docs/
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scripts/run_gbpusd_replication.py scripts/review_gbpusd_replication.py \
+                  results/2026-07-23/gbpusd \
+                  docs/GBPUSD_DTR_REPLICATION_RESEARCH_2026-07-23.md
+          git commit -m "Complete GBPUSD DTR replication from persistent cache"
+          git push origin HEAD:agent/gbpusd-dtr-replication

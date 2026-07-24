@@ -1,0 +1,23 @@
+{
+  "GBPUSD_DTR_REPLICATION_RESEARCH_2026-07-23.md": "a93b6376d564daed64bc1b12d8305b34d7aaaa24aefd23a29bdfca26de252da9",
+  "P0_TUE_FRI_ALL__trades.csv": "bd85a37ec674916847ad48a5a3efaa761d190c8fc3d001c2dc9757aba5a676e7",
+  "P1_MON_FRI_ALL__trades.csv": "35e4ef4cb7da55f4575952425dc3c1acf8d6fe3a5e6d6c0560361000fd92423e",
+  "P2_TUE_FRI_NO_ASIA__trades.csv": "b7f06ca0210d48ee789a00bc5b4b45e90d719aa2e8c624d2430cbce5f9caf19e",
+  "P3_MON_FRI_NO_ASIA__trades.csv": "aeecded93cb9a5a03a934128d74aaca909f5bed893422c73221b933d5e10e2c0",
+  "S1_LONDON_ONLY__trades.csv": "78b86f52c382c3e2acc34e78a9079e77ae5722e3dc535354f6665ee283889d3f",
+  "S2_NEW_YORK_ONLY__trades.csv": "0c3beda517db6e33e3fe699b57adb6cabc35c4d3d6fa09fcd59645d9e5468cf9",
+  "S3_ASIA_ONLY__trades.csv": "31760f5aa6f7ddf71bec46a5874205fc0936597fd288158f8edb22af17683f9d",
+  "S4_LONDON_NEW_YORK__trades.csv": "b7f06ca0210d48ee789a00bc5b4b45e90d719aa2e8c624d2430cbce5f9caf19e",
+  "S5_LONDON_ASIA__trades.csv": "0e2ea3f73ae7075beac1c1c64da5b64107b47b34c032836e640d455bf6539bfd",
+  "S6_ASIA_NEW_YORK__trades.csv": "1fea018ad93465b726eda91f1709f96c6287297652ab38ae7ab5689b110d36e7",
+  "charts/gbpusd_dtr_annual_net_r.png": "468ba361848b0a5cb630cf2f84338466b0c78efd7d4c243f6d711590426b231a",
+  "charts/gbpusd_dtr_cumulative_r.png": "1b1c32b90bab739b5cf5f1b97e86c2103feb43f41a2b26dadb0cbc179efa5557",
+  "data_audit.json": "6e700f4aff52f5317097833785e9382981dcb6818210e64563feed0fac05719b",
+  "decision.json": "33469d89dfdfb560a0f7352f078193cc068ff8b3ab2ba8c20d993fbfd53f21a2",
+  "signal_features.csv.gz": "dfbf39b8d32c62b10fc2f634f5063f1251055dc976354f5377a5400965989e0c",
+  "signal_trade_cache.csv.gz": "541bd2e11ed92262a313df52952be91fda6ae005f370c69110524051de3b8a37",
+  "spread_summary.csv": "71f5fbc7877758c3215299cacafe320b42dfa0dbd42b9183846c180cf04531cb",
+  "stage1_calendar_factorial.csv": "57b0d8a79192b9693f8646192f3f8d4c7ab026e58774ddb808ef10aa7241c52a",
+  "stage1_paired_bootstrap.csv": "d47e0f40e22d9b58cfe49d038e076287ef832d777d15bc9a627babb6f882808c",
+  "stage1b_session_decomposition.csv": "749475d861191b545af35c93b0489d29a89f1391e918180fccc7905727c9979d"
+}
