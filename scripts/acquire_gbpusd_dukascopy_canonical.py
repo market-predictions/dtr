@@ -48,7 +48,7 @@ def fetch_day(day: dt.date, side: str) -> tuple[dt.date, list[tuple[object, ...]
             payload = lzma.decompress(raw)
             if len(payload) % RECORD.size:
                 raise ValueError(f"record-size mismatch {len(payload)}")
-            midnight = dt.datetime.combine(day, dt.time(), tzinfo=dt.timezone.utc)
+            midnight = dt.datetime.combine(day, dt.time(), tzinfo=dt.UTC)
             rows: list[tuple[object, ...]] = []
             for offset in range(0, len(payload), RECORD.size):
                 seconds, open_, close, low, high, volume = RECORD.unpack_from(
@@ -141,7 +141,7 @@ def main() -> None:
     manifest = {
         "symbol": SYMBOL,
         "period": [args.start_year, args.end_year],
-        "generated_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
+        "generated_utc": dt.datetime.now(dt.UTC).isoformat(),
         "canonical_ohlc": True,
         "annual_audits": audits,
     }
