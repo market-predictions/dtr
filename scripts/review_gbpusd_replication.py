@@ -43,7 +43,11 @@ def metrics(path: Path) -> dict[str, float | int]:
         "max_drawdown_r": dd,
         "return_dd": net / dd if dd else math.nan,
     }
-    entry = pd.to_datetime(frame["entry_time"]) if not frame.empty else pd.Series(dtype="datetime64[ns]")
+    entry = (
+        pd.to_datetime(frame["entry_time"])
+        if not frame.empty
+        else pd.Series(dtype="datetime64[ns]")
+    )
     for year in YEARS:
         result[f"net_{year}"] = (
             float(frame.loc[entry.dt.year == year, "pnl_r"].sum()) if not frame.empty else 0.0
@@ -56,7 +60,9 @@ def assert_close(actual: float, expected: float, label: str) -> None:
         raise AssertionError(f"{label}: {actual} != {expected}")
 
 
-def paired(candidate: pd.DataFrame, baseline: pd.DataFrame, iterations: int, seed: int) -> dict[str, float]:
+def paired(
+    candidate: pd.DataFrame, baseline: pd.DataFrame, iterations: int, seed: int
+) -> dict[str, float]:
     def blocks(frame: pd.DataFrame) -> pd.Series:
         if frame.empty:
             return pd.Series(dtype=float)
@@ -131,13 +137,21 @@ def main() -> None:
             continue
         candidate = pd.read_csv(args.results / f"{row['arm']}__trades.csv")
         result = paired(candidate, p0, args.iterations, args.seed + index)
-        assert_close(result["observed"], float(row["observed_net_difference_r"]), f"{row['arm']}/observed")
+        assert_close(
+            result["observed"],
+            float(row["observed_net_difference_r"]),
+            f"{row['arm']}/observed",
+        )
         bootstrap_rows.append({"stage": "stage1", "arm": row["arm"], **result})
     if not stage1b.empty:
         for index, row in stage1b.iterrows():
             candidate = pd.read_csv(args.results / f"{row['arm']}__trades.csv")
             result = paired(candidate, p0, args.iterations, args.seed + 100 + index)
-            assert_close(result["observed"], float(row["observed_net_difference_r"]), f"{row['arm']}/observed")
+            assert_close(
+                result["observed"],
+                float(row["observed_net_difference_r"]),
+                f"{row['arm']}/observed",
+            )
             bootstrap_rows.append({"stage": "stage1b", "arm": row["arm"], **result})
     checks["paired_effects_reproduced"] = True
 
@@ -167,11 +181,14 @@ def main() -> None:
             "no_deployment": True,
         },
         "interpretation": (
-            "Metrics and selection logic were reconstructed independently from saved trade streams. "
-            "The result remains exploratory cross-asset evidence and does not establish deployability."
+            "Metrics and selection logic were reconstructed independently from saved "
+            "trade streams. The result remains exploratory cross-asset evidence and "
+            "does not establish deployability."
         ),
     }
-    (args.out / "independent_review.json").write_text(json.dumps(review, indent=2), encoding="utf-8")
+    (args.out / "independent_review.json").write_text(
+        json.dumps(review, indent=2), encoding="utf-8"
+    )
     pd.DataFrame(metric_rows).to_csv(args.out / "independent_metrics.csv", index=False)
     pd.DataFrame(bootstrap_rows).to_csv(args.out / "independent_bootstrap.csv", index=False)
     print(json.dumps(review, indent=2))
