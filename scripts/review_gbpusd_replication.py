@@ -107,9 +107,8 @@ def main() -> None:
         "midpoint_data_synchronized": audit["synchronized_rows"] > 1_000_000,
         "spread_non_negative": audit["median_spread_pips"] >= 0,
         "deployment_blocked": bool(decision["no_deployment_authorization"]),
-        "session_stage_conditional": bool(decision["session_decomposition_run"]) == bool(
-            not stage1["gate_all"].fillna(False).any()
-        ),
+        "session_stage_conditional": bool(decision["session_decomposition_run"])
+        == bool(not stage1["gate_all"].fillna(False).any()),
     }
 
     metric_rows: list[dict[str, object]] = []

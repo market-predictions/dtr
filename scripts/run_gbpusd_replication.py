@@ -10,13 +10,6 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-
-from dtr_lab.research import engine
-from dtr_lab.research.cross_market import (
-    USA500_PROXY_SPEC,
-    build_covered_session_table,
-    classify_proxy_gaps,
-)
 from run_usa500_baseline_discovery import (
     attach_gap_metadata,
     block_bootstrap,
@@ -26,6 +19,13 @@ from run_usa500_baseline_discovery import (
     sanitize_sessions,
     sequence,
     simulate_all,
+)
+
+from dtr_lab.research import engine
+from dtr_lab.research.cross_market import (
+    USA500_PROXY_SPEC,
+    build_covered_session_table,
+    classify_proxy_gaps,
 )
 
 STUDY_ID = "DTR-FX-WP-20260723-22"
@@ -113,7 +113,9 @@ def read_annual_files(input_dir: Path, side: str) -> tuple[pd.DataFrame, list[di
 def build_midpoint(input_dir: Path) -> tuple[pd.DataFrame, pd.DataFrame, dict[str, object]]:
     bid, bid_audit = read_annual_files(input_dir, "bid")
     ask, ask_audit = read_annual_files(input_dir, "ask")
-    merged = bid.merge(ask, on="timestamp", how="inner", suffixes=("_bid", "_ask"), validate="one_to_one")
+    merged = bid.merge(
+        ask, on="timestamp", how="inner", suffixes=("_bid", "_ask"), validate="one_to_one"
+    )
     merged["spread_close"] = merged["close_ask"] - merged["close_bid"]
     invalid_spread = merged["spread_close"] < 0
     invalid_count = int(invalid_spread.sum())
@@ -131,9 +133,8 @@ def build_midpoint(input_dir: Path) -> tuple[pd.DataFrame, pd.DataFrame, dict[st
     )
     midpoint = midpoint.sort_values("timestamp").drop_duplicates("timestamp").reset_index(drop=True)
 
-    valid_ohlc = (
-        (midpoint["high"] >= midpoint[["open", "close", "low"]].max(axis=1))
-        & (midpoint["low"] <= midpoint[["open", "close", "high"]].min(axis=1))
+    valid_ohlc = (midpoint["high"] >= midpoint[["open", "close", "low"]].max(axis=1)) & (
+        midpoint["low"] <= midpoint[["open", "close", "high"]].min(axis=1)
     )
     if not valid_ohlc.all():
         raise ValueError("GBPUSD midpoint OHLC integrity failed")
@@ -250,7 +251,9 @@ def summarize(
         ),
     }
     entry_times = (
-        pd.to_datetime(trades["entry_time"]) if not trades.empty else pd.Series(dtype="datetime64[ns]")
+        pd.to_datetime(trades["entry_time"])
+        if not trades.empty
+        else pd.Series(dtype="datetime64[ns]")
     )
     year_nets: list[float] = []
     for year in YEARS:
@@ -376,7 +379,9 @@ def write_report(
     )
 
 
-def create_charts(out: Path, arm_trades: dict[str, pd.DataFrame], stage1: pd.DataFrame, stage1b: pd.DataFrame) -> None:
+def create_charts(
+    out: Path, arm_trades: dict[str, pd.DataFrame], stage1: pd.DataFrame, stage1b: pd.DataFrame
+) -> None:
     chart_dir = out / "charts"
     chart_dir.mkdir(exist_ok=True)
     selected = list(PRIMARY_ARMS)
@@ -508,9 +513,7 @@ def main() -> None:
                 base_slippage_pips_each_side=float(audit["base_slippage_pips_each_side"]),
             )
             row.update(
-                paired_date_bootstrap(
-                    trades, p0_trades, args.iterations, args.seed + 200 + index
-                )
+                paired_date_bootstrap(trades, p0_trades, args.iterations, args.seed + 200 + index)
             )
             row.update(block_bootstrap(trades, "date", args.iterations, args.seed + 300 + index))
             session_rows.append(row)
@@ -588,9 +591,9 @@ def main() -> None:
     spread_summary.to_csv(args.out / "spread_summary.csv", index=False)
     (args.out / "data_audit.json").write_text(json.dumps(audit, indent=2), encoding="utf-8")
     (args.out / "decision.json").write_text(json.dumps(decision, indent=2), encoding="utf-8")
-    pd.DataFrame([asdict(trade) | {"signal_id": signal_id} for signal_id, trade in cached.items()]).to_csv(
-        args.out / "signal_trade_cache.csv.gz", index=False, compression="gzip"
-    )
+    pd.DataFrame(
+        [asdict(trade) | {"signal_id": signal_id} for signal_id, trade in cached.items()]
+    ).to_csv(args.out / "signal_trade_cache.csv.gz", index=False, compression="gzip")
     features.to_csv(args.out / "signal_features.csv.gz", index=False, compression="gzip")
     for arm, trades in arm_trades.items():
         trades.to_csv(args.out / f"{arm}__trades.csv", index=False)
@@ -603,9 +606,7 @@ def main() -> None:
         for path in sorted(args.out.rglob("*"))
         if path.is_file() and path.name != "artifact_hashes.json"
     }
-    (args.out / "artifact_hashes.json").write_text(
-        json.dumps(hashes, indent=2), encoding="utf-8"
-    )
+    (args.out / "artifact_hashes.json").write_text(json.dumps(hashes, indent=2), encoding="utf-8")
     print(json.dumps(decision, indent=2))
     print(stage1.to_string(index=False))
     if not stage1b.empty:
