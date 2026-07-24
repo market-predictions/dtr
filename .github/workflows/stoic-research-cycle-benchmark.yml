@@ -13,6 +13,18 @@ on:
       - "src/stoic_123_lab/cost_repricing.py"
       - "src/stoic_123_lab/reporting.py"
       - "src/stoic_123_lab/usa500_rth_study.py"
+  pull_request:
+    branches:
+      - agent/stoic-usa500-forward-2015plus
+    paths:
+      - ".github/workflows/stoic-research-cycle-benchmark.yml"
+      - "scripts/run_stoic_usa500_accelerated.py"
+      - "scripts/compare_stoic_acceleration_parity.py"
+      - "src/stoic_123_lab/research_cache.py"
+      - "src/stoic_123_lab/research_runtime.py"
+      - "src/stoic_123_lab/cost_repricing.py"
+      - "src/stoic_123_lab/reporting.py"
+      - "src/stoic_123_lab/usa500_rth_study.py"
   workflow_dispatch:
     inputs:
       source_run_id:
