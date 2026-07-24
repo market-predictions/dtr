@@ -1,0 +1,5 @@
+partition,candidate,replicates,full_expectancy_r,matched_median_expectancy_r,matched_p95_expectancy_r,full_expectancy_exceeds_matched_p95,minimum_event_match_fraction,full_median_hold_minutes,matched_median_hold_minutes,matched_to_full_hold_ratio,matched_control_comparable,matched_control_passed
+fresh_history,RTH_LONG_EMA_BREAK,50,-0.03537039683600319,-0.011961496007571636,0.09300838489876241,False,0.99235807860262,57.5,52.0,0.9043478260869565,True,False
+fresh_history,RTH_LONG_FULL,50,-0.17512816176483847,-0.058395616477145584,0.2495480679556971,False,1.0,91.0,115.75,1.271978021978022,False,False
+fresh_holdout,RTH_LONG_EMA_BREAK,50,-0.20083739810125134,-0.15065714756564036,-0.03189637096051807,False,1.0,50.5,42.0,0.8316831683168316,True,False
+fresh_holdout,RTH_LONG_FULL,50,-0.22945979127239394,-0.2348804918482774,0.12464465769499047,False,1.0,85.0,52.25,0.6147058823529412,False,False
