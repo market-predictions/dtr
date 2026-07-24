@@ -1,6 +1,11 @@
 name: GBPUSD B1 older source qualification
 
 on:
+  push:
+    branches:
+      - agent/gbpusd-b1-contract-reconciliation
+    paths:
+      - temporary/gbpusd_b1_older_source_qualification.trigger
   pull_request:
     paths:
       - temporary/gbpusd_b1_older_source_qualification.trigger
