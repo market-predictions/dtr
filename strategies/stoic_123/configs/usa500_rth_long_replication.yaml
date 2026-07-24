@@ -1,0 +1,109 @@
+study_id: STOIC123-WP-20260724-05
+frozen_on: 2026-07-24
+status: SOURCE_QUALIFICATION_PENDING
+matched_control_replicates: 50
+
+hypotheses:
+  primary:
+    id: RTH_LONG_EMA_BREAK
+    direction_mode: long_only
+    entry_model: ema_break
+  secondary:
+    id: RTH_LONG_FULL_123
+    direction_mode: long_only
+    entry_model: full_123
+  diagnostic:
+    id: RTH_LONG_EMA_BREAK_RETEST
+    direction_mode: long_only
+    entry_model: ema_break_retest
+  source_arm_id: S123_M0_NO_MAP_CONTROL
+  phase1_config_path: strategies/stoic_123/configs/phase1.yaml
+  phase1_expected_sha256: 5d6909bd5740e1cdea9bd3d47a9818289a6faa8b9a61338726afdc53289ff805
+  parameter_changes_allowed: false
+
+session_contract:
+  source_timezone: UTC
+  session_timezone: America/New_York
+  entry_window_start_inclusive: "09:30:00"
+  entry_window_end_exclusive: "16:00:00"
+  entry_filter_only: true
+  management_and_exits: full_session
+  daylight_saving_rule: IANA_America_New_York
+  session_subdivision_search_allowed: false
+
+source_contract:
+  classification: Dukascopy USA500 bid-CFD S&P-500 proxy; not CME ES futures
+  symbol: USA500IDXUSD
+  price_stream: bid_only
+  signal_and_execution_prices: same_bid_ohlc_stream
+  execution_tick_size: 0.25
+  point_value_usd: 50.0
+  commission_per_side_usd: 2.25
+  source_quote_increment: 0.001
+  inactive_definition: volume_lte_zero
+  timestamp_basis: UTC converted to naive UTC before existing resampling
+  partitions:
+    fresh_history:
+      start_inclusive_utc: 2012-01-01
+      end_exclusive_utc: 2014-01-01
+      labels: [2012, 2013]
+      expected_sha256_by_label:
+        2012: PENDING_SOURCE_QUALIFICATION
+        2013: PENDING_SOURCE_QUALIFICATION
+    fresh_holdout:
+      start_inclusive_utc: 2014-01-01
+      end_exclusive_utc: 2015-01-01
+      labels: [2014]
+      expected_sha256_by_label:
+        2014: PENDING_SOURCE_QUALIFICATION
+
+comparators:
+  - full_session_long_full_123
+  - overnight_entry_long_full_123
+  - rth_long_full_123
+  - rth_long_ema_break
+  - rth_long_ema_break_retest
+  - fifty_deterministic_rth_matched_time_long_controls_per_candidate
+
+execution_tests:
+  baseline_slippage_ticks_each_side: 1.0
+  stressed_slippage_ticks_each_side: 2.0
+  entry_delays_minutes: [1, 5]
+  max_hold_minutes: 1440
+  management_direction: both
+
+cross_asset_decision_screen:
+  primary_all_required:
+    - fresh_history_trade_count_gte_250
+    - fresh_history_expectancy_positive
+    - fresh_history_date_block_lo95_positive
+    - both_fresh_history_years_positive
+    - largest_positive_year_share_lte_0_60
+    - fresh_history_two_tick_expectancy_positive
+    - fresh_history_one_minute_delay_expectancy_positive
+    - fresh_history_return_to_drawdown_gte_1_50
+    - fresh_history_max_drawdown_lte_50R
+    - fresh_holdout_trade_count_gte_75
+    - fresh_holdout_expectancy_positive
+    - fresh_holdout_date_block_lo95_positive
+    - fresh_holdout_two_tick_expectancy_positive
+    - primary_matched_time_control_passes
+  secondary_additional_required:
+    - fresh_history_full_sequence_expectancy_positive
+    - fresh_holdout_full_sequence_expectancy_positive
+    - full_sequence_mechanism_value_over_ema_break
+    - secondary_matched_time_control_passes
+  mechanism_value_rule: >-
+    Full RTH 1-2-3 must exceed RTH EMA-break-only by at least 0.05R expectancy
+    or 20% return-to-drawdown on fresh history, and must not underperform EMA
+    break on the 2014 holdout.
+  matched_control_rule: >-
+    Every replicate must cover at least 90% of source events, median holding
+    period ratio must remain between 0.75 and 1.25, and candidate expectancy
+    must exceed the 95th percentile of matched-control expectancy.
+
+restrictions:
+  - No session, weekday, volatility, EMA-length, base, retest, stop, target, delay, timeframe, exit, or matching-rule search.
+  - No pooling with NQ or USATECH returns.
+  - No proxy result may be represented as CME ES futures evidence.
+  - No Pine port, sizing, alerts, paper deployment, or live trading authorization.
