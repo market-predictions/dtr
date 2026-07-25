@@ -25,7 +25,7 @@ research = [
   "matplotlib>=3.9,<4",
   "scipy>=1.14,<2",
   "statsmodels>=0.14,<1",
-  "scikit-learn>=1.5,<2",
+  "scikit-learn==1.9.0",
 ]
 dev = [
   "pytest>=8.3,<9",
@@ -33,7 +33,7 @@ dev = [
   "ruff==0.15.22",
   "mypy>=1.11,<2",
   "pandas-stubs>=2.2",
-  "scikit-learn>=1.5,<2",
+  "scikit-learn==1.9.0",
 ]
 
 [project.scripts]
