@@ -1,14 +1,14 @@
 name: Asian Sweep Ten-Pair FX Discovery
 
 on:
-  pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
   actions: read
 
 concurrency:
-  group: asia-sweep-fx-ten-pair-${{ github.event.pull_request.number || github.ref }}
+  group: asia-sweep-fx-ten-pair-${{ github.ref }}
   cancel-in-progress: true
 
 env:
@@ -17,9 +17,6 @@ env:
 jobs:
   focused_tests:
     name: Validate Asian Sweep FX implementation
-    if: >-
-      github.event_name == 'pull_request' &&
-      github.head_ref == 'agent/asia-sweep-fx-ten-pair'
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
