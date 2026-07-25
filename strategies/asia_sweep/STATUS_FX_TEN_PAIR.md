@@ -2,31 +2,58 @@
 
 Date: 2026-07-25  
 Work package: `AS-WP-20260725-10`  
-State: `DISCOVERY_RUN_PENDING_PNL_BLOCKED`
+State: `COMPLETE_DISCOVERY_FAILED_VALIDATION_BLOCKED`
 
-## Current question
+## Final decision
 
-Does a causally confirmed London rejection of the completed Asian range add positive 60-minute reversal value relative to matched non-rejection boundary breaches across ten FX pairs?
+`FAIL_DISCOVERY_STOP_BEFORE_MECHANISM_VALIDATION`
 
-## Fixed discovery scope
+A causally confirmed London rejection of the completed Asian range did not add positive 60-minute reversal value relative to matched non-rejection boundary breaches across the fixed ten-pair FX universe.
 
-- universe: EURUSD, GBPUSD, USDCHF, AUDUSD, NZDUSD, USDCAD, USDJPY, EURJPY, GBPJPY, EURGBP;
-- period: 2015–2019 only;
-- signal: synchronized active midpoint OHLC;
-- primary event: London `REJECTION` from the unchanged auction-state detector;
-- controls: five distinct-date non-rejection boundary events matched within pair/year/weekday/30-minute bucket;
-- endpoint: reversal-signed 60-minute midpoint return divided by Asian-range width;
-- inference: calendar-date block bootstrap and clustered sign permutation.
+## Primary evidence
 
-## Blocked
+- 2,498 matched rejection events;
+- 12,490 distinct-date matched controls;
+- mean event return: `+0.005890` Asian-range fractions;
+- mean control return: `+0.024507`;
+- mean event-minus-control effect: `-0.018617`;
+- 95% date-block interval: `[-0.046224, +0.008483]`;
+- one-sided clustered permutation p-value: `0.910809`;
+- positive pairs: `4 / 10`;
+- positive factor blocks: `1 / 4`.
 
-- 2020 onward outcome inspection;
+Five sample/breadth/concentration predicates passed. All five effect, inference and directional-breadth predicates failed.
+
+## Integrity status
+
+Complete and independently reconstructed:
+
+- exact five-control cardinality;
+- distinct control dates;
+- zero same-date leakage;
+- pair and factor attribution;
+- event-minus-control arithmetic;
+- clustered bootstrap and permutation;
+- all frozen gates.
+
+No implementation or source defect explains the negative result.
+
+## Current authorization
+
+Authorized:
+
+- retain the study as negative research evidence;
+- manually reproduce the frozen 2015–2019 run;
+- reuse the generic source and matched-control infrastructure for genuinely new preregistered hypotheses.
+
+Blocked:
+
+- 2020–2021 mechanism validation;
 - executable entries, stops, targets, costs and strategy P&L;
-- pair/session/direction/weekday/range-regime selection;
-- PDH/PDL cluster rescue;
-- Pine and deployment.
+- 2022–2025 outcome inspection;
+- pair, direction, weekday or regime selection;
+- NZDUSD or positive-pair rescue;
+- PDH/PDL-cluster rescue within this trial;
+- Pine, alerts, sizing, paper trading and deployment.
 
-## Next state transition
-
-- pass: authorize unchanged 2020–2021 mechanism validation;
-- fail: stop this formulation before execution research.
+See `FINAL_DECISION_FX_TEN_PAIR.md` for the complete audit record.
