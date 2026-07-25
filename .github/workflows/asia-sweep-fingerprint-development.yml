@@ -40,17 +40,20 @@ jobs:
         run: |
           pytest \
             strategies/asia_sweep/tests/test_fingerprint_engine.py \
-            strategies/asia_sweep/tests/test_fingerprint_labels.py
+            strategies/asia_sweep/tests/test_fingerprint_labels.py \
+            strategies/asia_sweep/tests/test_fingerprint_performance.py
       - name: Lint fingerprint implementation
         run: |
           ruff check \
             src/dtr_lab/strategies/asia_sweep/fingerprint_engine.py \
             src/dtr_lab/strategies/asia_sweep/fingerprint_labels.py \
+            src/dtr_lab/strategies/asia_sweep/fingerprint_performance.py \
             src/dtr_lab/strategies/asia_sweep/fingerprint_report.py \
             scripts/run_asia_sweep_fingerprint.py \
             scripts/aggregate_asia_sweep_fingerprint.py \
             strategies/asia_sweep/tests/test_fingerprint_engine.py \
-            strategies/asia_sweep/tests/test_fingerprint_labels.py
+            strategies/asia_sweep/tests/test_fingerprint_labels.py \
+            strategies/asia_sweep/tests/test_fingerprint_performance.py
 
   development_pair:
     name: Development anatomy ${{ matrix.symbol }}
