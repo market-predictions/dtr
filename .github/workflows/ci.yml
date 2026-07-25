@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -74,11 +75,9 @@ jobs:
         run: pytest
 
   stacey_burke_source:
-    name: Qualify ${{ matrix.symbol }}
+    name: Reproduce source qualification ${{ matrix.symbol }}
     needs: test
-    if: >-
-      github.event_name == 'pull_request' &&
-      github.head_ref == 'agent/stacey-burke-fx-source-census'
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 240
     strategy:
@@ -200,12 +199,9 @@ jobs:
           fi
 
   stacey_burke_aggregate:
-    name: Aggregate Stacey Burke source gate
+    name: Reproduce Stacey Burke source gate
     needs: stacey_burke_source
-    if: >-
-      always() &&
-      github.event_name == 'pull_request' &&
-      github.head_ref == 'agent/stacey-burke-fx-source-census'
+    if: always() && github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -258,11 +254,9 @@ jobs:
         run: test "${{ steps.aggregate.outcome }}" = "success"
 
   stacey_burke_census:
-    name: Census ${{ matrix.symbol }}
+    name: Reproduce census ${{ matrix.symbol }}
     needs: stacey_burke_aggregate
-    if: >-
-      github.event_name == 'pull_request' &&
-      github.head_ref == 'agent/stacey-burke-fx-source-census'
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 120
     strategy:
@@ -308,7 +302,7 @@ jobs:
       - name: Enforce cached source availability
         run: test "${{ steps.source-cache.outputs.cache-hit }}" = "true"
 
-      - name: Run preregistered event census
+      - name: Reproduce preregistered event census
         run: |
           mkdir -p "${RUNNER_TEMP}/sb-census/${{ matrix.symbol }}"
           python -m stacey_burke_lab.event_census \
@@ -328,12 +322,9 @@ jobs:
           retention-days: 90
 
   stacey_burke_census_aggregate:
-    name: Aggregate Stacey Burke event census
+    name: Reproduce Stacey Burke event census
     needs: stacey_burke_census
-    if: >-
-      always() &&
-      github.event_name == 'pull_request' &&
-      github.head_ref == 'agent/stacey-burke-fx-source-census'
+    if: always() && github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -363,7 +354,7 @@ jobs:
           path: ${{ runner.temp }}/sb-census-inputs
           merge-multiple: true
 
-      - name: Build and enforce event census decision
+      - name: Build event census decision
         id: aggregate
         continue-on-error: true
         run: |
