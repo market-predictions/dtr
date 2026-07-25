@@ -38,15 +38,19 @@ jobs:
           pip install -e ".[dev]"
       - name: Run causal fingerprint tests
         run: |
-          pytest strategies/asia_sweep/tests/test_fingerprint_engine.py
+          pytest \
+            strategies/asia_sweep/tests/test_fingerprint_engine.py \
+            strategies/asia_sweep/tests/test_fingerprint_labels.py
       - name: Lint fingerprint implementation
         run: |
           ruff check \
             src/dtr_lab/strategies/asia_sweep/fingerprint_engine.py \
+            src/dtr_lab/strategies/asia_sweep/fingerprint_labels.py \
             src/dtr_lab/strategies/asia_sweep/fingerprint_report.py \
             scripts/run_asia_sweep_fingerprint.py \
             scripts/aggregate_asia_sweep_fingerprint.py \
-            strategies/asia_sweep/tests/test_fingerprint_engine.py
+            strategies/asia_sweep/tests/test_fingerprint_engine.py \
+            strategies/asia_sweep/tests/test_fingerprint_labels.py
 
   development_pair:
     name: Development anatomy ${{ matrix.symbol }}
