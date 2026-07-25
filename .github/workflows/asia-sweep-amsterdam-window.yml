@@ -1,0 +1,157 @@
+name: Asian Sweep Amsterdam 09-10 Confirmation
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: asia-sweep-amsterdam-0900-1000-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  QUALIFIED_SOURCE_RUN_ID: "30111481052"
+
+jobs:
+  focused_tests:
+    name: Validate Amsterdam-window implementation
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.head_ref == 'agent/asia-sweep-eu-0900-1000'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: Run focused tests
+        run: |
+          pytest \
+            strategies/asia_sweep/tests/test_auction_state.py \
+            strategies/asia_sweep/tests/test_auction_state_causal_regressions.py \
+            strategies/asia_sweep/tests/test_fx_ten_pair.py \
+            strategies/asia_sweep/tests/test_amsterdam_window.py
+
+  confirmation:
+    name: Confirmation ${{ matrix.symbol }}
+    needs: focused_tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        symbol: [EURUSD, GBPUSD]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+      - name: Restore qualified immutable FX source cache
+        id: source-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/sb-source/${{ matrix.symbol }}
+          key: stacey-burke-fx-v1-${{ matrix.symbol }}-2015-2026-07-24
+      - name: Download qualified source artifact on cache miss
+        if: steps.source-cache.outputs.cache-hit != 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: stacey-burke-fx-source-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/sb-source/${{ matrix.symbol }}
+          repository: market-predictions/dtr
+          run-id: ${{ env.QUALIFIED_SOURCE_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Enforce untouched 2020-2021 source availability
+        shell: bash
+        run: |
+          set -euo pipefail
+          symbol="${{ matrix.symbol }}"
+          lower="${symbol,,}"
+          for year in 2020 2021; do
+            test -s "${RUNNER_TEMP}/sb-source/${symbol}/${lower}_m1_bid_${year}.csv.gz"
+            test -s "${RUNNER_TEMP}/sb-source/${symbol}/${lower}_m1_ask_${year}.csv.gz"
+          done
+      - name: Run frozen Amsterdam-window confirmation
+        run: |
+          mkdir -p "${RUNNER_TEMP}/asia-amsterdam/${{ matrix.symbol }}"
+          python scripts/run_asia_sweep_amsterdam_window.py \
+            --data "${RUNNER_TEMP}/sb-source/${{ matrix.symbol }}" \
+            --symbol "${{ matrix.symbol }}" \
+            --start-year 2020 \
+            --end-year 2021 \
+            --out "${RUNNER_TEMP}/asia-amsterdam/${{ matrix.symbol }}"
+      - name: Upload compact pair evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: asia-sweep-amsterdam-0900-1000-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/asia-amsterdam/${{ matrix.symbol }}
+          if-no-files-found: warn
+          retention-days: 90
+
+  aggregate:
+    name: Enforce Amsterdam-window holdout gate
+    needs: confirmation
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+      - name: Download pair evidence
+        uses: actions/download-artifact@v4
+        with:
+          pattern: asia-sweep-amsterdam-0900-1000-*
+          path: ${{ runner.temp }}/asia-amsterdam-inputs
+          merge-multiple: false
+      - name: Build confirmation decision
+        id: gate
+        continue-on-error: true
+        run: |
+          python scripts/aggregate_asia_sweep_amsterdam_window.py \
+            --inputs "${RUNNER_TEMP}/asia-amsterdam-inputs" \
+            --out "${RUNNER_TEMP}/asia-amsterdam-decision"
+      - name: Upload confirmation decision
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: asia-sweep-amsterdam-0900-1000-decision
+          path: ${{ runner.temp }}/asia-amsterdam-decision
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Enforce frozen confirmation gate
+        if: always()
+        run: test "${{ steps.gate.outcome }}" = "success"
