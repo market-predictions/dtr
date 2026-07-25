@@ -106,9 +106,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          symbol="${{ matrix.symbol }}"
+          lower="${symbol,,}"
           for year in 2015 2016 2017 2018 2019; do
-            test -s "${RUNNER_TEMP}/sb-source/${{ matrix.symbol }}/${{ matrix.symbol,, }}_m1_bid_${year}.csv.gz"
-            test -s "${RUNNER_TEMP}/sb-source/${{ matrix.symbol }}/${{ matrix.symbol,, }}_m1_ask_${year}.csv.gz"
+            test -s "${RUNNER_TEMP}/sb-source/${symbol}/${lower}_m1_bid_${year}.csv.gz"
+            test -s "${RUNNER_TEMP}/sb-source/${symbol}/${lower}_m1_ask_${year}.csv.gz"
           done
 
       - name: Run frozen 2015-2019 discovery mechanism study
