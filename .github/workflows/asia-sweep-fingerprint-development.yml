@@ -1,0 +1,155 @@
+name: Asian Sweep Fingerprint Development
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: asia-sweep-fingerprint-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  QUALIFIED_SOURCE_RUN_ID: "30111481052"
+
+jobs:
+  focused_tests:
+    name: Validate fingerprint implementation
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.head_ref == 'agent/asia-sweep-fingerprint-study'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: Run causal fingerprint tests
+        run: |
+          pytest strategies/asia_sweep/tests/test_fingerprint_engine.py
+      - name: Lint fingerprint implementation
+        run: |
+          ruff check \
+            src/dtr_lab/strategies/asia_sweep/fingerprint_engine.py \
+            src/dtr_lab/strategies/asia_sweep/fingerprint_report.py \
+            scripts/run_asia_sweep_fingerprint.py \
+            scripts/aggregate_asia_sweep_fingerprint.py \
+            strategies/asia_sweep/tests/test_fingerprint_engine.py
+
+  development_pair:
+    name: Development anatomy ${{ matrix.symbol }}
+    needs: focused_tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        symbol: [EURUSD, GBPUSD]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+      - name: Restore qualified immutable FX source cache
+        id: source-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/sb-source/${{ matrix.symbol }}
+          key: stacey-burke-fx-v1-${{ matrix.symbol }}-2015-2026-07-24
+      - name: Download qualified source artifact on cache miss
+        if: steps.source-cache.outputs.cache-hit != 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: stacey-burke-fx-source-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/sb-source/${{ matrix.symbol }}
+          repository: market-predictions/dtr
+          run-id: ${{ env.QUALIFIED_SOURCE_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Enforce 2015-2021 source availability
+        shell: bash
+        run: |
+          set -euo pipefail
+          symbol="${{ matrix.symbol }}"
+          lower="${symbol,,}"
+          for year in 2015 2016 2017 2018 2019 2020 2021; do
+            test -s "${RUNNER_TEMP}/sb-source/${symbol}/${lower}_m1_bid_${year}.csv.gz"
+            test -s "${RUNNER_TEMP}/sb-source/${symbol}/${lower}_m1_ask_${year}.csv.gz"
+          done
+      - name: Build Amsterdam-native fingerprint ledgers
+        run: |
+          mkdir -p "${RUNNER_TEMP}/asia-fingerprint/${{ matrix.symbol }}"
+          python scripts/run_asia_sweep_fingerprint.py \
+            --data "${RUNNER_TEMP}/sb-source/${{ matrix.symbol }}" \
+            --symbol "${{ matrix.symbol }}" \
+            --start-year 2015 \
+            --end-year 2021 \
+            --out "${RUNNER_TEMP}/asia-fingerprint/${{ matrix.symbol }}"
+      - name: Upload pair anatomy evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: asia-sweep-fingerprint-development-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/asia-fingerprint/${{ matrix.symbol }}
+          if-no-files-found: warn
+          retention-days: 90
+
+  aggregate:
+    name: Aggregate development anatomy
+    needs: development_pair
+    if: always() && github.head_ref == 'agent/asia-sweep-fingerprint-study'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+      - name: Download pair anatomy evidence
+        uses: actions/download-artifact@v4
+        with:
+          pattern: asia-sweep-fingerprint-development-*
+          path: ${{ runner.temp }}/asia-fingerprint-inputs
+          merge-multiple: false
+      - name: Build pooled anatomy report
+        run: |
+          python scripts/aggregate_asia_sweep_fingerprint.py \
+            --inputs "${RUNNER_TEMP}/asia-fingerprint-inputs" \
+            --out "${RUNNER_TEMP}/asia-fingerprint-report"
+      - name: Upload development anatomy report
+        uses: actions/upload-artifact@v4
+        with:
+          name: asia-sweep-fingerprint-development-report
+          path: ${{ runner.temp }}/asia-fingerprint-report
+          if-no-files-found: error
+          retention-days: 90
