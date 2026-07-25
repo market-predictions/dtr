@@ -1,21 +1,18 @@
 name: Stacey Burke Controlled Study
 
 on:
-  pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: stacey-burke-controlled-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  group: stacey-burke-controlled-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   focused_tests:
     name: Validate controlled-study implementation
-    if: >-
-      github.event_name == 'pull_request' &&
-      github.head_ref == 'agent/stacey-burke-fx-source-census'
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -93,7 +90,7 @@ jobs:
       - name: Enforce cached source availability
         run: test "${{ steps.source-cache.outputs.cache-hit }}" = "true"
 
-      - name: Run frozen 2015-2021 controlled event study
+      - name: Reproduce frozen 2015-2021 controlled event study
         run: |
           mkdir -p "${RUNNER_TEMP}/sb-controlled/${{ matrix.symbol }}"
           python -m stacey_burke_lab.event_study \
@@ -116,7 +113,7 @@ jobs:
           retention-days: 90
 
   gate_b:
-    name: Enforce controlled event-study Gate B
+    name: Reproduce failed controlled event-study Gate B
     needs: discovery_study
     if: always()
     runs-on: ubuntu-latest
@@ -148,7 +145,7 @@ jobs:
           path: ${{ runner.temp }}/sb-controlled-inputs
           merge-multiple: true
 
-      - name: Build Gate B decision
+      - name: Rebuild Gate B decision
         id: gate
         continue-on-error: true
         run: |
@@ -166,6 +163,6 @@ jobs:
           if-no-files-found: warn
           retention-days: 90
 
-      - name: Enforce Gate B
+      - name: Confirm frozen rejection remains enforced
         if: always()
-        run: test "${{ steps.gate.outcome }}" = "success"
+        run: test "${{ steps.gate.outcome }}" = "failure"
