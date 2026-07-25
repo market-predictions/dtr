@@ -1,0 +1,69 @@
+name: Temporary GBPUSD node backup
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/temporary_gbpusd_node_backup.yml
+      - temporary/gbpusd_node_backup.trigger
+
+permissions:
+  contents: read
+
+jobs:
+  download:
+    name: GBPUSD ${{ matrix.side }} ${{ matrix.year }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        include:
+          - {year: 2022, next_year: 2023, side: bid}
+          - {year: 2022, next_year: 2023, side: ask}
+          - {year: 2023, next_year: 2024, side: bid}
+          - {year: 2023, next_year: 2024, side: ask}
+          - {year: 2024, next_year: 2025, side: bid}
+          - {year: 2024, next_year: 2025, side: ask}
+          - {year: 2025, next_year: 2026, side: bid}
+          - {year: 2025, next_year: 2026, side: ask}
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Download annual candles
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p temporary-data
+          npx --yes dukascopy-node@1.49.0 \
+            -i gbpusd \
+            -from "${{ matrix.year }}-01-01" \
+            -to "${{ matrix.next_year }}-01-01" \
+            -t m1 \
+            -p "${{ matrix.side }}" \
+            -v \
+            -vu units \
+            -fl \
+            -f csv \
+            -dir temporary-data \
+            -fn "gbpusd_m1_${{ matrix.side }}_${{ matrix.year }}" \
+            -bs 20 \
+            -bp 500 \
+            -r 8 \
+            -rp 1000
+          CSV="$(find temporary-data -maxdepth 1 -type f -name '*.csv' -print -quit)"
+          test -n "$CSV"
+          sha256sum "$CSV" > temporary-data/sha256.txt
+          gzip -9 "$CSV"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gbpusd-node-${{ matrix.side }}-${{ matrix.year }}
+          path: |
+            temporary-data/*.csv.gz
+            temporary-data/sha256.txt
+          retention-days: 1
+          compression-level: 0
+          if-no-files-found: error
