@@ -5,10 +5,14 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: asia-sweep-fx-ten-pair-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
+
+env:
+  QUALIFIED_SOURCE_RUN_ID: "30111481052"
 
 jobs:
   focused_tests:
@@ -88,8 +92,24 @@ jobs:
           path: ${{ runner.temp }}/sb-source/${{ matrix.symbol }}
           key: stacey-burke-fx-v1-${{ matrix.symbol }}-2015-2026-07-24
 
-      - name: Enforce cached source availability
-        run: test "${{ steps.source-cache.outputs.cache-hit }}" = "true"
+      - name: Download qualified source artifact on cache miss
+        if: steps.source-cache.outputs.cache-hit != 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: stacey-burke-fx-source-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/sb-source/${{ matrix.symbol }}
+          repository: market-predictions/dtr
+          run-id: ${{ env.QUALIFIED_SOURCE_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Enforce qualified source availability
+        shell: bash
+        run: |
+          set -euo pipefail
+          for year in 2015 2016 2017 2018 2019; do
+            test -s "${RUNNER_TEMP}/sb-source/${{ matrix.symbol }}/${{ matrix.symbol,, }}_m1_bid_${year}.csv.gz"
+            test -s "${RUNNER_TEMP}/sb-source/${{ matrix.symbol }}/${{ matrix.symbol,, }}_m1_ask_${year}.csv.gz"
+          done
 
       - name: Run frozen 2015-2019 discovery mechanism study
         run: |
@@ -100,6 +120,15 @@ jobs:
             --start-year 2015 \
             --end-year 2019 \
             --out "${RUNNER_TEMP}/asia-fx/${{ matrix.symbol }}"
+          cat > "${RUNNER_TEMP}/asia-fx/${{ matrix.symbol }}/source_provenance.json" <<EOF
+          {
+            "qualified_source_run_id": ${QUALIFIED_SOURCE_RUN_ID},
+            "artifact_name": "stacey-burke-fx-source-${{ matrix.symbol }}",
+            "cache_hit": "${{ steps.source-cache.outputs.cache-hit }}",
+            "analysis_start_year": 2015,
+            "analysis_end_year": 2019
+          }
+          EOF
 
       - name: Upload compact pair evidence
         if: always()
