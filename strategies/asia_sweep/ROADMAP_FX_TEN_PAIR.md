@@ -11,45 +11,46 @@ Status: **complete**
 
 ## Phase 1 — Discovery mechanism study, 2015–2019
 
-Status: **active**
+Status: **complete — failed promotion gate**
 
-- [ ] Run all ten pairs from immutable caches.
-- [ ] Preserve boundary, event and control ledgers independently.
-- [ ] Enforce sample, breadth, concentration, effect and clustered-inference gates.
-- [ ] Independently reconstruct the pooled decision.
+- [x] Run all ten pairs from qualified immutable source artifacts.
+- [x] Preserve boundary, event and control ledgers independently.
+- [x] Enforce sample, breadth, concentration, effect and clustered-inference gates.
+- [x] Independently reconstruct the pooled decision.
+
+Decision: `FAIL_DISCOVERY_STOP_BEFORE_MECHANISM_VALIDATION`.
+
+The sample and concentration requirements passed, but the pooled effect was negative, the blocked interval crossed zero, the positive-effect permutation test failed, and pair/factor breadth was insufficient.
 
 ## Phase 2 — Mechanism validation, 2020–2021
 
-Status: **blocked on Phase 1**
+Status: **closed without inspection**
 
-- Repeat the identical event definition, matching and gates.
-- No threshold or subgroup changes.
-- Failure closes this formulation before strategy P&L.
+The preregistered discovery gate failed. The 2020–2021 partition remains unopened and cannot be used to rescue or redefine the mechanism.
 
 ## Phase 3 — Executable strategy validation, 2022–2023
 
-Status: **blocked**
+Status: **closed without inspection**
 
-Before outcome inspection, freeze:
-
-- next-active-minute side-correct BID/ASK entry;
-- stop beyond the observed sweep extreme with one global pip-aware buffer;
-- Asian midpoint target and fixed London time exit;
-- stop-first same-minute collisions;
-- actual spread plus explicit slippage stresses;
-- R-normalized metrics and date-clustered inference.
+No execution contract, entry, stop, target, spread stress, slippage model, R multiple or P&L was authorized because the mechanism did not pass discovery.
 
 ## Phase 4 — Untouched holdout, 2024–2025
 
-Status: **blocked**
+Status: **preserved and unopened**
 
-- One unchanged executable candidate only.
-- No pair or direction selection.
-- Require cross-pair, factor-block and annual breadth.
+The holdout remains untouched. It has no role in a failed discovery programme.
 
 ## Phase 5 — 2026 monitoring and TradingView
 
 Status: **not authorized**
 
-- Monitoring only after complete certification.
-- Pine, alerts, sizing, paper trading and deployment remain blocked until all prior phases pass.
+No Pine, alerts, sizing, paper trading, monitoring or deployment is justified for this formulation.
+
+## Future research boundary
+
+This roadmap is closed. A future Asian-session study requires:
+
+- a genuinely distinct economic mechanism rather than a threshold or subgroup rescue;
+- a new preregistration before examining new outcomes;
+- separation from AS-A through AS-D, the rejected ten-pair rejection study and the PDH/PDL cluster challenger;
+- new unseen evidence and the same staged mechanism-before-P&L discipline.
