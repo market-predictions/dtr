@@ -1,0 +1,168 @@
+name: Stacey Burke Controlled Study
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stacey-burke-controlled-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  focused_tests:
+    name: Validate controlled-study implementation
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run focused tests
+        run: |
+          pytest \
+            tests/test_stacey_burke_fx_source.py \
+            tests/test_stacey_burke_event_census.py \
+            tests/test_stacey_burke_census_gate.py \
+            tests/test_stacey_burke_event_study.py \
+            tests/test_stacey_burke_event_study_gate.py
+
+  discovery_study:
+    name: Discovery study ${{ matrix.symbol }}
+    needs: focused_tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        symbol:
+          - EURUSD
+          - GBPUSD
+          - USDCHF
+          - AUDUSD
+          - NZDUSD
+          - USDCAD
+          - USDJPY
+          - EURJPY
+          - GBPJPY
+          - EURGBP
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+
+      - name: Restore qualified immutable source cache
+        id: source-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/sb-source/${{ matrix.symbol }}
+          key: stacey-burke-fx-v1-${{ matrix.symbol }}-2015-2026-07-24
+
+      - name: Enforce cached source availability
+        run: test "${{ steps.source-cache.outputs.cache-hit }}" = "true"
+
+      - name: Reproduce frozen 2015-2021 controlled event study
+        run: |
+          mkdir -p "${RUNNER_TEMP}/sb-controlled/${{ matrix.symbol }}"
+          python -m stacey_burke_lab.event_study \
+            --data "${RUNNER_TEMP}/sb-source/${{ matrix.symbol }}" \
+            --symbol "${{ matrix.symbol }}" \
+            --load-start-year 2015 \
+            --load-end-year 2021 \
+            --analysis-start-year 2015 \
+            --analysis-end-year 2021 \
+            --enforce-frozen-discovery-count \
+            --out "${RUNNER_TEMP}/sb-controlled/${{ matrix.symbol }}"
+
+      - name: Upload compact pair study
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stacey-burke-controlled-study-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/sb-controlled/${{ matrix.symbol }}
+          if-no-files-found: warn
+          retention-days: 90
+
+  gate_b:
+    name: Reproduce failed controlled event-study Gate B
+    needs: discovery_study
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+
+      - name: Download available pair studies
+        id: download-evidence
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          pattern: stacey-burke-controlled-study-*
+          path: ${{ runner.temp }}/sb-controlled-inputs
+          merge-multiple: true
+
+      - name: Rebuild Gate B decision
+        id: gate
+        continue-on-error: true
+        run: |
+          mkdir -p "${RUNNER_TEMP}/sb-controlled-inputs"
+          python -m stacey_burke_lab.event_study_gate \
+            --inputs "${RUNNER_TEMP}/sb-controlled-inputs" \
+            --out "${RUNNER_TEMP}/sb-gate-b"
+
+      - name: Upload Gate B evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stacey-burke-controlled-study-gate-b
+          path: ${{ runner.temp }}/sb-gate-b
+          if-no-files-found: warn
+          retention-days: 90
+
+      - name: Confirm frozen rejection remains enforced
+        if: always()
+        run: test "${{ steps.gate.outcome }}" = "failure"
