@@ -872,7 +872,6 @@ def _liquidity_features(
     stack_ids = {level.level_id for level in stack}
     records: list[dict[str, Any]] = []
     same_distances_atr: list[float] = []
-    available_levels: list[Level] = []
     consumed_before: list[Level] = []
     consumed_sweep: list[Level] = []
     consumed_t5: list[Level] = []
@@ -891,8 +890,6 @@ def _liquidity_features(
         by_t5 = (not before) and _level_reached(path_sweep_t5, side, level.price)
         rem_t0 = distance_t0 > tolerance
         rem_t5 = distance_t5 > tolerance
-        if available:
-            available_levels.append(level)
         if before:
             consumed_before.append(level)
         if by_sweep:
@@ -979,12 +976,12 @@ def _liquidity_features(
         "same_side_level_count": len(same),
         "same_side_source_diversity": len({level.family for level in same}),
         "nearest_same_side_distance_atr": distances_sorted[0] if distances_sorted else math.nan,
-        "second_same_side_distance_atr": distances_sorted[1]
-        if len(distances_sorted) > 1
-        else math.nan,
-        "third_same_side_distance_atr": distances_sorted[2]
-        if len(distances_sorted) > 2
-        else math.nan,
+        "second_same_side_distance_atr": (
+            distances_sorted[1] if len(distances_sorted) > 1 else math.nan
+        ),
+        "third_same_side_distance_atr": (
+            distances_sorted[2] if len(distances_sorted) > 2 else math.nan
+        ),
         "same_side_levels_within_0_05_atr": sum(value <= 0.05 for value in distances),
         "same_side_levels_within_0_10_atr": sum(value <= 0.10 for value in distances),
         "same_side_levels_within_0_20_atr": sum(value <= 0.20 for value in distances),
@@ -1425,7 +1422,10 @@ def build_fingerprint_ledgers(
             path_to_1100 = _active_slice(frame, sweep_time, bounds["follow_end"])
             if path_to_1100.empty:
                 continue
-            event_id = f"{symbol}_{trade_date}_{side}_{sweep_time.tz_convert('UTC').strftime('%H%M')}"
+            event_id = (
+                f"{symbol}_{trade_date}_{side}_"
+                f"{sweep_time.tz_convert('UTC').strftime('%H%M')}"
+            )
             t5 = _t5_features(
                 side=side,
                 boundary=boundary,
@@ -1711,12 +1711,12 @@ def write_fingerprint_outputs(
         "start_year": start_year,
         "end_year": end_year,
         "candidate_events": int(len(events)),
-        "midpoint_successes": int(events["midpoint_success_09_10"].sum())
-        if not events.empty
-        else 0,
-        "success_rate": float(events["midpoint_success_09_10"].mean())
-        if not events.empty
-        else None,
+        "midpoint_successes": (
+            int(events["midpoint_success_09_10"].sum()) if not events.empty else 0
+        ),
+        "success_rate": (
+            float(events["midpoint_success_09_10"].mean()) if not events.empty else None
+        ),
         "weeks_with_candidates": int(events["week_key"].nunique()) if not events.empty else 0,
         "strategy_pnl_calculated": False,
         "validation_2022_2023_opened": False,
