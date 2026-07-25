@@ -7,9 +7,11 @@ from pathlib import Path
 from dtr_lab.strategies.asia_sweep.fx_ten_pair import (
     PAIR_SPECS,
     load_midpoint_minutes,
-    match_controls,
-    prepare_boundary_rows,
     write_pair_outputs,
+)
+from dtr_lab.strategies.asia_sweep.fx_ten_pair_runtime import (
+    match_controls_safe,
+    prepare_boundary_rows_fast,
 )
 
 
@@ -28,13 +30,13 @@ def main() -> None:
         start_year=args.start_year,
         end_year=args.end_year,
     )
-    rows = prepare_boundary_rows(
+    rows = prepare_boundary_rows_fast(
         args.symbol,
         minutes,
         start_year=args.start_year,
         end_year=args.end_year,
     )
-    matched_events, matched_controls = match_controls(rows)
+    matched_events, matched_controls = match_controls_safe(rows)
     summary = write_pair_outputs(
         args.out,
         symbol=args.symbol,
