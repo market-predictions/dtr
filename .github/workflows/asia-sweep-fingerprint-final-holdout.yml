@@ -1,0 +1,207 @@
+name: Asian Sweep Fingerprint Final Holdout
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: asia-sweep-fingerprint-final-holdout-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  QUALIFIED_SOURCE_RUN_ID: "30111481052"
+  DEVELOPMENT_MODEL_RUN_ID: "30177831134"
+  VALIDATION_RUN_ID: "30178537776"
+
+jobs:
+  focused_tests:
+    name: Validate final holdout contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install development and research dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,research]"
+      - name: Run frozen final holdout tests
+        run: pytest strategies/asia_sweep/tests/test_fingerprint_holdout.py
+      - name: Lint final holdout implementation
+        run: |
+          ruff check \
+            src/dtr_lab/strategies/asia_sweep/fingerprint_holdout_contract.py \
+            src/dtr_lab/strategies/asia_sweep/fingerprint_holdout.py \
+            scripts/run_asia_sweep_final_holdout.py \
+            strategies/asia_sweep/tests/test_fingerprint_holdout.py
+
+  holdout_pair:
+    name: Build untouched final holdout anatomy ${{ matrix.symbol }}
+    needs: focused_tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        symbol: [EURUSD, GBPUSD]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+      - name: Restore qualified immutable FX source cache
+        id: source-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/sb-source/${{ matrix.symbol }}
+          key: stacey-burke-fx-v1-${{ matrix.symbol }}-2015-2026-07-24
+      - name: Download qualified source artifact on cache miss
+        if: steps.source-cache.outputs.cache-hit != 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: stacey-burke-fx-source-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/sb-source/${{ matrix.symbol }}
+          repository: market-predictions/dtr
+          run-id: ${{ env.QUALIFIED_SOURCE_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Enforce untouched 2024-2025 source availability
+        shell: bash
+        run: |
+          set -euo pipefail
+          symbol="${{ matrix.symbol }}"
+          lower="${symbol,,}"
+          for year in 2024 2025; do
+            test -s "${RUNNER_TEMP}/sb-source/${symbol}/${lower}_m1_bid_${year}.csv.gz"
+            test -s "${RUNNER_TEMP}/sb-source/${symbol}/${lower}_m1_ask_${year}.csv.gz"
+          done
+      - name: Build untouched Amsterdam-native final holdout ledgers
+        run: |
+          mkdir -p "${RUNNER_TEMP}/fingerprint-holdout/${{ matrix.symbol }}"
+          python scripts/run_asia_sweep_fingerprint.py \
+            --data "${RUNNER_TEMP}/sb-source/${{ matrix.symbol }}" \
+            --symbol "${{ matrix.symbol }}" \
+            --start-year 2024 \
+            --end-year 2025 \
+            --out "${RUNNER_TEMP}/fingerprint-holdout/${{ matrix.symbol }}"
+      - name: Upload pair final holdout evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: asia-sweep-fingerprint-final-holdout-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/fingerprint-holdout/${{ matrix.symbol }}
+          if-no-files-found: warn
+          retention-days: 90
+
+  final_holdout_gate:
+    name: Enforce untouched 2024-2025 final holdout gate
+    needs: holdout_pair
+    if: always() && needs.holdout_pair.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install research dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[research]"
+      - name: Download pair final holdout evidence
+        uses: actions/download-artifact@v4
+        with:
+          pattern: asia-sweep-fingerprint-final-holdout-*
+          path: ${{ runner.temp }}/holdout-inputs
+          merge-multiple: false
+      - name: Download frozen development model
+        uses: actions/download-artifact@v4
+        with:
+          name: asia-sweep-fingerprint-development-model-decision
+          path: ${{ runner.temp }}/development-model
+          repository: market-predictions/dtr
+          run-id: ${{ env.DEVELOPMENT_MODEL_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download successful validation decision
+        uses: actions/download-artifact@v4
+        with:
+          name: asia-sweep-fingerprint-validation-decision
+          path: ${{ runner.temp }}/validation-decision
+          repository: market-predictions/dtr
+          run-id: ${{ env.VALIDATION_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Enforce exact frozen inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s "${RUNNER_TEMP}/development-model/frozen_validation_model.joblib"
+          validation="${RUNNER_TEMP}/validation-decision/validation_decision.json"
+          test -s "${validation}"
+          python - "${validation}" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          payload = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          expected = "PASS_VALIDATION_FREEZE_AUTHORIZE_2024_2025_FINAL_HOLDOUT"
+          raise SystemExit(0 if payload.get("decision") == expected else 1)
+          PY
+          count="$(find "${RUNNER_TEMP}/holdout-inputs" -name fingerprint_events.csv | wc -l)"
+          test "${count}" -eq 2
+      - name: Evaluate untouched frozen model
+        id: holdout
+        continue-on-error: true
+        run: |
+          python scripts/run_asia_sweep_final_holdout.py \
+            --inputs "${RUNNER_TEMP}/holdout-inputs" \
+            --model "${RUNNER_TEMP}/development-model/frozen_validation_model.joblib" \
+            --out "${RUNNER_TEMP}/final-holdout-decision"
+      - name: Upload complete final holdout decision
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: asia-sweep-fingerprint-final-holdout-decision
+          path: ${{ runner.temp }}/final-holdout-decision
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Enforce frozen final holdout decision
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          decision="${RUNNER_TEMP}/final-holdout-decision/final_holdout_decision.json"
+          test -s "${decision}"
+          python - "${decision}" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          payload = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          print(json.dumps(payload, indent=2, sort_keys=True))
+          expected = "PASS_FINAL_HOLDOUT_AUTHORIZE_EXECUTABLE_STRATEGY_RESEARCH"
+          raise SystemExit(0 if payload.get("decision") == expected else 1)
+          PY

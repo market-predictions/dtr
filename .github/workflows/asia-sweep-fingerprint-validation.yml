@@ -1,0 +1,183 @@
+name: Asian Sweep Fingerprint Validation
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  QUALIFIED_SOURCE_RUN_ID: "30111481052"
+  DEVELOPMENT_MODEL_RUN_ID: "30177831134"
+
+jobs:
+  focused_tests:
+    name: Validate untouched fingerprint gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install development and research dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,research]"
+      - name: Run frozen validation tests
+        run: pytest strategies/asia_sweep/tests/test_fingerprint_validation.py
+      - name: Lint validation implementation
+        run: |
+          ruff check \
+            src/dtr_lab/strategies/asia_sweep/fingerprint_validation_contract.py \
+            src/dtr_lab/strategies/asia_sweep/fingerprint_validation.py \
+            scripts/validate_asia_sweep_fingerprints.py \
+            strategies/asia_sweep/tests/test_fingerprint_validation.py
+
+  validation_pair:
+    name: Build untouched validation anatomy ${{ matrix.symbol }}
+    needs: focused_tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        symbol: [EURUSD, GBPUSD]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+      - name: Restore qualified immutable FX source cache
+        id: source-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/sb-source/${{ matrix.symbol }}
+          key: stacey-burke-fx-v1-${{ matrix.symbol }}-2015-2026-07-24
+      - name: Download qualified source artifact on cache miss
+        if: steps.source-cache.outputs.cache-hit != 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: stacey-burke-fx-source-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/sb-source/${{ matrix.symbol }}
+          repository: market-predictions/dtr
+          run-id: ${{ env.QUALIFIED_SOURCE_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Enforce untouched 2022-2023 source availability
+        shell: bash
+        run: |
+          set -euo pipefail
+          symbol="${{ matrix.symbol }}"
+          lower="${symbol,,}"
+          for year in 2022 2023; do
+            test -s "${RUNNER_TEMP}/sb-source/${symbol}/${lower}_m1_bid_${year}.csv.gz"
+            test -s "${RUNNER_TEMP}/sb-source/${symbol}/${lower}_m1_ask_${year}.csv.gz"
+          done
+      - name: Build untouched Amsterdam-native validation ledgers
+        run: |
+          mkdir -p "${RUNNER_TEMP}/fingerprint-validation/${{ matrix.symbol }}"
+          python scripts/run_asia_sweep_fingerprint.py \
+            --data "${RUNNER_TEMP}/sb-source/${{ matrix.symbol }}" \
+            --symbol "${{ matrix.symbol }}" \
+            --start-year 2022 \
+            --end-year 2023 \
+            --out "${RUNNER_TEMP}/fingerprint-validation/${{ matrix.symbol }}"
+      - name: Upload pair validation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: asia-sweep-fingerprint-validation-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/fingerprint-validation/${{ matrix.symbol }}
+          if-no-files-found: warn
+          retention-days: 90
+
+  validation_gate:
+    name: Enforce untouched 2022-2023 validation gate
+    needs: validation_pair
+    if: always() && needs.validation_pair.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install research dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[research]"
+      - name: Download pair validation evidence
+        uses: actions/download-artifact@v4
+        with:
+          pattern: asia-sweep-fingerprint-validation-*
+          path: ${{ runner.temp }}/validation-inputs
+          merge-multiple: false
+      - name: Download frozen development model
+        uses: actions/download-artifact@v4
+        with:
+          name: asia-sweep-fingerprint-development-model-decision
+          path: ${{ runner.temp }}/development-model
+          repository: market-predictions/dtr
+          run-id: ${{ env.DEVELOPMENT_MODEL_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Enforce exact frozen inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s "${RUNNER_TEMP}/development-model/frozen_validation_model.joblib"
+          count="$(find "${RUNNER_TEMP}/validation-inputs" -name fingerprint_events.csv | wc -l)"
+          test "${count}" -eq 2
+      - name: Evaluate untouched frozen model
+        id: validation
+        continue-on-error: true
+        run: |
+          python scripts/validate_asia_sweep_fingerprints.py \
+            --inputs "${RUNNER_TEMP}/validation-inputs" \
+            --model "${RUNNER_TEMP}/development-model/frozen_validation_model.joblib" \
+            --out "${RUNNER_TEMP}/validation-decision"
+      - name: Upload complete validation decision
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: asia-sweep-fingerprint-validation-decision
+          path: ${{ runner.temp }}/validation-decision
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Enforce frozen validation decision
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          decision="${RUNNER_TEMP}/validation-decision/validation_decision.json"
+          test -s "${decision}"
+          python - "${decision}" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          payload = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          print(json.dumps(payload, indent=2, sort_keys=True))
+          expected = "PASS_VALIDATION_FREEZE_AUTHORIZE_2024_2025_FINAL_HOLDOUT"
+          raise SystemExit(0 if payload.get("decision") == expected else 1)
+          PY

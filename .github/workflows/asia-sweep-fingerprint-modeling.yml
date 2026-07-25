@@ -1,0 +1,119 @@
+name: Asian Sweep Fingerprint Modeling
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  ANATOMY_RUN_ID: "30174245825"
+
+jobs:
+  focused_tests:
+    name: Validate fingerprint model contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install development and research dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,research]"
+      - name: Run model causality and falsification tests
+        run: pytest strategies/asia_sweep/tests/test_fingerprint_modeling.py
+      - name: Lint model implementation
+        run: |
+          ruff check \
+            src/dtr_lab/strategies/asia_sweep/fingerprint_model_contract.py \
+            src/dtr_lab/strategies/asia_sweep/fingerprint_model_tuning.py \
+            src/dtr_lab/strategies/asia_sweep/fingerprint_model_metrics.py \
+            src/dtr_lab/strategies/asia_sweep/fingerprint_model_freeze.py \
+            src/dtr_lab/strategies/asia_sweep/fingerprint_modeling.py \
+            scripts/model_asia_sweep_fingerprints.py \
+            strategies/asia_sweep/tests/test_fingerprint_modeling.py
+
+  development_models:
+    name: Enforce grouped development model gate
+    needs: focused_tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install research dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[research]"
+      - name: Download immutable EURUSD anatomy evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: asia-sweep-fingerprint-development-EURUSD
+          path: ${{ runner.temp }}/fingerprint-inputs/EURUSD
+          repository: market-predictions/dtr
+          run-id: ${{ env.ANATOMY_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download immutable GBPUSD anatomy evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: asia-sweep-fingerprint-development-GBPUSD
+          path: ${{ runner.temp }}/fingerprint-inputs/GBPUSD
+          repository: market-predictions/dtr
+          run-id: ${{ env.ANATOMY_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Enforce exact development inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s "${RUNNER_TEMP}/fingerprint-inputs/EURUSD/fingerprint_events.csv"
+          test -s "${RUNNER_TEMP}/fingerprint-inputs/GBPUSD/fingerprint_events.csv"
+          count="$(find "${RUNNER_TEMP}/fingerprint-inputs" -name fingerprint_events.csv | wc -l)"
+          test "${count}" -eq 2
+      - name: Run frozen grouped development models
+        id: model
+        continue-on-error: true
+        run: |
+          python scripts/model_asia_sweep_fingerprints.py \
+            --inputs "${RUNNER_TEMP}/fingerprint-inputs" \
+            --out "${RUNNER_TEMP}/fingerprint-model-decision"
+      - name: Upload complete development decision
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: asia-sweep-fingerprint-development-model-decision
+          path: ${{ runner.temp }}/fingerprint-model-decision
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Enforce frozen development decision
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          decision="${RUNNER_TEMP}/fingerprint-model-decision/development_model_decision.json"
+          test -s "${decision}"
+          python - "${decision}" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          payload = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          print(json.dumps(payload, indent=2, sort_keys=True))
+          expected = "PASS_DEVELOPMENT_FREEZE_AUTHORIZE_2022_2023_VALIDATION"
+          raise SystemExit(0 if payload.get("decision") == expected else 1)
+          PY
