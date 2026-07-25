@@ -11,6 +11,9 @@ from dtr_lab.strategies.asia_sweep.fingerprint_engine import (
 from dtr_lab.strategies.asia_sweep.fingerprint_labels import (
     enforce_window_and_two_sided_labels,
 )
+from dtr_lab.strategies.asia_sweep.fingerprint_performance import (
+    install_indexed_pivot_selector,
+)
 from dtr_lab.strategies.asia_sweep.fx_ten_pair import load_midpoint_minutes
 
 
@@ -23,6 +26,7 @@ def main() -> None:
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
 
+    install_indexed_pivot_selector()
     minutes = load_midpoint_minutes(
         args.data,
         args.symbol,
