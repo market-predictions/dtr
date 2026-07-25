@@ -1,9 +1,11 @@
 # Asian Sweep Success/Failure Fingerprint Study — Preregistration
 
-Version: `v1.0.0`  
+Version: `v1.1.0`  
 Date frozen: `2026-07-25`  
 Branch: `agent/asia-sweep-fingerprint-study`  
 Status: `FROZEN_BEFORE_FEATURE_OUTCOME_INSPECTION`
+
+Binding amendment: `FINGERPRINT_STUDY_FEATURE_AMENDMENT_V1_1.md` adds the preregistered Asian-range width/compression and layered-liquidity topology feature families. The amendment is part of this contract and was frozen before feature outcomes were inspected.
 
 ## 1. Research objective
 
@@ -130,6 +132,8 @@ All features must be deterministic, causal and defined before validation outcome
 
 - range width in pips;
 - 20-day and 60-day range percentile;
+- ATR20-, ADR20- and rolling-median-normalized width as frozen in `FINGERPRINT_STUDY_FEATURE_AMENDMENT_V1_1.md`;
+- causal rolling compression bucket;
 - Asian close location within the range;
 - net Asian-session return divided by range;
 - realized one-minute volatility;
@@ -152,7 +156,7 @@ All features must be deterministic, causal and defined before validation outcome
 - speed from 08:00 to sweep;
 - compression or expansion immediately before the breach.
 
-### 7.4 Sweep anatomy at T0
+### 7.4 Sweep anatomy and layered liquidity at T0
 
 - upper versus lower sweep;
 - breach depth in pips and range fractions;
@@ -161,9 +165,15 @@ All features must be deterministic, causal and defined before validation outcome
 - close location within the sweep bar;
 - displacement size relative to trailing volatility;
 - spread and quote-activity measures when source fields permit;
-- external liquidity confluence with prior-day and prior-week highs/lows;
+- previous-day, previous-New-York-session, previous-week, confirmed M15/H1 pivot and equal-high/low-cluster topology;
+- nearest-level distances, source diversity and density around the swept boundary;
+- liquidity available at 08:00, consumed before the sweep, consumed by the sweep and remaining beyond the sweep extreme;
+- full-stack-exhausted and residual-liquidity-attraction features;
+- opposing-side destination liquidity;
 - whether EURUSD and GBPUSD sweep the same USD direction within a 15-minute interval;
 - cross-pair SMT divergence: one pair sweeps while the other does not or fails to confirm.
+
+The exact level universe, pivot confirmation, invalidation, proximity, stack and consumption rules are frozen in `FINGERPRINT_STUDY_FEATURE_AMENDMENT_V1_1.md`.
 
 ### 7.5 Five-minute confirmation anatomy at T5
 
@@ -179,6 +189,7 @@ All features must be deterministic, causal and defined before validation outcome
 - break of the last causal one-minute and five-minute swing opposite the sweep;
 - displacement away from the sweep extreme;
 - imbalance/FVG descriptors only when defined mechanically from completed bars;
+- external liquidity consumed through T5 and residual liquidity beyond the T5 extreme;
 - cross-pair relative-strength divergence through T5.
 
 ### 7.6 Higher-timeframe context
@@ -186,8 +197,9 @@ All features must be deterministic, causal and defined before validation outcome
 Using only completed information before the sweep:
 
 - prior-day high/low and close location;
+- previous completed New York-session high/low;
 - prior-week high/low;
-- distance to prior-day and prior-week liquidity;
+- distance to prior-day, prior-New-York, prior-week and confirmed pivot liquidity;
 - daily opening direction;
 - trailing daily ATR percentile;
 - prior-day directional return;
@@ -216,6 +228,8 @@ For every feature, report:
 - pair-stratified and year-stratified results;
 - calendar-week clustered uncertainty;
 - false-discovery-rate-adjusted exploratory p-values.
+
+The width and layered-liquidity amendment additionally requires comparisons by compression bucket, liquidity-stack state, stack consumption and residual liquidity.
 
 No feature is promoted solely because it produces a low unadjusted p-value.
 
