@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import pandas as pd
 
-from dtr_lab.strategies.asia_sweep.fx_ten_pair import match_controls
 from dtr_lab.strategies.asia_sweep.fx_ten_pair_gate import build_decision
+from dtr_lab.strategies.asia_sweep.fx_ten_pair_runtime import match_controls_safe
 
 
 def _row(
@@ -44,7 +44,7 @@ def test_matching_uses_five_distinct_control_dates() -> None:
                 value=0.01 * index,
             )
         )
-    events, controls = match_controls(pd.DataFrame(rows))
+    events, controls = match_controls_safe(pd.DataFrame(rows))
     assert len(events) == 1
     assert len(controls) == 5
     assert controls["trade_date"].nunique() == 5
@@ -62,9 +62,11 @@ def test_matching_rejects_same_date_controls() -> None:
                 value=0.0,
             )
         )
-    events, controls = match_controls(pd.DataFrame(rows))
+    events, controls = match_controls_safe(pd.DataFrame(rows))
     assert events.empty
     assert controls.empty
+    assert list(events.columns)
+    assert list(controls.columns)
 
 
 def test_gate_requires_all_predicates(tmp_path) -> None:
