@@ -1,5 +1,43 @@
 # Changelog — Asian Sweep Ten-Pair FX Programme
 
+## v0.2.0-discovery-rejected — 2026-07-25
+
+### Changed
+
+- completed the frozen 2015–2019 study on all ten FX pairs;
+- preserved 2,498 matched rejection events and 12,490 controls;
+- enforced all sample, concentration, effect, inference and breadth gates;
+- independently reconstructed control assignments, arithmetic, attribution, bootstrap and permutation;
+- closed 2020–2025 outcome access and all executable strategy work;
+- converted the heavy workflow from automatic PR execution to manual reproduction only;
+- added the final decision and evidence hashes.
+
+### Result
+
+- mean rejection-event return: `+0.005890` Asian-range fractions;
+- mean matched-control return: `+0.024507`;
+- mean effect: `-0.018617`;
+- 95% date-block interval: `[-0.046224, +0.008483]`;
+- one-sided permutation p-value: `0.910809`;
+- positive pairs: `4 / 10`;
+- positive factor blocks: `1 / 4`;
+- discovery gates passed: `5 / 10`.
+
+### Reason
+
+The confirmed-rejection label did not isolate incremental reversal value. Matched non-rejection boundary breaches reversed more than the primary events. Continuing into stop/target or pair-selection research would violate the preregistered mechanism-before-P&L boundary.
+
+### Known limitations
+
+- the finding applies to the frozen Asian range, London window, causal rejection state, 60-minute endpoint and matched-control contract;
+- midpoint mechanism returns are not executable trade returns;
+- Dukascopy is an OTC quote source;
+- the test does not prove that every distinct Asian-session mechanism is ineffective.
+
+### Next
+
+No next phase is authorized for this formulation. Preserve 2020–2025 unopened. Any future work requires a genuinely new preregistered hypothesis and new unseen evidence.
+
 ## v0.1.0-discovery-freeze — 2026-07-25
 
 ### Added
@@ -16,7 +54,7 @@
 
 ### Reason
 
-The original NQ/ES execution variants failed and the broader auction-state diagnostic produced only a weak London rejection hint. A ten-pair FX test is justified only as a new cross-asset mechanism study with fixed controls and strict anti-rescue boundaries, not as retrospective parameter mining.
+The original NQ/ES execution variants failed and the broader auction-state diagnostic produced only a weak London rejection hint. A ten-pair FX test was justified only as a new cross-asset mechanism study with fixed controls and strict anti-rescue boundaries, not as retrospective parameter mining.
 
 ### Known limitations
 
