@@ -8,6 +8,9 @@ from dtr_lab.strategies.asia_sweep.fingerprint_engine import (
     build_fingerprint_ledgers,
     write_fingerprint_outputs,
 )
+from dtr_lab.strategies.asia_sweep.fingerprint_labels import (
+    enforce_window_and_two_sided_labels,
+)
 from dtr_lab.strategies.asia_sweep.fx_ten_pair import load_midpoint_minutes
 
 
@@ -32,6 +35,7 @@ def main() -> None:
         start_year=args.start_year,
         end_year=args.end_year,
     )
+    events = enforce_window_and_two_sided_labels(events)
     summary = write_fingerprint_outputs(
         args.out,
         symbol=args.symbol,
