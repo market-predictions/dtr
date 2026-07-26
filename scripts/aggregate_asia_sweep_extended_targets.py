@@ -4,7 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
-from dtr_lab.strategies.asia_sweep.extended_target_modeling import (
+from dtr_lab.strategies.asia_sweep.extended_target_modeling_v2 import (
     aggregate_extended_summaries,
 )
 
