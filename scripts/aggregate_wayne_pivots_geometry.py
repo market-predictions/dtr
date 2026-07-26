@@ -43,6 +43,14 @@ def _decision_markdown(
     comparison_summary: pd.DataFrame,
 ) -> str:
     payload = decision["decision"]
+    candidate_header = (
+        "| Candidate | Wayne events | Pair breadth | +success controls | "
+        "+payoff controls | Full passes | Core anchor pass | Geometry pass |"
+    )
+    comparison_header = (
+        "| Comparison | Events | Success lift | Payoff effect | Pair breadth | "
+        "Year breadth | P(effect>0) | q | Pass |"
+    )
     lines = [
         "# Wayne Pivots Daily Geometry — Decision",
         "",
@@ -56,7 +64,7 @@ def _decision_markdown(
         "",
         "## Candidate gates",
         "",
-        "| Candidate | Wayne events | Pair breadth | +success controls | +payoff controls | Full passes | Core anchor pass | Geometry pass |",
+        candidate_header,
         "|---|---:|---:|---:|---:|---:|---|---|",
     ]
     for row in candidate_summary.itertuples(index=False):
@@ -71,7 +79,7 @@ def _decision_markdown(
             "",
             "## Strongest Wayne-versus-placebo comparisons",
             "",
-            "| Comparison | Events | Success lift | Payoff effect | Pair breadth | Year breadth | P(effect>0) | q | Pass |",
+            comparison_header,
             "|---|---:|---:|---:|---:|---:|---:|---:|---|",
         ]
     )
@@ -97,7 +105,8 @@ def _decision_markdown(
             f"Execution stage opened: `{payload['execution_stage_opened']}`  ",
             f"Strategy P&L calculated: `{payload['strategy_pnl_calculated']}`",
             "",
-            "This study evaluates causal price-path anatomy. The strict payoff measure is not executable strategy P&L.",
+            "This study evaluates causal price-path anatomy. The strict payoff "
+            "measure is not executable strategy P&L.",
             "",
         ]
     )
