@@ -1,5 +1,35 @@
 # Asian Sweep Context and Regime Atlas — Changelog
 
+## v10.2.0 — 2026-07-26
+
+### Changed
+
+- completed the authoritative EURUSD/GBPUSD 2015–2021 atlas;
+- evaluated 2,900 T5 events and 106 preregistered context states;
+- confirmed that higher-timeframe direction, trend strength, trend change, volatility and causal location produced no passing state after breadth, bootstrap and FDR gates;
+- retained `sweep_half_hour::0900_0929` as the sole passing attribution state;
+- blocked interactions and router modelling because only one independent factor family passed;
+- added the final decision and independent artifact audit;
+- closed and released the work package and claim;
+- retired the expensive workflow to manual reproduction only.
+
+### Reason
+
+The frozen single-factor gate failed to establish broad regime support. Continuing into interactions would convert weak descriptive variation into post-hoc filter mining.
+
+### Known limitations
+
+- the passing 09:00–09:29 state still had -0.3947R absolute stressed payoff proxy;
+- it is a relative attribution effect, not a profitable strategy;
+- 2022–2025 cannot serve as untouched validation for this newly isolated time state;
+- unchanged future-data or cross-asset replication is required before any further consideration.
+
+### Next
+
+- stop the current higher-timeframe/regime programme;
+- preserve the 09:00–09:29 state only as an unvalidated replication hypothesis;
+- do not reopen interactions, entry, stop, target, runner or position-management research from this result.
+
 ## v10.1.0 — 2026-07-26
 
 ### Changed
