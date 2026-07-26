@@ -1,0 +1,166 @@
+name: Asian Sweep Weekly Profile Regime PR
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: asia-sweep-weekly-profile-regime-pr-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  QUALIFIED_SOURCE_RUN_ID: "30111481052"
+  EXTENDED_REVERSAL_RUN_ID: "30209186651"
+  OMP_NUM_THREADS: "1"
+  OPENBLAS_NUM_THREADS: "1"
+  MKL_NUM_THREADS: "1"
+  NUMEXPR_NUM_THREADS: "1"
+
+jobs:
+  mechanism_study:
+    name: Run protected weekly-profile mechanism study
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install development dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,research]"
+      - name: Validate frozen contract
+        run: |
+          pytest strategies/asia_sweep/tests/test_weekly_profile_regime.py
+          ruff check \
+            src/dtr_lab/strategies/asia_sweep/weekly_profile_regime.py \
+            scripts/run_asia_sweep_weekly_profile_pair.py \
+            scripts/aggregate_asia_sweep_weekly_profile.py \
+            strategies/asia_sweep/tests/test_weekly_profile_regime.py
+      - name: Restore EURUSD qualified source cache
+        id: eur-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/source/EURUSD
+          key: stacey-burke-fx-v1-EURUSD-2015-2026-07-24
+      - name: Download EURUSD source on cache miss
+        if: steps.eur-cache.outputs.cache-hit != 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: stacey-burke-fx-source-EURUSD
+          path: ${{ runner.temp }}/source/EURUSD
+          repository: market-predictions/dtr
+          run-id: ${{ env.QUALIFIED_SOURCE_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Restore GBPUSD qualified source cache
+        id: gbp-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/source/GBPUSD
+          key: stacey-burke-fx-v1-GBPUSD-2015-2026-07-24
+      - name: Download GBPUSD source on cache miss
+        if: steps.gbp-cache.outputs.cache-hit != 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: stacey-burke-fx-source-GBPUSD
+          path: ${{ runner.temp }}/source/GBPUSD
+          repository: market-predictions/dtr
+          run-id: ${{ env.QUALIFIED_SOURCE_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download EURUSD immutable target ledger
+        uses: actions/download-artifact@v4
+        with:
+          name: asia-sweep-extended-targets-EURUSD
+          path: ${{ runner.temp }}/targets/EURUSD
+          repository: market-predictions/dtr
+          run-id: ${{ env.EXTENDED_REVERSAL_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download GBPUSD immutable target ledger
+        uses: actions/download-artifact@v4
+        with:
+          name: asia-sweep-extended-targets-GBPUSD
+          path: ${{ runner.temp }}/targets/GBPUSD
+          repository: market-predictions/dtr
+          run-id: ${{ env.EXTENDED_REVERSAL_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Enforce protected source boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          for symbol in EURUSD GBPUSD; do
+            lower="${symbol,,}"
+            test -s "${RUNNER_TEMP}/targets/${symbol}/extended_reversal_targets.csv"
+            for year in 2015 2016 2017 2018 2019; do
+              test -s "${RUNNER_TEMP}/source/${symbol}/${lower}_m1_bid_${year}.csv.gz"
+              test -s "${RUNNER_TEMP}/source/${symbol}/${lower}_m1_ask_${year}.csv.gz"
+            done
+            for protected in 2020 2021 2022 2023 2024 2025; do
+              test ! -e "${RUNNER_TEMP}/source/${symbol}/${lower}_m1_bid_${protected}.csv.gz"
+              test ! -e "${RUNNER_TEMP}/source/${symbol}/${lower}_m1_ask_${protected}.csv.gz"
+            done
+          done
+      - name: Build EURUSD causal weekly-profile ledger
+        run: |
+          out="${RUNNER_TEMP}/weekly-profile/EURUSD"
+          mkdir -p "${out}"
+          python scripts/run_asia_sweep_weekly_profile_pair.py \
+            --data "${RUNNER_TEMP}/source/EURUSD" \
+            --targets "${RUNNER_TEMP}/targets/EURUSD/extended_reversal_targets.csv" \
+            --symbol EURUSD \
+            --out "${out}"
+      - name: Build GBPUSD causal weekly-profile ledger
+        run: |
+          out="${RUNNER_TEMP}/weekly-profile/GBPUSD"
+          mkdir -p "${out}"
+          python scripts/run_asia_sweep_weekly_profile_pair.py \
+            --data "${RUNNER_TEMP}/source/GBPUSD" \
+            --targets "${RUNNER_TEMP}/targets/GBPUSD/extended_reversal_targets.csv" \
+            --symbol GBPUSD \
+            --out "${out}"
+      - name: Aggregate frozen H1 and H2 decision
+        run: |
+          out="${RUNNER_TEMP}/weekly-profile-decision"
+          mkdir -p "${out}"
+          python scripts/aggregate_asia_sweep_weekly_profile.py \
+            --inputs \
+              "${RUNNER_TEMP}/weekly-profile/EURUSD/weekly_profile_enriched.csv" \
+              "${RUNNER_TEMP}/weekly-profile/GBPUSD/weekly_profile_enriched.csv" \
+            --out "${out}"
+      - name: Upload complete weekly-profile evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: asia-sweep-weekly-profile-pr-decision
+          path: |
+            ${{ runner.temp }}/weekly-profile
+            ${{ runner.temp }}/weekly-profile-decision
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Enforce scientific authorization
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          path = (
+              Path(os.environ["RUNNER_TEMP"])
+              / "weekly-profile-decision"
+              / "weekly_profile_mechanism_decision.json"
+          )
+          decision = json.loads(path.read_text(encoding="utf-8"))
+          code = decision["decision"]
+          print(f"Scientific decision: {code}")
+          if code != "PASS_WEEKLY_PROFILE_MECHANISM_OPEN_MODELING":
+              raise SystemExit(code)
+          PY
