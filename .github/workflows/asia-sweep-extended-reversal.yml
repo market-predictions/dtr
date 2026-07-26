@@ -1,0 +1,278 @@
+name: Asian Sweep Extended Reversal Model
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: asia-sweep-extended-reversal-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  EARLY_ENTRY_FRONTIER_RUN_ID: "30197859712"
+  DEVELOPMENT_ANATOMY_RUN_ID: "30174245825"
+  QUALIFIED_SOURCE_RUN_ID: "30111481052"
+  OMP_NUM_THREADS: "1"
+  OPENBLAS_NUM_THREADS: "1"
+  MKL_NUM_THREADS: "1"
+  NUMEXPR_NUM_THREADS: "1"
+
+jobs:
+  focused_tests:
+    name: Validate frozen extended-reversal contract
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.head_ref == 'agent/asia-sweep-extended-reversal'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install development and research dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,research]"
+      - name: Run extended-reversal tests
+        run: pytest strategies/asia_sweep/tests/test_extended_reversal.py
+      - name: Lint extended-reversal implementation
+        run: |
+          ruff check \
+            src/dtr_lab/strategies/asia_sweep/extended_reversal_targets.py \
+            src/dtr_lab/strategies/asia_sweep/extended_reversal_modeling.py \
+            scripts/run_asia_sweep_extended_reversal_pair.py \
+            scripts/run_asia_sweep_extended_reversal_candidate.py \
+            scripts/aggregate_asia_sweep_extended_reversal.py \
+            strategies/asia_sweep/tests/test_extended_reversal.py
+
+  pair_targets:
+    name: Extended target ledger ${{ matrix.symbol }}
+    needs: focused_tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        symbol: [EURUSD, GBPUSD]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+      - name: Restore qualified FX source cache
+        id: source-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/source/${{ matrix.symbol }}
+          key: stacey-burke-fx-v1-${{ matrix.symbol }}-2015-2026-07-24
+      - name: Download qualified source on cache miss
+        if: steps.source-cache.outputs.cache-hit != 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: stacey-burke-fx-source-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/source/${{ matrix.symbol }}
+          repository: market-predictions/dtr
+          run-id: ${{ env.QUALIFIED_SOURCE_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download immutable early-entry ledger
+        uses: actions/download-artifact@v4
+        with:
+          name: asia-sweep-early-entry-frontier-decision
+          path: ${{ runner.temp }}/early-entry
+          repository: market-predictions/dtr
+          run-id: ${{ env.EARLY_ENTRY_FRONTIER_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download immutable anatomy levels
+        uses: actions/download-artifact@v4
+        with:
+          name: asia-sweep-fingerprint-development-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/anatomy/${{ matrix.symbol }}
+          repository: market-predictions/dtr
+          run-id: ${{ env.DEVELOPMENT_ANATOMY_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Enforce pair inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          symbol="${{ matrix.symbol }}"
+          lower="${symbol,,}"
+          test -s "${RUNNER_TEMP}/early-entry/early_entry_landmark_ledger.csv"
+          test -s "${RUNNER_TEMP}/anatomy/${symbol}/fingerprint_levels.csv"
+          for year in 2015 2016 2017 2018 2019; do
+            test -s "${RUNNER_TEMP}/source/${symbol}/${lower}_m1_bid_${year}.csv.gz"
+            test -s "${RUNNER_TEMP}/source/${symbol}/${lower}_m1_ask_${year}.csv.gz"
+          done
+      - name: Build extended target labels
+        run: |
+          out="${RUNNER_TEMP}/extended/${{ matrix.symbol }}"
+          mkdir -p "${out}"
+          python scripts/run_asia_sweep_extended_reversal_pair.py \
+            --data "${RUNNER_TEMP}/source/${{ matrix.symbol }}" \
+            --ledger "${RUNNER_TEMP}/early-entry/early_entry_landmark_ledger.csv" \
+            --levels "${RUNNER_TEMP}/anatomy/${{ matrix.symbol }}/fingerprint_levels.csv" \
+            --symbol "${{ matrix.symbol }}" \
+            --out "${out}"
+      - name: Upload pair target evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: asia-sweep-extended-targets-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/extended/${{ matrix.symbol }}
+          if-no-files-found: warn
+          retention-days: 90
+
+  candidates:
+    name: ${{ matrix.target }} ${{ matrix.landmark }} ${{ matrix.family }}
+    needs: pair_targets
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        target:
+          - EXT_FIXED_3R_1200
+          - EXT_FIXED_4R_1400
+          - EXT_FIXED_2R_1100
+          - EXT_OPPOSING_LIQUIDITY_1400
+          - EXT_OPPOSITE_BOUNDARY_1100
+        landmark: [T0, T1, T2, T3]
+        family: [elastic_net, hgb]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install research dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[research]"
+      - name: Download pair target ledgers
+        uses: actions/download-artifact@v4
+        with:
+          pattern: asia-sweep-extended-targets-*
+          path: ${{ runner.temp }}/extended-inputs
+          merge-multiple: false
+      - name: Enforce pair target count
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(find "${RUNNER_TEMP}/extended-inputs" -name extended_reversal_targets.csv | wc -l)" -eq 2
+          mkdir -p "${RUNNER_TEMP}/pooled"
+          python - <<'PY'
+          from pathlib import Path
+          import pandas as pd
+
+          files = sorted(Path("${RUNNER_TEMP}/extended-inputs").rglob("extended_reversal_targets.csv"))
+          frame = pd.concat([pd.read_csv(path) for path in files], ignore_index=True)
+          frame.to_csv("${RUNNER_TEMP}/pooled/extended_reversal_targets.csv", index=False)
+          PY
+      - name: Run grouped target candidate
+        run: |
+          out="${RUNNER_TEMP}/candidate/${{ matrix.target }}-${{ matrix.landmark }}-${{ matrix.family }}"
+          mkdir -p "${out}"
+          python scripts/run_asia_sweep_extended_reversal_candidate.py \
+            --ledger "${RUNNER_TEMP}/pooled/extended_reversal_targets.csv" \
+            --target "${{ matrix.target }}" \
+            --landmark "${{ matrix.landmark }}" \
+            --family "${{ matrix.family }}" \
+            --out "${out}"
+      - name: Upload candidate evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: extended-${{ matrix.target }}-${{ matrix.landmark }}-${{ matrix.family }}
+          path: ${{ runner.temp }}/candidate/${{ matrix.target }}-${{ matrix.landmark }}-${{ matrix.family }}
+          if-no-files-found: warn
+          retention-days: 90
+
+  model_gate:
+    name: Enforce extended-reversal model decision
+    needs: candidates
+    if: always() && needs.candidates.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[research]"
+      - name: Download all candidate evidence
+        uses: actions/download-artifact@v4
+        with:
+          pattern: extended-*
+          path: ${{ runner.temp }}/candidate-inputs
+          merge-multiple: false
+      - name: Enforce candidate count
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(find "${RUNNER_TEMP}/candidate-inputs" -name candidate_summary.json | wc -l)" -eq 40
+      - name: Aggregate frozen model gate
+        run: |
+          mkdir -p "${RUNNER_TEMP}/extended-decision"
+          python scripts/aggregate_asia_sweep_extended_reversal.py \
+            --inputs "${RUNNER_TEMP}/candidate-inputs" \
+            --out "${RUNNER_TEMP}/extended-decision"
+      - name: Upload complete extended decision
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: asia-sweep-extended-reversal-model-decision
+          path: ${{ runner.temp }}/extended-decision
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Enforce scientific decision
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          decision="${RUNNER_TEMP}/extended-decision/extended_reversal_model_decision.json"
+          test -s "${decision}"
+          python - "${decision}" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          payload = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          print(json.dumps(payload, indent=2, sort_keys=True))
+          expected = (
+              "PASS_EXTENDED_REVERSAL_MODEL_"
+              "AUTHORIZE_POSITION_STRUCTURE_DISCOVERY"
+          )
+          raise SystemExit(0 if payload.get("decision") == expected else 1)
+          PY
