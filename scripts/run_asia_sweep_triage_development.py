@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from dtr_lab.strategies.asia_sweep.triage_modeling import run_development
+from dtr_lab.strategies.asia_sweep.triage_modeling_v2 import run_development
 
 
 def main() -> None:
