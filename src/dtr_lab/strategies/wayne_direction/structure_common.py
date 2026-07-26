@@ -7,7 +7,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from .model import CandidateState, TrendConfig
+from .model import CandidateState, DEFAULT_TREND_CONFIG, TrendConfig
 
 _REQUIRED_OHLC = {"open", "high", "low", "close"}
 
@@ -74,7 +74,7 @@ def average_true_range(frame: pd.DataFrame, length: int = 20) -> pd.Series:
 
 def confirmed_swings(
     frame: pd.DataFrame,
-    config: TrendConfig = TrendConfig(),
+    config: TrendConfig = DEFAULT_TREND_CONFIG,
 ) -> pd.DataFrame:
     bars = _validate_ohlc(frame)
     highs = bars["high"].to_numpy(dtype=float)
