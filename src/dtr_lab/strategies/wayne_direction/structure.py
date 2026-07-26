@@ -7,7 +7,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from .model import CandidateState, TrendConfig, TrendDirection
+from .model import CandidateState, DEFAULT_TREND_CONFIG, TrendConfig, TrendDirection
 from .structure_common import (
     _Candidate,
     _process_high_swing,
@@ -21,7 +21,7 @@ from .structure_common import (
 
 def build_structure_ledger(
     frame: pd.DataFrame,
-    config: TrendConfig = TrendConfig(),
+    config: TrendConfig = DEFAULT_TREND_CONFIG,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     bars = _validate_ohlc(frame)
     bars["atr"] = average_true_range(bars, config.atr_length)
