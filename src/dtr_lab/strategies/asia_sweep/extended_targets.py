@@ -81,7 +81,11 @@ def _first_passage_label(
         if target_hit:
             return 1.0, False, "TARGET"
     coverage_ok = pd.Timestamp(path.index[-1]) >= horizon - pd.Timedelta(minutes=2)
-    return (0.0, False, "HORIZON") if coverage_ok else (math.nan, False, "INCOMPLETE_PATH")
+    return (
+        (0.0, False, "HORIZON")
+        if coverage_ok
+        else (math.nan, False, "INCOMPLETE_PATH")
+    )
 
 
 def _late_hold_label(
@@ -169,7 +173,9 @@ def _label_row(row: pd.Series, bars: pd.DataFrame) -> dict[str, Any]:
         result[f"{name}_resolution"] = reason
         result[f"{name}_reward_risk"] = multiple
     opposite = float(row["asian_high"] if is_long else row["asian_low"])
-    opposite_reward = (opposite - entry) / risk if is_long else (entry - opposite) / risk
+    opposite_reward = (
+        (opposite - entry) / risk if is_long else (entry - opposite) / risk
+    )
     if opposite_reward <= 0:
         result["OPPOSITE_ASIAN_BOUNDARY_1300"] = math.nan
         result["OPPOSITE_ASIAN_BOUNDARY_1300_ambiguous"] = False
@@ -248,11 +254,6 @@ def build_extended_target_ledger(
         ).iterrows():
             rows.append(_label_row(row, bars))
     labels = pd.DataFrame(rows)
-    feature_columns = [
-        column
-        for column in landmark_ledger.columns
-        if column not in labels.columns or column in ("event_id", "landmark")
-    ]
     joined = landmark_ledger.merge(
         labels,
         on=["event_id", "landmark"],
