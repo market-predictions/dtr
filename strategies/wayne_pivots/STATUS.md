@@ -4,28 +4,40 @@ Updated: 2026-07-27
 
 ## Current state
 
-`GEOMETRY_IMPLEMENTED_PENDING_AUTHORITATIVE_RUN`
+`CLOSED_FAIL_DAILY_PIVOT_GEOMETRY_STOP_BEFORE_BIAS`
+
+## Binding decision
+
+The six-pair 2015–2021 daily geometry programme failed its preregistered uniqueness gate.
+
+- Wayne produced more than 9,000 fresh events per side;
+- all six source-faithful target proxies were negative in every pair and every year;
+- 20 of 60 individual comparisons passed, but only against displaced or weak anchors;
+- no candidate beat at least eight of ten controls;
+- no candidate passed the prior-close or range-midpoint core-anchor requirement;
+- no directional-bias or execution stage was opened.
 
 ## Completed
 
-- source methodology and conflict between pivot-slope and external-bias interpretations documented;
-- preregistration, exact event definitions and family-level gate frozen;
-- separate work package and claim opened;
-- daily traditional pivot engine implemented;
-- New York 17:00 causal calendar implemented;
-- six-pair BID/ASK anatomy pipeline implemented;
-- ten-placebo matched comparison engine implemented;
-- pair/year breadth, date-block inference and FDR implemented;
-- focused tests and authoritative workflow implemented.
-
-## Active next step
-
-Run contract tests, isolate 2015–2021 source for all six primary pairs, build pair ledgers and enforce the daily geometry gate.
+- source contract, exact event definitions and geometry gate frozen before outcomes;
+- New York 17:00 DST-safe daily pivot engine;
+- six-pair BID/ASK source isolation for 2015–2021;
+- first-touch anatomy, freshness, first-passage, MFE/MAE and strict payoff proxy;
+- ten matched placebo structures;
+- pair/year breadth, block bootstrap, permutation and FDR;
+- authoritative run `30223457477`;
+- independent artifact reconstruction and hash audit;
+- non-authoritative previous-pivot metadata corrected and regression-tested;
+- expensive workflow retired to manual reproduction only.
 
 ## Protected boundaries
 
-- no 2022–2025 source access;
-- no directional-bias outcome inspection before geometry passes;
-- no execution P&L;
-- no role reversal, weekly/monthly pivots or future-pivot outcomes;
-- no Pine or deployment work.
+- 2022–2025 remained unopened in this work package;
+- no pivot-slope, H4/M15, macro or fundamental-bias outcome was inspected;
+- no execution P&L or role-reversal study was opened;
+- no weekly/monthly or future-pivot outcome was opened;
+- no Pine or deployment work was authorized.
+
+## Future research boundary
+
+A future full-methodology study would require a new preregistration. It must hold the directional bias and trigger constant while comparing Wayne zones with prior-close and range-midpoint zones, so any incremental pivot contribution remains identifiable.
