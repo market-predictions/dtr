@@ -1,10 +1,14 @@
 """Wayne McDonell pivot-point research package."""
 
+from typing import Any
+
+import pandas as pd
+
 from dtr_lab.strategies.wayne_pivots.pivot_atlas import evaluate_geometry_atlas
 from dtr_lab.strategies.wayne_pivots.pivot_geometry import (
     PRIMARY_PAIRS,
     STRUCTURES,
-    build_anatomy_ledger,
+    build_anatomy_ledger as _build_anatomy_ledger,
     build_pivot_days,
     build_structures,
     load_bid_ask_minutes,
@@ -12,6 +16,15 @@ from dtr_lab.strategies.wayne_pivots.pivot_geometry import (
     pivot_day_start,
     traditional_structure,
 )
+
+
+def build_anatomy_ledger(*args: Any, **kwargs: Any) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Build anatomy and normalize the non-authoritative previous-pivot metadata."""
+    ledger, day_ledger = _build_anatomy_ledger(*args, **kwargs)
+    day_ledger = day_ledger.copy()
+    day_ledger["previous_wayne_p"] = day_ledger["wayne_p"].shift(1)
+    return ledger, day_ledger
+
 
 __all__ = [
     "PRIMARY_PAIRS",
