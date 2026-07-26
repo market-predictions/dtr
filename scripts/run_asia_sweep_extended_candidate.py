@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from dtr_lab.strategies.asia_sweep.extended_target_modeling import (
+from dtr_lab.strategies.asia_sweep.extended_target_modeling_v2 import (
     FAMILIES,
     fit_extended_candidate,
 )
