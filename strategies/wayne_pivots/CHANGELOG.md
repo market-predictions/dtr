@@ -1,5 +1,37 @@
 # Wayne Pivots Research Changelog
 
+## v0.4.0 — 2026-07-27
+
+### Changed
+
+- completed the authoritative six-pair 2015–2021 daily geometry atlas;
+- evaluated 596,277 event-target rows and 60 Wayne-versus-placebo comparisons;
+- recorded the binding decision `FAIL_DAILY_PIVOT_GEOMETRY_STOP_BEFORE_BIAS`;
+- documented that all six source-faithful target proxies were negative in every pair and year;
+- distinguished strong wins against adversely displaced controls from failure against prior-close and range-midpoint anchors;
+- independently reconstructed event counts, absolute outcomes, comparison gates and authorization logic;
+- corrected non-authoritative previous-pivot metadata and added a regression test;
+- retired the expensive Actions workflow to manual reproduction only;
+- closed directional-bias, execution and historical-confirmation stages in the current programme.
+
+### Reason
+
+Wayne geometry demonstrated generic prior-range location sensitivity but did not establish sufficient incremental value for the traditional `(H + L + C) / 3` anchor. Directional filters cannot receive credit before pivot-specific value is identified.
+
+### Known limitations
+
+- the strict payoff value is an anatomy proxy, not executable P&L;
+- the study did not test the complete discretionary system with fundamental bias, speed, momentum, announcements and abstention;
+- scheduled-news tagging and London-midnight sensitivity were not opened;
+- 2022–2025 remained unopened;
+- a future full-methodology interaction study would require a new preregistration and identical bias/trigger rules across Wayne and generic anchors.
+
+### Next
+
+- close and hand over work package `WP-WP-20260727-01`;
+- discuss whether a separate full-methodology incremental-value study is justified;
+- do not reopen standalone Wayne geometry, target, side, pair, year or boundary variants.
+
 ## v0.3.0 — 2026-07-27
 
 ### Changed
