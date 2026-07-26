@@ -262,7 +262,10 @@ def _apply_platt(model: LogisticRegression, probabilities: np.ndarray) -> np.nda
     return model.predict_proba(logits)[:, 1]
 
 
-def _calibration_coefficients(target: np.ndarray, probability: np.ndarray) -> tuple[float, float]:
+def _calibration_coefficients(
+    target: np.ndarray,
+    probability: np.ndarray,
+) -> tuple[float, float]:
     clipped = np.clip(probability, 1e-6, 1.0 - 1e-6)
     logits = np.log(clipped / (1.0 - clipped)).reshape(-1, 1)
     model = LogisticRegression(C=1e4, solver="lbfgs").fit(logits, target)
@@ -368,7 +371,9 @@ def _breadth_table(predictions: pd.DataFrame, column: str) -> pd.DataFrame:
     return table
 
 
-def summarize_predictions(predictions: pd.DataFrame) -> tuple[dict[str, Any], dict[str, pd.DataFrame]]:
+def summarize_predictions(
+    predictions: pd.DataFrame,
+) -> tuple[dict[str, Any], dict[str, pd.DataFrame]]:
     scored = _year_block_quintiles(predictions)
     target = scored["target"].to_numpy(dtype=int)
     probability = scored["probability"].to_numpy(dtype=float)
@@ -441,7 +446,9 @@ def summarize_predictions(predictions: pd.DataFrame) -> tuple[dict[str, Any], di
     }
     gates = {
         "events": summary["events"] >= 400,
-        "events_per_pair": all(len(group) >= 150 for _, group in scored.groupby("instrument")),
+        "events_per_pair": all(
+            len(group) >= 150 for _, group in scored.groupby("instrument")
+        ),
         "pr_auc_lift": summary["pr_auc_relative_lift"] >= 0.50,
         "top_quintile_lift": summary["top_quintile_lift"] >= 1.75,
         "bottom_quintile": summary["bottom_quintile_ratio"] < 0.60,
