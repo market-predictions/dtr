@@ -1,0 +1,176 @@
+name: Asian Sweep Sequential Triage Phase A
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: asia-sweep-sequential-triage-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  EARLY_ENTRY_FRONTIER_RUN_ID: "30197859712"
+  OMP_NUM_THREADS: "1"
+  OPENBLAS_NUM_THREADS: "1"
+  MKL_NUM_THREADS: "1"
+  NUMEXPR_NUM_THREADS: "1"
+
+jobs:
+  focused_tests:
+    name: Validate frozen sequential triage contract
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.head_ref == 'agent/asia-sweep-sequential-triage'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install development and research dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,research]"
+      - name: Run sequential triage tests
+        run: pytest strategies/asia_sweep/tests/test_sequential_triage.py
+      - name: Lint sequential triage implementation
+        run: |
+          ruff check \
+            src/dtr_lab/strategies/asia_sweep/sequential_triage.py \
+            src/dtr_lab/strategies/asia_sweep/sequential_triage_modeling.py \
+            scripts/run_asia_sweep_sequential_triage_candidate.py \
+            scripts/aggregate_asia_sweep_sequential_triage.py \
+            strategies/asia_sweep/tests/test_sequential_triage.py
+
+  candidates:
+    name: Triage ${{ matrix.landmark }} ${{ matrix.family }}
+    needs: focused_tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        landmark: [T0, T1, T2, T3]
+        family: [elastic_net, hgb]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install research dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[research]"
+      - name: Download immutable early-entry frontier evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: asia-sweep-early-entry-frontier-decision
+          path: ${{ runner.temp }}/early-entry
+          repository: market-predictions/dtr
+          run-id: ${{ env.EARLY_ENTRY_FRONTIER_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Enforce immutable input
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s "${RUNNER_TEMP}/early-entry/early_entry_landmark_ledger.csv"
+      - name: Run grouped candidate
+        run: |
+          out="${RUNNER_TEMP}/triage/${{ matrix.landmark }}-${{ matrix.family }}"
+          mkdir -p "${out}"
+          python scripts/run_asia_sweep_sequential_triage_candidate.py \
+            --ledger "${RUNNER_TEMP}/early-entry/early_entry_landmark_ledger.csv" \
+            --landmark "${{ matrix.landmark }}" \
+            --family "${{ matrix.family }}" \
+            --out "${out}"
+      - name: Upload candidate evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: asia-sweep-triage-${{ matrix.landmark }}-${{ matrix.family }}
+          path: ${{ runner.temp }}/triage/${{ matrix.landmark }}-${{ matrix.family }}
+          if-no-files-found: warn
+          retention-days: 90
+
+  phase_a_gate:
+    name: Enforce sequential triage Phase A
+    needs: candidates
+    if: always() && needs.candidates.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[research]"
+      - name: Download all candidate evidence
+        uses: actions/download-artifact@v4
+        with:
+          pattern: asia-sweep-triage-*
+          path: ${{ runner.temp }}/triage-inputs
+          merge-multiple: false
+      - name: Enforce candidate count
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(find "${RUNNER_TEMP}/triage-inputs" -name candidate_summary.json | wc -l)" -eq 8
+      - name: Aggregate frozen Phase A gate
+        continue-on-error: true
+        run: |
+          mkdir -p "${RUNNER_TEMP}/triage-decision"
+          python scripts/aggregate_asia_sweep_sequential_triage.py \
+            --inputs "${RUNNER_TEMP}/triage-inputs" \
+            --out "${RUNNER_TEMP}/triage-decision"
+      - name: Upload complete Phase A decision
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: asia-sweep-sequential-triage-phase-a-decision
+          path: ${{ runner.temp }}/triage-decision
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Enforce scientific decision
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          decision="${RUNNER_TEMP}/triage-decision/triage_phase_a_decision.json"
+          test -s "${decision}"
+          python - "${decision}" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          payload = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          print(json.dumps(payload, indent=2, sort_keys=True))
+          expected = (
+              "PASS_TRIAGE_AUTHORIZE_SEPARATE_STAGED_REVERSAL_"
+              "AND_CONTINUATION_GEOMETRY"
+          )
+          raise SystemExit(0 if payload.get("decision") == expected else 1)
+          PY
