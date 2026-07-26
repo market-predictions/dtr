@@ -1,0 +1,202 @@
+name: Asian Sweep Early Entry Information Frontier
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: asia-sweep-early-entry-frontier-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  QUALIFIED_SOURCE_RUN_ID: "30111481052"
+  DEVELOPMENT_ANATOMY_RUN_ID: "30174245825"
+  FINGERPRINT_MODEL_RUN_ID: "30177831134"
+
+jobs:
+  focused_tests:
+    name: Validate frozen early-entry contract
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.head_ref == 'agent/asia-sweep-early-entry-research'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install development dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: Run early-entry falsification tests
+        run: pytest strategies/asia_sweep/tests/test_early_entry_frontier.py
+      - name: Lint early-entry implementation
+        run: |
+          ruff check \
+            src/dtr_lab/strategies/asia_sweep/early_entry_landmarks.py \
+            src/dtr_lab/strategies/asia_sweep/early_entry_modeling.py \
+            scripts/run_asia_sweep_early_entry_pair.py \
+            scripts/aggregate_asia_sweep_early_entry_frontier.py \
+            strategies/asia_sweep/tests/test_early_entry_frontier.py
+
+  pair_landmarks:
+    name: Build early-entry landmarks ${{ matrix.symbol }}
+    needs: focused_tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        symbol: [EURUSD, GBPUSD]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+      - name: Restore qualified FX source cache
+        id: source-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/source/${{ matrix.symbol }}
+          key: stacey-burke-fx-v1-${{ matrix.symbol }}-2015-2026-07-24
+      - name: Download qualified source on cache miss
+        if: steps.source-cache.outputs.cache-hit != 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: stacey-burke-fx-source-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/source/${{ matrix.symbol }}
+          repository: market-predictions/dtr
+          run-id: ${{ env.QUALIFIED_SOURCE_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download immutable development anatomy
+        uses: actions/download-artifact@v4
+        with:
+          name: asia-sweep-fingerprint-development-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/events/${{ matrix.symbol }}
+          repository: market-predictions/dtr
+          run-id: ${{ env.DEVELOPMENT_ANATOMY_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Enforce pair inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          symbol="${{ matrix.symbol }}"
+          lower="${symbol,,}"
+          for year in 2015 2016 2017 2018 2019; do
+            test -s "${RUNNER_TEMP}/source/${symbol}/${lower}_m1_bid_${year}.csv.gz"
+            test -s "${RUNNER_TEMP}/source/${symbol}/${lower}_m1_ask_${year}.csv.gz"
+          done
+          test -s "${RUNNER_TEMP}/events/${symbol}/fingerprint_events.csv"
+          test -s "${RUNNER_TEMP}/events/${symbol}/fingerprint_levels.csv"
+      - name: Build causal landmark ledger
+        run: |
+          mkdir -p "${RUNNER_TEMP}/early-entry/${{ matrix.symbol }}"
+          python scripts/run_asia_sweep_early_entry_pair.py \
+            --data "${RUNNER_TEMP}/source/${{ matrix.symbol }}" \
+            --events "${RUNNER_TEMP}/events/${{ matrix.symbol }}/fingerprint_events.csv" \
+            --levels "${RUNNER_TEMP}/events/${{ matrix.symbol }}/fingerprint_levels.csv" \
+            --symbol "${{ matrix.symbol }}" \
+            --start-year 2015 \
+            --end-year 2019 \
+            --out "${RUNNER_TEMP}/early-entry/${{ matrix.symbol }}"
+      - name: Upload pair landmark evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: asia-sweep-early-entry-landmarks-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/early-entry/${{ matrix.symbol }}
+          if-no-files-found: warn
+          retention-days: 90
+
+  frontier_gate:
+    name: Enforce early-entry information frontier
+    needs: pair_landmarks
+    if: always() && needs.pair_landmarks.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+      - name: Download pair landmark evidence
+        uses: actions/download-artifact@v4
+        with:
+          pattern: asia-sweep-early-entry-landmarks-*
+          path: ${{ runner.temp }}/early-entry-inputs
+          merge-multiple: false
+      - name: Download frozen T5 model evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: asia-sweep-fingerprint-development-model-decision
+          path: ${{ runner.temp }}/frozen-model
+          repository: market-predictions/dtr
+          run-id: ${{ env.FINGERPRINT_MODEL_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Enforce aggregate inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(find "${RUNNER_TEMP}/early-entry-inputs" -name early_entry_landmarks.csv | wc -l)" -eq 2
+          test -s "${RUNNER_TEMP}/frozen-model/predictions_T5_hgb.csv"
+      - name: Run grouped information-payoff frontier
+        run: |
+          python scripts/aggregate_asia_sweep_early_entry_frontier.py \
+            --inputs "${RUNNER_TEMP}/early-entry-inputs" \
+            --frozen-t5-predictions "${RUNNER_TEMP}/frozen-model/predictions_T5_hgb.csv" \
+            --out "${RUNNER_TEMP}/early-entry-decision"
+      - name: Upload complete frontier decision
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: asia-sweep-early-entry-frontier-decision
+          path: ${{ runner.temp }}/early-entry-decision
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Enforce frozen scientific decision
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          decision="${RUNNER_TEMP}/early-entry-decision/early_entry_frontier_decision.json"
+          test -s "${decision}"
+          python - "${decision}" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          payload = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          print(json.dumps(payload, indent=2, sort_keys=True))
+          expected = "PASS_EARLY_ENTRY_FRONTIER_AUTHORIZE_POLICY_AMENDMENT"
+          raise SystemExit(0 if payload.get("decision") == expected else 1)
+          PY
