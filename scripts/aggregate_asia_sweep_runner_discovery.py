@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from dtr_lab.strategies.asia_sweep.runner_optimization_metrics import (
+from dtr_lab.strategies.asia_sweep.runner_optimization_selection import (
     write_runner_discovery_outputs,
 )
 
