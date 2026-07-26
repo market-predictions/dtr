@@ -18,7 +18,10 @@ class TriageThresholds:
     continuation: float
 
     def __post_init__(self) -> None:
-        for name, value in (("reversal", self.reversal), ("continuation", self.continuation)):
+        for name, value in (
+            ("reversal", self.reversal),
+            ("continuation", self.continuation),
+        ):
             if not 0.0 <= value <= 1.0:
                 raise ValueError(f"{name} threshold must be in [0, 1]")
 
@@ -49,7 +52,10 @@ def decide_action(
     """Map calibrated state probabilities to a conservative staged action."""
     reversal_pass = reversal_probability >= thresholds.reversal
     continuation_pass = continuation_probability >= thresholds.continuation
-    if continuation_pass and (not reversal_pass or continuation_probability >= reversal_probability):
+    continuation_wins = (
+        not reversal_pass or continuation_probability >= reversal_probability
+    )
+    if continuation_pass and continuation_wins:
         return "EXIT_BLOCK_ADD"
     if reversal_pass and reversal_probability > continuation_probability:
         return "ADD_OR_HOLD"
