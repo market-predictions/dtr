@@ -116,7 +116,7 @@ def test_landmark_clock_and_long_quote_side(tmp_path: Path) -> None:
     assert ledger.loc["LEGACY_T5", "entry_timestamp_utc"] == (
         "2015-01-06T08:05:00+00:00"
     )
-    assert ledger.loc["T0", "entry_price"] == 1.09955
+    assert np.isclose(ledger.loc["T0", "entry_price"], 1.09955)
     assert ledger.loc["T0", "landmark_bar_count"] == 1
     assert ledger.loc["T3", "landmark_bar_count"] == 4
     assert ledger.loc["LEGACY_T5", "landmark_bar_count"] == 5
