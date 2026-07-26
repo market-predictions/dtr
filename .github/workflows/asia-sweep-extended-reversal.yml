@@ -178,19 +178,37 @@ jobs:
           pattern: asia-sweep-extended-targets-*
           path: ${{ runner.temp }}/extended-inputs
           merge-multiple: false
-      - name: Enforce pair target count
+      - name: Pool pair target ledgers
         shell: bash
         run: |
           set -euo pipefail
-          test "$(find "${RUNNER_TEMP}/extended-inputs" -name extended_reversal_targets.csv | wc -l)" -eq 2
           mkdir -p "${RUNNER_TEMP}/pooled"
           python - <<'PY'
+          from __future__ import annotations
+
+          import os
           from pathlib import Path
+
           import pandas as pd
 
-          files = sorted(Path("${RUNNER_TEMP}/extended-inputs").rglob("extended_reversal_targets.csv"))
-          frame = pd.concat([pd.read_csv(path) for path in files], ignore_index=True)
-          frame.to_csv("${RUNNER_TEMP}/pooled/extended_reversal_targets.csv", index=False)
+          root = Path(os.environ["RUNNER_TEMP"])
+          files = sorted(
+              (root / "extended-inputs").rglob("extended_reversal_targets.csv")
+          )
+          if len(files) != 2:
+              discovered = "\n".join(str(path) for path in files) or "<none>"
+              raise SystemExit(
+                  "Expected exactly two pair target ledgers, "
+                  f"found {len(files)}:\n{discovered}"
+              )
+
+          frame = pd.concat(
+              [pd.read_csv(path) for path in files],
+              ignore_index=True,
+          )
+          output = root / "pooled" / "extended_reversal_targets.csv"
+          frame.to_csv(output, index=False)
+          print(f"Pooled {len(files)} ledgers into {output} ({len(frame)} rows)")
           PY
       - name: Run grouped target candidate
         run: |
