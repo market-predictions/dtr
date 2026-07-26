@@ -1,1 +1,190 @@
-ZnJvbSBfX2Z1dHVyZV9fIGltcG9ydCBhbm5vdGF0aW9ucwoKaW1wb3J0IG51bXB5IGFzIG5wCmltcG9ydCBwYW5kYXMgYXMgcGQKaW1wb3J0IHB5dGVzdAoKZnJvbSBkdHJfbGFiLnN0cmF0ZWdpZXMuYXNpYV9zd2VlcC5leHRlbmRlZF9yZXZlcnNhbF9saXF1aWRpdHkgaW1wb3J0ICgKICAgIGJ1aWxkX29wcG9zaW5nX2xpcXVpZGl0eV9sZXZlbF9yZWNvcmRzLAogICAgc2VsZWN0X29wcG9zaW5nX2xpcXVpZGl0eV9sZXZlbHMsCikKZnJvbSBkdHJfbGFiLnN0cmF0ZWdpZXMuYXNpYV9zd2VlcC5leHRlbmRlZF9yZXZlcnNhbF90YXJnZXRzIGltcG9ydCAoCiAgICBUQVJHRVRfT1JERVIsCiAgICBfbGFiZWxfdGFyZ2V0LAogICAgX29wcG9zaW5nX2xpcXVpZGl0eV90YXJnZXQsCikKZnJvbSBkdHJfbGFiLnN0cmF0ZWdpZXMuYXNpYV9zd2VlcC5maW5nZXJwcmludF9lbmdpbmUgaW1wb3J0IExldmVsCgoKZGVmIHRlc3RfZXh0ZW5kZWRfdGFyZ2V0X2hpZXJhcmNoeV9pc19mcm96ZW4oKSAtPiBOb25lOgogICAgYXNzZXJ0IFRBUkdFVF9PUkRFUiA9PSAoCiAgICAgICAgIkVYVF9GSVhFRF8zUl8xMjAwIiwKICAgICAgICAiRVhUX0ZJWEVEXzRSXzE0MDAiLAogICAgICAgICJFWFRfRklYRURfMlJfMTEwMCIsCiAgICAgICAgIkVYVF9PUFBPU0lOR19MSVFVSURJVFlfMTQwMCIsCiAgICAgICAgIkVYVF9PUFBPU0lURV9CT1VOREFSWV8xMTAwIiwKICAgICkKCgpkZWYgdGVzdF9leHRlbmRlZF9zYW1lX2Jhcl9hbWJpZ3VpdHlfaXNfc3RvcF9maXJzdCgpIC0+IE5vbmU6CiAgICB0aW1lc3RhbXAgPSBwZC5UaW1lc3RhbXAoIjIwMTUtMDEtMDZUMDg6MDM6MDBaIikKICAgIGJhcnMgPSBwZC5EYXRhRnJhbWUoCiAgICAgICAgewogICAgICAgICAgICAibG93X2JpZCI6IFsxLjA5ODBdLAogICAgICAgICAgICAiaGlnaF9iaWQiOiBbMS4xMDIwXSwKICAgICAgICAgICAgImhpZ2hfYXNrIjogWzEuMTAyMl0sCiAgICAgICAgICAgICJsb3dfYXNrIjogWzEuMDk4Ml0sCiAgICAgICAgICAgICJhY3RpdmUiOiBbVHJ1ZV0sCiAgICAgICAgfSwKICAgICAgICBpbmRleD1wZC5EYXRldGltZUluZGV4KFt0aW1lc3RhbXBdKSwKICAgICkKICAgIHJvdyA9IHBkLlNlcmllcygKICAgICAgICB7CiAgICAgICAgICAgICJpbnN0cnVtZW50IjogIkVVUlVTRCIsCiAgICAgICAgICAgICJ0cmFkZV9kYXRlIjogIjIwMTUtMDEtMDYiLAogICAgICAgICAgICAiZW50cnlfdGltZXN0YW1wX3V0YyI6IHRpbWVzdGFtcCwKICAgICAgICB9CiAgICApCiAgICBvdXRjb21lID0gX2xhYmVsX3RhcmdldCgKICAgICAgICByb3csCiAgICAgICAgYmFycywKICAgICAgICB0YXJnZXRfbmFtZT0iRVhUX0ZJWEVEXzJSXzExMDAiLAogICAgICAgIHRhcmdldF9wcmljZT0xLjEwMTUsCiAgICAgICAgZW50cnlfcHJpY2U9MS4xMDAwLAogICAgICAgIHN0b3BfcHJpY2U9MS4wOTk1LAogICAgICAgIGlzX2xvbmc9VHJ1ZSwKICAgICkKICAgIGFzc2VydCBvdXRjb21lIGlzIG5vdCBOb25lCiAgICBhc3NlcnQgb3V0Y29tZVsiZXh0ZW5kZWRfc3RvcF9maXJzdCJdID09IDEKICAgIGFzc2VydCBvdXRjb21lWyJleHRlbmRlZF9hbWJpZ3VvdXNfc3RvcF9maXJzdCJdID09IDEKICAgIGFzc2VydCBvdXRjb21lWyJleHRlbmRlZF90YXJnZXRfaGl0Il0gPT0gMAoKCmRlZiB0ZXN0X29wcG9zaW5nX2xpcXVpZGl0eV9pc19pbl9yZXZlcnNhbF9kaXJlY3Rpb24oKSAtPiBOb25lOgogICAgcm93ID0gcGQuU2VyaWVzKHsiZXZlbnRfaWQiOiAiRTEifSkKICAgIGxldmVscyA9IHBkLkRhdGFGcmFtZSgKICAgICAgICBbCiAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgICJldmVudF9pZCI6ICJFMSIsCiAgICAgICAgICAgICAgICAiYXZhaWxhYmxlX2F0XzA4MDAiOiBUcnVlLAogICAgICAgICAgICAgICAgImxldmVsX3NpZGUiOiAiSElHSCIsCiAgICAgICAgICAgICAgICAibGV2ZWxfcHJpY2UiOiAxLjEwMTAsCiAgICAgICAgICAgIH0sCiAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgICJldmVudF9pZCI6ICJFMSIsCiAgICAgICAgICAgICAgICAiYXZhaWxhYmxlX2F0XzA4MDAiOiBUcnVlLAogICAgICAgICAgICAgICAgImxldmVsX3NpZGUiOiAiSElHSCIsCiAgICAgICAgICAgICAgICAibGV2ZWxfcHJpY2UiOiAxLjEwMjAsCiAgICAgICAgICAgIH0sCiAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgICJldmVudF9pZCI6ICJFMSIsCiAgICAgICAgICAgICAgICAiYXZhaWxhYmxlX2F0XzA4MDAiOiBUcnVlLAogICAgICAgICAgICAgICAgImxldmVsX3NpZGUiOiAiTE9XIiwKICAgICAgICAgICAgICAgICJsZXZlbF9wcmljZSI6IDEuMDk4MCwKICAgICAgICAgICAgfSwKICAgICAgICBdCiAgICApCiAgICBhc3NlcnQgbnAuaXNjbG9zZSgKICAgICAgICBfb3Bwb3NpbmdfbGlxdWlkaXR5X3RhcmdldCgKICAgICAgICAgICAgcm93LAogICAgICAgICAgICBsZXZlbHMsCiAgICAgICAgICAgIGlzX2xvbmc9VHJ1ZSwKICAgICAgICAgICAgZW50cnlfcHJpY2U9MS4xMDAwLAogICAgICAgICksCiAgICAgICAgMS4xMDEwLAogICAgKQogICAgYXNzZXJ0IG5wLmlzY2xvc2UoCiAgICAgICAgX29wcG9zaW5nX2xpcXVpZGl0eV90YXJnZXQoCiAgICAgICAgICAgIHJvdywKICAgICAgICAgICAgbGV2ZWxzLAogICAgICAgICAgICBpc19sb25nPUZhbHNlLAogICAgICAgICAgICBlbnRyeV9wcmljZT0xLjEwMDAsCiAgICAgICAgKSwKICAgICAgICAxLjA5ODAsCiAgICApCgoKZGVmIHRlc3Rfb3Bwb3NpbmdfbGV2ZWxfcmVjb3JkZXJfc2VyaWFsaXplc19yZXZlcnNhbF9zaWRlX29ubHkoKSAtPiBOb25lOgogICAgdGltZXN0YW1wID0gcGQuVGltZXN0YW1wKCIyMDE1LTAxLTA2VDA3OjAwOjAwWiIpCiAgICBsZXZlbHMgPSBbCiAgICAgICAgTGV2ZWwoIkxPVyIsICJQUklPUl9EQVkiLCAiTE9XIiwgMS4wOTgwLCB0aW1lc3RhbXApLAogICAgICAgIExldmVsKCJISUdIX05FQVIiLCAiUFJJT1JfREFZIiwgIkhJR0giLCAxLjEwMjAsIHRpbWVzdGFtcCksCiAgICAgICAgTGV2ZWwoIkhJR0hfRkFSIiwgIlBSSU9SX1dFRUsiLCAiSElHSCIsIDEuMTA0MCwgdGltZXN0YW1wKSwKICAgIF0KICAgIGVtcHR5ID0gcGQuRGF0YUZyYW1lKAogICAgICAgIHsiaGlnaCI6IHBkLlNlcmllcyhkdHlwZT1mbG9hdCksICJsb3ciOiBwZC5TZXJpZXMoZHR5cGU9ZmxvYXQpfSwKICAgICAgICBpbmRleD1wZC5EYXRldGltZUluZGV4KFtdLCB0ej0iVVRDIiksCiAgICApCiAgICByZWNvcmRzID0gYnVpbGRfb3Bwb3NpbmdfbGlxdWlkaXR5X2xldmVsX3JlY29yZHMoCiAgICAgICAgZXZlbnRfaWQ9IkUxIiwKICAgICAgICBpbnN0cnVtZW50PSJFVVJVU0QiLAogICAgICAgIHRyYWRlX2RhdGU9IjIwMTUtMDEtMDYiLAogICAgICAgIHNpZGU9IkRPV04iLAogICAgICAgIGxldmVscz1sZXZlbHMsCiAgICAgICAgYXNpYW5faGlnaD0xLjEwMTAsCiAgICAgICAgYXNpYW5fbG93PTEuMDk5MCwKICAgICAgICBhc2lhbl9yYW5nZT0wLjAwMjAsCiAgICAgICAgcGlwPTAuMDAwMSwKICAgICAgICBhdHIyMD0wLjAxMDAsCiAgICAgICAgcHJlX3N3ZWVwX3ByaWNlPTEuMTAwMCwKICAgICAgICBzd2VlcF9leHRyZW1lPTEuMDk4NSwKICAgICAgICB0NV9wcmljZT0xLjA5OTUsCiAgICAgICAgcGF0aF8wODAwX3ByZT1lbXB0eSwKICAgICAgICBzd2VlcF9iYXI9ZW1wdHksCiAgICAgICAgcGF0aF9zd2VlcF90NT1lbXB0eSwKICAgICkKICAgIGFzc2VydCBbcmVjb3JkWyJsZXZlbF9pZCJdIGZvciByZWNvcmQgaW4gcmVjb3Jkc10gPT0gWyJISUdIX05FQVIiLCAiSElHSF9GQVIiXQogICAgYXNzZXJ0IGFsbChyZWNvcmRbImxldmVsX3NpZGUiXSA9PSAiSElHSCIgZm9yIHJlY29yZCBpbiByZWNvcmRzKQogICAgYXNzZXJ0IGFsbChyZWNvcmRbImF2YWlsYWJsZV9hdF8wODAwIl0gZm9yIHJlY29yZCBpbiByZWNvcmRzKQoKCmRlZiB0ZXN0X29wcG9zaW5nX2xldmVsX3NlbGVjdG9yX3JlamVjdHNfc2lsZW50X29uZV9zaWRlZF9vdXRwdXQoKSAtPiBOb25lOgogICAgb25lX3NpZGVkID0gcGQuRGF0YUZyYW1lKAogICAgICAgIFsKICAgICAgICAgICAgewogICAgICAgICAgICAgICAgImV2ZW50X2lkIjogIkUxIiwKICAgICAgICAgICAgICAgICJpbnN0cnVtZW50IjogIkVVUlVTRCIsCiAgICAgICAgICAgICAgICAidHJhZGVfZGF0ZSI6ICIyMDE1LTAxLTA2IiwKICAgICAgICAgICAgICAgICJzaWRlIjogIkRPV04iLAogICAgICAgICAgICAgICAgImxldmVsX2lkIjogIkhJR0giLAogICAgICAgICAgICAgICAgImxldmVsX3NpZGUiOiAiSElHSCIsCiAgICAgICAgICAgICAgICAibGV2ZWxfcHJpY2UiOiAxLjEwMjAsCiAgICAgICAgICAgICAgICAiYXZhaWxhYmxlX2F0XzA4MDAiOiBUcnVlLAogICAgICAgICAgICB9CiAgICAgICAgXQogICAgKQogICAgd2l0aCBweXRlc3QucmFpc2VzKFZhbHVlRXJyb3IsIG1hdGNoPSJtaXNzaW5nIG9wcG9zaW5nLWxpcXVpZGl0eSByb2xlcyIpOgogICAgICAgIHNlbGVjdF9vcHBvc2luZ19saXF1aWRpdHlfbGV2ZWxzKG9uZV9zaWRlZCkKCgpkZWYgdGVzdF90YXJnZXRfYmVoaW5kX2VudHJ5X2lzX2luZWxpZ2libGUoKSAtPiBOb25lOgogICAgdGltZXN0YW1wID0gcGQuVGltZXN0YW1wKCIyMDE1LTAxLTA2VDA4OjAzOjAwWiIpCiAgICBiYXJzID0gcGQuRGF0YUZyYW1lKAogICAgICAgIHsKICAgICAgICAgICAgImxvd19iaWQiOiBbMS4wOTkwXSwKICAgICAgICAgICAgImhpZ2hfYmlkIjogWzEuMTAxMF0sCiAgICAgICAgICAgICJoaWdoX2FzayI6IFsxLjEwMTJdLAogICAgICAgICAgICAibG93X2FzayI6IFsxLjA5OTJdLAogICAgICAgICAgICAiYWN0aXZlIjogW1RydWVdLAogICAgICAgIH0sCiAgICAgICAgaW5kZXg9cGQuRGF0ZXRpbWVJbmRleChbdGltZXN0YW1wXSksCiAgICApCiAgICByb3cgPSBwZC5TZXJpZXMoCiAgICAgICAgewogICAgICAgICAgICAiaW5zdHJ1bWVudCI6ICJFVVJVU0QiLAogICAgICAgICAgICAidHJhZGVfZGF0ZSI6ICIyMDE1LTAxLTA2IiwKICAgICAgICAgICAgImVudHJ5X3RpbWVzdGFtcF91dGMiOiB0aW1lc3RhbXAsCiAgICAgICAgfQogICAgKQogICAgYXNzZXJ0ICgKICAgICAgICBfbGFiZWxfdGFyZ2V0KAogICAgICAgICAgICByb3csCiAgICAgICAgICAgIGJhcnMsCiAgICAgICAgICAgIHRhcmdldF9uYW1lPSJFWFRfT1BQT1NJVEVfQk9VTkRBUllfMTEwMCIsCiAgICAgICAgICAgIHRhcmdldF9wcmljZT0xLjA5OTAsCiAgICAgICAgICAgIGVudHJ5X3ByaWNlPTEuMTAwMCwKICAgICAgICAgICAgc3RvcF9wcmljZT0xLjA5ODAsCiAgICAgICAgICAgIGlzX2xvbmc9VHJ1ZSwKICAgICAgICApCiAgICAgICAgaXMgTm9uZQogICAgKQo="encoding":"base64
+from __future__ import annotations
+
+import numpy as np
+import pandas as pd
+import pytest
+
+from dtr_lab.strategies.asia_sweep.extended_reversal_liquidity import (
+    build_opposing_liquidity_level_records,
+    select_opposing_liquidity_levels,
+)
+from dtr_lab.strategies.asia_sweep.extended_reversal_targets import (
+    TARGET_ORDER,
+    _label_target,
+    _opposing_liquidity_target,
+)
+from dtr_lab.strategies.asia_sweep.fingerprint_engine import Level
+
+
+def test_extended_target_hierarchy_is_frozen() -> None:
+    assert TARGET_ORDER == (
+        "EXT_FIXED_3R_1200",
+        "EXT_FIXED_4R_1400",
+        "EXT_FIXED_2R_1100",
+        "EXT_OPPOSING_LIQUIDITY_1400",
+        "EXT_OPPOSITE_BOUNDARY_1100",
+    )
+
+
+def test_extended_same_bar_ambiguity_is_stop_first() -> None:
+    timestamp = pd.Timestamp("2015-01-06T08:03:00Z")
+    bars = pd.DataFrame(
+        {
+            "low_bid": [1.0980],
+            "high_bid": [1.1020],
+            "high_ask": [1.1022],
+            "low_ask": [1.0982],
+            "active": [True],
+        },
+        index=pd.DatetimeIndex([timestamp]),
+    )
+    row = pd.Series(
+        {
+            "instrument": "EURUSD",
+            "trade_date": "2015-01-06",
+            "entry_timestamp_utc": timestamp,
+        }
+    )
+    outcome = _label_target(
+        row,
+        bars,
+        target_name="EXT_FIXED_2R_1100",
+        target_price=1.1015,
+        entry_price=1.1000,
+        stop_price=1.0995,
+        is_long=True,
+    )
+    assert outcome is not None
+    assert outcome["extended_stop_first"] == 1
+    assert outcome["extended_ambiguous_stop_first"] == 1
+    assert outcome["extended_target_hit"] == 0
+
+
+def test_opposing_liquidity_is_in_reversal_direction() -> None:
+    row = pd.Series({"event_id": "E1"})
+    levels = pd.DataFrame(
+        [
+            {
+                "event_id": "E1",
+                "available_at_0800": True,
+                "level_side": "HIGH",
+                "level_price": 1.1010,
+            },
+            {
+                "event_id": "E1",
+                "available_at_0800": True,
+                "level_side": "HIGH",
+                "level_price": 1.1020,
+            },
+            {
+                "event_id": "E1",
+                "available_at_0800": True,
+                "level_side": "LOW",
+                "level_price": 1.0980,
+            },
+        ]
+    )
+    assert np.isclose(
+        _opposing_liquidity_target(
+            row,
+            levels,
+            is_long=True,
+            entry_price=1.1000,
+        ),
+        1.1010,
+    )
+    assert np.isclose(
+        _opposing_liquidity_target(
+            row,
+            levels,
+            is_long=False,
+            entry_price=1.1000,
+        ),
+        1.0980,
+    )
+
+
+def test_opposing_level_recorder_serializes_reversal_side_only() -> None:
+    timestamp = pd.Timestamp("2015-01-06T07:00:00Z")
+    levels = [
+        Level("LOW", "PRIOR_DAY", "LOW", 1.0980, timestamp),
+        Level("HIGH_NEAR", "PRIOR_DAY", "HIGH", 1.1020, timestamp),
+        Level("HIGH_FAR", "PRIOR_WEEK", "HIGH", 1.1040, timestamp),
+    ]
+    empty = pd.DataFrame(
+        {"high": pd.Series(dtype=float), "low": pd.Series(dtype=float)},
+        index=pd.DatetimeIndex([], tz="UTC"),
+    )
+    records = build_opposing_liquidity_level_records(
+        event_id="E1",
+        instrument="EURUSD",
+        trade_date="2015-01-06",
+        side="DOWN",
+        levels=levels,
+        asian_high=1.1010,
+        asian_low=1.0990,
+        asian_range=0.0020,
+        pip=0.0001,
+        atr20=0.0100,
+        pre_sweep_price=1.1000,
+        sweep_extreme=1.0985,
+        t5_price=1.0995,
+        path_0800_pre=empty,
+        sweep_bar=empty,
+        path_sweep_t5=empty,
+    )
+    assert [record["level_id"] for record in records] == ["HIGH_NEAR", "HIGH_FAR"]
+    assert all(record["level_side"] == "HIGH" for record in records)
+    assert all(record["available_at_0800"] for record in records)
+
+
+def test_opposing_level_selector_rejects_silent_one_sided_output() -> None:
+    one_sided = pd.DataFrame(
+        [
+            {
+                "event_id": "E1",
+                "instrument": "EURUSD",
+                "trade_date": "2015-01-06",
+                "side": "DOWN",
+                "level_id": "HIGH",
+                "level_side": "HIGH",
+                "level_price": 1.1020,
+                "available_at_0800": True,
+            }
+        ]
+    )
+    with pytest.raises(ValueError, match="missing opposing-liquidity roles"):
+        select_opposing_liquidity_levels(one_sided)
+
+
+def test_target_behind_entry_is_ineligible() -> None:
+    timestamp = pd.Timestamp("2015-01-06T08:03:00Z")
+    bars = pd.DataFrame(
+        {
+            "low_bid": [1.0990],
+            "high_bid": [1.1010],
+            "high_ask": [1.1012],
+            "low_ask": [1.0992],
+            "active": [True],
+        },
+        index=pd.DatetimeIndex([timestamp]),
+    )
+    row = pd.Series(
+        {
+            "instrument": "EURUSD",
+            "trade_date": "2015-01-06",
+            "entry_timestamp_utc": timestamp,
+        }
+    )
+    assert (
+        _label_target(
+            row,
+            bars,
+            target_name="EXT_OPPOSITE_BOUNDARY_1100",
+            target_price=1.0990,
+            entry_price=1.1000,
+            stop_price=1.0980,
+            is_long=True,
+        )
+        is None
+    )
