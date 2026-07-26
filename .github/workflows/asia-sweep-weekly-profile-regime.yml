@@ -1,0 +1,204 @@
+name: Asian Sweep Weekly Profile Regime
+
+on:
+  push:
+    branches:
+      - agent/asia-sweep-weekly-profile-regime
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: asia-sweep-weekly-profile-regime-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  QUALIFIED_SOURCE_RUN_ID: "30111481052"
+  EXTENDED_REVERSAL_RUN_ID: "30209186651"
+  OMP_NUM_THREADS: "1"
+  OPENBLAS_NUM_THREADS: "1"
+  MKL_NUM_THREADS: "1"
+  NUMEXPR_NUM_THREADS: "1"
+
+jobs:
+  focused_tests:
+    name: Validate frozen weekly-profile contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install development dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,research]"
+      - name: Run weekly-profile tests
+        run: pytest strategies/asia_sweep/tests/test_weekly_profile_regime.py
+      - name: Lint weekly-profile implementation
+        run: |
+          ruff check \
+            src/dtr_lab/strategies/asia_sweep/weekly_profile_regime.py \
+            scripts/run_asia_sweep_weekly_profile_pair.py \
+            scripts/aggregate_asia_sweep_weekly_profile.py \
+            strategies/asia_sweep/tests/test_weekly_profile_regime.py
+
+  pair_profile:
+    name: Weekly profile ledger ${{ matrix.symbol }}
+    needs: focused_tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        symbol: [EURUSD, GBPUSD]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+      - name: Restore qualified FX source cache
+        id: source-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/source/${{ matrix.symbol }}
+          key: stacey-burke-fx-v1-${{ matrix.symbol }}-2015-2026-07-24
+      - name: Download qualified source on cache miss
+        if: steps.source-cache.outputs.cache-hit != 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: stacey-burke-fx-source-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/source/${{ matrix.symbol }}
+          repository: market-predictions/dtr
+          run-id: ${{ env.QUALIFIED_SOURCE_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download immutable extended target ledger
+        uses: actions/download-artifact@v4
+        with:
+          name: asia-sweep-extended-targets-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/targets/${{ matrix.symbol }}
+          repository: market-predictions/dtr
+          run-id: ${{ env.EXTENDED_REVERSAL_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Enforce protected inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          symbol="${{ matrix.symbol }}"
+          lower="${symbol,,}"
+          test -s "${RUNNER_TEMP}/targets/${symbol}/extended_reversal_targets.csv"
+          for year in 2015 2016 2017 2018 2019; do
+            test -s "${RUNNER_TEMP}/source/${symbol}/${lower}_m1_bid_${year}.csv.gz"
+            test -s "${RUNNER_TEMP}/source/${symbol}/${lower}_m1_ask_${year}.csv.gz"
+          done
+          for protected in 2020 2021 2022 2023 2024 2025; do
+            test ! -e "${RUNNER_TEMP}/source/${symbol}/${lower}_m1_bid_${protected}.csv.gz"
+            test ! -e "${RUNNER_TEMP}/source/${symbol}/${lower}_m1_ask_${protected}.csv.gz"
+          done
+      - name: Build causal weekly-profile ledger
+        run: |
+          out="${RUNNER_TEMP}/weekly-profile/${{ matrix.symbol }}"
+          mkdir -p "${out}"
+          python scripts/run_asia_sweep_weekly_profile_pair.py \
+            --data "${RUNNER_TEMP}/source/${{ matrix.symbol }}" \
+            --targets "${RUNNER_TEMP}/targets/${{ matrix.symbol }}/extended_reversal_targets.csv" \
+            --symbol "${{ matrix.symbol }}" \
+            --out "${out}"
+      - name: Upload pair weekly-profile evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: asia-sweep-weekly-profile-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/weekly-profile/${{ matrix.symbol }}
+          if-no-files-found: warn
+          retention-days: 90
+
+  mechanism_gate:
+    name: Enforce weekly-profile mechanism decision
+    needs: pair_profile
+    if: always() && needs.pair_profile.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+      - name: Download pair weekly-profile ledgers
+        uses: actions/download-artifact@v4
+        with:
+          pattern: asia-sweep-weekly-profile-*
+          path: ${{ runner.temp }}/weekly-profile-inputs
+          merge-multiple: false
+      - name: Aggregate frozen H1 and H2 mechanism study
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(
+            find "${RUNNER_TEMP}/weekly-profile-inputs" \
+              -name weekly_profile_enriched.csv \
+              -type f | sort
+          )
+          if [[ "${#files[@]}" -ne 2 ]]; then
+            printf 'Expected two pair ledgers, found %s\n' "${#files[@]}"
+            printf '%s\n' "${files[@]:-<none>}"
+            exit 1
+          fi
+          out="${RUNNER_TEMP}/weekly-profile-decision"
+          mkdir -p "${out}"
+          python scripts/aggregate_asia_sweep_weekly_profile.py \
+            --inputs "${files[@]}" \
+            --out "${out}"
+      - name: Upload authoritative mechanism decision
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: asia-sweep-weekly-profile-mechanism-decision
+          path: ${{ runner.temp }}/weekly-profile-decision
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Enforce scientific authorization
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          path = (
+              Path(os.environ["RUNNER_TEMP"])
+              / "weekly-profile-decision"
+              / "weekly_profile_mechanism_decision.json"
+          )
+          decision = json.loads(path.read_text(encoding="utf-8"))
+          code = decision["decision"]
+          print(f"Scientific decision: {code}")
+          if code != "PASS_WEEKLY_PROFILE_MECHANISM_OPEN_MODELING":
+              raise SystemExit(code)
+          PY
