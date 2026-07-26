@@ -25,6 +25,18 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def _normalize_geometry_columns(candidates: pd.DataFrame) -> pd.DataFrame:
+    result = candidates.copy()
+    if "asian_midpoint" not in result.columns:
+        for candidate in ("asian_midpoint_x", "asian_midpoint_y"):
+            if candidate in result.columns:
+                result["asian_midpoint"] = result[candidate]
+                break
+    if "asian_midpoint" not in result.columns:
+        raise ValueError("staged candidates are missing Asian midpoint geometry")
+    return result
+
+
 def main() -> None:
     args = parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
@@ -42,6 +54,7 @@ def main() -> None:
             symbol=args.symbol,
             policy=policy,
         )
+        candidates = _normalize_geometry_columns(candidates)
         trades = build_pair_staged_policy_ledger(
             candidates,
             policy,
