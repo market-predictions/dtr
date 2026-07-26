@@ -1,7 +1,6 @@
 name: Wayne Pivots Daily Geometry
 
 on:
-  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -9,7 +8,7 @@ permissions:
   actions: read
 
 concurrency:
-  group: wayne-pivots-daily-geometry-${{ github.event.pull_request.number || github.ref }}
+  group: wayne-pivots-daily-geometry-${{ github.ref }}
   cancel-in-progress: true
 
 env:
