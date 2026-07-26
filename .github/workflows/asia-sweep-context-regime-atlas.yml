@@ -1,7 +1,6 @@
 name: Asian Sweep Context Regime Atlas
 
 on:
-  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -9,7 +8,7 @@ permissions:
   actions: read
 
 concurrency:
-  group: asia-sweep-context-regime-atlas-${{ github.event.pull_request.number || github.ref }}
+  group: asia-sweep-context-regime-atlas-${{ github.ref }}
   cancel-in-progress: true
 
 env:
