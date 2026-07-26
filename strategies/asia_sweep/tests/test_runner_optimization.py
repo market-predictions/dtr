@@ -3,7 +3,7 @@ from __future__ import annotations
 import pandas as pd
 import pytest
 
-from dtr_lab.strategies.asia_sweep.runner_optimization_metrics import (
+from dtr_lab.strategies.asia_sweep.runner_optimization_selection import (
     build_nested_runner_decision,
 )
 from dtr_lab.strategies.asia_sweep.runner_optimization_simulator import (
