@@ -1,7 +1,6 @@
 name: Asian Sweep Extended Reversal Model
 
 on:
-  pull_request:
   workflow_dispatch:
 
 permissions:
