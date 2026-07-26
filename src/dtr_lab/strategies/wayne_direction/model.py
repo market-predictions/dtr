@@ -57,3 +57,6 @@ class TrendConfig:
             raise ValueError("max_retest_wait_bars must be positive")
         if self.max_continuation_wait_bars < 1:
             raise ValueError("max_continuation_wait_bars must be positive")
+
+
+DEFAULT_TREND_CONFIG = TrendConfig()
