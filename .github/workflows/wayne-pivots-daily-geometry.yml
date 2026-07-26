@@ -1,0 +1,220 @@
+name: Wayne Pivots Daily Geometry
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: wayne-pivots-daily-geometry-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  QUALIFIED_SOURCE_RUN_ID: "30111481052"
+  OMP_NUM_THREADS: "1"
+  OPENBLAS_NUM_THREADS: "1"
+  MKL_NUM_THREADS: "1"
+  NUMEXPR_NUM_THREADS: "1"
+
+jobs:
+  contract:
+    name: Validate frozen Wayne Pivots contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,research]"
+      - name: Focused tests
+        run: |
+          pytest tests/test_wayne_pivots.py \
+            --junitxml="${RUNNER_TEMP}/wayne-pivots-pytest.xml"
+      - name: Lint
+        run: |
+          ruff check \
+            src/dtr_lab/strategies/wayne_pivots \
+            scripts/run_wayne_pivots_pair.py \
+            scripts/aggregate_wayne_pivots_geometry.py \
+            tests/test_wayne_pivots.py
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wayne-pivots-contract-diagnostics
+          path: ${{ runner.temp }}/wayne-pivots-pytest.xml
+          if-no-files-found: warn
+          retention-days: 30
+
+  pair_anatomy:
+    name: Build Wayne anatomy ${{ matrix.symbol }}
+    needs: contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        symbol: [AUDUSD, EURUSD, GBPUSD, USDCAD, USDCHF, USDJPY]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[research]"
+      - name: Restore qualified FX source cache
+        id: source-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/source/${{ matrix.symbol }}
+          key: stacey-burke-fx-v1-${{ matrix.symbol }}-2015-2026-07-24
+      - name: Download qualified source on cache miss
+        if: steps.source-cache.outputs.cache-hit != 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: stacey-burke-fx-source-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/source/${{ matrix.symbol }}
+          repository: market-predictions/dtr
+          run-id: ${{ env.QUALIFIED_SOURCE_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Isolate 2015-2021 source
+        shell: bash
+        run: |
+          set -euo pipefail
+          symbol="${{ matrix.symbol }}"
+          lower="${symbol,,}"
+          stage="${RUNNER_TEMP}/wayne-source/${symbol}"
+          mkdir -p "${stage}"
+          for year in 2015 2016 2017 2018 2019 2020 2021; do
+            for side in bid ask; do
+              source="${RUNNER_TEMP}/source/${symbol}/${lower}_m1_${side}_${year}.csv.gz"
+              test -s "${source}"
+              cp "${source}" "${stage}/"
+            done
+          done
+          test "$(find "${stage}" -maxdepth 1 -name '*.csv.gz' -type f | wc -l)" -eq 14
+          if find "${stage}" -maxdepth 1 -type f \
+            \( -name '*_2022.csv.gz' -o -name '*_2023.csv.gz' -o -name '*_2024.csv.gz' -o -name '*_2025.csv.gz' \) \
+            | grep -q .; then
+            echo "Post-development source entered Wayne Pivots directory"
+            exit 1
+          fi
+      - name: Build pair anatomy
+        shell: bash
+        run: |
+          set -uo pipefail
+          output="${RUNNER_TEMP}/wayne-pivots/${{ matrix.symbol }}"
+          mkdir -p "${output}"
+          set +e
+          python scripts/run_wayne_pivots_pair.py \
+            --data "${RUNNER_TEMP}/wayne-source/${{ matrix.symbol }}" \
+            --symbol "${{ matrix.symbol }}" \
+            --start-year 2015 \
+            --end-year 2021 \
+            --out "${output}" \
+            > "${output}/pair-build.log" 2>&1
+          status=$?
+          set -e
+          cat "${output}/pair-build.log"
+          exit "${status}"
+      - name: Upload pair anatomy
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wayne-pivots-anatomy-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/wayne-pivots/${{ matrix.symbol }}
+          if-no-files-found: warn
+          retention-days: 90
+
+  geometry_gate:
+    name: Enforce Wayne daily geometry gate
+    needs: pair_anatomy
+    if: always() && needs.pair_anatomy.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[research]"
+      - name: Download pair ledgers
+        uses: actions/download-artifact@v4
+        with:
+          pattern: wayne-pivots-anatomy-*
+          path: ${{ runner.temp }}/wayne-pivots-inputs
+          merge-multiple: false
+      - name: Enforce six inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(find "${RUNNER_TEMP}/wayne-pivots-inputs" -name wayne_pivots_anatomy_ledger.csv | wc -l)" -eq 6
+      - name: Run frozen geometry atlas
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t inputs < <(
+            find "${RUNNER_TEMP}/wayne-pivots-inputs" \
+              -name wayne_pivots_anatomy_ledger.csv -type f | sort
+          )
+          output="${RUNNER_TEMP}/wayne-pivots-decision"
+          mkdir -p "${output}"
+          python scripts/aggregate_wayne_pivots_geometry.py \
+            --inputs "${inputs[@]}" \
+            --out "${output}"
+      - name: Upload complete geometry decision
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wayne-pivots-daily-geometry-decision
+          path: ${{ runner.temp }}/wayne-pivots-decision
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Enforce bias authorization
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          decision = (
+              Path(os.environ["RUNNER_TEMP"])
+              / "wayne-pivots-decision"
+              / "wayne_pivots_geometry_decision.json"
+          )
+          payload = json.loads(decision.read_text(encoding="utf-8"))
+          code = payload["decision"]["decision"]
+          print(f"Scientific decision: {code}")
+          expected = "PASS_DAILY_PIVOT_GEOMETRY_AUTHORIZE_BIAS_FREEZE"
+          if code != expected:
+              raise SystemExit(code)
+          PY
