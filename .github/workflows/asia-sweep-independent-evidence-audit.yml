@@ -1,0 +1,71 @@
+name: Asian Sweep Independent Evidence Audit
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/asia-sweep-independent-evidence-audit.yml"
+      - "scripts/audit_asia_sweep_triage_extended_evidence.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: asia-sweep-independent-evidence-audit-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  TRIAGE_EXTENDED_RUN_ID: "30201189610"
+
+jobs:
+  audit:
+    name: Independently reconcile retained predictions
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.head_ref == 'agent/asia-sweep-triage-staged-extended'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install research dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[research]"
+      - name: Download corrected triage evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: asia-sweep-triage-development-decision
+          path: ${{ runner.temp }}/triage
+          repository: market-predictions/dtr
+          run-id: ${{ env.TRIAGE_EXTENDED_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download all extended candidate evidence
+        uses: actions/download-artifact@v4
+        with:
+          pattern: extended-*
+          path: ${{ runner.temp }}/extended
+          merge-multiple: false
+          repository: market-predictions/dtr
+          run-id: ${{ env.TRIAGE_EXTENDED_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run independent reconstruction
+        run: |
+          python scripts/audit_asia_sweep_triage_extended_evidence.py \
+            --triage "${RUNNER_TEMP}/triage" \
+            --extended "${RUNNER_TEMP}/extended" \
+            --out "${RUNNER_TEMP}/audit"
+      - name: Upload independent audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: asia-sweep-independent-triage-extended-audit
+          path: ${{ runner.temp }}/audit
+          if-no-files-found: warn
+          retention-days: 90
