@@ -83,7 +83,7 @@ jobs:
       - name: Install
         run: |
           python -m pip install --upgrade pip
-          pip install -e .
+          pip install -e ".[research]"
       - name: Restore qualified FX source cache
         id: source-cache
         uses: actions/cache/restore@v4
