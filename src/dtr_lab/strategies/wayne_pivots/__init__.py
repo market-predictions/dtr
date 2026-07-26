@@ -1,7 +1,5 @@
 """Wayne McDonell pivot-point research package."""
 
-from typing import Any
-
 from dtr_lab.strategies.wayne_pivots.pivot_atlas import evaluate_geometry_atlas
 from dtr_lab.strategies.wayne_pivots.pivot_geometry import (
     PRIMARY_PAIRS,
@@ -16,7 +14,7 @@ from dtr_lab.strategies.wayne_pivots.pivot_geometry import (
 )
 
 
-def build_anatomy_ledger(*args: Any, **kwargs: Any) -> tuple[Any, Any]:
+def build_anatomy_ledger(*args, **kwargs):
     """Build anatomy and normalize the non-authoritative previous-pivot metadata."""
     ledger, day_ledger = _build_anatomy_ledger(*args, **kwargs)
     day_ledger = day_ledger.copy()
