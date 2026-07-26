@@ -56,7 +56,10 @@ def _decision_markdown(
         "",
         "## Factor-family decisions",
         "",
-        "| Family | States | Passing states | Status | Best state | Best EV effect | Best hit lift | Best q |",
+        (
+            "| Family | States | Passing states | Status | Best state | "
+            "Best EV effect | Best hit lift | Best q |"
+        ),
         "|---|---:|---:|---|---|---:|---:|---:|",
     ]
     for row in family_summary.itertuples(index=False):
@@ -71,7 +74,10 @@ def _decision_markdown(
             "",
             "## Strongest individual states",
             "",
-            "| State | Events | Hit rate | Hit lift | Mean payoff | EV effect | P(EV>0) | q | Pass |",
+            (
+                "| State | Events | Hit rate | Hit lift | Mean payoff | EV effect | "
+                "P(EV>0) | q | Pass |"
+            ),
             "|---|---:|---:|---:|---:|---:|---:|---:|---|",
         ]
     )
