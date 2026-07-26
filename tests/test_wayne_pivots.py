@@ -3,12 +3,12 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
+from dtr_lab.strategies.wayne_pivots import build_anatomy_ledger
 from dtr_lab.strategies.wayne_pivots.pivot_atlas import evaluate_geometry_atlas
 from dtr_lab.strategies.wayne_pivots.pivot_geometry import (
     STRUCTURES,
     TARGETS,
     _first_passage,
-    build_anatomy_ledger,
     build_structures,
     pivot_day_start,
     traditional_structure,
@@ -118,6 +118,14 @@ def test_anatomy_ledger_is_deterministic_and_unique() -> None:
     ]
     assert not ledger.duplicated(key).any()
     assert ledger["reward_r"].gt(0.0).all()
+    assert pd.isna(day_ledger.iloc[0]["previous_wayne_p"])
+    if len(day_ledger) > 1:
+        expected_previous = day_ledger["wayne_p"].shift(1)
+        pd.testing.assert_series_equal(
+            day_ledger["previous_wayne_p"],
+            expected_previous,
+            check_names=False,
+        )
 
 
 def _small_atlas_ledger() -> pd.DataFrame:
