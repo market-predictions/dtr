@@ -1,0 +1,197 @@
+name: Asian Sweep Runner Optimisation Discovery
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: asia-sweep-runner-optimisation-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  QUALIFIED_SOURCE_RUN_ID: "30111481052"
+  DEVELOPMENT_ANATOMY_RUN_ID: "30174245825"
+  EXECUTION_DISCOVERY_RUN_ID: "30192167763"
+
+jobs:
+  focused_tests:
+    name: Validate frozen runner optimisation contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install development dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: Run runner falsification tests
+        run: |
+          pytest \
+            strategies/asia_sweep/tests/test_runner_optimization.py \
+            strategies/asia_sweep/tests/test_runner_optimization_outputs.py
+      - name: Lint runner implementation
+        run: |
+          ruff check \
+            src/dtr_lab/strategies/asia_sweep/runner_optimization_simulator.py \
+            src/dtr_lab/strategies/asia_sweep/runner_optimization_metrics.py \
+            src/dtr_lab/strategies/asia_sweep/runner_optimization_selection.py \
+            src/dtr_lab/strategies/asia_sweep/runner_optimization_outputs.py \
+            scripts/run_asia_sweep_runner_grid_pair.py \
+            scripts/aggregate_asia_sweep_runner_discovery.py \
+            strategies/asia_sweep/tests/test_runner_optimization.py \
+            strategies/asia_sweep/tests/test_runner_optimization_outputs.py
+
+  pair_runner_grid:
+    name: Build runner discovery ${{ matrix.symbol }}
+    needs: focused_tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        symbol: [EURUSD, GBPUSD]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+      - name: Restore qualified FX source cache
+        id: source-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/source/${{ matrix.symbol }}
+          key: stacey-burke-fx-v1-${{ matrix.symbol }}-2015-2026-07-24
+      - name: Download qualified source on cache miss
+        if: steps.source-cache.outputs.cache-hit != 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: stacey-burke-fx-source-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/source/${{ matrix.symbol }}
+          repository: market-predictions/dtr
+          run-id: ${{ env.QUALIFIED_SOURCE_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download immutable development event ledger
+        uses: actions/download-artifact@v4
+        with:
+          name: asia-sweep-fingerprint-development-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/events/${{ matrix.symbol }}
+          repository: market-predictions/dtr
+          run-id: ${{ env.DEVELOPMENT_ANATOMY_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download frozen market-entry execution ledger
+        uses: actions/download-artifact@v4
+        with:
+          name: asia-sweep-execution-discovery-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/execution/${{ matrix.symbol }}
+          repository: market-predictions/dtr
+          run-id: ${{ env.EXECUTION_DISCOVERY_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Enforce runner discovery inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          symbol="${{ matrix.symbol }}"
+          lower="${symbol,,}"
+          for year in 2015 2016 2017 2018 2019; do
+            test -s "${RUNNER_TEMP}/source/${symbol}/${lower}_m1_bid_${year}.csv.gz"
+            test -s "${RUNNER_TEMP}/source/${symbol}/${lower}_m1_ask_${year}.csv.gz"
+          done
+          test -s "${RUNNER_TEMP}/events/${symbol}/fingerprint_events.csv"
+          test -s "${RUNNER_TEMP}/execution/${symbol}/execution_orders.csv"
+      - name: Simulate frozen 40-policy runner grid
+        run: |
+          mkdir -p "${RUNNER_TEMP}/runner/${{ matrix.symbol }}"
+          python scripts/run_asia_sweep_runner_grid_pair.py \
+            --data "${RUNNER_TEMP}/source/${{ matrix.symbol }}" \
+            --execution-orders "${RUNNER_TEMP}/execution/${{ matrix.symbol }}/execution_orders.csv" \
+            --events "${RUNNER_TEMP}/events/${{ matrix.symbol }}/fingerprint_events.csv" \
+            --symbol "${{ matrix.symbol }}" \
+            --start-year 2015 \
+            --end-year 2019 \
+            --out "${RUNNER_TEMP}/runner/${{ matrix.symbol }}"
+      - name: Upload pair runner evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: asia-sweep-runner-discovery-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/runner/${{ matrix.symbol }}
+          if-no-files-found: warn
+          retention-days: 90
+
+  discovery_gate:
+    name: Enforce nested runner discovery gate
+    needs: pair_runner_grid
+    if: always() && needs.pair_runner_grid.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+      - name: Download pair runner evidence
+        uses: actions/download-artifact@v4
+        with:
+          pattern: asia-sweep-runner-discovery-*
+          path: ${{ runner.temp }}/runner-inputs
+          merge-multiple: false
+      - name: Aggregate frozen nested runner gate
+        run: |
+          python scripts/aggregate_asia_sweep_runner_discovery.py \
+            --inputs "${RUNNER_TEMP}/runner-inputs" \
+            --out "${RUNNER_TEMP}/runner-decision"
+      - name: Upload complete runner decision
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: asia-sweep-runner-discovery-decision
+          path: ${{ runner.temp }}/runner-decision
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Enforce frozen runner scientific decision
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          decision="${RUNNER_TEMP}/runner-decision/runner_discovery_decision.json"
+          test -s "${decision}"
+          python - "${decision}" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          payload = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          print(json.dumps(payload, indent=2, sort_keys=True))
+          expected = "PASS_RUNNER_DISCOVERY_FREEZE_AUTHORIZE_2020_2021_VALIDATION"
+          raise SystemExit(0 if payload.get("decision") == expected else 1)
+          PY
