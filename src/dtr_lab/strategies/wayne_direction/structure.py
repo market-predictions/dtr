@@ -7,7 +7,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from .model import CandidateState, DEFAULT_TREND_CONFIG, TrendConfig, TrendDirection
+from .model import DEFAULT_TREND_CONFIG, CandidateState, TrendConfig, TrendDirection
 from .structure_common import (
     _Candidate,
     _process_high_swing,
