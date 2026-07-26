@@ -1,7 +1,6 @@
 name: Asian Sweep Staged Exit Discovery
 
 on:
-  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -9,7 +8,7 @@ permissions:
   actions: read
 
 concurrency:
-  group: asia-sweep-staged-exit-discovery-${{ github.event.pull_request.number || github.ref }}
+  group: asia-sweep-staged-exit-discovery-${{ github.ref }}
   cancel-in-progress: true
 
 env:
@@ -20,9 +19,6 @@ env:
 jobs:
   focused_tests:
     name: Validate frozen staged-exit contract
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      github.head_ref == 'agent/asia-sweep-staged-exit-research'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
