@@ -29,6 +29,14 @@ def main() -> None:
     args.out.mkdir(parents=True, exist_ok=True)
     ledger = pd.read_csv(args.ledger)
     validate_extended_ledger(ledger)
+    population = ledger.loc[
+        ledger["extended_target"].eq(args.target)
+        & ledger["landmark"].eq(args.landmark)
+    ]
+    if population.empty:
+        raise ValueError(
+            f"{args.target}/{args.landmark}: frozen target population is absent"
+        )
     predictions, tuning = fit_outer_predictions(
         ledger,
         target_name=args.target,

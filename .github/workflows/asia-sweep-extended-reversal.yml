@@ -14,7 +14,6 @@ concurrency:
 
 env:
   EARLY_ENTRY_FRONTIER_RUN_ID: "30197859712"
-  DEVELOPMENT_ANATOMY_RUN_ID: "30174245825"
   QUALIFIED_SOURCE_RUN_ID: "30111481052"
   OMP_NUM_THREADS: "1"
   OPENBLAS_NUM_THREADS: "1"
@@ -48,8 +47,10 @@ jobs:
       - name: Lint extended-reversal implementation
         run: |
           ruff check \
+            src/dtr_lab/strategies/asia_sweep/extended_reversal_liquidity.py \
             src/dtr_lab/strategies/asia_sweep/extended_reversal_targets.py \
             src/dtr_lab/strategies/asia_sweep/extended_reversal_modeling.py \
+            scripts/run_asia_sweep_extended_liquidity.py \
             scripts/run_asia_sweep_extended_reversal_pair.py \
             scripts/run_asia_sweep_extended_reversal_candidate.py \
             scripts/aggregate_asia_sweep_extended_reversal.py \
@@ -102,14 +103,6 @@ jobs:
           repository: market-predictions/dtr
           run-id: ${{ env.EARLY_ENTRY_FRONTIER_RUN_ID }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Download immutable anatomy levels
-        uses: actions/download-artifact@v4
-        with:
-          name: asia-sweep-fingerprint-development-${{ matrix.symbol }}
-          path: ${{ runner.temp }}/anatomy/${{ matrix.symbol }}
-          repository: market-predictions/dtr
-          run-id: ${{ env.DEVELOPMENT_ANATOMY_RUN_ID }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Enforce pair inputs
         shell: bash
         run: |
@@ -117,11 +110,20 @@ jobs:
           symbol="${{ matrix.symbol }}"
           lower="${symbol,,}"
           test -s "${RUNNER_TEMP}/early-entry/early_entry_landmark_ledger.csv"
-          test -s "${RUNNER_TEMP}/anatomy/${symbol}/fingerprint_levels.csv"
           for year in 2015 2016 2017 2018 2019; do
             test -s "${RUNNER_TEMP}/source/${symbol}/${lower}_m1_bid_${year}.csv.gz"
             test -s "${RUNNER_TEMP}/source/${symbol}/${lower}_m1_ask_${year}.csv.gz"
           done
+      - name: Reconstruct causal opposing-liquidity levels
+        run: |
+          out="${RUNNER_TEMP}/extended-levels/${{ matrix.symbol }}"
+          mkdir -p "${out}"
+          python scripts/run_asia_sweep_extended_liquidity.py \
+            --data "${RUNNER_TEMP}/source/${{ matrix.symbol }}" \
+            --symbol "${{ matrix.symbol }}" \
+            --start-year 2015 \
+            --end-year 2019 \
+            --out "${out}"
       - name: Build extended target labels
         run: |
           out="${RUNNER_TEMP}/extended/${{ matrix.symbol }}"
@@ -129,9 +131,17 @@ jobs:
           python scripts/run_asia_sweep_extended_reversal_pair.py \
             --data "${RUNNER_TEMP}/source/${{ matrix.symbol }}" \
             --ledger "${RUNNER_TEMP}/early-entry/early_entry_landmark_ledger.csv" \
-            --levels "${RUNNER_TEMP}/anatomy/${{ matrix.symbol }}/fingerprint_levels.csv" \
+            --levels "${RUNNER_TEMP}/extended-levels/${{ matrix.symbol }}/opposing_liquidity_levels.csv" \
             --symbol "${{ matrix.symbol }}" \
             --out "${out}"
+      - name: Upload opposing-liquidity source evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: asia-sweep-extended-liquidity-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/extended-levels/${{ matrix.symbol }}
+          if-no-files-found: warn
+          retention-days: 90
       - name: Upload pair target evidence
         if: always()
         uses: actions/upload-artifact@v4
