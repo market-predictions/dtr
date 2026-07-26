@@ -1,7 +1,6 @@
 name: Asian Sweep Execution Discovery
 
 on:
-  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -9,7 +8,7 @@ permissions:
   actions: read
 
 concurrency:
-  group: asia-sweep-execution-discovery-${{ github.event.pull_request.number || github.ref }}
+  group: asia-sweep-execution-discovery-${{ github.ref }}
   cancel-in-progress: true
 
 env:
@@ -20,9 +19,6 @@ env:
 jobs:
   focused_tests:
     name: Validate frozen execution contract
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      github.head_ref == 'agent/asia-sweep-execution-research'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
