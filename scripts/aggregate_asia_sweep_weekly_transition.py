@@ -88,11 +88,19 @@ def _subgroup_rows(scope: str, results: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def _format_percent(value: Any) -> str:
-    return "n/a" if value is None or not math.isfinite(float(value)) else f"{float(value):.2%}"
+    return (
+        "n/a"
+        if value is None or not math.isfinite(float(value))
+        else f"{float(value):.2%}"
+    )
 
 
 def _format_number(value: Any, suffix: str = "") -> str:
-    return "n/a" if value is None or not math.isfinite(float(value)) else f"{float(value):+.3f}{suffix}"
+    return (
+        "n/a"
+        if value is None or not math.isfinite(float(value))
+        else f"{float(value):+.3f}{suffix}"
+    )
 
 
 def _decision_markdown(payload: dict[str, Any]) -> str:
@@ -105,12 +113,19 @@ def _decision_markdown(payload: dict[str, Any]) -> str:
         "",
         "## Target results",
         "",
-        "| Target | Events | Positives | Hit rate | Reference | Hit lift | Mean EV | Reference EV | EV lift | Bootstrap P(EV>0) |",
+        (
+            "| Target | Events | Positives | Hit rate | Reference | Hit lift | "
+            "Mean EV | Reference EV | EV lift | Bootstrap P(EV>0) |"
+        ),
         "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
+    row_template = (
+        "| {target} | {events} | {positives} | {hit} | {ref_hit} | "
+        "{hit_lift} | {ev} | {ref_ev} | {ev_lift} | {prob} |"
+    )
     for target, result in payload["results"].items():
         lines.append(
-            "| {target} | {events} | {positives} | {hit} | {ref_hit} | {hit_lift} | {ev} | {ref_ev} | {ev_lift} | {prob} |".format(
+            row_template.format(
                 target=target,
                 events=result["events"],
                 positives=result["positives"],
