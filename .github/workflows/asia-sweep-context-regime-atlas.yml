@@ -131,15 +131,24 @@ jobs:
           fi
           test -s "${RUNNER_TEMP}/events/${symbol}/fingerprint_events.csv"
       - name: Build pair context ledger
+        shell: bash
         run: |
-          mkdir -p "${RUNNER_TEMP}/context-regime/${{ matrix.symbol }}"
+          set -uo pipefail
+          output="${RUNNER_TEMP}/context-regime/${{ matrix.symbol }}"
+          mkdir -p "${output}"
+          set +e
           python scripts/run_asia_sweep_context_regime_pair.py \
             --data "${RUNNER_TEMP}/atlas-source/${{ matrix.symbol }}" \
             --events "${RUNNER_TEMP}/events/${{ matrix.symbol }}/fingerprint_events.csv" \
             --symbol "${{ matrix.symbol }}" \
             --start-year 2015 \
             --end-year 2021 \
-            --out "${RUNNER_TEMP}/context-regime/${{ matrix.symbol }}"
+            --out "${output}" \
+            > "${output}/pair-build.log" 2>&1
+          status=$?
+          set -e
+          cat "${output}/pair-build.log"
+          exit "${status}"
       - name: Upload pair context evidence
         if: always()
         uses: actions/upload-artifact@v4
