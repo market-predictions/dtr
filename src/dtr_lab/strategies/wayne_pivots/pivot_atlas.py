@@ -98,7 +98,7 @@ def _matched_comparison(
     side: str,
     target_name: str,
     placebo: str,
-) -> tuple[pd.DataFrame, dict[str, Any], pd.DataFrame]:
+) -> tuple[dict[str, Any], pd.DataFrame]:
     key = ["instrument", "pivot_day_start_utc", "pivot_day_local_date", "year"]
     columns = key + ["success", "strict_payoff_r"]
     wayne = eligible.loc[
@@ -185,7 +185,7 @@ def _matched_comparison(
         "bootstrap_p10": percentile_10,
         "permutation_p_value": p_value,
     }
-    return matched, metrics, subgroup.assign(row_id=row_id)
+    return metrics, subgroup.assign(row_id=row_id)
 
 
 def _comparison_gate(row: pd.Series) -> bool:
@@ -225,11 +225,10 @@ def evaluate_geometry_atlas(
     eligible = ledger.loc[ledger["eligible_fresh"].astype(bool)].copy()
     comparisons: list[dict[str, Any]] = []
     subgroups: list[pd.DataFrame] = []
-    matched_packets: list[pd.DataFrame] = []
     for side, target_names in TARGETS.items():
         for target_name in target_names:
             for placebo in PLACEBOS:
-                matched, metrics, subgroup = _matched_comparison(
+                metrics, subgroup = _matched_comparison(
                     eligible,
                     side=side,
                     target_name=target_name,
@@ -237,19 +236,10 @@ def evaluate_geometry_atlas(
                 )
                 comparisons.append(metrics)
                 subgroups.append(subgroup)
-                if not matched.empty:
-                    matched_packets.append(
-                        matched.assign(
-                            side=side,
-                            target_name=target_name,
-                            placebo=placebo,
-                        )
-                    )
     comparison = pd.DataFrame(comparisons)
     comparison["q_value"] = _bh_qvalues(comparison["permutation_p_value"])
     comparison["passes_all_gates"] = comparison.apply(_comparison_gate, axis=1)
     subgroup_summary = pd.concat(subgroups, ignore_index=True)
-    matched_summary = pd.concat(matched_packets, ignore_index=True)
     candidates: list[dict[str, Any]] = []
     for side, target_names in TARGETS.items():
         for target_name in target_names:
