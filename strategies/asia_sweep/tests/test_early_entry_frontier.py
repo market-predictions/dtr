@@ -20,7 +20,7 @@ def _write_quotes(directory: Path, *, end_minute: int = 7) -> None:
         periods=end_minute + 1,
         freq="1min",
     )
-    mid = np.array([1.0992, 1.0995, 1.0998, 1.1001, 1.1003, 1.1011, 1.1013, 1.1014])[
+    mid = np.array([1.0992, 1.0995, 1.0998, 1.1001, 1.1003, 1.1006, 1.1013, 1.1014])[
         : len(timestamps)
     ]
     for side, offset in (("bid", -0.00005), ("ask", 0.00005)):
@@ -43,7 +43,7 @@ def _write_quotes(directory: Path, *, end_minute: int = 7) -> None:
         )
 
 
-def _event(*, midpoint_time: str = "2015-01-06T08:05:00Z") -> pd.DataFrame:
+def _event(*, midpoint_time: str = "2015-01-06T08:06:00Z") -> pd.DataFrame:
     return pd.DataFrame(
         [
             {
