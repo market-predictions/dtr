@@ -107,10 +107,12 @@ def test_limit_order_cannot_fill_after_its_replacement_expiry() -> None:
 
 
 def test_execution_population_enforces_threshold_and_t5_unresolved_state() -> None:
+    raw_event = _event().to_dict()
+    raw_event.pop("prediction")
     events = pd.DataFrame(
         [
             {
-                **_event().to_dict(),
+                **raw_event,
                 "t5_available": True,
                 "midpoint_success_09_10": False,
                 "midpoint_first_passage_utc": None,
