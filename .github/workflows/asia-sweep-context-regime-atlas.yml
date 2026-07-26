@@ -1,0 +1,230 @@
+name: Asian Sweep Context Regime Atlas
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: asia-sweep-context-regime-atlas-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  QUALIFIED_SOURCE_RUN_ID: "30111481052"
+  DEVELOPMENT_ANATOMY_RUN_ID: "30174245825"
+  OMP_NUM_THREADS: "1"
+  OPENBLAS_NUM_THREADS: "1"
+  MKL_NUM_THREADS: "1"
+  NUMEXPR_NUM_THREADS: "1"
+
+jobs:
+  focused_tests:
+    name: Validate frozen context atlas contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install development dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,research]"
+      - name: Run focused tests
+        run: |
+          pytest strategies/asia_sweep/tests/test_context_regime_atlas.py \
+            --junitxml="${RUNNER_TEMP}/context-regime-pytest.xml"
+      - name: Lint implementation
+        run: |
+          ruff check \
+            src/dtr_lab/strategies/asia_sweep/context_regime.py \
+            src/dtr_lab/strategies/asia_sweep/context_regime_atlas.py \
+            scripts/run_asia_sweep_context_regime_pair.py \
+            scripts/aggregate_asia_sweep_context_regime_atlas.py \
+            strategies/asia_sweep/tests/test_context_regime_atlas.py
+      - name: Upload test diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: asia-sweep-context-regime-test-diagnostics
+          path: ${{ runner.temp }}/context-regime-pytest.xml
+          if-no-files-found: warn
+          retention-days: 30
+
+  pair_context:
+    name: Build causal context ledger ${{ matrix.symbol }}
+    needs: focused_tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        symbol: [EURUSD, GBPUSD]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[research]"
+      - name: Restore qualified FX source cache
+        id: source-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/source/${{ matrix.symbol }}
+          key: stacey-burke-fx-v1-${{ matrix.symbol }}-2015-2026-07-24
+      - name: Download qualified source on cache miss
+        if: steps.source-cache.outputs.cache-hit != 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: stacey-burke-fx-source-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/source/${{ matrix.symbol }}
+          repository: market-predictions/dtr
+          run-id: ${{ env.QUALIFIED_SOURCE_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download immutable development anatomy
+        uses: actions/download-artifact@v4
+        with:
+          name: asia-sweep-fingerprint-development-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/events/${{ matrix.symbol }}
+          repository: market-predictions/dtr
+          run-id: ${{ env.DEVELOPMENT_ANATOMY_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Isolate 2015-2021 source
+        shell: bash
+        run: |
+          set -euo pipefail
+          symbol="${{ matrix.symbol }}"
+          lower="${symbol,,}"
+          stage="${RUNNER_TEMP}/atlas-source/${symbol}"
+          mkdir -p "${stage}"
+          for year in 2015 2016 2017 2018 2019 2020 2021; do
+            for side in bid ask; do
+              source="${RUNNER_TEMP}/source/${symbol}/${lower}_m1_${side}_${year}.csv.gz"
+              test -s "${source}"
+              cp "${source}" "${stage}/"
+            done
+          done
+          test "$(find "${stage}" -maxdepth 1 -name '*.csv.gz' -type f | wc -l)" -eq 14
+          if find "${stage}" -maxdepth 1 -type f \
+            \( -name '*_2022.csv.gz' -o -name '*_2023.csv.gz' -o -name '*_2024.csv.gz' -o -name '*_2025.csv.gz' \) \
+            | grep -q .; then
+            echo "Post-development source entered the atlas directory"
+            exit 1
+          fi
+          test -s "${RUNNER_TEMP}/events/${symbol}/fingerprint_events.csv"
+      - name: Build pair context ledger
+        shell: bash
+        run: |
+          set -uo pipefail
+          output="${RUNNER_TEMP}/context-regime/${{ matrix.symbol }}"
+          mkdir -p "${output}"
+          set +e
+          python scripts/run_asia_sweep_context_regime_pair.py \
+            --data "${RUNNER_TEMP}/atlas-source/${{ matrix.symbol }}" \
+            --events "${RUNNER_TEMP}/events/${{ matrix.symbol }}/fingerprint_events.csv" \
+            --symbol "${{ matrix.symbol }}" \
+            --start-year 2015 \
+            --end-year 2021 \
+            --out "${output}" \
+            > "${output}/pair-build.log" 2>&1
+          status=$?
+          set -e
+          cat "${output}/pair-build.log"
+          exit "${status}"
+      - name: Upload pair context evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: asia-sweep-context-regime-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/context-regime/${{ matrix.symbol }}
+          if-no-files-found: warn
+          retention-days: 90
+
+  single_factor_gate:
+    name: Enforce single-factor context atlas
+    needs: pair_context
+    if: always() && needs.pair_context.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[research]"
+      - name: Download pair ledgers
+        uses: actions/download-artifact@v4
+        with:
+          pattern: asia-sweep-context-regime-*
+          path: ${{ runner.temp }}/context-regime-inputs
+          merge-multiple: false
+      - name: Enforce aggregate inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(find "${RUNNER_TEMP}/context-regime-inputs" -name context_regime_ledger.csv | wc -l)" -eq 2
+      - name: Run frozen single-factor atlas
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t inputs < <(
+            find "${RUNNER_TEMP}/context-regime-inputs" \
+              -name context_regime_ledger.csv -type f | sort
+          )
+          mkdir -p "${RUNNER_TEMP}/context-regime-decision"
+          python scripts/aggregate_asia_sweep_context_regime_atlas.py \
+            --inputs "${inputs[@]}" \
+            --out "${RUNNER_TEMP}/context-regime-decision"
+      - name: Upload complete atlas decision
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: asia-sweep-context-regime-atlas-decision
+          path: ${{ runner.temp }}/context-regime-decision
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Enforce interaction authorization
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          decision = (
+              Path(os.environ["RUNNER_TEMP"])
+              / "context-regime-decision"
+              / "context_regime_atlas_decision.json"
+          )
+          payload = json.loads(decision.read_text(encoding="utf-8"))
+          code = payload["decision"]["decision"]
+          print(f"Scientific decision: {code}")
+          expected = "PASS_SINGLE_FACTOR_ATLAS_AUTHORIZE_INTERACTION_FREEZE"
+          if code != expected:
+              raise SystemExit(code)
+          PY
