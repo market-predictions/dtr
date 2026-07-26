@@ -162,13 +162,15 @@ def test_no_tp1_before_1000_closes_complete_position_at_1000() -> None:
     assert result["runner_exit_timestamp_utc"] == "2024-01-02T08:59:00+00:00"
 
 
-def _synthetic_orders(expectancy: float) -> pd.DataFrame:
+def _synthetic_orders(expectancy_positive: bool) -> pd.DataFrame:
     rows = []
     start = pd.Timestamp("2015-01-05T08:00:00Z")
     for index in range(200):
         year = 2015 + index % 5
         instrument = "EURUSD" if index % 2 == 0 else "GBPUSD"
-        value = expectancy + (0.10 if index % 3 else -0.05)
+        value = 0.40 if index % 3 else -0.10
+        if not expectancy_positive:
+            value = -0.20 if index % 2 else 0.05
         rows.append(
             {
                 "event_id": f"event-{index:03d}",
@@ -199,7 +201,7 @@ def _synthetic_orders(expectancy: float) -> pd.DataFrame:
 
 def test_staged_selection_requires_absolute_gates_and_frozen_hierarchy() -> None:
     passing = summarize_staged_variant(
-        _synthetic_orders(0.08), "MIDPOINT_50_RUNNER_ORIGINAL_STOP"
+        _synthetic_orders(True), "MIDPOINT_50_RUNNER_ORIGINAL_STOP"
     )
     challenger = {
         **passing,
@@ -210,7 +212,7 @@ def test_staged_selection_requires_absolute_gates_and_frozen_hierarchy() -> None
     assert selection["selected_variant"] == "MIDPOINT_50_RUNNER_ORIGINAL_STOP"
 
     failing = summarize_staged_variant(
-        _synthetic_orders(-0.10), "MIDPOINT_50_RUNNER_ORIGINAL_STOP"
+        _synthetic_orders(False), "MIDPOINT_50_RUNNER_ORIGINAL_STOP"
     )
     failed_challenger = {**failing, "variant": "MIDPOINT_50_RUNNER_BE"}
     failed = choose_staged_variant([failing, failed_challenger])
