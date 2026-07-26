@@ -7,7 +7,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from .model import CandidateState, DEFAULT_TREND_CONFIG, TrendConfig
+from .model import DEFAULT_TREND_CONFIG, CandidateState, TrendConfig
 
 _REQUIRED_OHLC = {"open", "high", "low", "close"}
 
