@@ -93,28 +93,38 @@ jobs:
           repository: market-predictions/dtr
           run-id: ${{ env.EXTENDED_REVERSAL_RUN_ID }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Enforce protected source boundary
+      - name: Isolate development-only source
         shell: bash
         run: |
           set -euo pipefail
           for symbol in EURUSD GBPUSD; do
             lower="${symbol,,}"
             test -s "${RUNNER_TEMP}/targets/${symbol}/extended_reversal_targets.csv"
+            dev="${RUNNER_TEMP}/development-source/${symbol}"
+            mkdir -p "${dev}"
             for year in 2015 2016 2017 2018 2019; do
-              test -s "${RUNNER_TEMP}/source/${symbol}/${lower}_m1_bid_${year}.csv.gz"
-              test -s "${RUNNER_TEMP}/source/${symbol}/${lower}_m1_ask_${year}.csv.gz"
+              for side in bid ask; do
+                source="${RUNNER_TEMP}/source/${symbol}/${lower}_m1_${side}_${year}.csv.gz"
+                test -s "${source}"
+                cp "${source}" "${dev}/"
+              done
             done
-            for protected in 2020 2021 2022 2023 2024 2025; do
-              test ! -e "${RUNNER_TEMP}/source/${symbol}/${lower}_m1_bid_${protected}.csv.gz"
-              test ! -e "${RUNNER_TEMP}/source/${symbol}/${lower}_m1_ask_${protected}.csv.gz"
-            done
+            test "$(find "${dev}" -maxdepth 1 -name '*.csv.gz' -type f | wc -l)" -eq 10
+            if find "${dev}" -maxdepth 1 -type f \
+              \( -name '*_2020.csv.gz' -o -name '*_2021.csv.gz' \
+              -o -name '*_2022.csv.gz' -o -name '*_2023.csv.gz' \
+              -o -name '*_2024.csv.gz' -o -name '*_2025.csv.gz' \) \
+              | grep -q .; then
+              echo "Protected-year file entered development source"
+              exit 1
+            fi
           done
       - name: Build EURUSD causal weekly-profile ledger
         run: |
           out="${RUNNER_TEMP}/weekly-profile/EURUSD"
           mkdir -p "${out}"
           python scripts/run_asia_sweep_weekly_profile_pair.py \
-            --data "${RUNNER_TEMP}/source/EURUSD" \
+            --data "${RUNNER_TEMP}/development-source/EURUSD" \
             --targets "${RUNNER_TEMP}/targets/EURUSD/extended_reversal_targets.csv" \
             --symbol EURUSD \
             --out "${out}"
@@ -123,7 +133,7 @@ jobs:
           out="${RUNNER_TEMP}/weekly-profile/GBPUSD"
           mkdir -p "${out}"
           python scripts/run_asia_sweep_weekly_profile_pair.py \
-            --data "${RUNNER_TEMP}/source/GBPUSD" \
+            --data "${RUNNER_TEMP}/development-source/GBPUSD" \
             --targets "${RUNNER_TEMP}/targets/GBPUSD/extended_reversal_targets.csv" \
             --symbol GBPUSD \
             --out "${out}"
