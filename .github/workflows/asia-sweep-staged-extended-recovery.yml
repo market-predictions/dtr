@@ -1,0 +1,16 @@
+name: Asian Sweep Staged Extended Recovery (Archived)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  archived:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Explain archived recovery
+        run: |
+          echo "The authoritative recovery run is the latest completed run preceding this archive commit."
+          echo "It reuses triage and extended candidate artifacts; no model refit is required."

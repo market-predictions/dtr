@@ -1,0 +1,17 @@
+name: Asian Sweep Triage Staged Extended Research (Archived)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  archived:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Explain archived workflow
+        run: |
+          echo "The authoritative development run is 30201189610."
+          echo "Use asia-sweep-staged-extended-recovery.yml for the frozen staged-reference correction and extended aggregate recovery."
+          echo "No model refit is required."
