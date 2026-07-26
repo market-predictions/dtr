@@ -1,0 +1,219 @@
+name: Asian Sweep Staged Reversal Discovery
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: asia-sweep-staged-reversal-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  TRIAGE_PHASE_A_RUN_ID: "30203426056"
+  EARLY_ENTRY_FRONTIER_RUN_ID: "30197859712"
+  QUALIFIED_SOURCE_RUN_ID: "30111481052"
+
+jobs:
+  focused_tests:
+    name: Validate frozen staged reversal contract
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.head_ref == 'agent/asia-sweep-staged-reversal'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install development dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: Run staged reversal tests
+        run: pytest strategies/asia_sweep/tests/test_staged_reversal.py
+      - name: Lint staged reversal implementation
+        run: |
+          ruff check \
+            src/dtr_lab/strategies/asia_sweep/staged_reversal.py \
+            scripts/run_asia_sweep_staged_reversal_pair.py \
+            scripts/aggregate_asia_sweep_staged_reversal.py \
+            strategies/asia_sweep/tests/test_staged_reversal.py
+
+  pair_simulation:
+    name: Staged reversal ${{ matrix.symbol }}
+    needs: focused_tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        symbol: [EURUSD, GBPUSD]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+      - name: Restore qualified FX source cache
+        id: source-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/source/${{ matrix.symbol }}
+          key: stacey-burke-fx-v1-${{ matrix.symbol }}-2015-2026-07-24
+      - name: Download qualified source on cache miss
+        if: steps.source-cache.outputs.cache-hit != 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: stacey-burke-fx-source-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/source/${{ matrix.symbol }}
+          repository: market-predictions/dtr
+          run-id: ${{ env.QUALIFIED_SOURCE_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download T0 triage predictions
+        uses: actions/download-artifact@v4
+        with:
+          name: asia-sweep-triage-T0-elastic_net
+          path: ${{ runner.temp }}/triage/T0
+          repository: market-predictions/dtr
+          run-id: ${{ env.TRIAGE_PHASE_A_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download T2 triage predictions
+        uses: actions/download-artifact@v4
+        with:
+          name: asia-sweep-triage-T2-elastic_net
+          path: ${{ runner.temp }}/triage/T2
+          repository: market-predictions/dtr
+          run-id: ${{ env.TRIAGE_PHASE_A_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download T3 triage predictions
+        uses: actions/download-artifact@v4
+        with:
+          name: asia-sweep-triage-T3-elastic_net
+          path: ${{ runner.temp }}/triage/T3
+          repository: market-predictions/dtr
+          run-id: ${{ env.TRIAGE_PHASE_A_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download immutable early-entry ledger
+        uses: actions/download-artifact@v4
+        with:
+          name: asia-sweep-early-entry-frontier-decision
+          path: ${{ runner.temp }}/early-entry
+          repository: market-predictions/dtr
+          run-id: ${{ env.EARLY_ENTRY_FRONTIER_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Enforce pair inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          symbol="${{ matrix.symbol }}"
+          lower="${symbol,,}"
+          test -s "${RUNNER_TEMP}/triage/T0/predictions_T0_elastic_net.csv"
+          test -s "${RUNNER_TEMP}/triage/T2/predictions_T2_elastic_net.csv"
+          test -s "${RUNNER_TEMP}/triage/T3/predictions_T3_elastic_net.csv"
+          test -s "${RUNNER_TEMP}/early-entry/early_entry_landmark_ledger.csv"
+          for year in 2015 2016 2017 2018 2019; do
+            test -s "${RUNNER_TEMP}/source/${symbol}/${lower}_m1_bid_${year}.csv.gz"
+            test -s "${RUNNER_TEMP}/source/${symbol}/${lower}_m1_ask_${year}.csv.gz"
+          done
+      - name: Run six staged policies
+        run: |
+          out="${RUNNER_TEMP}/staged/${{ matrix.symbol }}"
+          mkdir -p "${out}"
+          python scripts/run_asia_sweep_staged_reversal_pair.py \
+            --data "${RUNNER_TEMP}/source/${{ matrix.symbol }}" \
+            --t0-predictions "${RUNNER_TEMP}/triage/T0/predictions_T0_elastic_net.csv" \
+            --t2-predictions "${RUNNER_TEMP}/triage/T2/predictions_T2_elastic_net.csv" \
+            --t3-predictions "${RUNNER_TEMP}/triage/T3/predictions_T3_elastic_net.csv" \
+            --ledger "${RUNNER_TEMP}/early-entry/early_entry_landmark_ledger.csv" \
+            --symbol "${{ matrix.symbol }}" \
+            --out "${out}"
+      - name: Upload pair staged evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: asia-sweep-staged-reversal-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/staged/${{ matrix.symbol }}
+          if-no-files-found: warn
+          retention-days: 90
+
+  discovery_gate:
+    name: Enforce staged reversal discovery
+    needs: pair_simulation
+    if: always() && needs.pair_simulation.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+      - name: Download pair evidence
+        uses: actions/download-artifact@v4
+        with:
+          pattern: asia-sweep-staged-reversal-*
+          path: ${{ runner.temp }}/staged-inputs
+          merge-multiple: false
+      - name: Enforce pair count
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(find "${RUNNER_TEMP}/staged-inputs" -name staged_reversal_trades.csv | wc -l)" -eq 2
+      - name: Aggregate nested staged gate
+        run: |
+          mkdir -p "${RUNNER_TEMP}/staged-decision"
+          python scripts/aggregate_asia_sweep_staged_reversal.py \
+            --inputs "${RUNNER_TEMP}/staged-inputs" \
+            --out "${RUNNER_TEMP}/staged-decision"
+      - name: Upload complete staged decision
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: asia-sweep-staged-reversal-decision
+          path: ${{ runner.temp }}/staged-decision
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Enforce scientific decision
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          decision="${RUNNER_TEMP}/staged-decision/staged_reversal_decision.json"
+          test -s "${decision}"
+          python - "${decision}" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          payload = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          print(json.dumps(payload, indent=2, sort_keys=True))
+          expected = "PASS_STAGED_REVERSAL_DISCOVERY_AUTHORIZE_VALIDATION"
+          raise SystemExit(0 if payload.get("decision") == expected else 1)
+          PY
