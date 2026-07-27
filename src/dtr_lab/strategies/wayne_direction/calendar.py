@@ -45,11 +45,26 @@ def h4_bar_start(index: pd.DatetimeIndex) -> pd.DatetimeIndex:
     )
 
 
+def _wall_clock_close(
+    starts: pd.DatetimeIndex,
+    *,
+    hours: int,
+) -> pd.DatetimeIndex:
+    local_naive = starts.tz_convert(NEW_YORK_TZ).tz_localize(None)
+    close_naive = local_naive + pd.Timedelta(hours=hours)
+    return (
+        pd.DatetimeIndex(close_naive)
+        .tz_localize(NEW_YORK_TZ, ambiguous=True, nonexistent="shift_forward")
+        .tz_convert("UTC")
+    )
+
+
 def _aggregate(
     frame: pd.DataFrame,
     key: pd.DatetimeIndex,
     *,
     active_column: str | None,
+    wall_clock_hours: int,
 ) -> pd.DataFrame:
     bars = _validate_ohlc(frame)
     if active_column is not None:
@@ -62,17 +77,25 @@ def _aggregate(
     work = bars.loc[:, ["open", "high", "low", "close"]].copy()
     work["bar_start"] = key
     work["active"] = active.to_numpy(dtype=bool)
-    grouped = work.groupby("bar_start", sort=True)
+    observed = work.groupby("bar_start", sort=True).size().rename("observed_minutes")
+    active_work = work.loc[work["active"]].copy()
+    grouped = active_work.groupby("bar_start", sort=True)
     out = grouped.agg(
         open=("open", "first"),
         high=("high", "max"),
         low=("low", "min"),
         close=("close", "last"),
-        observed_minutes=("close", "size"),
-        active_minutes=("active", "sum"),
+        active_minutes=("close", "size"),
     )
-    out.index = pd.DatetimeIndex(out.index)
-    out.index.name = "bar_start_utc"
+    out = out.join(observed, how="left")
+    starts = pd.DatetimeIndex(out.index)
+    closes = _wall_clock_close(starts, hours=wall_clock_hours)
+    out.insert(0, "bar_start_utc", starts)
+    out["elapsed_minutes"] = (
+        (closes - starts) / pd.Timedelta(minutes=1)
+    ).to_numpy(dtype=int)
+    out.index = closes
+    out.index.name = "bar_close_utc"
     return out
 
 
@@ -84,7 +107,12 @@ def build_new_york_daily_bars(
     if not isinstance(minutes.index, pd.DatetimeIndex):
         raise TypeError("minute index must be a DatetimeIndex")
     key = pivot_day_start(minutes.index)
-    return _aggregate(minutes, key, active_column=active_column)
+    return _aggregate(
+        minutes,
+        key,
+        active_column=active_column,
+        wall_clock_hours=24,
+    )
 
 
 def build_new_york_h4_bars(
@@ -95,4 +123,9 @@ def build_new_york_h4_bars(
     if not isinstance(minutes.index, pd.DatetimeIndex):
         raise TypeError("minute index must be a DatetimeIndex")
     key = h4_bar_start(minutes.index)
-    return _aggregate(minutes, key, active_column=active_column)
+    return _aggregate(
+        minutes,
+        key,
+        active_column=active_column,
+        wall_clock_hours=4,
+    )
