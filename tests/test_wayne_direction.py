@@ -7,6 +7,8 @@ from dtr_lab.strategies.wayne_direction import (
     TrendConfig,
     build_h4_health,
     build_monthly_context,
+    build_new_york_daily_bars,
+    build_new_york_h4_bars,
     build_structure_ledger,
     confirmed_swings,
     h4_bar_start,
@@ -95,6 +97,17 @@ def _bear_sequence() -> pd.DataFrame:
     return frame
 
 
+def _sparse_minutes(timestamps: list[str]) -> pd.DataFrame:
+    index = pd.DatetimeIndex(timestamps)
+    values = np.arange(len(index), dtype=float) + 100.0
+    frame = pd.DataFrame(index=index)
+    frame["open"] = values
+    frame["high"] = values + 0.10
+    frame["low"] = values - 0.10
+    frame["close"] = values
+    return frame
+
+
 def test_swing_is_observed_only_after_right_side_closes() -> None:
     frame = _frame_from_close(np.array([5.0, 4.0, 3.0, 4.0, 5.0]))
     swings = confirmed_swings(
@@ -167,7 +180,7 @@ def test_traditional_monthly_levels_are_exact() -> None:
 
 def test_monthly_context_uses_completed_prior_month_only() -> None:
     index = pd.date_range(
-        "2019-12-31 22:00:00+00:00",
+        "2020-01-01 22:00:00+00:00",
         periods=60,
         freq="D",
     )
@@ -217,3 +230,41 @@ def test_new_york_boundaries_are_dst_safe() -> None:
     )
     starts = h4_bar_start(repeated_hour)
     assert starts[0] == starts[1]
+
+
+def test_aggregated_bars_are_indexed_at_causal_close() -> None:
+    spring = build_new_york_daily_bars(
+        _sparse_minutes(
+            [
+                "2021-03-13 22:00:00+00:00",
+                "2021-03-14 20:59:00+00:00",
+            ]
+        )
+    )
+    assert spring.index[0] == pd.Timestamp("2021-03-14 21:00:00+00:00")
+    assert spring.iloc[0]["bar_start_utc"] == pd.Timestamp(
+        "2021-03-13 22:00:00+00:00"
+    )
+    assert spring.iloc[0]["elapsed_minutes"] == 1380
+
+    fall = build_new_york_daily_bars(
+        _sparse_minutes(
+            [
+                "2021-11-06 21:00:00+00:00",
+                "2021-11-07 21:59:00+00:00",
+            ]
+        )
+    )
+    assert fall.index[0] == pd.Timestamp("2021-11-07 22:00:00+00:00")
+    assert fall.iloc[0]["elapsed_minutes"] == 1500
+
+    repeated = build_new_york_h4_bars(
+        _sparse_minutes(
+            [
+                "2021-11-07 05:30:00+00:00",
+                "2021-11-07 06:30:00+00:00",
+            ]
+        )
+    )
+    assert repeated.index[0] == pd.Timestamp("2021-11-07 10:00:00+00:00")
+    assert repeated.iloc[0]["elapsed_minutes"] == 300
