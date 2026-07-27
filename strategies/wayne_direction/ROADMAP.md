@@ -4,89 +4,114 @@ Updated: 2026-07-27
 
 ## Current state
 
-`PHASE_A_CONTRACT_FROZEN_IMPLEMENTATION_ACTIVE`
+`PHASE_D_STAGED_TECHNICAL_SEQUENCE_REQUIRES_FREEZE`
 
 ## Phase A — Direction contract
 
-Status: `ACTIVE`
+Status: `COMPLETE`
 
-- freeze D1 structural sequence;
-- freeze H4 moving-average health;
-- freeze macro, regime and seasonality roles;
-- prohibit daily pivots from creating direction;
-- define categorical long/short/abstain routing.
+- macro, regime, seasonality and structure are separate direction layers;
+- daily pivots cannot create direction;
+- D1 structure is strategic context;
+- H4 structure is current technical transition;
+- H4 EMA21/55/200 grades health;
+- monthly pivots define location and reach.
 
-## Phase B — Structural trend engine
+## Phase B — D1 strategic structure
 
-Status: `NEXT`
+Status: `COMPLETE_REFERENCE_FAILED_SAMPLE_GATE`
 
-- build New York 17:00 D1 bars from qualified M1 BID/ASK data;
-- confirm swings causally with right-side delay;
-- implement double-bottom/top, BOS, retest, HL/LH and continuation confirmation;
-- implement structural invalidation;
-- test synthetic bull, bear, failed-break, ambiguous-shock and missing-data paths;
-- publish a six-pair structural event ledger for 2015–2021.
+- causal double-bottom/top → BOS → retest → HL/LH → continuation engine;
+- full pre-retest impulse reference;
+- six pairs, 2015–2021;
+- corrected result: 79 complete transitions;
+- 69 of 79 had aligned healthy H4 averages at confirmation;
+- D1 state is broad but slow and persistent;
+- retain unchanged as strategic regime context;
+- do not loosen thresholds to manufacture sample.
 
-## Phase C — H4 health engine
+Primary record: `D1_STRUCTURE_CENSUS_CORRECTION_V0_2_1.md`.
 
-Status: `BLOCKED_BY_PHASE_B`
+## Phase C — H4 current structure and health
 
-- build DST-safe H4 bars nested in each pivot day;
-- calculate EMA21/55/200 and ATR20;
-- classify expanding, stable, compressed and conflicted states;
-- attach the last completed H4 state to each D1 structural event;
-- quantify whether healthy divergence improves continuation and monthly reach.
+Status: `COMPLETE_TRANSITION_GATE_PASS_MONTH_OPEN_GATE_FAIL`
 
-## Phase D — Monthly location and reach
+- 475 complete H4 transitions;
+- all six pairs exceed 40 events;
+- transition-count gate passed;
+- only 176 of 475 had aligned healthy H4 averages at confirmation;
+- zero of 486 monthly-zone months were simultaneously aligned structure plus healthy MAs at the exact month open;
+- simultaneous conjunction is rejected;
+- H4 thresholds remain frozen.
 
-Status: `BLOCKED_BY_PHASE_B`
+Primary record: `H4_STRUCTURE_SENSITIVITY_DECISION_V0_4.md`.
 
-- calculate prior-month traditional levels and M1–M4;
-- classify month-open location and first-five-day zone touch;
-- evaluate M4/R2 reach for bullish direction and M1/S2 for bearish direction;
-- use month-end and structural invalidation as causal stopping conditions;
-- record R1/S1 as path checkpoints, not optimized targets.
+## Phase D — Staged technical sequence
+
+Status: `NEXT_VALID_PHASE`
+
+Test an ordered setup rather than simultaneous filters:
+
+1. month opens in zone or first touches the zone during the first five pivot days;
+2. H4 structure confirms in the zone direction;
+3. H4 EMA21/55/200 subsequently becomes stable or expanding;
+4. monthly reach is measured from the completed confirmation timestamp.
+
+Rules:
+
+- first five pivot days are primary;
+- ten pivot days may be a labeled development sensitivity only;
+- no H4 threshold tuning;
+- no target-grid search;
+- compare against no-direction and opposite-direction month controls;
+- report pair/year breadth and concentration;
+- treat pre-confirmation target touches as ineligible, not successes.
 
 ## Phase E — Seasonality
 
-Status: `PLANNED`
+Status: `BLOCKED_BY_STAGED_TECHNICAL_SAMPLE`
 
 - expanding-window month-of-year prior;
 - week-of-month and turn-of-month states;
-- no full-sample seasonality lookup;
-- minimum-history and stability gates;
-- seasonality supports or blocks but does not override structure.
+- prior years only;
+- supportive, neutral or opposing relationship;
+- no override of missing technical confirmation.
 
 ## Phase F — Macro and regime data qualification
 
 Status: `DATA_CONTRACT_REQUIRED`
 
-- identify point-in-time rate, inflation, growth and real-yield sources;
-- freeze release timestamps and revision treatment;
-- define pairwise currency differential;
-- freeze volatility, efficiency, risk and policy-regime states;
-- reject any series that cannot be reconstructed as known at the decision timestamp.
+- point-in-time rate and policy expectations;
+- inflation and growth-surprise differentials;
+- real-yield or rate-market differential;
+- volatility, efficiency and risk regime;
+- explicit release timestamps and revision treatment;
+- reject any series that cannot be reconstructed as known contemporaneously.
 
 ## Phase G — Direction triage atlas
 
 Status: `BLOCKED`
 
-- structural direction mandatory;
+Candidate permission stack:
+
+- D1 strategic context aligned or explicitly neutral;
 - macro must not oppose;
 - regime must permit trend-following;
-- seasonality must be supportive or neutral;
-- H4 health must be expanding or stable;
-- otherwise abstain;
-- no weighted-score optimization in the first atlas.
+- seasonality supportive or neutral;
+- staged H4 structural and MA confirmation complete;
+- otherwise abstain.
+
+No weighted-score optimization in the first atlas.
 
 ## Phase H — Conditional reach validation
 
 Status: `BLOCKED`
 
-- test monthly M4/R2 and M1/S2 reach conditional on frozen direction states;
-- report absolute reach rates, timing, MFE/MAE, pair/year breadth and concentration;
-- use block bootstrap, permutation and FDR where families are compared;
-- preserve 2022–2025 for later confirmation.
+- M4/R2 bullish and M1/S2 bearish reach;
+- start clock at completed staged confirmation;
+- matched controls;
+- pair/year breadth, concentration, block bootstrap and FDR;
+- preserve 2022–2025 for locked confirmation.
 
 ## Phase I — Bounded execution
 
@@ -94,10 +119,10 @@ Status: `NOT_AUTHORIZED`
 
 Only after direction and reach pass:
 
-- freeze a small number of entry triggers;
-- apply identical triggers to Wayne monthly zones and generic monthly anchors;
-- model BID/ASK fills, costs and same-bar ambiguity;
-- no partial exits, runners or continuous search in the first execution study.
+- freeze a small entry set;
+- BID/ASK fills and transaction costs;
+- identical execution across monthly-zone and generic-anchor controls;
+- no partial exits, runners or continuous threshold search.
 
 ## Phase J — Historical confirmation and deployment
 
@@ -109,6 +134,6 @@ Status: `FUTURE`
 - Pine parity only after Python evidence;
 - no sizing or deployment before prospective confirmation.
 
-## Archived branch
+## Archived work
 
-PR #63 is retained as a negative daily-pivot geometry study. It is not an active roadmap dependency and cannot block or authorize this direction-first programme.
+PR #63 remains the bounded negative daily-pivot geometry study. It is not an active dependency and cannot block or authorize the direction-first programme.
