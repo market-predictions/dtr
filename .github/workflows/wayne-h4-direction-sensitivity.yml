@@ -1,0 +1,221 @@
+name: Wayne H4 Direction Sensitivity
+
+on:
+  pull_request:
+    paths:
+      - "src/dtr_lab/strategies/wayne_direction/**"
+      - "scripts/run_wayne_h4_sensitivity_pair.py"
+      - "scripts/aggregate_wayne_h4_sensitivity.py"
+      - "tests/test_wayne_direction.py"
+      - "tests/test_wayne_h4_sensitivity.py"
+      - ".github/workflows/wayne-h4-direction-sensitivity.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: wayne-h4-direction-sensitivity-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  QUALIFIED_SOURCE_RUN_ID: "30111481052"
+  OMP_NUM_THREADS: "1"
+  OPENBLAS_NUM_THREADS: "1"
+  MKL_NUM_THREADS: "1"
+  NUMEXPR_NUM_THREADS: "1"
+
+jobs:
+  contract:
+    name: Validate H4 sensitivity contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,research]"
+      - name: Focused tests
+        run: |
+          pytest \
+            tests/test_wayne_direction.py \
+            tests/test_wayne_h4_sensitivity.py \
+            --junitxml="${RUNNER_TEMP}/wayne-h4-pytest.xml"
+      - name: Lint
+        run: |
+          ruff check \
+            src/dtr_lab/strategies/wayne_direction \
+            scripts/run_wayne_h4_sensitivity_pair.py \
+            scripts/aggregate_wayne_h4_sensitivity.py \
+            tests/test_wayne_direction.py \
+            tests/test_wayne_h4_sensitivity.py
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wayne-h4-contract-diagnostics
+          path: ${{ runner.temp }}/wayne-h4-pytest.xml
+          if-no-files-found: warn
+          retention-days: 30
+
+  pair_sensitivity:
+    name: Build H4 sensitivity ${{ matrix.symbol }}
+    needs: contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        symbol: [AUDUSD, EURUSD, GBPUSD, USDCAD, USDCHF, USDJPY]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[research]"
+      - name: Restore qualified FX source cache
+        id: source-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/source/${{ matrix.symbol }}
+          key: stacey-burke-fx-v1-${{ matrix.symbol }}-2015-2026-07-24
+      - name: Download qualified source on cache miss
+        if: steps.source-cache.outputs.cache-hit != 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: stacey-burke-fx-source-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/source/${{ matrix.symbol }}
+          repository: market-predictions/dtr
+          run-id: ${{ env.QUALIFIED_SOURCE_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Isolate 2015-2021 source
+        shell: bash
+        run: |
+          set -euo pipefail
+          symbol="${{ matrix.symbol }}"
+          lower="${symbol,,}"
+          stage="${RUNNER_TEMP}/wayne-h4-source/${symbol}"
+          mkdir -p "${stage}"
+          for year in 2015 2016 2017 2018 2019 2020 2021; do
+            for side in bid ask; do
+              source="${RUNNER_TEMP}/source/${symbol}/${lower}_m1_${side}_${year}.csv.gz"
+              test -s "${source}"
+              cp "${source}" "${stage}/"
+            done
+          done
+          test "$(find "${stage}" -maxdepth 1 -name '*.csv.gz' -type f | wc -l)" -eq 14
+          if find "${stage}" -maxdepth 1 -type f \
+            \( -name '*_2022.csv.gz' -o -name '*_2023.csv.gz' -o -name '*_2024.csv.gz' -o -name '*_2025.csv.gz' \) \
+            | grep -q .; then
+            echo "Post-development source entered H4 sensitivity directory"
+            exit 1
+          fi
+      - name: Build pair sensitivity
+        shell: bash
+        run: |
+          set -uo pipefail
+          output="${RUNNER_TEMP}/wayne-h4/${{ matrix.symbol }}"
+          mkdir -p "${output}"
+          set +e
+          python scripts/run_wayne_h4_sensitivity_pair.py \
+            --data "${RUNNER_TEMP}/wayne-h4-source/${{ matrix.symbol }}" \
+            --symbol "${{ matrix.symbol }}" \
+            --start-year 2015 \
+            --end-year 2021 \
+            --out "${output}" \
+            > "${output}/pair-build.log" 2>&1
+          status=$?
+          set -e
+          cat "${output}/pair-build.log"
+          exit "${status}"
+      - name: Upload pair sensitivity
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wayne-h4-pair-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/wayne-h4/${{ matrix.symbol }}
+          if-no-files-found: warn
+          retention-days: 90
+
+  aggregate:
+    name: Aggregate H4 sensitivity
+    needs: pair_sensitivity
+    if: always() && needs.pair_sensitivity.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[research]"
+      - name: Download pair sensitivities
+        uses: actions/download-artifact@v4
+        with:
+          pattern: wayne-h4-pair-*
+          path: ${{ runner.temp }}/wayne-h4-inputs
+          merge-multiple: false
+      - name: Enforce complete input set
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="${RUNNER_TEMP}/wayne-h4-inputs"
+          test "$(find "${root}" -name wayne_h4_pair_summary.json | wc -l)" -eq 6
+          test "$(find "${root}" -name wayne_h4_structure_ledger.csv | wc -l)" -eq 6
+          test "$(find "${root}" -name wayne_h4_monthly_attribution.csv | wc -l)" -eq 6
+      - name: Aggregate sensitivity
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="${RUNNER_TEMP}/wayne-h4-inputs"
+          mapfile -t summaries < <(
+            find "${root}" -name wayne_h4_pair_summary.json -type f | sort
+          )
+          mapfile -t structures < <(
+            find "${root}" -name wayne_h4_structure_ledger.csv -type f | sort
+          )
+          mapfile -t attributions < <(
+            find "${root}" -name wayne_h4_monthly_attribution.csv -type f | sort
+          )
+          output="${RUNNER_TEMP}/wayne-h4-decision"
+          mkdir -p "${output}"
+          python scripts/aggregate_wayne_h4_sensitivity.py \
+            --summaries "${summaries[@]}" \
+            --structures "${structures[@]}" \
+            --attributions "${attributions[@]}" \
+            --out "${output}"
+      - name: Upload complete sensitivity
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wayne-h4-direction-sensitivity
+          path: ${{ runner.temp }}/wayne-h4-decision
+          if-no-files-found: warn
+          retention-days: 90
