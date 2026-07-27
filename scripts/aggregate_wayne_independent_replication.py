@@ -212,11 +212,17 @@ def _markdown(decision: dict[str, Any], comparisons: pd.DataFrame) -> str:
         f"- available conservative treatment rows: {gate['available_treatment']};",
         f"- available controls: {gate['available_control']};",
         f"- pairs with at least eight active sequences: {gate['active_pair_breadth']};",
-        f"- pairs with at least five available treatment rows: {gate['available_treatment_pair_breadth']}.",
+        (
+            "- pairs with at least five available treatment rows: "
+            f"{gate['available_treatment_pair_breadth']}."
+        ),
         "",
         "## Frozen comparisons",
         "",
-        "| Test | Treatment N | Control N | Treatment | Control | Lift | 90% low | 90% high | p | q |",
+        (
+            "| Test | Treatment N | Control N | Treatment | Control | Lift | "
+            "90% low | 90% high | p | q |"
+        ),
         "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for row in comparisons.itertuples(index=False):
@@ -230,7 +236,10 @@ def _markdown(decision: dict[str, Any], comparisons: pd.DataFrame) -> str:
     lines.extend(
         [
             "",
-            "The independent estimate is reported separately from the six-pair development result. ",
+            (
+                "The independent estimate is reported separately from the "
+                "six-pair development result."
+            ),
             "No yield, VIX, macro, seasonality, execution or Pine layer is included.",
             "",
         ]
