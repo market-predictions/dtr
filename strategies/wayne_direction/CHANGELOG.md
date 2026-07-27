@@ -1,5 +1,52 @@
 # Wayne Direction-First Framework — Changelog
 
+## v1.0.0 — 2026-07-27
+
+### Changed
+
+- opened a separate stacked work package for independent day-10 replication;
+- froze EURGBP, EURJPY, GBPJPY and NZDUSD before outcome access;
+- added source-only qualification for exact calendar coverage, BID/ASK agreement, OHLC validity, spreads and New York D1/H4 coverage;
+- qualified all four pairs without using Wayne outcomes;
+- ran the exact unchanged monthly-location → H4 structure → H4 MA-health sequence;
+- added a four-pair replication decision gate with cluster-preserving inference;
+- independently audited treatment availability, pair/year breadth, permutation and bootstrap results;
+- kept yield, VIX, seasonality, full macro and execution closed.
+
+### Results
+
+- independent primary opportunities: 514;
+- active day-10 sequences: 26;
+- clean conservative treatments: 14;
+- controls: 447;
+- conservative reach: 35.71% versus 12.53%;
+- conservative lift: +23.19 pp;
+- cluster p=0.0948;
+- bootstrap 90% interval: +1.48 to +43.70 pp;
+- stretch supportive lift: +32.11 pp, p=0.0002;
+- binding decision: `FAIL_REPLICATION_SAMPLE_INSUFFICIENT`.
+
+### Reason
+
+The positive effect direction reproduced outside the original six-pair panel, but the exact setup remained too sparse after causal target availability. The conservative treatment sample missed its frozen minimum by one, EURJPY exceeded the concentration ceiling, and pair/year breadth did not pass.
+
+### Known limitations
+
+- only 14 clean conservative treatment observations remained;
+- twelve active sequences had conservative targets consumed before or on the observation boundary;
+- only EURJPY was eligible for a pair-level conservative effect;
+- only three years were eligible and one was negative;
+- the strong stretch endpoint was supportive only and cannot rescue the primary endpoint;
+- 2022–2025 remain unopened;
+- no P&L or execution evidence exists.
+
+### Next
+
+- choose between stopping the sparse technical line or authorizing one final preregistered independent pair panel;
+- do not change the sequence, window, target or target-availability rules;
+- open two-year yield and VIX attribution only after a technical replication pass;
+- keep seasonality, full macro and deployment postponed.
+
 ## v0.7.0 — 2026-07-27
 
 ### Changed
