@@ -127,6 +127,7 @@ def attach_last_completed_h4(
         left_on="timestamp",
         right_on="h4_timestamp",
         direction="backward",
-        allow_exact_matches=False,
+        allow_exact_matches=True,
+        suffixes=("_d1", "_h4"),
     )
     return merged.set_index("timestamp")
