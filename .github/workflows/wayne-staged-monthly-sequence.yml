@@ -1,17 +1,6 @@
 name: Wayne Staged Monthly Sequence
 
 on:
-  pull_request:
-    paths:
-      - "src/dtr_lab/strategies/wayne_direction/**"
-      - "scripts/run_wayne_staged_sequence_pair.py"
-      - "scripts/aggregate_wayne_staged_sequence.py"
-      - "tests/test_wayne_direction.py"
-      - "tests/test_wayne_h4_sensitivity.py"
-      - "tests/test_wayne_staged_sequence.py"
-      - "tests/test_wayne_staged_aggregation.py"
-      - "strategies/wayne_direction/STAGED_MONTHLY_SEQUENCE_PREREGISTRATION*.md"
-      - ".github/workflows/wayne-staged-monthly-sequence.yml"
   workflow_dispatch:
 
 permissions:
