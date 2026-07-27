@@ -60,9 +60,7 @@ def parse_args() -> argparse.Namespace:
 def _json_safe(value: Any) -> Any:
     if isinstance(value, dict):
         return {str(key): _json_safe(item) for key, item in value.items()}
-    if isinstance(value, list):
-        return [_json_safe(item) for item in value]
-    if isinstance(value, tuple):
+    if isinstance(value, (list, tuple)):
         return [_json_safe(item) for item in value]
     if isinstance(value, np.integer):
         return int(value)
@@ -87,41 +85,52 @@ def _load_summaries(paths: list[Path]) -> list[dict[str, Any]]:
 def _as_bool(series: pd.Series) -> pd.Series:
     if pd.api.types.is_bool_dtype(series):
         return series.fillna(False)
-    normalized = series.astype(str).str.strip().str.lower()
-    invalid = ~normalized.isin({"true", "false", "1", "0"})
+    values = series.astype(str).str.strip().str.lower()
+    invalid = ~values.isin({"true", "false", "1", "0"})
     if invalid.any():
-        values = sorted(normalized.loc[invalid].unique())
-        raise ValueError(f"invalid boolean values: {values}")
-    return normalized.isin({"true", "1"})
+        raise ValueError(
+            f"invalid boolean values: {sorted(values.loc[invalid].unique())}"
+        )
+    return values.isin({"true", "1"})
 
 
 def _load_ledgers(paths: list[Path]) -> pd.DataFrame:
-    frames = [pd.read_csv(path) for path in paths]
-    ledger = pd.concat(frames, ignore_index=True)
-    symbols = tuple(sorted(ledger["instrument"].unique()))
-    if symbols != PRIMARY_PAIRS:
+    ledger = pd.concat([pd.read_csv(path) for path in paths], ignore_index=True)
+    if tuple(sorted(ledger["instrument"].unique())) != PRIMARY_PAIRS:
         raise ValueError("pooled staged ledger does not contain all primary pairs")
-    bool_columns = [
+    boolean_columns = [
         column
-        for column in ledger.columns
-        if column.startswith("sequence_")
-        or column.startswith("preexisting_")
-        or column.startswith("dual_zone_")
-        or column.startswith("health_same_")
-        or column.startswith("health_strictly_")
-        or column.endswith("_target_pre_start")
-        or column.endswith("_target_same_bar")
-        or column.endswith("_target_available")
-        or column.endswith("_target_invalidation_same_bar")
-        or column.endswith("_reached_by_month_end")
-        or column.endswith("_reached_before_invalidation")
+        for column in ledger
+        if column.startswith(
+            (
+                "sequence_",
+                "preexisting_",
+                "dual_zone_",
+                "health_same_",
+                "health_strictly_",
+            )
+        )
+        or column.endswith(
+            (
+                "_target_pre_start",
+                "_target_same_bar",
+                "_target_available",
+                "_target_invalidation_same_bar",
+                "_reached_by_month_end",
+                "_reached_before_invalidation",
+            )
+        )
     ]
-    for column in bool_columns:
+    for column in boolean_columns:
         ledger[column] = _as_bool(ledger[column])
     return ledger
 
 
-def _effect(data: pd.DataFrame, treatment_column: str, outcome_column: str) -> float:
+def _effect(
+    data: pd.DataFrame,
+    treatment_column: str,
+    outcome_column: str,
+) -> float:
     treatment = data[treatment_column].astype(bool)
     if treatment.sum() == 0 or (~treatment).sum() == 0:
         return math.nan
@@ -140,44 +149,29 @@ def _cluster_bootstrap(
 ) -> tuple[float, float]:
     work = data.copy()
     work["cluster"] = (
-        work["instrument"].astype(str)
-        + "::"
-        + work["month_id"].astype(str)
+        work["instrument"].astype(str) + "::" + work["month_id"].astype(str)
     )
     treatment = work[treatment_column].astype(bool)
-    work["t_success"] = np.where(
-        treatment,
-        work[outcome_column].astype(float),
-        0.0,
-    )
+    work["t_y"] = np.where(treatment, work[outcome_column].astype(float), 0.0)
     work["t_n"] = treatment.astype(int)
-    work["c_success"] = np.where(
-        ~treatment,
-        work[outcome_column].astype(float),
-        0.0,
-    )
+    work["c_y"] = np.where(~treatment, work[outcome_column].astype(float), 0.0)
     work["c_n"] = (~treatment).astype(int)
-    grouped = work.groupby("cluster", sort=False)[
-        ["t_success", "t_n", "c_success", "c_n"]
-    ].sum()
-    values = grouped.to_numpy(dtype=float)
+    values = (
+        work.groupby("cluster", sort=False)[["t_y", "t_n", "c_y", "c_n"]]
+        .sum()
+        .to_numpy(dtype=float)
+    )
     if len(values) == 0:
         return math.nan, math.nan
-
     rng = np.random.default_rng(seed)
     effects: list[float] = []
     for _ in range(BOOTSTRAP_SAMPLES):
-        sampled = values[rng.integers(0, len(values), size=len(values))]
-        totals = sampled.sum(axis=0)
-        if totals[1] == 0 or totals[3] == 0:
-            continue
-        effects.append(totals[0] / totals[1] - totals[2] / totals[3])
+        totals = values[rng.integers(0, len(values), len(values))].sum(axis=0)
+        if totals[1] and totals[3]:
+            effects.append(totals[0] / totals[1] - totals[2] / totals[3])
     if not effects:
         return math.nan, math.nan
-    return (
-        float(np.quantile(effects, 0.05)),
-        float(np.quantile(effects, 0.95)),
-    )
+    return float(np.quantile(effects, 0.05)), float(np.quantile(effects, 0.95))
 
 
 def _permutation_p_value(
@@ -192,11 +186,7 @@ def _permutation_p_value(
         return math.nan
     treatment = data[treatment_column].astype(bool).to_numpy()
     outcome = data[outcome_column].astype(float).to_numpy()
-    strata = (
-        data["instrument"].astype(str)
-        + "::"
-        + data["year"].astype(str)
-    )
+    strata = data["instrument"].astype(str) + "::" + data["year"].astype(str)
     groups = [
         np.asarray(index, dtype=int)
         for index in data.groupby(strata, sort=False).indices.values()
@@ -208,11 +198,10 @@ def _permutation_p_value(
         permuted = treatment.copy()
         for index in groups:
             permuted[index] = rng.permutation(permuted[index])
-        if permuted.sum() == 0 or (~permuted).sum() == 0:
-            continue
-        effect = outcome[permuted].mean() - outcome[~permuted].mean()
-        exceed += int(effect >= observed_effect)
-        valid += 1
+        if permuted.sum() and (~permuted).sum():
+            effect = outcome[permuted].mean() - outcome[~permuted].mean()
+            exceed += int(effect >= observed_effect)
+            valid += 1
     return math.nan if valid == 0 else (exceed + 1.0) / (valid + 1.0)
 
 
@@ -223,7 +212,7 @@ def _breadth(
     outcome_column: str,
     group_column: str,
 ) -> tuple[int, list[dict[str, Any]]]:
-    rows: list[dict[str, Any]] = []
+    records: list[dict[str, Any]] = []
     for key, group in data.groupby(group_column, sort=True):
         treatment = group[treatment_column].astype(bool)
         treatment_n = int(treatment.sum())
@@ -236,7 +225,7 @@ def _breadth(
             if treatment_n >= 3 and control_n >= 3
             else math.nan
         )
-        rows.append(
+        records.append(
             {
                 group_column: key,
                 "treatment_n": treatment_n,
@@ -245,13 +234,10 @@ def _breadth(
             }
         )
     positive = sum(
-        1
-        for row in rows
-        if row["effect"] is not None
-        and math.isfinite(float(row["effect"]))
-        and float(row["effect"]) > 0.0
+        math.isfinite(float(record["effect"])) and float(record["effect"]) > 0.0
+        for record in records
     )
-    return positive, rows
+    return int(positive), records
 
 
 def _comparison(
@@ -272,29 +258,12 @@ def _comparison(
     treatment = data[treatment_column].astype(bool)
     treatment_n = int(treatment.sum())
     control_n = int((~treatment).sum())
-    treatment_rate = (
-        float(data.loc[treatment, outcome_column].mean())
-        if treatment_n
-        else math.nan
-    )
-    control_rate = (
-        float(data.loc[~treatment, outcome_column].mean())
-        if control_n
-        else math.nan
-    )
     effect = _effect(data, treatment_column, outcome_column)
     ci_low, ci_high = _cluster_bootstrap(
         data,
         treatment_column=treatment_column,
         outcome_column=outcome_column,
         seed=seed,
-    )
-    p_value = _permutation_p_value(
-        data,
-        treatment_column=treatment_column,
-        outcome_column=outcome_column,
-        observed_effect=effect,
-        seed=seed + 1000,
     )
     positive_pairs, pair_effects = _breadth(
         data,
@@ -313,12 +282,26 @@ def _comparison(
         "target_tier": target_tier,
         "treatment_n": treatment_n,
         "control_n": control_n,
-        "treatment_rate": treatment_rate,
-        "control_rate": control_rate,
+        "treatment_rate": (
+            float(data.loc[treatment, outcome_column].mean())
+            if treatment_n
+            else math.nan
+        ),
+        "control_rate": (
+            float(data.loc[~treatment, outcome_column].mean())
+            if control_n
+            else math.nan
+        ),
         "effect": effect,
         "bootstrap_p05": ci_low,
         "bootstrap_p95": ci_high,
-        "permutation_p": p_value,
+        "permutation_p": _permutation_p_value(
+            data,
+            treatment_column=treatment_column,
+            outcome_column=outcome_column,
+            observed_effect=effect,
+            seed=seed + 1000,
+        ),
         "positive_pairs": positive_pairs,
         "positive_years": positive_years,
         "pair_effects": pair_effects,
@@ -333,15 +316,13 @@ def _bh_q_values(p_values: list[float]) -> list[float]:
     if len(valid) == 0:
         return output.tolist()
     order = valid[np.argsort(values[valid])]
-    adjusted = np.empty(len(order), dtype=float)
     running = 1.0
     total = len(order)
-    for reverse_rank, index in enumerate(order[::-1], start=1):
-        rank = total - reverse_rank + 1
+    for position in range(total - 1, -1, -1):
+        index = order[position]
+        rank = position + 1
         running = min(running, values[index] * total / rank)
-        adjusted[rank - 1] = running
-    for rank, index in enumerate(order):
-        output[index] = adjusted[rank]
+        output[index] = running
     return output.tolist()
 
 
@@ -356,9 +337,7 @@ def _sample_gate(
     minimum_available_treatment: int,
     minimum_control: int,
 ) -> dict[str, Any]:
-    primary = opportunities.loc[
-        opportunities["location_rule"].eq(PRIMARY_RULE)
-    ].copy()
+    primary = opportunities.loc[opportunities["location_rule"].eq(PRIMARY_RULE)]
     active = primary.loc[primary[active_column].astype(bool)]
     pair_counts = active.groupby("instrument", sort=True).size()
     pair_breadth = int(pair_counts.ge(minimum_pair).sum())
@@ -385,7 +364,6 @@ def _sample_gate(
 
 def _pair_concentration(
     opportunities: pd.DataFrame,
-    *,
     active_column: str,
 ) -> float:
     active = opportunities.loc[
@@ -398,38 +376,24 @@ def _pair_concentration(
     return float(counts.max() / counts.sum())
 
 
-def _stage_table(
-    opportunities: pd.DataFrame,
-    *,
-    stage_column: str,
-) -> pd.DataFrame:
+def _stage_table(opportunities: pd.DataFrame, column: str) -> pd.DataFrame:
     return (
-        opportunities.groupby(
-            ["location_rule", "side", stage_column],
-            sort=True,
-        )
+        opportunities.groupby(["location_rule", "side", column], sort=True)
         .size()
         .rename("opportunities")
         .reset_index()
     )
 
 
-def _signal_table(
-    ledger: pd.DataFrame,
-    *,
-    maximum_day: int,
-) -> pd.DataFrame:
-    eligible = ledger.loc[
+def _signal_table(ledger: pd.DataFrame, maximum_day: int) -> pd.DataFrame:
+    data = ledger.loc[
         ledger["health_pivot_day"].le(maximum_day)
         & ledger["signal_target_available"].astype(bool)
-    ].copy()
-    if eligible.empty:
+    ]
+    if data.empty:
         return pd.DataFrame()
     return (
-        eligible.groupby(
-            ["location_rule", "target_tier", "side"],
-            sort=True,
-        )
+        data.groupby(["location_rule", "target_tier", "side"], sort=True)
         .agg(
             observations=("signal_target_available", "size"),
             reached=("signal_reached_before_invalidation", "sum"),
@@ -442,7 +406,7 @@ def _signal_table(
 def _markdown(
     decision: dict[str, Any],
     comparisons: pd.DataFrame,
-    stages_primary: pd.DataFrame,
+    stages: pd.DataFrame,
 ) -> str:
     payload = decision["decision"]
     lines = [
@@ -461,30 +425,28 @@ def _markdown(
         lines.append(
             f"| {row.name} | {row.treatment_n} | {row.control_n} | "
             f"{row.treatment_rate:.2%} | {row.control_rate:.2%} | "
-            f"{row.effect:.2%} | {row.permutation_p:.4f} | {row.q_value:.4f} |"
+            f"{row.effect:.2%} | {row.permutation_p:.4f} | "
+            f"{row.q_value:.4f} |"
         )
     lines.extend(
         [
             "",
-            "## Stage census",
+            "## Primary stage census",
             "",
             "| Location rule | Side | Stage | Opportunities |",
             "|---|---|---|---:|",
         ]
     )
-    for row in stages_primary.itertuples(index=False):
+    for row in stages.itertuples(index=False):
         lines.append(
             f"| {row.location_rule} | {row.side} | "
-            f"{getattr(row, 'stage_primary')} | {row.opportunities} |"
+            f"{row.stage_primary} | {row.opportunities} |"
         )
     lines.extend(
         [
             "",
-            "## Boundary",
-            "",
-            "This study evaluates technical sequencing and monthly reach. "
-            "It does not authorize entries, stops, sizing, Pine or deployment. "
-            "Macro, policy regime and seasonality remain unopened.",
+            "This is technical attribution, not an executable strategy. "
+            "Macro, regime, seasonality, entries and deployment remain closed.",
             "",
         ]
     )
@@ -495,31 +457,29 @@ def main() -> None:
     args = parse_args()
     summaries = _load_summaries(args.summaries)
     ledger = _load_ledgers(args.ledgers)
-    if not set(ledger["year"].unique()).issubset(set(range(2015, 2022))):
+    if not set(ledger["year"].unique()).issubset(range(2015, 2022)):
         raise ValueError("post-development year entered staged sequence ledger")
 
-    opportunities = ledger.drop_duplicates(
-        ["instrument", "opportunity_id"]
-    ).copy()
-    comparisons = []
-    for offset, spec in enumerate(TEST_SPECS):
-        name, treatment, available, outcome, tier = spec
-        comparisons.append(
-            _comparison(
-                ledger,
-                name=name,
-                treatment_column=treatment,
-                available_column=available,
-                outcome_column=outcome,
-                target_tier=tier,
-                seed=RANDOM_SEED + offset,
-            )
+    opportunities = ledger.drop_duplicates(["instrument", "opportunity_id"])
+    comparisons = [
+        _comparison(
+            ledger,
+            name=name,
+            treatment_column=treatment,
+            available_column=available,
+            outcome_column=outcome,
+            target_tier=tier,
+            seed=RANDOM_SEED + offset,
         )
+        for offset, (name, treatment, available, outcome, tier) in enumerate(
+            TEST_SPECS
+        )
+    ]
     q_values = _bh_q_values(
-        [float(item["permutation_p"]) for item in comparisons]
+        [float(comparison["permutation_p"]) for comparison in comparisons]
     )
-    for item, q_value in zip(comparisons, q_values, strict=True):
-        item["q_value"] = q_value
+    for comparison, q_value in zip(comparisons, q_values, strict=True):
+        comparison["q_value"] = q_value
 
     primary_comparison = comparisons[0]
     sensitivity_comparison = comparisons[2]
@@ -543,11 +503,10 @@ def main() -> None:
         minimum_available_treatment=40,
         minimum_control=120,
     )
-    primary_concentration = _pair_concentration(
+    concentration = _pair_concentration(
         opportunities,
-        active_column="sequence_active_primary",
+        "sequence_active_primary",
     )
-
     primary_effect_passed = (
         primary_gate["passed"]
         and float(primary_comparison["effect"]) >= 0.10
@@ -555,8 +514,8 @@ def main() -> None:
         and float(primary_comparison["q_value"]) <= 0.10
         and int(primary_comparison["positive_pairs"]) >= 4
         and int(primary_comparison["positive_years"]) >= 5
-        and math.isfinite(primary_concentration)
-        and primary_concentration <= 0.35
+        and math.isfinite(concentration)
+        and concentration <= 0.35
     )
     sensitivity_effect_passed = (
         sensitivity_gate["passed"]
@@ -575,18 +534,9 @@ def main() -> None:
     else:
         decision_code = "FAIL_STAGED_SEQUENCE_NO_REACH_LIFT"
 
-    stages_primary = _stage_table(
-        opportunities,
-        stage_column="stage_primary",
-    )
-    stages_sensitivity = _stage_table(
-        opportunities,
-        stage_column="stage_sensitivity",
-    )
-    signal_day5 = _signal_table(ledger, maximum_day=5)
-    signal_day10 = _signal_table(ledger, maximum_day=10)
+    stage_primary = _stage_table(opportunities, "stage_primary")
+    stage_sensitivity = _stage_table(opportunities, "stage_sensitivity")
     comparison_frame = pd.DataFrame(comparisons)
-
     decision = {
         "decision": {
             "decision": decision_code,
@@ -597,7 +547,7 @@ def main() -> None:
             "sensitivity_sample_passed": bool(sensitivity_gate["passed"]),
             "primary_effect_passed": primary_effect_passed,
             "sensitivity_effect_passed": sensitivity_effect_passed,
-            "primary_pair_concentration": primary_concentration,
+            "primary_pair_concentration": concentration,
             "macro_stage_opened": primary_effect_passed,
             "execution_stage_opened": False,
             "strategy_pnl_calculated": False,
@@ -609,37 +559,23 @@ def main() -> None:
     }
 
     args.out.mkdir(parents=True, exist_ok=True)
-    ledger.to_csv(
-        args.out / "wayne_staged_pooled_ledger.csv",
-        index=False,
-    )
-    stages_primary.to_csv(
-        args.out / "wayne_staged_primary_stage_census.csv",
-        index=False,
-    )
-    stages_sensitivity.to_csv(
-        args.out / "wayne_staged_sensitivity_stage_census.csv",
-        index=False,
-    )
-    comparison_frame.to_csv(
-        args.out / "wayne_staged_planned_comparisons.csv",
-        index=False,
-    )
-    signal_day5.to_csv(
-        args.out / "wayne_staged_signal_reach_day5.csv",
-        index=False,
-    )
-    signal_day10.to_csv(
-        args.out / "wayne_staged_signal_reach_day10.csv",
-        index=False,
-    )
+    outputs = {
+        "wayne_staged_pooled_ledger.csv": ledger,
+        "wayne_staged_primary_stage_census.csv": stage_primary,
+        "wayne_staged_sensitivity_stage_census.csv": stage_sensitivity,
+        "wayne_staged_planned_comparisons.csv": comparison_frame,
+        "wayne_staged_signal_reach_day5.csv": _signal_table(ledger, 5),
+        "wayne_staged_signal_reach_day10.csv": _signal_table(ledger, 10),
+    }
+    for filename, frame in outputs.items():
+        frame.to_csv(args.out / filename, index=False)
     safe = _json_safe(decision)
     (args.out / "wayne_staged_sequence_decision.json").write_text(
         json.dumps(safe, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
     (args.out / "WAYNE_STAGED_SEQUENCE_DECISION.md").write_text(
-        _markdown(safe, comparison_frame, stages_primary),
+        _markdown(safe, comparison_frame, stage_primary),
         encoding="utf-8",
     )
     print(json.dumps(safe, indent=2, sort_keys=True))
