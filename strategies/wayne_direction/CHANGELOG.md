@@ -1,5 +1,47 @@
 # Wayne Direction-First Framework — Changelog
 
+## v0.7.0 — 2026-07-27
+
+### Changed
+
+- froze the staged monthly-location → H4 structure → H4 MA-health sequence;
+- separated close-in-zone primary location from range-touch sensitivity;
+- added day-5 primary and day-10 sensitivity landmarks;
+- excluded targets consumed before or on confirmation/landmark bars;
+- added instrument-month clustered bootstrap and bundle-preserving permutation inference;
+- completed six-pair 2015–2021 pair construction and corrected pooled aggregation;
+- added independent audit, decision record and replication roadmap.
+
+### Results
+
+- primary close-in-zone opportunities: 764;
+- active sequences by day 5: 15;
+- active sequences by day 10: 36;
+- day-5 conservative: 45.45% versus 18.08%, +27.37 pp, p=0.1192, q=0.1589;
+- day-10 conservative: 48.00% versus 12.31%, +35.69 pp, p=0.0002, q=0.0008;
+- primary and sensitivity sample gates both failed;
+- binding decision: `FAIL_STAGED_SEQUENCE_PRIMARY_SAMPLE`.
+
+### Reason
+
+The ordered sequence appears economically discriminating when it completes, especially by day 10, but occurs too rarely on the frozen six-pair development population to support promotion. Sample scarcity must be resolved through independent replication, not weaker definitions or additional in-sample window search.
+
+### Known limitations
+
+- only 25 day-10 conservative treatment cases remained available at the fixed landmark;
+- EURUSD was negative in the day-10 conservative pair breakdown;
+- most active opportunities lacked aligned D1 structure, so D1 interaction remains unresolved;
+- macro, regime and seasonality outcomes remain untested;
+- 2022–2025 remain unopened;
+- no executable P&L has been calculated.
+
+### Next
+
+- freeze and qualify a broader independent liquid-FX panel;
+- replicate the exact day-10 sequence without threshold changes;
+- allow point-in-time macro/regime data engineering in parallel;
+- keep direction integration, execution and deployment blocked.
+
 ## v0.4.0 — 2026-07-27
 
 ### Changed
@@ -27,19 +69,11 @@ Monthly pivot location and healthy H4 trend conditions represent different stage
 
 ### Known limitations
 
-- the staged zone → H4 structure → MA expansion sequence is not yet frozen or tested;
-- macro and policy-regime point-in-time sources remain unqualified;
-- seasonality remains unimplemented;
-- monthly reach results are descriptive and not executable P&L;
-- 2022–2025 remain unopened.
-
-### Next
-
-- freeze and test the staged technical sequence;
-- require target reach after, not before, completed confirmation;
-- build expanding-window seasonality;
-- qualify point-in-time macro and regime data;
-- combine only after each layer has independent sample and attribution.
+- the staged sequence had not yet been tested;
+- macro and policy-regime point-in-time sources remained unqualified;
+- seasonality remained unimplemented;
+- monthly reach results were descriptive and not executable P&L;
+- 2022–2025 remained unopened.
 
 ## v0.1.0 — 2026-07-27
 
@@ -53,15 +87,3 @@ Monthly pivot location and healthy H4 trend conditions represent different stage
 - assigned monthly M4/R2 and M1/S2 to conservative/stretch reach;
 - archived daily-pivot PR #63 as a bounded negative result rather than an active dependency;
 - opened work package `WP-WD-20260727-01`.
-
-### Reason
-
-Direction must exist before monthly pivot levels can be interpreted as opportunity and reach. Testing levels without the methodology's directional framework answers a narrower and less important question.
-
-### Known limitations
-
-- macro and policy-regime point-in-time sources were not qualified;
-- structural thresholds had not yet been evaluated on real data;
-- H4 divergence and monthly reach were not yet implemented;
-- the first stage was attribution, not executable P&L;
-- 2022–2025 remained unopened.

@@ -4,7 +4,7 @@ Updated: 2026-07-27
 
 ## Current state
 
-`PHASE_D_STAGED_TECHNICAL_SEQUENCE_REQUIRES_FREEZE`
+`PHASE_D_COMPLETE_SAMPLE_FAIL_DAY10_REPLICATION_CANDIDATE`
 
 ## Phase A — Direction contract
 
@@ -12,8 +12,8 @@ Status: `COMPLETE`
 
 - macro, regime, seasonality and structure are separate direction layers;
 - daily pivots cannot create direction;
-- D1 structure is strategic context;
-- H4 structure is current technical transition;
+- D1 structure is slow strategic context;
+- H4 structure is the current technical transition;
 - H4 EMA21/55/200 grades health;
 - monthly pivots define location and reach.
 
@@ -22,64 +22,89 @@ Status: `COMPLETE`
 Status: `COMPLETE_REFERENCE_FAILED_SAMPLE_GATE`
 
 - causal double-bottom/top → BOS → retest → HL/LH → continuation engine;
-- full pre-retest impulse reference;
+- continuation exceeds the complete pre-retest impulse;
 - six pairs, 2015–2021;
-- corrected result: 79 complete transitions;
+- 79 complete transitions;
 - 69 of 79 had aligned healthy H4 averages at confirmation;
-- D1 state is broad but slow and persistent;
 - retain unchanged as strategic regime context;
 - do not loosen thresholds to manufacture sample.
 
 Primary record: `D1_STRUCTURE_CENSUS_CORRECTION_V0_2_1.md`.
 
-## Phase C — H4 current structure and health
+## Phase C — H4 structure and health
 
-Status: `COMPLETE_TRANSITION_GATE_PASS_MONTH_OPEN_GATE_FAIL`
+Status: `COMPLETE_TRANSITION_GATE_PASS_SIMULTANEOUS_GATE_FAIL`
 
 - 475 complete H4 transitions;
-- all six pairs exceed 40 events;
-- transition-count gate passed;
-- only 176 of 475 had aligned healthy H4 averages at confirmation;
-- zero of 486 monthly-zone months were simultaneously aligned structure plus healthy MAs at the exact month open;
-- simultaneous conjunction is rejected;
+- all six pairs exceeded 40 events;
+- 176 of 475 had healthy aligned H4 averages at confirmation;
+- zero of 486 monthly-zone months were simultaneously aligned and healthy at the exact month open;
+- simultaneous conjunction rejected;
 - H4 thresholds remain frozen.
 
 Primary record: `H4_STRUCTURE_SENSITIVITY_DECISION_V0_4.md`.
 
-## Phase D — Staged technical sequence
+## Phase D — Staged monthly sequence
 
-Status: `NEXT_VALID_PHASE`
+Status: `COMPLETE_PRIMARY_AND_SENSITIVITY_SAMPLE_FAIL`
 
-Test an ordered setup rather than simultaneous filters:
+Frozen sequence:
 
-1. month opens in zone or first touches the zone during the first five pivot days;
-2. H4 structure confirms in the zone direction;
-3. H4 EMA21/55/200 subsequently becomes stable or expanding;
-4. monthly reach is measured from the completed confirmation timestamp.
+1. month opens or H4 closes in the directional monthly zone within five pivot days;
+2. a new H4 structural turn follows;
+3. EMA21/55/200 becomes aligned stable or expanding;
+4. reach begins only after completed confirmation or a fixed landmark.
 
-Rules:
+Results:
 
-- first five pivot days are primary;
-- ten pivot days may be a labeled development sensitivity only;
-- no H4 threshold tuning;
-- no target-grid search;
-- compare against no-direction and opposite-direction month controls;
-- report pair/year breadth and concentration;
-- treat pre-confirmation target touches as ineligible, not successes.
+- primary close-in-zone opportunities: 764;
+- active day-5 sequences: 15;
+- active day-10 sequences: 36;
+- day-5 conservative lift: +27.37 pp, p=0.1192, q=0.1589;
+- day-10 conservative lift: +35.69 pp, p=0.0002, q=0.0008;
+- both frozen sample gates failed;
+- binding decision: `FAIL_STAGED_SEQUENCE_PRIMARY_SAMPLE`.
 
-## Phase E — Seasonality
+Consequences:
 
-Status: `BLOCKED_BY_STAGED_TECHNICAL_SAMPLE`
+- reject day 5 as a promotable technical gate on the current population;
+- retain the exact day-10 sequence as an unchanged replication candidate;
+- do not weaken structure, MA health or target-availability rules;
+- do not extend the in-sample window again;
+- do not open direction-layer integration or execution.
+
+Primary record: `STAGED_MONTHLY_SEQUENCE_DECISION_V0_7.md`.
+
+## Phase E — Independent day-10 replication
+
+Status: `NEXT_VALID_RESEARCH_PATH_DATA_QUALIFICATION_REQUIRED`
+
+- qualify an independent broader panel of liquid FX pairs before opening outcomes;
+- freeze pair inclusion using liquidity, source completeness and quote-quality rules rather than performance;
+- reuse the exact close-in-zone, H4 structure, EMA health and day-10 definitions;
+- retain conservative and stretch targets unchanged;
+- preserve instrument-month clustering and the existing sample/effect gates;
+- treat current six-pair results as development evidence only;
+- preserve 2022–2025 as locked chronological confirmation, not sample rescue.
+
+No new pair outcome may be viewed until the expanded-panel manifest and data-quality gate are frozen.
+
+## Phase F — Seasonality
+
+Status: `OUTCOME_INTEGRATION_BLOCKED_BY_TECHNICAL_REPLICATION`
+
+Engineering contract may proceed:
 
 - expanding-window month-of-year prior;
 - week-of-month and turn-of-month states;
 - prior years only;
-- supportive, neutral or opposing relationship;
-- no override of missing technical confirmation.
+- supportive, neutral or opposing relationship.
 
-## Phase F — Macro and regime data qualification
+Seasonality outcome integration remains blocked until the technical replication passes.
 
-Status: `DATA_CONTRACT_REQUIRED`
+## Phase G — Macro and regime qualification
+
+Status: `DATA_CONTRACT_ENGINEERING_ALLOWED_OUTCOMES_BLOCKED`
 
 - point-in-time rate and policy expectations;
 - inflation and growth-surprise differentials;
@@ -88,52 +113,33 @@ Status: `DATA_CONTRACT_REQUIRED`
 - explicit release timestamps and revision treatment;
 - reject any series that cannot be reconstructed as known contemporaneously.
 
-## Phase G — Direction triage atlas
+Data qualification can proceed independently. Directional outcome testing cannot.
+
+## Phase H — Direction triage atlas
 
 Status: `BLOCKED`
 
 Candidate permission stack:
 
-- D1 strategic context aligned or explicitly neutral;
-- macro must not oppose;
-- regime must permit trend-following;
-- seasonality supportive or neutral;
-- staged H4 structural and MA confirmation complete;
+- strategic direction from independently qualified macro, regime, seasonality and D1 context;
+- monthly pivot location;
+- staged H4 structure and MA health;
 - otherwise abstain.
 
 No weighted-score optimization in the first atlas.
 
-## Phase H — Conditional reach validation
-
-Status: `BLOCKED`
-
-- M4/R2 bullish and M1/S2 bearish reach;
-- start clock at completed staged confirmation;
-- matched controls;
-- pair/year breadth, concentration, block bootstrap and FDR;
-- preserve 2022–2025 for locked confirmation.
-
-## Phase I — Bounded execution
+## Phase I — Conditional reach and execution
 
 Status: `NOT_AUTHORIZED`
 
-Only after direction and reach pass:
+Only after independent technical replication and direction-layer attribution:
 
-- freeze a small entry set;
-- BID/ASK fills and transaction costs;
-- identical execution across monthly-zone and generic-anchor controls;
-- no partial exits, runners or continuous threshold search.
-
-## Phase J — Historical confirmation and deployment
-
-Status: `FUTURE`
-
-- 2022–2023 locked validation;
-- 2024–2025 final historical confirmation;
-- prospective or cross-asset replication;
-- Pine parity only after Python evidence;
-- no sizing or deployment before prospective confirmation.
+- locked historical confirmation;
+- bounded entry triggers;
+- BID/ASK fills and costs;
+- no partial exits, runners or continuous threshold search;
+- no Pine, alerts, sizing, paper trading or deployment.
 
 ## Archived work
 
-PR #63 remains the bounded negative daily-pivot geometry study. It is not an active dependency and cannot block or authorize the direction-first programme.
+PR #63 remains the bounded negative daily-pivot geometry study. It is not an active dependency and cannot block or authorize this direction-first programme.
