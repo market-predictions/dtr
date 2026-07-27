@@ -1,0 +1,203 @@
+name: Wayne Replication Panel Qualification
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: wayne-replication-panel-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  QUALIFIED_SOURCE_RUN_ID: "30111481052"
+  OMP_NUM_THREADS: "1"
+  OPENBLAS_NUM_THREADS: "1"
+  MKL_NUM_THREADS: "1"
+  NUMEXPR_NUM_THREADS: "1"
+
+jobs:
+  contract:
+    name: Validate replication qualification contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,research]"
+      - name: Focused tests
+        run: |
+          pytest \
+            tests/test_wayne_direction.py \
+            tests/test_wayne_h4_sensitivity.py \
+            tests/test_wayne_staged_sequence.py \
+            tests/test_wayne_staged_cluster_stats.py \
+            tests/test_wayne_replication_panel.py \
+            --junitxml="${RUNNER_TEMP}/wayne-replication-panel-pytest.xml"
+      - name: Lint
+        run: |
+          ruff check \
+            src/dtr_lab/strategies/wayne_direction \
+            scripts/qualify_wayne_replication_pair.py \
+            scripts/aggregate_wayne_replication_panel.py \
+            tests/test_wayne_replication_panel.py
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wayne-replication-panel-contract-diagnostics
+          path: ${{ runner.temp }}/wayne-replication-panel-pytest.xml
+          if-no-files-found: warn
+          retention-days: 30
+
+  pair_quality:
+    name: Qualify replication source ${{ matrix.symbol }}
+    needs: contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        symbol: [EURGBP, EURJPY, GBPJPY, NZDUSD]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[research]"
+      - name: Restore qualified FX source cache
+        id: source-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/source/${{ matrix.symbol }}
+          key: stacey-burke-fx-v1-${{ matrix.symbol }}-2015-2026-07-24
+      - name: Download qualified source on cache miss
+        if: steps.source-cache.outputs.cache-hit != 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: stacey-burke-fx-source-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/source/${{ matrix.symbol }}
+          repository: market-predictions/dtr
+          run-id: ${{ env.QUALIFIED_SOURCE_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Isolate development source
+        shell: bash
+        run: |
+          set -euo pipefail
+          symbol="${{ matrix.symbol }}"
+          lower="${symbol,,}"
+          stage="${RUNNER_TEMP}/wayne-replication-source/${symbol}"
+          mkdir -p "${stage}"
+          for year in 2015 2016 2017 2018 2019 2020 2021; do
+            for side in bid ask; do
+              source="${RUNNER_TEMP}/source/${symbol}/${lower}_m1_${side}_${year}.csv.gz"
+              test -s "${source}"
+              cp "${source}" "${stage}/"
+            done
+          done
+          test "$(find "${stage}" -maxdepth 1 -name '*.csv.gz' -type f | wc -l)" -eq 14
+          if find "${stage}" -maxdepth 1 -type f \
+            \( -name '*_2022.csv.gz' -o -name '*_2023.csv.gz' -o -name '*_2024.csv.gz' -o -name '*_2025.csv.gz' \) \
+            | grep -q .; then
+            echo "Protected post-development source entered qualification directory"
+            exit 1
+          fi
+      - name: Qualify pair source
+        shell: bash
+        run: |
+          set -euo pipefail
+          output="${RUNNER_TEMP}/wayne-replication-quality/${{ matrix.symbol }}"
+          mkdir -p "${output}"
+          python scripts/qualify_wayne_replication_pair.py \
+            --data "${RUNNER_TEMP}/wayne-replication-source/${{ matrix.symbol }}" \
+            --symbol "${{ matrix.symbol }}" \
+            --start-year 2015 \
+            --end-year 2021 \
+            --out "${output}" \
+            | tee "${output}/pair-quality.log"
+      - name: Remove raw source
+        if: always()
+        run: rm -rf "${RUNNER_TEMP}/wayne-replication-source"
+      - name: Upload pair quality
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wayne-replication-quality-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/wayne-replication-quality/${{ matrix.symbol }}
+          if-no-files-found: warn
+          retention-days: 90
+
+  aggregate:
+    name: Freeze replication panel
+    needs: pair_quality
+    if: always() && needs.pair_quality.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[research]"
+      - name: Download pair quality evidence
+        uses: actions/download-artifact@v4
+        with:
+          pattern: wayne-replication-quality-*
+          path: ${{ runner.temp }}/wayne-replication-quality-inputs
+          merge-multiple: false
+      - name: Enforce complete input set
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="${RUNNER_TEMP}/wayne-replication-quality-inputs"
+          test "$(find "${root}" -name wayne_replication_pair_quality.json | wc -l)" -eq 4
+      - name: Aggregate source-only panel decision
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="${RUNNER_TEMP}/wayne-replication-quality-inputs"
+          mapfile -t summaries < <(
+            find "${root}" -name wayne_replication_pair_quality.json -type f | sort
+          )
+          output="${RUNNER_TEMP}/wayne-replication-panel-decision"
+          mkdir -p "${output}"
+          python scripts/aggregate_wayne_replication_panel.py \
+            --summaries "${summaries[@]}" \
+            --out "${output}"
+      - name: Upload frozen panel decision
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wayne-replication-panel-decision
+          path: ${{ runner.temp }}/wayne-replication-panel-decision
+          if-no-files-found: warn
+          retention-days: 90

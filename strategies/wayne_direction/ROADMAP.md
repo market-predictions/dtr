@@ -4,7 +4,7 @@ Updated: 2026-07-27
 
 ## Current state
 
-`PHASE_D_COMPLETE_SAMPLE_FAIL_DAY10_REPLICATION_CANDIDATE`
+`PHASE_E_COMPLETE_DIRECTIONAL_REPLICATION_SAMPLE_AND_BREADTH_FAIL`
 
 ## Phase A — Direction contract
 
@@ -26,7 +26,7 @@ Status: `COMPLETE_REFERENCE_FAILED_SAMPLE_GATE`
 - six pairs, 2015–2021;
 - 79 complete transitions;
 - 69 of 79 had aligned healthy H4 averages at confirmation;
-- retain unchanged as strategic regime context;
+- retain unchanged as strategic context;
 - do not loosen thresholds to manufacture sample.
 
 Primary record: `D1_STRUCTURE_CENSUS_CORRECTION_V0_2_1.md`.
@@ -44,9 +44,9 @@ Status: `COMPLETE_TRANSITION_GATE_PASS_SIMULTANEOUS_GATE_FAIL`
 
 Primary record: `H4_STRUCTURE_SENSITIVITY_DECISION_V0_4.md`.
 
-## Phase D — Staged monthly sequence
+## Phase D — Six-pair staged monthly sequence
 
-Status: `COMPLETE_PRIMARY_AND_SENSITIVITY_SAMPLE_FAIL`
+Status: `COMPLETE_SAMPLE_FAIL_REPLICATION_JUSTIFIED`
 
 Frozen sequence:
 
@@ -65,81 +65,111 @@ Results:
 - both frozen sample gates failed;
 - binding decision: `FAIL_STAGED_SEQUENCE_PRIMARY_SAMPLE`.
 
-Consequences:
+Consequence:
 
-- reject day 5 as a promotable technical gate on the current population;
-- retain the exact day-10 sequence as an unchanged replication candidate;
-- do not weaken structure, MA health or target-availability rules;
-- do not extend the in-sample window again;
-- do not open direction-layer integration or execution.
+- reject day 5 as a promotable technical gate;
+- retain the exact day-10 sequence for independent replication;
+- do not weaken structure, MA health or target availability.
 
 Primary record: `STAGED_MONTHLY_SEQUENCE_DECISION_V0_7.md`.
 
-## Phase E — Independent day-10 replication
+## Phase E — Independent four-pair day-10 replication
 
-Status: `NEXT_VALID_RESEARCH_PATH_DATA_QUALIFICATION_REQUIRED`
+Status: `COMPLETE_SAMPLE_AND_BREADTH_FAIL_EFFECT_DIRECTION_REPRODUCED`
 
-- qualify an independent broader panel of liquid FX pairs before opening outcomes;
-- freeze pair inclusion using liquidity, source completeness and quote-quality rules rather than performance;
-- reuse the exact close-in-zone, H4 structure, EMA health and day-10 definitions;
-- retain conservative and stretch targets unchanged;
-- preserve instrument-month clustering and the existing sample/effect gates;
-- treat current six-pair results as development evidence only;
-- preserve 2022–2025 as locked chronological confirmation, not sample rescue.
+Frozen panel qualification:
 
-No new pair outcome may be viewed until the expanded-panel manifest and data-quality gate are frozen.
+- EURGBP, EURJPY, GBPJPY and NZDUSD;
+- all four passed exact 2015–2021 BID/ASK, activity, OHLC, spread and D1/H4 coverage gates;
+- no pair was selected or excluded using Wayne outcomes;
+- qualification decision: `PASS_PANEL_QUALIFICATION_OPEN_REPLICATION_OUTCOMES`.
 
-## Phase F — Seasonality
+Replication result:
 
-Status: `OUTCOME_INTEGRATION_BLOCKED_BY_TECHNICAL_REPLICATION`
+- primary opportunities: 514;
+- active day-10 sequences: 26;
+- clean conservative treatments: 14;
+- controls: 447;
+- conservative reach: 35.71% versus 12.53%;
+- conservative lift: +23.19 pp;
+- cluster p=0.0948;
+- bootstrap 90% interval: +1.48 to +43.70 pp;
+- stretch supportive lift: +32.11 pp, p=0.0002.
 
-Engineering contract may proceed:
+Binding failures:
 
-- expanding-window month-of-year prior;
-- week-of-month and turn-of-month states;
-- prior years only;
-- supportive, neutral or opposing relationship.
+- 14 clean conservative treatments versus minimum 15;
+- EURJPY concentration 42.31% versus maximum 40%;
+- one positive eligible pair versus minimum three;
+- two positive eligible years versus minimum four.
 
-Seasonality outcome integration remains blocked until the technical replication passes.
+Binding decision: `FAIL_REPLICATION_SAMPLE_INSUFFICIENT`.
 
-## Phase G — Macro and regime qualification
+Interpretation:
 
-Status: `DATA_CONTRACT_ENGINEERING_ALLOWED_OUTCOMES_BLOCKED`
+- the estimated effect did not reverse;
+- the exact sequence remains directionally interesting;
+- causal target availability makes it operationally sparse;
+- cross-pair and cross-year replication breadth is not established;
+- the stretch endpoint cannot rescue the conservative primary endpoint.
 
-- point-in-time rate and policy expectations;
-- inflation and growth-surprise differentials;
-- real-yield or rate-market differential;
-- volatility, efficiency and risk regime;
-- explicit release timestamps and revision treatment;
-- reject any series that cannot be reconstructed as known contemporaneously.
+Primary records:
 
-Data qualification can proceed independently. Directional outcome testing cannot.
+- `INDEPENDENT_FX_PANEL_QUALIFICATION_DECISION_V0_9.md`;
+- `INDEPENDENT_FX_REPLICATION_DECISION_V1_0.md`;
+- `INDEPENDENT_FX_REPLICATION_AUDIT_V1_0.md`.
 
-## Phase H — Direction triage atlas
+## Phase F — Technical continuation decision
 
-Status: `BLOCKED`
+Status: `STRATEGIC_DECISION_REQUIRED`
 
-Candidate permission stack:
+Two defensible choices remain:
 
-- strategic direction from independently qualified macro, regime, seasonality and D1 context;
-- monthly pivot location;
-- staged H4 structure and MA health;
-- otherwise abstain.
+1. stop the technical line because the exact setup is too sparse after ten development pairs; or
+2. authorize one final, separately preregistered independent FX panel using new source-qualified pairs and no changes to signal, window, target or target-availability rules.
 
-No weighted-score optimization in the first atlas.
+A final panel must:
 
-## Phase I — Conditional reach and execution
+- be frozen from source/liquidity criteria before outcomes;
+- exclude all ten already tested pairs;
+- preserve 2022–2025 for chronological confirmation rather than sample rescue;
+- use the exact day-10 engine and conservative primary endpoint;
+- be explicitly final, with no subsequent pair-panel search.
+
+## Phase G — Minimal yield and risk context
+
+Status: `BLOCKED_BY_TECHNICAL_REPLICATION`
+
+Only after a technical replication pass:
+
+1. nominal two-year yield differential;
+2. 20-day change in that differential;
+3. simple VIX expanding-percentile risk state;
+4. independent attribution of yield and VIX before combination.
+
+No weighted score in the first context model.
+
+## Phase H — Seasonality and full macro
+
+Status: `POSTPONED`
+
+- seasonality remains postponed because the conditioned sample is too small;
+- release-level inflation, employment, growth and surprise models remain postponed;
+- no point-in-time macro engineering is currently on the critical path.
+
+## Phase I — Direction triage, execution and deployment
 
 Status: `NOT_AUTHORIZED`
 
-Only after independent technical replication and direction-layer attribution:
+Blocked items:
 
-- locked historical confirmation;
-- bounded entry triggers;
-- BID/ASK fills and costs;
-- no partial exits, runners or continuous threshold search;
-- no Pine, alerts, sizing, paper trading or deployment.
+- combined direction triage;
+- entries, stops, partial exits, runners or breakeven;
+- BID/ASK execution P&L and costs;
+- sizing;
+- 2022–2025 confirmation;
+- Pine, alerts, paper trading or deployment.
 
 ## Archived work
 
-PR #63 remains the bounded negative daily-pivot geometry study. It is not an active dependency and cannot block or authorize this direction-first programme.
+PR #63 remains the bounded negative daily-pivot geometry study. It is not an active dependency and cannot authorize this direction-first programme.

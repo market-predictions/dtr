@@ -6,6 +6,8 @@ import numpy as np
 import pandas as pd
 
 PRIMARY_PAIRS = ("AUDUSD", "EURUSD", "GBPUSD", "USDCAD", "USDCHF", "USDJPY")
+REPLICATION_PAIRS = ("EURGBP", "EURJPY", "GBPJPY", "NZDUSD")
+SUPPORTED_PAIRS = tuple(sorted((*PRIMARY_PAIRS, *REPLICATION_PAIRS)))
 _REQUIRED_COLUMNS = {
     "timestamp_utc",
     "open",
@@ -58,8 +60,8 @@ def load_bid_ask_minutes(
     end_year: int,
 ) -> pd.DataFrame:
     symbol = symbol.upper()
-    if symbol not in PRIMARY_PAIRS:
-        raise ValueError(f"unsupported primary pair: {symbol}")
+    if symbol not in SUPPORTED_PAIRS:
+        raise ValueError(f"unsupported Wayne pair: {symbol}")
     if end_year < start_year:
         raise ValueError("end_year must not precede start_year")
 
