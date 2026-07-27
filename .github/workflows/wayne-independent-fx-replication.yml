@@ -1,14 +1,6 @@
 name: Wayne Independent FX Replication
 
 on:
-  pull_request:
-    branches: [main]
-    paths:
-      - .github/workflows/wayne-independent-fx-replication.yml
-      - scripts/qualify_wayne_replication_source.py
-      - scripts/run_wayne_independent_replication_pair.py
-      - scripts/aggregate_wayne_independent_replication.py
-      - strategies/wayne_direction/INDEPENDENT_FX_*
   workflow_dispatch:
 
 permissions:
@@ -16,7 +8,7 @@ permissions:
   actions: read
 
 concurrency:
-  group: wayne-independent-fx-replication-${{ github.event.pull_request.number || github.ref }}
+  group: wayne-independent-fx-replication-${{ github.ref }}
   cancel-in-progress: true
 
 env:
