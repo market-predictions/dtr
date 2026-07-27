@@ -1,0 +1,305 @@
+name: Wayne Independent FX Replication
+
+on:
+  push:
+    branches: [agent/wayne-direction-first-research]
+    paths:
+      - .github/workflows/wayne-independent-fx-replication.yml
+      - scripts/qualify_wayne_replication_source.py
+      - scripts/run_wayne_independent_replication_pair.py
+      - scripts/aggregate_wayne_independent_replication.py
+      - strategies/wayne_direction/INDEPENDENT_FX_*
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: wayne-independent-fx-replication-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  QUALIFIED_SOURCE_RUN_ID: "30111481052"
+  OMP_NUM_THREADS: "1"
+  OPENBLAS_NUM_THREADS: "1"
+  MKL_NUM_THREADS: "1"
+  NUMEXPR_NUM_THREADS: "1"
+
+jobs:
+  contract:
+    name: Validate independent replication contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,research]"
+      - name: Compile research runners
+        run: |
+          python -m py_compile \
+            scripts/qualify_wayne_replication_source.py \
+            scripts/run_wayne_independent_replication_pair.py \
+            scripts/aggregate_wayne_independent_replication.py
+      - name: Focused regression tests
+        run: |
+          pytest \
+            tests/test_wayne_staged_sequence.py \
+            tests/test_wayne_staged_aggregation.py \
+            tests/test_wayne_staged_cluster_stats.py
+      - name: Lint
+        run: |
+          ruff check \
+            scripts/qualify_wayne_replication_source.py \
+            scripts/run_wayne_independent_replication_pair.py \
+            scripts/aggregate_wayne_independent_replication.py
+
+  source_quality:
+    name: Reproduce source quality ${{ matrix.symbol }}
+    needs: contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        symbol: [EURGBP, EURJPY, GBPJPY, NZDUSD]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[research]"
+      - name: Restore qualified source artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: stacey-burke-fx-source-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/source/${{ matrix.symbol }}
+          repository: market-predictions/dtr
+          run-id: ${{ env.QUALIFIED_SOURCE_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Reproduce frozen source gates
+        run: |
+          python scripts/qualify_wayne_replication_source.py \
+            --data "${RUNNER_TEMP}/source/${{ matrix.symbol }}" \
+            --symbol "${{ matrix.symbol }}" \
+            --out "${RUNNER_TEMP}/quality/${{ matrix.symbol }}"
+      - name: Upload source-quality record
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wayne-independent-source-quality-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/quality/${{ matrix.symbol }}
+          if-no-files-found: warn
+          retention-days: 90
+
+  panel_freeze:
+    name: Verify frozen panel manifest
+    needs: source_quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install pandas
+        run: pip install pandas
+      - name: Download reproduced quality records
+        uses: actions/download-artifact@v4
+        with:
+          pattern: wayne-independent-source-quality-*
+          path: ${{ runner.temp }}/quality
+          merge-multiple: false
+      - name: Match committed annual ledger
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          import pandas as pd
+
+          root = Path("${{ runner.temp }}/quality")
+          files = sorted(root.rglob("wayne_replication_source_quality.csv"))
+          summaries = sorted(root.rglob("wayne_replication_source_summary.json"))
+          if len(files) != 4 or len(summaries) != 4:
+              raise SystemExit("expected four source-quality ledgers and summaries")
+          observed = pd.concat([pd.read_csv(path) for path in files], ignore_index=True)
+          expected = pd.read_csv(
+              "strategies/wayne_direction/INDEPENDENT_FX_PANEL_ANNUAL_QUALITY_V0_9.csv"
+          )
+          keys = ["instrument", "year"]
+          observed = observed.sort_values(keys).reset_index(drop=True)
+          expected = expected.sort_values(keys).reset_index(drop=True)
+          pd.testing.assert_frame_equal(
+              observed,
+              expected,
+              check_dtype=False,
+              check_exact=False,
+              rtol=1e-12,
+              atol=1e-12,
+          )
+          payloads = [json.loads(path.read_text()) for path in summaries]
+          if not all(item["included"] for item in payloads):
+              raise SystemExit("one or more frozen pairs failed reproduced source gates")
+          observed.to_csv("${{ runner.temp }}/wayne_independent_panel_reproduced.csv", index=False)
+          PY
+      - name: Upload panel reproduction
+        uses: actions/upload-artifact@v4
+        with:
+          name: wayne-independent-panel-source-reproduction
+          path: ${{ runner.temp }}/wayne_independent_panel_reproduced.csv
+          retention-days: 90
+
+  pair_sequence:
+    name: Build independent sequence ${{ matrix.symbol }}
+    needs: panel_freeze
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        symbol: [EURGBP, EURJPY, GBPJPY, NZDUSD]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[research]"
+      - name: Restore qualified source artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: stacey-burke-fx-source-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/source/${{ matrix.symbol }}
+          repository: market-predictions/dtr
+          run-id: ${{ env.QUALIFIED_SOURCE_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Isolate 2015-2021 source
+        shell: bash
+        run: |
+          set -euo pipefail
+          symbol="${{ matrix.symbol }}"
+          lower="${symbol,,}"
+          stage="${RUNNER_TEMP}/wayne-independent-source/${symbol}"
+          mkdir -p "${stage}"
+          for year in 2015 2016 2017 2018 2019 2020 2021; do
+            for side in bid ask; do
+              source="${RUNNER_TEMP}/source/${symbol}/${lower}_m1_${side}_${year}.csv.gz"
+              test -s "${source}"
+              cp "${source}" "${stage}/"
+            done
+          done
+          test "$(find "${stage}" -maxdepth 1 -name '*.csv.gz' -type f | wc -l)" -eq 14
+          if find "${stage}" -maxdepth 1 -type f \
+            \( -name '*_2022.csv.gz' -o -name '*_2023.csv.gz' -o -name '*_2024.csv.gz' -o -name '*_2025.csv.gz' \) \
+            | grep -q .; then
+            echo "Locked chronological source entered replication directory"
+            exit 1
+          fi
+      - name: Build unchanged day-10 sequence
+        shell: bash
+        run: |
+          set -euo pipefail
+          output="${RUNNER_TEMP}/wayne-independent/${{ matrix.symbol }}"
+          mkdir -p "${output}"
+          python scripts/run_wayne_independent_replication_pair.py \
+            --data "${RUNNER_TEMP}/wayne-independent-source/${{ matrix.symbol }}" \
+            --symbol "${{ matrix.symbol }}" \
+            --start-year 2015 \
+            --end-year 2021 \
+            --out "${output}" \
+            | tee "${output}/pair-build.log"
+      - name: Upload pair sequence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wayne-independent-pair-${{ matrix.symbol }}
+          path: ${{ runner.temp }}/wayne-independent/${{ matrix.symbol }}
+          if-no-files-found: warn
+          retention-days: 90
+
+  aggregate:
+    name: Aggregate independent replication
+    needs: pair_sequence
+    if: always() && needs.pair_sequence.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[research]"
+      - name: Download pair sequences
+        uses: actions/download-artifact@v4
+        with:
+          pattern: wayne-independent-pair-*
+          path: ${{ runner.temp }}/wayne-independent-inputs
+          merge-multiple: false
+      - name: Enforce complete frozen panel
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="${RUNNER_TEMP}/wayne-independent-inputs"
+          test "$(find "${root}" -name wayne_staged_pair_summary.json | wc -l)" -eq 4
+          test "$(find "${root}" -name wayne_staged_sequence_ledger.csv | wc -l)" -eq 4
+      - name: Aggregate frozen replication
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="${RUNNER_TEMP}/wayne-independent-inputs"
+          mapfile -t summaries < <(find "${root}" -name wayne_staged_pair_summary.json -type f | sort)
+          mapfile -t ledgers < <(find "${root}" -name wayne_staged_sequence_ledger.csv -type f | sort)
+          output="${RUNNER_TEMP}/wayne-independent-decision"
+          mkdir -p "${output}"
+          python scripts/aggregate_wayne_independent_replication.py \
+            --summaries "${summaries[@]}" \
+            --ledgers "${ledgers[@]}" \
+            --out "${output}"
+      - name: Upload independent decision
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wayne-independent-fx-replication-decision
+          path: ${{ runner.temp }}/wayne-independent-decision
+          if-no-files-found: warn
+          retention-days: 90
