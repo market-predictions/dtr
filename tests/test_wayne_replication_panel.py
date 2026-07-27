@@ -2,8 +2,11 @@ from __future__ import annotations
 
 from copy import deepcopy
 
+import pandas as pd
+
 from dtr_lab.strategies.wayne_direction import (
     REPLICATION_PAIRS,
+    annual_spread_quantiles,
     evaluate_quality_metrics,
     expected_calendar_minutes,
 )
@@ -32,6 +35,23 @@ def test_replication_candidate_universe_is_frozen() -> None:
 
 def test_expected_calendar_minutes_includes_leap_years() -> None:
     assert expected_calendar_minutes(2015, 2021) == 3_682_080
+
+
+def test_annual_spread_quantiles_use_active_series_index() -> None:
+    series = pd.Series(
+        [1.0, 3.0, 9.0],
+        index=pd.to_datetime(
+            [
+                "2019-12-31 23:59:00+00:00",
+                "2020-01-02 12:00:00+00:00",
+                "2020-01-02 12:01:00+00:00",
+            ]
+        ),
+    )
+    result = annual_spread_quantiles(series, 2020)
+    assert result["spread_median_pips"] == 6.0
+    assert result["spread_p95_pips"] == 8.7
+    assert result["spread_p99_pips"] == 8.94
 
 
 def test_complete_quality_metrics_pass() -> None:
