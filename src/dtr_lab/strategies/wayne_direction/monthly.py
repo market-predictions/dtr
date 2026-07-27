@@ -35,8 +35,8 @@ def traditional_levels(high: float, low: float, close: float) -> dict[str, float
 def _trading_month_id(index: pd.DatetimeIndex) -> np.ndarray:
     if index.tz is None:
         raise ValueError("daily-bar index must be timezone-aware")
-    local_start = index.tz_convert(NEW_YORK_TZ).tz_localize(None)
-    trading_date = local_start.normalize() + pd.Timedelta(days=1)
+    local_close = index.tz_convert(NEW_YORK_TZ).tz_localize(None)
+    trading_date = local_close.normalize()
     return (trading_date.year * 100 + trading_date.month).to_numpy(dtype=int)
 
 
