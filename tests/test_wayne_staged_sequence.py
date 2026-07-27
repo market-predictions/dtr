@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import numpy as np
 import pandas as pd
 
 from dtr_lab.strategies.wayne_direction import build_staged_monthly_sequence
