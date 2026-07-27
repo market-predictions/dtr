@@ -1,16 +1,6 @@
 name: Wayne Replication Panel Qualification
 
 on:
-  pull_request:
-    paths:
-      - "src/dtr_lab/strategies/wayne_direction/data.py"
-      - "src/dtr_lab/strategies/wayne_direction/replication_panel.py"
-      - "src/dtr_lab/strategies/wayne_direction/__init__.py"
-      - "scripts/qualify_wayne_replication_pair.py"
-      - "scripts/aggregate_wayne_replication_panel.py"
-      - "tests/test_wayne_replication_panel.py"
-      - "strategies/wayne_direction/INDEPENDENT_FX_REPLICATION_PREREGISTRATION_V0_8.md"
-      - ".github/workflows/wayne-replication-panel-qualification.yml"
   workflow_dispatch:
 
 permissions:
