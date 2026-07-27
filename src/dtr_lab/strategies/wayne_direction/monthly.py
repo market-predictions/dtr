@@ -114,6 +114,8 @@ def build_monthly_reach_ledger(
     if not daily.index.equals(context.index):
         raise ValueError("monthly context index must match daily bars")
 
+    direction = structure_ledger[["confirmed_direction"]].copy()
+    direction["direction_at_open"] = direction["confirmed_direction"].shift(1)
     joined = daily.join(
         context[
             [
@@ -130,20 +132,20 @@ def build_monthly_reach_ledger(
                 "S2",
             ]
         ]
-    ).join(structure_ledger[["confirmed_direction"]])
+    ).join(direction)
 
     rows: list[dict[str, Any]] = []
     for month_id, month in joined.groupby("month_id", sort=True):
         first = month.iloc[0]
-        direction = str(first["confirmed_direction"])
+        direction_at_open = str(first["direction_at_open"])
         location = str(first["month_open_location"])
-        if direction == "BULL" and location == "BUY_ZONE":
+        if direction_at_open == "BULL" and location == "BUY_ZONE":
             side = "BULL"
             targets = ("M4", "R2")
             path_values = month["high"].to_numpy(dtype=float)
             invalid = month["confirmed_direction"].ne("BULL").to_numpy(dtype=bool)
             comparator = np.greater_equal
-        elif direction == "BEAR" and location == "SELL_ZONE":
+        elif direction_at_open == "BEAR" and location == "SELL_ZONE":
             side = "BEAR"
             targets = ("M1", "S2")
             path_values = month["low"].to_numpy(dtype=float)
@@ -164,6 +166,7 @@ def build_monthly_reach_ledger(
                     "month_id": int(month_id),
                     "month_start_timestamp": month.index[0],
                     "side": side,
+                    "direction_at_open": direction_at_open,
                     "month_open": float(first["month_open"]),
                     "month_open_location": location,
                     "target_name": target_name,
