@@ -20,6 +20,7 @@ from .monthly import (
     build_monthly_reach_ledger,
     traditional_levels,
 )
+from .staged_sequence import build_staged_monthly_sequence
 from .structure import build_structure_ledger
 from .structure_common import average_true_range, confirmed_swings
 
@@ -37,6 +38,7 @@ __all__ = [
     "build_monthly_reach_ledger",
     "build_new_york_daily_bars",
     "build_new_york_h4_bars",
+    "build_staged_monthly_sequence",
     "build_structure_ledger",
     "classify_d1_relation",
     "classify_h4_relation",
