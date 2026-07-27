@@ -4,7 +4,7 @@ Updated: 2026-07-27
 
 ## Current state
 
-`PHASE_D_COMPLETE_SAMPLE_FAIL_DAY10_REPLICATION_CANDIDATE`
+`PHASE_E_PANEL_PREREGISTERED_DATA_QUALIFICATION_NEXT`
 
 ## Phase A — Direction contract
 
@@ -77,68 +77,116 @@ Primary record: `STAGED_MONTHLY_SEQUENCE_DECISION_V0_7.md`.
 
 ## Phase E — Independent day-10 replication
 
-Status: `NEXT_VALID_RESEARCH_PATH_DATA_QUALIFICATION_REQUIRED`
+Status: `PANEL_PREREGISTERED_DATA_QUALIFICATION_NEXT`
+
+Primary record: `INDEPENDENT_FX_REPLICATION_PREREGISTRATION_V0_8.md`.
+
+Frozen scope:
 
 - qualify an independent broader panel of liquid FX pairs before opening outcomes;
-- freeze pair inclusion using liquidity, source completeness and quote-quality rules rather than performance;
+- use the preregistered 22-pair candidate inventory;
+- admit pairs only through annual file completeness, timestamp integrity, BID/ASK alignment, quote validity, temporal coverage, spread plausibility and activity gates;
+- freeze the admitted-panel manifest and source checksums before generating Wayne outcomes;
 - reuse the exact close-in-zone, H4 structure, EMA health and day-10 definitions;
 - retain conservative and stretch targets unchanged;
-- preserve instrument-month clustering and the existing sample/effect gates;
+- preserve instrument-month clustering and complete bull/bear treatment bundles;
 - treat current six-pair results as development evidence only;
 - preserve 2022–2025 as locked chronological confirmation, not sample rescue.
 
 No new pair outcome may be viewed until the expanded-panel manifest and data-quality gate are frozen.
 
-## Phase F — Seasonality
+The next operational steps are:
 
-Status: `OUTCOME_INTEGRATION_BLOCKED_BY_TECHNICAL_REPLICATION`
+1. identify or acquire 2015–2021 Dukascopy BID/ASK M1 files for the frozen candidate inventory;
+2. build a source-only qualification runner and manifest;
+3. freeze admitted and excluded pairs with reasons and checksums;
+4. run the unchanged replication only on the frozen admitted panel;
+5. apply the preregistered sample, effect, breadth and leave-one-pair-out gates;
+6. commission an independent no-panel-shopping audit.
 
-Engineering contract may proceed:
+## Phase F — Minimal external context
 
-- expanding-window month-of-year prior;
-- week-of-month and turn-of-month states;
-- prior years only;
-- supportive, neutral or opposing relationship.
+Status: `BLOCKED_BY_TECHNICAL_REPLICATION`
 
-Seasonality outcome integration remains blocked until the technical replication passes.
+Only if Phase E passes, introduce two simple external variables in sequence.
 
-## Phase G — Macro and regime qualification
+### F1 — Two-year nominal yield differential
 
-Status: `DATA_CONTRACT_ENGINEERING_ALLOWED_OUTCOMES_BLOCKED`
+- base-currency two-year yield minus quote-currency two-year yield;
+- current differential plus frozen 20-day change;
+- optionally retain a predeclared 60-day stability diagnostic without optimization;
+- classify as supports base, supports quote, neutral or conflicted;
+- test independently before combining with another context layer.
 
-- point-in-time rate and policy expectations;
-- inflation and growth-surprise differentials;
-- real-yield or rate-market differential;
-- volatility, efficiency and risk regime;
-- explicit release timestamps and revision treatment;
-- reject any series that cannot be reconstructed as known contemporaneously.
+### F2 — Simple VIX risk regime
 
-Data qualification can proceed independently. Directional outcome testing cannot.
+- use VIX only in the first risk-regime version;
+- use expanding historical percentiles and recent change;
+- classify as risk-on, neutral, risk-off or volatility shock;
+- test independently from yields;
+- do not build a broad stress-index or cross-asset model in this phase.
 
-## Phase H — Direction triage atlas
+No full macro-release database, economic-surprise model, real-yield model or term-structure model is authorized here.
+
+## Phase G — Simple permission triage
 
 Status: `BLOCKED`
 
-Candidate permission stack:
+Only if at least one Phase F layer adds stable information without collapsing sample:
 
-- strategic direction from independently qualified macro, regime, seasonality and D1 context;
-- monthly pivot location;
-- staged H4 structure and MA health;
-- otherwise abstain.
+- technical sequence complete;
+- yield state supportive or neutral;
+- risk state compatible or neutral;
+- otherwise classify as conflicted or abstain.
 
-No weighted-score optimization in the first atlas.
+Initial outputs:
+
+- `PERMITTED`;
+- `CONFLICTED`;
+- `ABSTAIN`.
+
+No weighted-score optimization in the first triage model.
+
+## Phase H — Deferred research
+
+Status: `DEFERRED_NOT_ON_CRITICAL_PATH`
+
+Explicitly postponed:
+
+- expanding-window seasonality;
+- week-of-month and turn-of-month models;
+- CPI, employment, GDP and retail-release vintages;
+- historical consensus-surprise databases;
+- central-bank language models;
+- real-yield differentials;
+- 10-year yield and curve-slope models;
+- OFR, NFCI, credit, funding and multi-index risk composites.
+
+Seasonality may be revisited only after the dataset materially expands and the technical sequence passes independent replication. A cheap descriptive month-of-year table is not an authorized decision layer.
 
 ## Phase I — Conditional reach and execution
 
 Status: `NOT_AUTHORIZED`
 
-Only after independent technical replication and direction-layer attribution:
+Only after independent technical replication and minimal direction-layer attribution:
 
 - locked historical confirmation;
 - bounded entry triggers;
 - BID/ASK fills and costs;
 - no partial exits, runners or continuous threshold search;
 - no Pine, alerts, sizing, paper trading or deployment.
+
+## Stop rules
+
+Stop this direction-context programme when:
+
+- the independent technical replication fails effect or breadth;
+- the sequence remains below the frozen sample gates on the qualified panel;
+- fewer than four independent pairs pass source qualification;
+- simple yield and VIX layers add no stable information or destroy sample;
+- results depend on one pair or one exceptional crisis period.
+
+Do not rescue a failed phase through looser technical definitions, post-outcome panel changes, seasonality, extra indicators or consumption of the 2022–2025 holdout.
 
 ## Archived work
 
