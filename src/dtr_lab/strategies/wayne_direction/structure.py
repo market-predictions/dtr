@@ -161,10 +161,18 @@ def build_structure_ledger(
                 and float(bar["low"]) <= bull.neckline_value + band
                 and float(bar["high"]) >= bull.neckline_value - band
             )
+            if (
+                bull.state == CandidateState.BOS
+                and bull.bos_pos is not None
+                and position > bull.bos_pos
+                and not bull_retest
+            ):
+                bull.bos_extreme = max(bull.bos_extreme, float(bar["high"]))
             if bull_retest:
                 bull.state = CandidateState.RETEST
                 bull.retest_pos = position
                 events.append("BULL_RETEST")
+
             bear_retest = (
                 bear.state == CandidateState.BOS
                 and bear.bos_pos is not None
@@ -172,6 +180,13 @@ def build_structure_ledger(
                 and float(bar["low"]) <= bear.neckline_value + band
                 and float(bar["high"]) >= bear.neckline_value - band
             )
+            if (
+                bear.state == CandidateState.BOS
+                and bear.bos_pos is not None
+                and position > bear.bos_pos
+                and not bear_retest
+            ):
+                bear.bos_extreme = min(bear.bos_extreme, float(bar["low"]))
             if bear_retest:
                 bear.state = CandidateState.RETEST
                 bear.retest_pos = position
