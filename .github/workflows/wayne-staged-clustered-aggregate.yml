@@ -1,12 +1,6 @@
 name: Wayne Staged Clustered Aggregate
 
 on:
-  pull_request:
-    paths:
-      - "src/dtr_lab/strategies/wayne_direction/cluster_stats.py"
-      - "scripts/aggregate_wayne_staged_sequence_clustered.py"
-      - "tests/test_wayne_staged_cluster_stats.py"
-      - ".github/workflows/wayne-staged-clustered-aggregate.yml"
   workflow_dispatch:
 
 permissions:
