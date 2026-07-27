@@ -69,6 +69,22 @@ def _read_nonempty_csv(paths: list[Path]) -> pd.DataFrame:
     return pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
 
 
+def _coerce_bool(series: pd.Series) -> pd.Series:
+    if pd.api.types.is_bool_dtype(series):
+        return series.astype(bool)
+    mapped = series.astype(str).str.strip().str.lower().map(
+        {
+            "true": True,
+            "false": False,
+            "1": True,
+            "0": False,
+        }
+    )
+    if mapped.isna().any():
+        raise ValueError("reach ledger contains invalid Boolean values")
+    return mapped.astype(bool)
+
+
 def _event_counts(structure: pd.DataFrame) -> dict[str, int]:
     counter: Counter[str] = Counter()
     for value in structure["events"].fillna(""):
@@ -145,7 +161,8 @@ def _markdown(
             "",
             "This is a structural sample-sufficiency census. Monthly reach is descriptive and "
             "does not authorize entries, stops, sizing or deployment. Macro, regime and "
-            "seasonality attribution remains unopened until their causal data contracts are frozen.",
+            "seasonality attribution remains unopened until their causal data contracts "
+            "are frozen.",
             "",
         ]
     )
@@ -194,9 +211,9 @@ def main() -> None:
     if reach_ledger.empty:
         reach_summary = pd.DataFrame()
     else:
-        reach_ledger["reached_before_invalidation"] = reach_ledger[
-            "reached_before_invalidation"
-        ].astype(bool)
+        reach_ledger["reached_before_invalidation"] = _coerce_bool(
+            reach_ledger["reached_before_invalidation"]
+        )
         reach_summary = (
             reach_ledger.groupby(["side", "target_name"], sort=True)
             .agg(
@@ -247,9 +264,18 @@ def main() -> None:
     args.out.mkdir(parents=True, exist_ok=True)
     pair_summary.to_csv(args.out / "wayne_direction_pair_census.csv", index=False)
     health.to_csv(args.out / "wayne_direction_confirmation_health.csv", index=False)
-    reach_summary.to_csv(args.out / "wayne_direction_monthly_reach_summary.csv", index=False)
-    structure.to_csv(args.out / "wayne_direction_pooled_structure_ledger.csv", index=False)
-    reach_ledger.to_csv(args.out / "wayne_direction_pooled_monthly_reach.csv", index=False)
+    reach_summary.to_csv(
+        args.out / "wayne_direction_monthly_reach_summary.csv",
+        index=False,
+    )
+    structure.to_csv(
+        args.out / "wayne_direction_pooled_structure_ledger.csv",
+        index=False,
+    )
+    reach_ledger.to_csv(
+        args.out / "wayne_direction_pooled_monthly_reach.csv",
+        index=False,
+    )
     safe = _json_safe(decision)
     (args.out / "wayne_direction_census_decision.json").write_text(
         json.dumps(safe, indent=2, sort_keys=True) + "\n",
