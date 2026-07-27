@@ -50,7 +50,7 @@ def _bull_sequence() -> pd.DataFrame:
         36: 98.0,
         37: 100.0,
         38: 102.0,
-        39: 101.0,
+        39: 103.0,
         40: 100.5,
         41: 99.8,
         42: 98.5,
@@ -120,22 +120,27 @@ def test_swing_is_observed_only_after_right_side_closes() -> None:
     assert low["observed_timestamp"] == frame.index[4]
 
 
-def test_bull_trend_requires_full_sequence_and_is_not_backdated() -> None:
-    ledger, _swings = build_structure_ledger(_bull_sequence())
+def test_bull_trend_requires_full_impulse_break_and_is_not_backdated() -> None:
+    frame = _bull_sequence()
+    ledger, _swings = build_structure_ledger(frame)
     bos_timestamp = ledger.index[ledger["events"].str.contains("BULL_BOS")][0]
     confirm_timestamp = ledger.index[
         ledger["events"].str.contains("BULL_TREND_CONFIRMED")
     ][0]
     assert ledger.loc[bos_timestamp, "confirmed_direction"] == "NONE"
-    assert confirm_timestamp > bos_timestamp
+    assert ledger.loc[frame.index[46], "confirmed_direction"] == "NONE"
+    assert confirm_timestamp == frame.index[47]
     assert ledger.loc[confirm_timestamp, "confirmed_direction"] == "BULL"
     before = ledger.loc[ledger.index < confirm_timestamp, "confirmed_direction"]
     assert not before.eq("BULL").any()
 
 
 def test_bear_sequence_is_exact_mirror() -> None:
-    ledger, _swings = build_structure_ledger(_bear_sequence())
+    frame = _bear_sequence()
+    ledger, _swings = build_structure_ledger(frame)
     confirm = ledger.index[ledger["events"].str.contains("BEAR_TREND_CONFIRMED")][0]
+    assert ledger.loc[frame.index[46], "confirmed_direction"] == "NONE"
+    assert confirm == frame.index[47]
     assert ledger.loc[confirm, "confirmed_direction"] == "BEAR"
     assert ledger["events"].str.contains("BEAR_DOUBLE_TOP").any()
     assert ledger["events"].str.contains("BEAR_BOS").any()
