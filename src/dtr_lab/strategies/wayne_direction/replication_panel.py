@@ -49,6 +49,20 @@ def _quantile(series: pd.Series, probability: float) -> float:
     return float(series.quantile(probability))
 
 
+def annual_spread_quantiles(
+    active_spread_pips: pd.Series,
+    year: int,
+) -> dict[str, float]:
+    if not isinstance(active_spread_pips.index, pd.DatetimeIndex):
+        raise ValueError("spread series must use a DatetimeIndex")
+    annual = active_spread_pips.loc[active_spread_pips.index.year == year]
+    return {
+        "spread_median_pips": _quantile(annual, 0.50),
+        "spread_p95_pips": _quantile(annual, 0.95),
+        "spread_p99_pips": _quantile(annual, 0.99),
+    }
+
+
 def _invalid_ohlc_rows(quotes: pd.DataFrame, side: str) -> int:
     active = quotes[f"is_active_quote_{side}"].eq(1)
     high = quotes[f"high_{side}"].astype(float)
@@ -142,9 +156,7 @@ def build_pair_quality_summary(
                 "source_minutes": int(mask.sum()),
                 "active_minutes": int(both_active.loc[mask].sum()),
                 "active_fraction": float(both_active.loc[mask].mean()),
-                "spread_median_pips": _quantile(active_spread_pips.loc[mask], 0.50),
-                "spread_p95_pips": _quantile(active_spread_pips.loc[mask], 0.95),
-                "spread_p99_pips": _quantile(active_spread_pips.loc[mask], 0.99),
+                **annual_spread_quantiles(active_spread_pips, year),
             }
         )
 
