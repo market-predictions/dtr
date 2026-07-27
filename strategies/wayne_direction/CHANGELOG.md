@@ -1,5 +1,36 @@
 # Wayne Direction-First Framework — Changelog
 
+## v0.8.0 — 2026-07-27
+
+### Changed
+
+- froze the independent FX replication candidate universe before outcomes;
+- defined binding annual file, timestamp, BID/ASK alignment, quote-validity, temporal-coverage, spread and activity gates;
+- required a committed admitted/excluded panel manifest with source checksums before sequence generation;
+- froze independent sample, effect, breadth, concentration and leave-one-pair-out criteria;
+- separated the independent-panel estimate from the six-pair development estimate;
+- simplified the conditional-layer roadmap to two-year nominal yield differential followed by a VIX-only risk regime;
+- explicitly deferred seasonality, full macro-release vintages, real yields, curve models and multi-index stress composites.
+
+### Reason
+
+The day-10 result is too under-sampled to justify a large conditional-data programme. The next decision must establish whether the unchanged technical sequence replicates cross-sectionally. Pair selection and data inclusion therefore need to be frozen before any new Wayne outcomes are visible.
+
+### Known limitations
+
+- the frozen 22-pair candidate inventory has not yet been source-qualified;
+- the existing qualified-source workflow is confirmed only for the six development pairs;
+- no independent-pair Wayne outcomes are authorized or available;
+- 2022–2025 remain locked;
+- external yield and VIX outcome testing remains blocked by technical replication.
+
+### Next
+
+- locate or acquire 2015–2021 Dukascopy BID/ASK M1 files for the frozen candidate universe;
+- implement and run the source-only qualification manifest;
+- freeze the admitted panel before generating sequence outcomes;
+- run the exact day-10 replication and independent audit.
+
 ## v0.7.0 — 2026-07-27
 
 ### Changed
