@@ -23,19 +23,29 @@ Replicate the frozen Stage-1 Large Quarter Point distinctiveness test on EUR/USD
 - Matching strata: year, direction, whole/half-100 roundness, four-hour UTC session.
 - Uncertainty: year-preserving weekly block bootstrap.
 
+## Implementation contract
+
+The frozen GBP/USD engine itself is not generalized or rewritten. Instead, each source quote is deterministically normalized so one source pip equals `0.0001` in the existing engine:
+
+- EUR/USD scale: `1.0`;
+- USD/JPY scale: `0.01`.
+
+This preserves every signal, event, reset, matching and bootstrap code path used for GBP/USD and removes implementation drift as a replication confound.
+
 ## Acceptance gates
 
 1. Acquisition and audit complete for both bid and ask.
-2. Generic engine reproduces the GBP/USD contract without changing its semantics.
-3. EUR/USD and USD/JPY run with pair-appropriate pip size and unchanged pip-domain thresholds.
+2. No change to the frozen Stage-1 engine.
+3. Synthetic tests prove EUR/USD identity scaling and USD/JPY pip-equivalent scaling.
 4. Report development, validation and combined estimates separately.
 5. No strategy optimization or holdout opening.
 
 ## Deliverables
 
-- generic Dukascopy bid/ask downloader;
-- pair-aware Stage-1 engine and runner;
-- synthetic JPY scaling and backward-compatibility tests;
+- aligned Dukascopy bid/ask downloader with source audit manifests;
+- deterministic pip-domain normalization adapter;
+- unchanged frozen Stage-1 runner;
+- synthetic EUR/USD and USD/JPY normalization tests;
 - GitHub Actions replication workflow;
 - compact pair result artifacts;
 - cross-pair research report and roadmap decision.
