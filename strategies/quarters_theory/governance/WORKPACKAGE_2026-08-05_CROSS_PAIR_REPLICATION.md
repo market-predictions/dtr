@@ -23,9 +23,21 @@ Replicate the frozen Stage-1 Large Quarter Point distinctiveness test on EUR/USD
 - Matching strata: year, direction, whole/half-100 roundness, four-hour UTC session.
 - Uncertainty: year-preserving weekly block bootstrap.
 
+## Source contract
+
+Reuse the already qualified Stacey Burke ten-pair Dukascopy universe from workflow run `30129064261`. The EURUSD and USDJPY artifacts contain annual BID and ASK M1 files for 2015–2025 plus 2026 YTD and are retained through 2026-10-22.
+
+The workflow must:
+
+1. restore the retained artifact rather than download Dukascopy again;
+2. validate every annual raw-source SHA256 against its embedded audit;
+3. process only 2015–2021;
+4. leave 2022–2025 and 2026 YTD unopened for this hypothesis;
+5. fail closed if the retained source cannot be authenticated.
+
 ## Implementation contract
 
-The frozen GBP/USD engine itself is not generalized or rewritten. Instead, each source quote is deterministically normalized so one source pip equals `0.0001` in the existing engine:
+The frozen GBP/USD engine itself is not generalized or rewritten. A deterministic adapter converts the retained source schema and normalizes each quote so one source pip equals `0.0001` in the existing engine:
 
 - EUR/USD scale: `1.0`;
 - USD/JPY scale: `0.01`.
@@ -34,18 +46,19 @@ This preserves every signal, event, reset, matching and bootstrap code path used
 
 ## Acceptance gates
 
-1. Acquisition and audit complete for both bid and ask.
-2. No change to the frozen Stage-1 engine.
-3. Synthetic tests prove EUR/USD identity scaling and USD/JPY pip-equivalent scaling.
-4. Report development, validation and combined estimates separately.
-5. No strategy optimization or holdout opening.
+1. Retained source restored and authenticated for both bid and ask.
+2. No Dukascopy reacquisition in the normal replication path.
+3. No change to the frozen Stage-1 engine.
+4. Tests prove EUR/USD identity scaling and USD/JPY pip-equivalent scaling.
+5. Report development, validation and combined estimates separately.
+6. No strategy optimization or holdout opening.
 
 ## Deliverables
 
-- aligned Dukascopy bid/ask downloader with source audit manifests;
-- deterministic pip-domain normalization adapter;
+- authenticated retained-source restoration workflow;
+- checksum-preserving schema and pip-domain normalization adapter;
 - unchanged frozen Stage-1 runner;
-- synthetic EUR/USD and USD/JPY normalization tests;
-- GitHub Actions replication workflow;
+- EUR/USD and USD/JPY normalization tests;
 - compact pair result artifacts;
-- cross-pair research report and roadmap decision.
+- cross-pair research report and roadmap decision;
+- durable-cache governance follow-up before source-artifact expiry.
