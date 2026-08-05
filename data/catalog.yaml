@@ -1,4 +1,22 @@
 datasets:
+  dukascopy_fx_m1_bid_ask_2015_2025_2026_ytd:
+    status: canonical_private_cache
+    priority: cache_first_mandatory
+    registry: data/private_market_data_cache_registry.json
+    runbook: docs/PERMANENT_MARKET_DATA_CACHE.md
+    provider: Dukascopy
+    storage_provider: Google Drive
+    private_dataset_folder_id: 160qGdjm9Gi6pr05nRHuUXaTZc9EgJOOU
+    private_dataset_folder_url: https://drive.google.com/drive/folders/160qGdjm9Gi6pr05nRHuUXaTZc9EgJOOU
+    timeframe: M1
+    sides: [BID, ASK]
+    timezone: UTC
+    pairs: [EURUSD, GBPUSD, USDCHF, AUDUSD, NZDUSD, USDCAD, USDJPY, EURJPY, GBPJPY, EURGBP]
+    complete_years: [2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025]
+    ytd_end_exclusive: "2026-07-24"
+    acquisition_policy: reuse_registered_cache_before_any_download
+    raw_data_in_git: prohibited
+
   nq_futures_1m_2022_2025:
     status: provisional
     source_platform: Kaggle

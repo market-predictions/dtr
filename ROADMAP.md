@@ -1,5 +1,20 @@
 # DTR Optimization Lab Roadmap
 
+## Priority 0 — Permanent private market-data cache
+
+Status: **active and mandatory**
+
+- [x] Create canonical private Drive hierarchy for historic Dukascopy sources.
+- [x] Preserve exact source archives for ten FX pairs.
+- [x] Register archive and part SHA-256 values.
+- [x] Add root cache-first controls and a deterministic restore utility.
+- [x] Complete a real EURUSD reconstruction and extraction drill.
+- [ ] Add a second encrypted off-provider mirror.
+- [ ] Add periodic integrity and permission audits.
+- [ ] Register incremental partitions after 2026-07-24 without mutating frozen history.
+
+Canonical folder ID: `160qGdjm9Gi6pr05nRHuUXaTZc9EgJOOU`.
+
 ## Phase 0 — Data and execution validity
 
 Status: **active; deployment-blocking**
