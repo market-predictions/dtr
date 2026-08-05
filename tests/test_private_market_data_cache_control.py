@@ -1,3 +1,4 @@
+# ruff: noqa: I001
 from __future__ import annotations
 
 import json
@@ -7,7 +8,18 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 REGISTRY = ROOT / "data" / "private_market_data_cache_registry.json"
-EXPECTED_PAIRS = {"EURUSD", "GBPUSD", "USDCHF", "AUDUSD", "NZDUSD", "USDCAD", "USDJPY", "EURJPY", "GBPJPY", "EURGBP"}
+EXPECTED_PAIRS = {
+    "EURUSD",
+    "GBPUSD",
+    "USDCHF",
+    "AUDUSD",
+    "NZDUSD",
+    "USDCAD",
+    "USDJPY",
+    "EURJPY",
+    "GBPJPY",
+    "EURGBP",
+}
 CONTROL_MARKER = "CACHE-FIRST CONTROL"
 CANONICAL_FOLDER_ID = "160qGdjm9Gi6pr05nRHuUXaTZc9EgJOOU"
 DUKASCOPY_ENDPOINT_TOKENS = ("datafeed.dukascopy.com", "dukascopy-node")
@@ -23,22 +35,33 @@ def test_private_cache_registry_is_complete_and_active() -> None:
         assert entry["archive_size_bytes"] > 100_000_000
         assert re.fullmatch(r"[0-9a-f]{64}", entry["archive_sha256"])
         assert 2 <= len(entry["parts"]) <= 3
-        assert sum(part["size_bytes"] for part in entry["parts"]) == entry["archive_size_bytes"]
+        assert sum(part["size_bytes"] for part in entry["parts"]) == entry[
+            "archive_size_bytes"
+        ]
         for part in entry["parts"]:
             assert part["file"].startswith(pair)
             assert re.fullmatch(r"[0-9a-f]{64}", part["sha256"])
 
 
 def test_cache_first_control_is_prominent() -> None:
-    for relative_path in ("AGENTS.md", "REPOSITORY_CONTROL.md", "README.md", "STATUS.md"):
-        first_lines = "\n".join((ROOT / relative_path).read_text(encoding="utf-8").splitlines()[:30])
+    control_files = (
+        "AGENTS.md",
+        "REPOSITORY_CONTROL.md",
+        "README.md",
+        "STATUS.md",
+    )
+    for relative_path in control_files:
+        text = (ROOT / relative_path).read_text(encoding="utf-8")
+        first_lines = "\n".join(text.splitlines()[:30])
         assert CONTROL_MARKER in first_lines, relative_path
         assert CANONICAL_FOLDER_ID in first_lines, relative_path
 
 
 def test_catalog_and_runbook_point_to_registry() -> None:
     catalog = (ROOT / "data" / "catalog.yaml").read_text(encoding="utf-8")
-    runbook = (ROOT / "docs" / "PERMANENT_MARKET_DATA_CACHE.md").read_text(encoding="utf-8")
+    runbook = (
+        ROOT / "docs" / "PERMANENT_MARKET_DATA_CACHE.md"
+    ).read_text(encoding="utf-8")
     assert "private_market_data_cache_registry.json" in catalog
     assert CANONICAL_FOLDER_ID in catalog
     assert CANONICAL_FOLDER_ID in runbook
@@ -54,6 +77,12 @@ def test_new_dukascopy_downloaders_require_explicit_cache_miss_authorization() -
         text = path.read_text(encoding="utf-8")
         if not any(token in text for token in DUKASCOPY_ENDPOINT_TOKENS):
             continue
-        if "CACHE_MISS_AUTHORIZATION:" not in text or "private_market_data_cache_registry.json" not in text:
+        has_authorization = "CACHE_MISS_AUTHORIZATION:" in text
+        references_registry = "private_market_data_cache_registry.json" in text
+        if not has_authorization or not references_registry:
             violations.append(str(path.relative_to(ROOT)))
-    assert not violations, "Dukascopy acquisition code bypasses permanent cache control: " + ", ".join(violations)
+    message = (
+        "Dukascopy acquisition code bypasses permanent cache control: "
+        + ", ".join(violations)
+    )
+    assert not violations, message
