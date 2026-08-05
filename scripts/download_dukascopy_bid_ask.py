@@ -18,12 +18,21 @@ from pathlib import Path
 
 _RECORD = struct.Struct(">5if")
 _ENGINE_INSTRUMENT_ID = "gbpusd"
+_TRANSIENT_HTTP_CODES = {408, 425, 429, 500, 502, 503, 504}
 
 
 @dataclass(frozen=True)
 class SideResult:
     rows: list[tuple[int, float, float, float, float, float]]
     status: str
+
+
+@dataclass(frozen=True)
+class DayResult:
+    day: dt.date
+    bid_rows: list[tuple[int, float, float, float, float, float]]
+    ask_rows: list[tuple[int, float, float, float, float, float]]
+    audit: dict
 
 
 def _sha256(path: Path, chunk_size: int = 1024 * 1024) -> str:
@@ -60,6 +69,17 @@ def _decode_payload(
     return rows
 
 
+def _retry_delay(error: urllib.error.HTTPError | None, attempt: int, base: float) -> float:
+    if error is not None:
+        retry_after = error.headers.get("Retry-After")
+        if retry_after:
+            try:
+                return min(180.0, max(base, float(retry_after)))
+            except ValueError:
+                pass
+    return min(120.0, base * (2**attempt)) + random.uniform(0.0, 1.0)
+
+
 def _fetch_side(
     day: dt.date,
     *,
@@ -67,6 +87,8 @@ def _fetch_side(
     side: str,
     divisor: float,
     normalization_scale: float,
+    attempts: int,
+    base_delay: float,
 ) -> SideResult:
     url = (
         f"https://datafeed.dukascopy.com/datafeed/{symbol}/"
@@ -74,11 +96,12 @@ def _fetch_side(
         f"{side}_candles_min_1.bi5"
     )
     last_error = "unknown"
-    for attempt in range(8):
+    for attempt in range(attempts):
+        http_error: urllib.error.HTTPError | None = None
         try:
             request = urllib.request.Request(
                 url,
-                headers={"User-Agent": "DTR-quarters-replication/1.0"},
+                headers={"User-Agent": "DTR-quarters-replication/1.1"},
             )
             with urllib.request.urlopen(request, timeout=90) as response:
                 raw = response.read()
@@ -91,10 +114,14 @@ def _fetch_side(
         except urllib.error.HTTPError as error:
             if error.code == 404:
                 return SideResult([], "404")
+            if error.code not in _TRANSIENT_HTTP_CODES:
+                raise
+            http_error = error
             last_error = f"HTTP {error.code}"
         except Exception as error:  # noqa: BLE001
             last_error = repr(error)
-        time.sleep(min(60, 2 * (2**attempt)) + random.random())
+        if attempt + 1 < attempts:
+            time.sleep(_retry_delay(http_error, attempt, base_delay))
     raise RuntimeError(f"{day} {side}: {last_error}")
 
 
@@ -104,18 +131,17 @@ def _fetch_day(
     symbol: str,
     divisor: float,
     normalization_scale: float,
-) -> tuple[
-    dt.date,
-    list[tuple[int, float, float, float, float, float]],
-    list[tuple[int, float, float, float, float, float]],
-    dict,
-]:
+    attempts: int,
+    base_delay: float,
+) -> DayResult:
     bid = _fetch_side(
         day,
         symbol=symbol,
         side="BID",
         divisor=divisor,
         normalization_scale=normalization_scale,
+        attempts=attempts,
+        base_delay=base_delay,
     )
     ask = _fetch_side(
         day,
@@ -123,17 +149,24 @@ def _fetch_day(
         side="ASK",
         divisor=divisor,
         normalization_scale=normalization_scale,
+        attempts=attempts,
+        base_delay=base_delay,
     )
     if not bid.rows and not ask.rows:
         status = bid.status if bid.status == ask.status else "closed"
-        return day, [], [], {
-            "status": status,
-            "bid_rows": 0,
-            "ask_rows": 0,
-            "common_rows": 0,
-            "bid_only": 0,
-            "ask_only": 0,
-        }
+        return DayResult(
+            day,
+            [],
+            [],
+            {
+                "status": status,
+                "bid_rows": 0,
+                "ask_rows": 0,
+                "common_rows": 0,
+                "bid_only": 0,
+                "ask_only": 0,
+            },
+        )
     if not bid.rows or not ask.rows:
         raise RuntimeError(
             f"One-sided data on {day}: bid={bid.status}/{len(bid.rows)}, "
@@ -143,16 +176,115 @@ def _fetch_day(
     bid_by_timestamp = {row[0]: row for row in bid.rows}
     ask_by_timestamp = {row[0]: row for row in ask.rows}
     common_timestamps = sorted(bid_by_timestamp.keys() & ask_by_timestamp.keys())
-    return day, [bid_by_timestamp[t] for t in common_timestamps], [
-        ask_by_timestamp[t] for t in common_timestamps
-    ], {
-        "status": "ok",
-        "bid_rows": len(bid.rows),
-        "ask_rows": len(ask.rows),
-        "common_rows": len(common_timestamps),
-        "bid_only": len(bid_by_timestamp.keys() - ask_by_timestamp.keys()),
-        "ask_only": len(ask_by_timestamp.keys() - bid_by_timestamp.keys()),
-    }
+    return DayResult(
+        day,
+        [bid_by_timestamp[timestamp] for timestamp in common_timestamps],
+        [ask_by_timestamp[timestamp] for timestamp in common_timestamps],
+        {
+            "status": "ok",
+            "bid_rows": len(bid.rows),
+            "ask_rows": len(ask.rows),
+            "common_rows": len(common_timestamps),
+            "bid_only": len(bid_by_timestamp.keys() - ask_by_timestamp.keys()),
+            "ask_only": len(ask_by_timestamp.keys() - bid_by_timestamp.keys()),
+        },
+    )
+
+
+def _fetch_batch(
+    days: list[dt.date],
+    *,
+    symbol: str,
+    divisor: float,
+    normalization_scale: float,
+    workers: int,
+    attempts: int,
+    base_delay: float,
+) -> tuple[dict[dt.date, DayResult], dict[dt.date, str]]:
+    results: dict[dt.date, DayResult] = {}
+    failures: dict[dt.date, str] = {}
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        futures = {
+            pool.submit(
+                _fetch_day,
+                day,
+                symbol=symbol,
+                divisor=divisor,
+                normalization_scale=normalization_scale,
+                attempts=attempts,
+                base_delay=base_delay,
+            ): day
+            for day in days
+        }
+        for completed, future in enumerate(as_completed(futures), start=1):
+            day = futures[future]
+            try:
+                results[day] = future.result()
+            except Exception as error:  # noqa: BLE001
+                failures[day] = repr(error)
+            if completed % 50 == 0 or completed == len(days):
+                print(
+                    f"  batch {completed}/{len(days)} days; "
+                    f"failures={len(failures)}",
+                    flush=True,
+                )
+    return results, failures
+
+
+def _acquire_year(
+    days: list[dt.date],
+    *,
+    symbol: str,
+    divisor: float,
+    normalization_scale: float,
+    workers: int,
+) -> dict[dt.date, DayResult]:
+    results: dict[dt.date, DayResult] = {}
+    remaining = list(days)
+    retry_plan = (
+        (workers, 3, 1.5),
+        (min(2, workers), 8, 5.0),
+        (1, 12, 10.0),
+    )
+    last_failures: dict[dt.date, str] = {}
+    for pass_number, (pass_workers, attempts, base_delay) in enumerate(
+        retry_plan, start=1
+    ):
+        if not remaining:
+            break
+        print(
+            f"  acquisition pass {pass_number}: days={len(remaining)}, "
+            f"workers={pass_workers}, attempts={attempts}",
+            flush=True,
+        )
+        pass_results, failures = _fetch_batch(
+            remaining,
+            symbol=symbol,
+            divisor=divisor,
+            normalization_scale=normalization_scale,
+            workers=pass_workers,
+            attempts=attempts,
+            base_delay=base_delay,
+        )
+        results.update(pass_results)
+        last_failures = failures
+        remaining = sorted(failures)
+        if remaining and pass_number < len(retry_plan):
+            print(
+                f"  cooling down before retrying {len(remaining)} failed days",
+                flush=True,
+            )
+            time.sleep(30.0)
+    if remaining:
+        sample = {day.isoformat(): last_failures[day] for day in remaining[:10]}
+        raise RuntimeError(
+            f"Persistent source failures for {len(remaining)} days: {sample}"
+        )
+    if len(results) != len(days):
+        raise RuntimeError(
+            f"Acquisition completeness failure: {len(results)} of {len(days)} days"
+        )
+    return results
 
 
 def _write_side(
@@ -196,7 +328,7 @@ def main() -> None:
     parser.add_argument("--output-directory", type=Path, required=True)
     parser.add_argument("--divisor", type=float, required=True)
     parser.add_argument("--normalization-scale", type=float, required=True)
-    parser.add_argument("--workers", type=int, default=24)
+    parser.add_argument("--workers", type=int, default=8)
     args = parser.parse_args()
 
     if args.end_year < args.start_year:
@@ -215,33 +347,17 @@ def main() -> None:
         start = dt.date(year, 1, 1)
         end = dt.date(year + 1, 1, 1)
         days = [start + dt.timedelta(days=offset) for offset in range((end - start).days)]
-        bid_rows_by_day: dict[
-            dt.date, list[tuple[int, float, float, float, float, float]]
-        ] = {}
-        ask_rows_by_day: dict[
-            dt.date, list[tuple[int, float, float, float, float, float]]
-        ] = {}
-        day_audits: dict[dt.date, dict] = {}
-
         print(f"Downloading {args.pair_label} {year}", flush=True)
-        with ThreadPoolExecutor(max_workers=args.workers) as pool:
-            futures = {
-                pool.submit(
-                    _fetch_day,
-                    day,
-                    symbol=args.symbol,
-                    divisor=args.divisor,
-                    normalization_scale=args.normalization_scale,
-                ): day
-                for day in days
-            }
-            for completed, future in enumerate(as_completed(futures), start=1):
-                day, bid_rows, ask_rows, audit = future.result()
-                bid_rows_by_day[day] = bid_rows
-                ask_rows_by_day[day] = ask_rows
-                day_audits[day] = audit
-                if completed % 50 == 0 or completed == len(days):
-                    print(f"  {completed}/{len(days)} days", flush=True)
+        day_results = _acquire_year(
+            days,
+            symbol=args.symbol,
+            divisor=args.divisor,
+            normalization_scale=args.normalization_scale,
+            workers=args.workers,
+        )
+        bid_rows_by_day = {day: result.bid_rows for day, result in day_results.items()}
+        ask_rows_by_day = {day: result.ask_rows for day, result in day_results.items()}
+        day_audits = {day: result.audit for day, result in day_results.items()}
 
         bid_only = sum(audit["bid_only"] for audit in day_audits.values())
         ask_only = sum(audit["ask_only"] for audit in day_audits.values())
@@ -269,6 +385,14 @@ def main() -> None:
             "source_quote_normalization_scale": args.normalization_scale,
             "engine_instrument_id": _ENGINE_INSTRUMENT_ID,
             "analysis_pip_size": 0.0001,
+            "acquisition_policy": {
+                "initial_workers": args.workers,
+                "retry_passes": [
+                    {"workers": args.workers, "attempts": 3},
+                    {"workers": min(2, args.workers), "attempts": 8},
+                    {"workers": 1, "attempts": 12},
+                ],
+            },
             "source_status": statuses,
             "source_unmatched": {"bid_only": bid_only, "ask_only": ask_only},
             "sides": {
