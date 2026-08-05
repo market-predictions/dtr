@@ -1,0 +1,127 @@
+name: Quarters Theory Cross-Pair Replication
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - agent/quarters-theory-crosspair
+    paths:
+      - .github/workflows/quarters-crosspair-replication.yml
+      - scripts/prepare_quarters_from_stacey_source.py
+      - scripts/run_quarters_crosspair.py
+      - scripts/aggregate_quarters_crosspair.py
+      - tests/test_quarters_crosspair.py
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: quarters-theory-crosspair-retained-source-v1
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: Analyze ${{ matrix.pair }} from retained source
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {pair: EURUSD, symbol: EURUSD, normalization_scale: "1.0"}
+          - {pair: USDJPY, symbol: USDJPY, normalization_scale: "0.01"}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install project
+        run: python -m pip install -e ".[research]"
+
+      - name: Restore retained ten-pair Dukascopy source artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: stacey-burke-fx-source-${{ matrix.pair }}
+          path: retained_source/${{ matrix.pair }}
+          github-token: ${{ github.token }}
+          repository: market-predictions/dtr
+          run-id: "30129064261"
+
+      - name: Verify and adapt retained source to frozen engine schema
+        run: |
+          python scripts/prepare_quarters_from_stacey_source.py \
+            --source-dir "retained_source/${{ matrix.pair }}" \
+            --output-dir "data/quarters/${{ matrix.pair }}" \
+            --source-symbol "${{ matrix.symbol }}" \
+            --normalization-scale "${{ matrix.normalization_scale }}" \
+            --start-year 2015 \
+            --end-year 2021
+
+      - name: Run unchanged frozen Stage-1 engine
+        run: |
+          python scripts/run_quarters_crosspair.py \
+            --data-dir "data/quarters/${{ matrix.pair }}" \
+            --output-dir "replication_results/${{ matrix.pair }}" \
+            --pair-label "${{ matrix.pair }}" \
+            --source-symbol "${{ matrix.symbol }}" \
+            --normalization-scale "${{ matrix.normalization_scale }}" \
+            --bootstrap 5000
+
+      - name: Upload compact pair evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: quarters-stage1-${{ matrix.pair }}
+          path: |
+            replication_results/${{ matrix.pair }}/key_results.json
+            replication_results/${{ matrix.pair }}/canonical_60m_bootstrap.csv
+            replication_results/${{ matrix.pair }}/phase_effects.csv
+            replication_results/${{ matrix.pair }}/canonical_phase_rank.csv
+            replication_results/${{ matrix.pair }}/group_summary.csv
+            replication_results/${{ matrix.pair }}/data_audit.csv
+            replication_results/${{ matrix.pair }}/data_audit.json
+            data/quarters/${{ matrix.pair }}/*_audit.json
+          if-no-files-found: error
+          retention-days: 14
+
+  aggregate:
+    name: Aggregate frozen decision gate
+    needs: analyze
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Download pair evidence
+        uses: actions/download-artifact@v4
+        with:
+          pattern: quarters-stage1-*
+          path: artifacts
+
+      - name: Apply preregistered decision rule
+        run: |
+          python scripts/aggregate_quarters_crosspair.py \
+            --artifacts-dir artifacts \
+            --output-dir cross_pair_summary
+          cat cross_pair_summary/CROSS_PAIR_REPLICATION_REPORT.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload combined report
+        uses: actions/upload-artifact@v4
+        with:
+          name: quarters-stage1-cross-pair-summary
+          path: cross_pair_summary
+          if-no-files-found: error
+          retention-days: 30
