@@ -42,7 +42,8 @@ def pair_entry(registry: dict[str, Any], pair: str) -> dict[str, Any]:
         return registry["pairs"][normalized]
     except KeyError as error:
         available = ", ".join(sorted(registry["pairs"]))
-        raise CacheRestoreError(f"Pair {normalized!r} is not registered. Available: {available}") from error
+        message = f"Pair {normalized!r} is not registered. Available: {available}"
+        raise CacheRestoreError(message) from error
 
 
 def verify_parts(parts_dir: Path, entry: dict[str, Any]) -> list[Path]:
@@ -62,12 +63,20 @@ def verify_parts(parts_dir: Path, entry: dict[str, Any]) -> list[Path]:
     return verified
 
 
-def reconstruct_archive(parts_dir: Path, output: Path, entry: dict[str, Any], *, overwrite: bool = False) -> Path:
+def reconstruct_archive(
+    parts_dir: Path,
+    output: Path,
+    entry: dict[str, Any],
+    *,
+    overwrite: bool = False,
+) -> Path:
     parts = verify_parts(parts_dir, entry)
     if output.exists() and not overwrite:
         if sha256_file(output) == entry["archive_sha256"]:
             return output
-        raise CacheRestoreError(f"Output already exists with a different checksum: {output}")
+        raise CacheRestoreError(
+            f"Output already exists with a different checksum: {output}"
+        )
     output.parent.mkdir(parents=True, exist_ok=True)
     temporary = output.with_suffix(output.suffix + ".partial")
     if temporary.exists():
@@ -110,8 +119,14 @@ def extract_verified_archive(archive: Path, extract_to: Path) -> None:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Verify and restore a registered private Dukascopy archive.")
-    parser.add_argument("--registry", type=Path, default=Path("data/private_market_data_cache_registry.json"))
+    parser = argparse.ArgumentParser(
+        description="Verify and restore a registered private Dukascopy archive."
+    )
+    parser.add_argument(
+        "--registry",
+        type=Path,
+        default=Path("data/private_market_data_cache_registry.json"),
+    )
     parser.add_argument("--pair", required=True)
     parser.add_argument("--parts-dir", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
@@ -126,7 +141,12 @@ def main() -> int:
         print(f"Verified {len(parts)} parts for {args.pair.upper()}.")
         if args.verify_parts_only:
             return 0
-        archive = reconstruct_archive(args.parts_dir, args.output, entry, overwrite=args.overwrite)
+        archive = reconstruct_archive(
+            args.parts_dir,
+            args.output,
+            entry,
+            overwrite=args.overwrite,
+        )
         print(f"Restored and verified archive: {archive}")
         print(f"SHA-256: {entry['archive_sha256']}")
         if args.extract_to is not None:
