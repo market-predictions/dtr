@@ -15,23 +15,81 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: quarters-theory-crosspair-v3
+  cancel-in-progress: true
+
 jobs:
-  replicate:
-    name: Replicate ${{ matrix.pair }}
+  acquire:
+    name: Acquire ${{ matrix.pair }} ${{ matrix.year }}
     runs-on: ubuntu-latest
-    timeout-minutes: 240
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        include:
+          - {pair: EURUSD, symbol: EURUSD, divisor: "100000", normalization_scale: "1.0", year: 2015}
+          - {pair: EURUSD, symbol: EURUSD, divisor: "100000", normalization_scale: "1.0", year: 2016}
+          - {pair: EURUSD, symbol: EURUSD, divisor: "100000", normalization_scale: "1.0", year: 2017}
+          - {pair: EURUSD, symbol: EURUSD, divisor: "100000", normalization_scale: "1.0", year: 2018}
+          - {pair: EURUSD, symbol: EURUSD, divisor: "100000", normalization_scale: "1.0", year: 2019}
+          - {pair: EURUSD, symbol: EURUSD, divisor: "100000", normalization_scale: "1.0", year: 2020}
+          - {pair: EURUSD, symbol: EURUSD, divisor: "100000", normalization_scale: "1.0", year: 2021}
+          - {pair: USDJPY, symbol: USDJPY, divisor: "1000", normalization_scale: "0.01", year: 2015}
+          - {pair: USDJPY, symbol: USDJPY, divisor: "1000", normalization_scale: "0.01", year: 2016}
+          - {pair: USDJPY, symbol: USDJPY, divisor: "1000", normalization_scale: "0.01", year: 2017}
+          - {pair: USDJPY, symbol: USDJPY, divisor: "1000", normalization_scale: "0.01", year: 2018}
+          - {pair: USDJPY, symbol: USDJPY, divisor: "1000", normalization_scale: "0.01", year: 2019}
+          - {pair: USDJPY, symbol: USDJPY, divisor: "1000", normalization_scale: "0.01", year: 2020}
+          - {pair: USDJPY, symbol: USDJPY, divisor: "1000", normalization_scale: "0.01", year: 2021}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Restore qualified pair-year cache
+        uses: actions/cache@v4
+        with:
+          path: data/quarters/${{ matrix.pair }}/${{ matrix.year }}
+          key: dukascopy-${{ matrix.pair }}-${{ matrix.year }}-normalized-v3
+
+      - name: Acquire and audit pair-year bid/ask
+        run: |
+          python scripts/download_dukascopy_bid_ask.py \
+            --symbol "${{ matrix.symbol }}" \
+            --pair-label "${{ matrix.pair }}" \
+            --start-year "${{ matrix.year }}" \
+            --end-year "${{ matrix.year }}" \
+            --divisor "${{ matrix.divisor }}" \
+            --normalization-scale "${{ matrix.normalization_scale }}" \
+            --workers 4 \
+            --output-directory "data/quarters/${{ matrix.pair }}/${{ matrix.year }}"
+
+      - name: Upload qualified pair-year source
+        uses: actions/upload-artifact@v4
+        with:
+          name: quarters-source-${{ matrix.pair }}-${{ matrix.year }}
+          path: data/quarters/${{ matrix.pair }}/${{ matrix.year }}
+          if-no-files-found: error
+          retention-days: 3
+
+  analyze:
+    name: Analyze ${{ matrix.pair }}
+    needs: acquire
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
     strategy:
       fail-fast: false
       matrix:
         include:
-          - pair: EURUSD
-            symbol: EURUSD
-            divisor: "100000"
-            normalization_scale: "1.0"
-          - pair: USDJPY
-            symbol: USDJPY
-            divisor: "1000"
-            normalization_scale: "0.01"
+          - {pair: EURUSD, symbol: EURUSD, normalization_scale: "1.0"}
+          - {pair: USDJPY, symbol: USDJPY, normalization_scale: "0.01"}
 
     steps:
       - name: Checkout
@@ -46,23 +104,12 @@ jobs:
       - name: Install project
         run: python -m pip install -e ".[research]"
 
-      - name: Restore qualified Dukascopy cache
-        uses: actions/cache@v4
+      - name: Download qualified pair-year sources
+        uses: actions/download-artifact@v4
         with:
+          pattern: quarters-source-${{ matrix.pair }}-*
           path: data/quarters/${{ matrix.pair }}
-          key: dukascopy-m1-bid-ask-${{ matrix.pair }}-2015-2021-normalized-v2
-
-      - name: Acquire aligned and pip-normalized Dukascopy bid/ask
-        run: |
-          python scripts/download_dukascopy_bid_ask.py \
-            --symbol "${{ matrix.symbol }}" \
-            --pair-label "${{ matrix.pair }}" \
-            --start-year 2015 \
-            --end-year 2021 \
-            --divisor "${{ matrix.divisor }}" \
-            --normalization-scale "${{ matrix.normalization_scale }}" \
-            --workers 8 \
-            --output-directory "data/quarters/${{ matrix.pair }}"
+          merge-multiple: true
 
       - name: Run unchanged frozen Stage-1 engine
         run: |
@@ -92,7 +139,7 @@ jobs:
 
   aggregate:
     name: Aggregate frozen decision gate
-    needs: replicate
+    needs: analyze
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
