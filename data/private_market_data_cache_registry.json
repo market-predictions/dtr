@@ -1,0 +1,59 @@
+{
+  "registry_version": "1.0.0",
+  "status": "CANONICAL_ACTIVE_PRIVATE_CACHE",
+  "last_verified_utc": "2026-08-05T23:18:00Z",
+  "canonical_storage": {
+    "provider": "Google Drive",
+    "privacy_status_at_verification": "private_not_shared_owner_only",
+    "dataset_folder_id": "160qGdjm9Gi6pr05nRHuUXaTZc9EgJOOU",
+    "dataset_folder_url": "https://drive.google.com/drive/folders/160qGdjm9Gi6pr05nRHuUXaTZc9EgJOOU",
+    "source_archives_folder_id": "1X0Kajgx9yQ9-RAvRVDV5WDCaxVMXo858",
+    "qualification_and_manifests_folder_id": "1E1lLqClQrhVWIox_1Q1ddLl0jxNPcXxE",
+    "registry_drive_file_id": "1tPyV1fF3gyfIycEucXr08n6vNPFj_LiS",
+    "runbook_drive_file_id": "1g61lkYMurmHB-RWKPnk9MTRFkgurv_Ry"
+  },
+  "dataset_contract": {
+    "name": "Dukascopy ten-pair FX M1 BID/ASK universe",
+    "pairs": ["EURUSD", "GBPUSD", "USDCHF", "AUDUSD", "NZDUSD", "USDCAD", "USDJPY", "EURJPY", "GBPJPY", "EURGBP"],
+    "timeframe": "M1",
+    "sides": ["BID", "ASK"],
+    "complete_years": [2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],
+    "ytd_partition": {"start_inclusive": "2026-01-01", "end_exclusive": "2026-07-24", "monitoring_only": true},
+    "timezone": "UTC",
+    "canonical_columns": ["timestamp_utc", "open", "high", "low", "close", "volume", "is_active_quote"],
+    "source_workflow": {
+      "repository": "market-predictions/dtr",
+      "workflow_run_id": 30129064261,
+      "source_commit": "b5525473a8203db61341d88584c6473c7dd03a22",
+      "source_universe_decision_artifact_id": 8610484731,
+      "source_universe_decision_drive_file_id": "1URET_JXejHIsJdEqf6c588Ans_vmSDdW"
+    }
+  },
+  "mandatory_cache_first_rules": [
+    "Read AGENTS.md, REPOSITORY_CONTROL.md and this registry before any historic FX acquisition.",
+    "Search and checksum-verify the canonical private cache first.",
+    "Do not redownload a registered full historic pair or year.",
+    "Acquire only a confirmed missing/corrupt partition, an explicitly requested incremental extension, or a materially different construction.",
+    "Record CACHE_MISS_AUTHORIZATION before acquisition.",
+    "Never commit raw market data to the public repository.",
+    "Register and verify every new qualified partition before deleting temporary copies."
+  ],
+  "pairs": {
+    "EURUSD": {"drive_folder_id":"19hFngxVMjR-9_yEGIAV_ikdYoMGFskxb","source_github_actions_artifact_id":8610419247,"archive_reconstructed_name":"EURUSD_DUKASCOPY_M1_BID_ASK_2015_2025_2026YTD.zip","archive_size_bytes":130281961,"archive_sha256":"ce7a82e08c1088e003917b1cd4908f194c9fa8245d30ef61fa5401f7571a042d","parts":[{"file":"EURUSD_DUKASCOPY_M1_BID_ASK_2015_2025_2026YTD.zip.part-000","size_bytes":67108864,"sha256":"d122a39c236e2c190e0951e54141d507f93ce02e187cf93f7ae8f9236d2af2c8"},{"file":"EURUSD_DUKASCOPY_M1_BID_ASK_2015_2025_2026YTD.zip.part-001","size_bytes":63173097,"sha256":"8c2e00c8cfedd735621807b52843de096e91692936888cadceb3423c15f0556c"}]},
+    "GBPUSD": {"drive_folder_id":"16ezXGt9wV9S_A1v_k1l0LzdfvsV-JQsH","source_github_actions_artifact_id":8610413359,"archive_reconstructed_name":"GBPUSD_DUKASCOPY_M1_BID_ASK_2015_2025_2026YTD.zip","archive_size_bytes":131848967,"archive_sha256":"61cd11f9ef53493579bf42f9e97eba493e2fb8e3141bbb6747021fdb25f166b5","parts":[{"file":"GBPUSD_DUKASCOPY_M1_BID_ASK_2015_2025_2026YTD.zip.part-000","size_bytes":67108864,"sha256":"8fbe2c5ca61bb534ce7c7610def0c0e823a3fced9165d67d06485dd32d4c285e"},{"file":"GBPUSD_DUKASCOPY_M1_BID_ASK_2015_2025_2026YTD.zip.part-001","size_bytes":64740103,"sha256":"9a75fb6540c12a35918983b131204dedc0da92db52d04e015ce73c75628169cf"}]},
+    "USDCHF": {"drive_folder_id":"1eLLr1T3kIdO_5arNgmjOB2XzRG7_yj53","source_github_actions_artifact_id":8610417621,"archive_reconstructed_name":"USDCHF_DUKASCOPY_M1_BID_ASK_2015_2025_2026YTD.zip","archive_size_bytes":124761797,"archive_sha256":"f7bc2e426de0d5c30f40232f37ee8ca64e8d58c0df231ea9379cf2e4c0b4af32","parts":[{"file":"USDCHF_DUKASCOPY_M1_BID_ASK_2015_2025_2026YTD.zip.part-000","size_bytes":67108864,"sha256":"f30980a8b68703169ad08989df5d71f4f155c00a585e076416ae7c10dc552b9a"},{"file":"USDCHF_DUKASCOPY_M1_BID_ASK_2015_2025_2026YTD.zip.part-001","size_bytes":57652933,"sha256":"958ed50d45e00808c17c23addafd5d6f43cdd79ead3cf8ba60e8beb86a4066cd"}]},
+    "AUDUSD": {"drive_folder_id":"1ewtz6YAneEJc8fLs3OTdpsh_mSl8QUC7","source_github_actions_artifact_id":8610419141,"archive_reconstructed_name":"AUDUSD_DUKASCOPY_M1_BID_ASK_2015_2025_2026YTD.zip","archive_size_bytes":126944550,"archive_sha256":"b2fe775a930c0e558831eb986c1ec71409c3e7bb605324a81f7b52b5dca54e94","parts":[{"file":"AUDUSD_DUKASCOPY_M1_BID_ASK_2015_2025_2026YTD.zip.part-000","size_bytes":67108864,"sha256":"94f5f495c427a6f7bc19886905be73f7676b37ab01292d45e02b8755508b326f"},{"file":"AUDUSD_DUKASCOPY_M1_BID_ASK_2015_2025_2026YTD.zip.part-001","size_bytes":59835686,"sha256":"4338832e92d03a7930f834a05ae804b0e6153f58e5f9ece5c3b5d26e34ae826c"}]},
+    "NZDUSD": {"drive_folder_id":"1c1mX-J8eflpXHZi3aggI02nZ0XLwcj9f","source_github_actions_artifact_id":8610444103,"archive_reconstructed_name":"NZDUSD_DUKASCOPY_M1_BID_ASK_2015_2025_2026YTD.zip","archive_size_bytes":123100934,"archive_sha256":"003f2b868a9b54d736f5fea5c8fe6066cfe9c04ec7f79e0e090dadc7de1018dc","parts":[{"file":"NZDUSD_DUKASCOPY_M1_BID_ASK_2015_2025_2026YTD.zip.part-000","size_bytes":67108864,"sha256":"23f2709618cf608a2a1fb52ab1b13e55f9fa14544dfe185a909b36bba4c819f2"},{"file":"NZDUSD_DUKASCOPY_M1_BID_ASK_2015_2025_2026YTD.zip.part-001","size_bytes":55992070,"sha256":"e61b938c0ab7739760b68ae6b9fe7c239916bd7295d77251361224cdb25417f6"}]},
+    "USDCAD": {"drive_folder_id":"1Of0mTJBl4faUfNjqCj7AoHE-hi56XtcT","source_github_actions_artifact_id":8610448103,"archive_reconstructed_name":"USDCAD_DUKASCOPY_M1_BID_ASK_2015_2025_2026YTD.zip","archive_size_bytes":128296020,"archive_sha256":"4a1ee8fb470f871137e5371ed161a67162e58e5537328305710991eb8ad055fd","parts":[{"file":"USDCAD_DUKASCOPY_M1_BID_ASK_2015_2025_2026YTD.zip.part-000","size_bytes":67108864,"sha256":"5e720ddaeba55211b98f83ea85368e5b7819acd9cdda009e313ba10df5147a21"},{"file":"USDCAD_DUKASCOPY_M1_BID_ASK_2015_2025_2026YTD.zip.part-001","size_bytes":61187156,"sha256":"a8453569aef0ff92f8cc68ba091f7f23802635c89159485f12f21c4be8639740"}]},
+    "USDJPY": {"drive_folder_id":"1dVxjcnXWt00ogdS_u1Der2ZE-jhF8-9M","source_github_actions_artifact_id":8610451958,"archive_reconstructed_name":"USDJPY_DUKASCOPY_M1_BID_ASK_2015_2025_2026YTD.zip","archive_size_bytes":131880355,"archive_sha256":"e918cc3d7859bd726b003b4958ad6c60c34af356b280f5400bf1e3379d93ea4e","parts":[{"file":"USDJPY_DUKASCOPY_M1_BID_ASK_2015_2025_2026YTD.zip.part-000","size_bytes":67108864,"sha256":"08b4d78f0fa9dffb09fd635a9014a55bc1f090230053cb4ddb2fa3d54271ecbf"},{"file":"USDJPY_DUKASCOPY_M1_BID_ASK_2015_2025_2026YTD.zip.part-001","size_bytes":64771491,"sha256":"24cd844724d07076da86280551489de3a36a8d4cfe56dfa2275d6a3684c57de8"}]},
+    "EURJPY": {"drive_folder_id":"1ARAJKiR7igOvYtHUC0uGJg-ZO7rLeHAK","source_github_actions_artifact_id":8610452935,"archive_reconstructed_name":"EURJPY_DUKASCOPY_M1_BID_ASK_2015_2025_2026YTD.zip","archive_size_bytes":134980638,"archive_sha256":"d8005c697f4bc727de66693a1a0d106f3332007f832bc578a13e836269359189","parts":[{"file":"EURJPY_DUKASCOPY_M1_BID_ASK_2015_2025_2026YTD.zip.part-000","size_bytes":67108864,"sha256":"a20a891ab08efddb15315e1fe15cedfbc4114357825487be50fb4dd20ba00009"},{"file":"EURJPY_DUKASCOPY_M1_BID_ASK_2015_2025_2026YTD.zip.part-001","size_bytes":67108864,"sha256":"7a9fe64154099b341bd7974d5149a5e28a7f9794d463eb8884a1a29b821ad983"},{"file":"EURJPY_DUKASCOPY_M1_BID_ASK_2015_2025_2026YTD.zip.part-002","size_bytes":762910,"sha256":"716a87fc39ea5f2e6be52d8967906af315f8a0fe431fc888bbeed9ab6eeb497e"}]},
+    "GBPJPY": {"drive_folder_id":"1Oeo4nN_sSjS67fZWI-_6-ZcxCeROVanb","source_github_actions_artifact_id":8610473902,"archive_reconstructed_name":"GBPJPY_DUKASCOPY_M1_BID_ASK_2015_2025_2026YTD.zip","archive_size_bytes":137795466,"archive_sha256":"068d4ce85d86ce7c5295f994671ec9fcc41def3a47048d301b5958dded3b7fae","parts":[{"file":"GBPJPY_DUKASCOPY_M1_BID_ASK_2015_2025_2026YTD.zip.part-000","size_bytes":67108864,"sha256":"9f471912cd7d911c974649d8cb586f89c7276f7485a3bea2b4c09c5f8d142b5f"},{"file":"GBPJPY_DUKASCOPY_M1_BID_ASK_2015_2025_2026YTD.zip.part-001","size_bytes":67108864,"sha256":"fb85513cdfc6b9c53956c1fac009546dd8f879bb7d0b8ea6ea99518b5d996c7c"},{"file":"GBPJPY_DUKASCOPY_M1_BID_ASK_2015_2025_2026YTD.zip.part-002","size_bytes":3577738,"sha256":"7ac260e445c1a68704bd65d11861ee715aa9c30e58c270a32022578caaabc86c"}]},
+    "EURGBP": {"drive_folder_id":"1frq9FYxa1uynTqZEN0_Xfd9dHPA8cyHC","source_github_actions_artifact_id":8610475207,"archive_reconstructed_name":"EURGBP_DUKASCOPY_M1_BID_ASK_2015_2025_2026YTD.zip","archive_size_bytes":124122281,"archive_sha256":"011bd177685dd1376627ded88da9d9fb6b43927a435f20fca2ba8e3bd87347ec","parts":[{"file":"EURGBP_DUKASCOPY_M1_BID_ASK_2015_2025_2026YTD.zip.part-000","size_bytes":67108864,"sha256":"5976db5bf77d08f016d0044bc048476c23574d3b7d2506d4e5fd08ce106aa57e"},{"file":"EURGBP_DUKASCOPY_M1_BID_ASK_2015_2025_2026YTD.zip.part-001","size_bytes":57013417,"sha256":"01be4f19327be9a068f69111dfb21914c18189a356a014c628334613e16b62de"}]}
+  },
+  "verification_evidence": {
+    "ten_pair_folder_inventory_verified": true,
+    "privacy_verified_private_not_shared_owner_only": true,
+    "restore_drill": {"pair":"EURUSD","result":"PASS","reconstructed_archive_sha256":"ce7a82e08c1088e003917b1cd4908f194c9fa8245d30ef61fa5401f7571a042d","archive_extracted_safely":true},
+    "known_resilience_gap": "A second off-provider encrypted mirror is not yet configured."
+  }
+}

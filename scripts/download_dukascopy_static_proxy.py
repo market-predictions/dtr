@@ -14,6 +14,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 _RECORD = struct.Struct(">5if")
+_CACHE_REGISTRY = Path("data/private_market_data_cache_registry.json")
+_CACHE_MISS_TOKEN = "CACHE_MISS_AUTHORIZATION:CONFIRMED"
 
 
 def _fetch_day(
@@ -80,8 +82,23 @@ def main() -> None:
     parser.add_argument("--output-directory", type=Path, required=True)
     parser.add_argument("--divisor", type=float, default=1000.0)
     parser.add_argument("--workers", type=int, default=4)
+    parser.add_argument(
+        "--cache-miss-authorization",
+        help=(
+            "Required only after data/private_market_data_cache_registry.json "
+            "has been checked and a cache miss documented."
+        ),
+    )
     args = parser.parse_args()
 
+    if args.cache_miss_authorization != _CACHE_MISS_TOKEN:
+        raise SystemExit(
+            "Download blocked. Check data/private_market_data_cache_registry.json "
+            "first and pass --cache-miss-authorization "
+            f"{_CACHE_MISS_TOKEN!r} only after documenting the exception."
+        )
+    if not _CACHE_REGISTRY.exists():
+        raise SystemExit(f"Permanent cache registry not found: {_CACHE_REGISTRY}")
     if args.end <= args.start:
         raise ValueError("end must be after start")
     if args.divisor <= 0:

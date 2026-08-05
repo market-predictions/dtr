@@ -1,5 +1,17 @@
 # DTR Optimization Lab
 
+## CACHE-FIRST CONTROL — MANDATORY
+
+Before any strategy test or historic FX acquisition, read `AGENTS.md`, `REPOSITORY_CONTROL.md`, and `data/private_market_data_cache_registry.json`.
+
+Canonical private Drive dataset folder: `160qGdjm9Gi6pr05nRHuUXaTZc9EgJOOU`.
+
+It contains qualified Dukascopy M1 BID/ASK data for EURUSD, GBPUSD, USDCHF, AUDUSD, NZDUSD, USDCAD, USDJPY, EURJPY, GBPJPY and EURGBP: complete 2015–2025 plus 2026 YTD ending exclusive 2026-07-24.
+
+**Do not redownload registered historic data. Reuse and checksum-verify the permanent cache first.**
+
+See `docs/PERMANENT_MARKET_DATA_CACHE.md`.
+
 Python-first research and validation framework for the Daytrading Rauf strategy.
 
 ## Current decision

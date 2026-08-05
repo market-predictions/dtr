@@ -1,5 +1,15 @@
 # DTR Optimization Lab Status
 
+## CACHE-FIRST CONTROL — MANDATORY
+
+Status: `PERMANENT_PRIVATE_FX_CACHE_ACTIVE_AND_VERIFIED`
+
+Canonical dataset folder ID: `160qGdjm9Gi6pr05nRHuUXaTZc9EgJOOU`.
+
+The ten-pair Dukascopy M1 BID/ASK universe for 2015–2025 plus 2026 YTD is permanently stored, private, checksummed and registered. Any future strategy work must consult `data/private_market_data_cache_registry.json` and reuse this cache before acquisition.
+
+Full historic redownload of registered data is prohibited. See `REPOSITORY_CONTROL.md`.
+
 ## Current work package
 
 `DTR-NQ-WP-20260722-06 — Baseline validity reset`
@@ -43,6 +53,9 @@ Decision: `CONTINUE_RESEARCH_DO_NOT_DEPLOY`
 
 ## Reproducibility
 
+- permanent FX cache: ten pair folders present and private;
+- EURUSD real-archive restore drill: exact SHA-256 match and safe extraction;
+- local cache-control suite: 8 tests passed;
 - local suite: 75 tests passed;
 - baseline validity: 15/15 artifacts identical;
 - IFVG: 52/52;
