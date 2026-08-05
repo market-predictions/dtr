@@ -69,6 +69,10 @@ def main() -> None:
         json.dumps(summary, indent=2), encoding="utf-8"
     )
 
+    table_header = (
+        "| Pair | Events | LQP events | Dev 60m | Validation 60m | Combined 60m | "
+        "95% CI | Positive/stable |"
+    )
     lines = [
         "# Quarters Theory Cross-Pair Stage-1 Replication",
         "",
@@ -80,7 +84,7 @@ def main() -> None:
         "",
         "The 2022–2025 holdout remained unopened and no strategy optimization was performed.",
         "",
-        "| Pair | Events | LQP events | Dev 60m | Validation 60m | Combined 60m | 95% CI | Positive/stable |",
+        table_header,
         "|---|---:|---:|---:|---:|---:|---:|:---:|",
     ]
     for pair in sorted(pair_results):
