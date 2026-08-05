@@ -19,7 +19,7 @@ jobs:
   replicate:
     name: Replicate ${{ matrix.pair }}
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 240
     strategy:
       fail-fast: false
       matrix:
@@ -50,7 +50,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: data/quarters/${{ matrix.pair }}
-          key: dukascopy-m1-bid-ask-${{ matrix.pair }}-2015-2021-normalized-v1
+          key: dukascopy-m1-bid-ask-${{ matrix.pair }}-2015-2021-normalized-v2
 
       - name: Acquire aligned and pip-normalized Dukascopy bid/ask
         run: |
@@ -61,7 +61,7 @@ jobs:
             --end-year 2021 \
             --divisor "${{ matrix.divisor }}" \
             --normalization-scale "${{ matrix.normalization_scale }}" \
-            --workers 24 \
+            --workers 8 \
             --output-directory "data/quarters/${{ matrix.pair }}"
 
       - name: Run unchanged frozen Stage-1 engine
