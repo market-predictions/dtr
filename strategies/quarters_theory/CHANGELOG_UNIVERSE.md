@@ -1,5 +1,16 @@
 # Quarters Theory Universe Confirmation Changelog
 
+## v0.2.0 — 2026-08-06
+
+- Changed: completed the full ten-pair Stage-1 universe confirmation on the registered Dukascopy FX Cache.
+- Changed: froze `CONFIRM_GLOBAL_DEMOTION_NO_PAIR_EXCEPTIONS` as the binding decision.
+- Changed: recorded 47,278 eligible crossings, 9,480 canonical LQP crossings and zero positive/stable pairs.
+- Changed: added exact JPY write-and-reload normalization after detecting floating-point boundary drift in a direct in-memory shortcut.
+- Changed: added the compact result JSON, research report and independent arithmetic audit.
+- Reason: close the basic-principle question without retrospective rescue or strategy-level optimization.
+- Known limits: the result addresses distinct 60-minute continuation at canonical 250-pip levels versus matched round-number controls; it does not test every conceivable quarter-related mechanism.
+- Next: close the research line and redirect resources to independent strategy hypotheses with a stronger first-principles mechanism.
+
 ## v0.1.0 — 2026-08-06
 
 - Changed: opened `QT-WP-20260806-03` for a ten-pair Stage-1 universe confirmation.
