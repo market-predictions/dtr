@@ -2,23 +2,47 @@
 
 Date: 2026-08-06  
 Work package: `QT-WP-20260806-03`  
-State: `TEN_PAIR_CONFIRMATION_RUNNING`
+State: `COMPLETE_GLOBAL_DEMOTION_CONFIRMED`
 
-## Binding prior status
+## Binding decision
 
-`DEMOTE_CANONICAL_250_PIP_THEORY`
+`CONFIRM_GLOBAL_DEMOTION_NO_PAIR_EXCEPTIONS`
 
-GBPUSD failed Stage-1. EURUSD and USDJPY failed temporal stability. The ten-pair run cannot reverse this status retrospectively.
+The canonical 250-pip Large Quarter Point continuation hypothesis failed across the registered ten-pair Dukascopy FX Cache universe.
 
-## Current operation
+## Evidence
 
-- Run the unchanged Stage-1 engine across all ten pairs in the Dukascopy FX Cache.
-- Verify annual BID/ASK hashes before analysis.
-- Require exact GBPUSD parity with the frozen reference.
-- Process 2015–2021 only.
-- Keep 2022–2025 unopened.
-- Perform no strategy optimization.
+- 47,278 eligible round-level crossing events.
+- 9,480 canonical LQP events.
+- 0 / 10 positive-and-stable pairs.
+- 0 / 7 positive-and-stable pairs in the new confirmation panel.
+- Median combined canonical effect: -0.396 pips.
+- Four development-to-validation sign flips.
+- Annual BID/ASK hashes passed before analysis.
+- GBPUSD, EURUSD and USDJPY matched their frozen reference results.
+- Independent arithmetic audit: `PASS_PROCESS_AND_ARITHMETIC`.
 
-## Open question
+## Sample protection
 
-Do the seven additional pairs contain no positive/stable exceptions, one or two isolated exceptions, or an unexpected breadth anomaly requiring a new independent preregistration?
+- Development: 2015–2019.
+- Internal validation: 2020–2021.
+- 2022–2025 remained unopened.
+- No strategy optimization or P&L construction was performed.
+
+## Authorization boundary
+
+Closed and not authorized:
+
+- threshold, phase, reset, session, pair or year rescue;
+- pair shopping based on this result;
+- transition census;
+- entries, stops, targets, execution P&L or position management;
+- Pine, alerts, sizing, paper trading or deployment.
+
+A materially different quarter-level hypothesis would require a new first-principles mechanism, new controls and a new preregistration. It may not be presented as continuation of the failed canonical 250-pip theory.
+
+## Primary records
+
+- `reports/TEN_PAIR_UNIVERSE_CONFIRMATION_2026-08-06.md`
+- `results/2026-08-06/ten_pair_universe_summary.json`
+- `reviews/TEN_PAIR_UNIVERSE_ARITHMETIC_AUDIT_2026-08-06.json`
