@@ -1,0 +1,16 @@
+{
+  "programme": "QT-DESTINATION-EXHAUSTION-V1",
+  "decision": "REJECT_DESTINATION_EXHAUSTION_MECHANISM",
+  "assurance": "PASS",
+  "holdout_opened": false,
+  "files": {
+    "run_destination_exhaustion.py": {"bytes": 29521, "sha256": "a5c0db146e9e85a32b83a70cc68b6cf31102868e23bb1a302a16fb2db09e365d"},
+    "assure_destination_exhaustion.py": {"bytes": 8281, "sha256": "859a218176aa37fab18474840871c4505d16a7f7a3c496663fb7d45f79f0da7a"},
+    "destination_exhaustion_results.json": {"bytes": 28122, "sha256": "477e50e5230faaf7ca3ca59fdfdfd47adc185edf5b8a33dad38f67ce156cd15e"},
+    "a1_leg_endpoints.csv.gz": {"bytes": 7121259, "sha256": "eb377e805a052f02bc3c0932418a792c6a2fd13941ebd23aa7700e3c373d5d86"},
+    "a2_destination_events.csv.gz": {"bytes": 2401249, "sha256": "1c394b93cd64a68bddbc8b81b5cd41661fc4467fd1575edf9c4af6db88deeb83"},
+    "a3_arrival_events.csv.gz": {"bytes": 617975, "sha256": "e055f6ffde862c2d1556d8378ad7cf194ce0fc689a758d73e1b11e7a016ad815"},
+    "assurance.json": {"bytes": 3486, "sha256": "c52ab53477fff14c3c9b328a4673ce3a8ea5cddfe8c28f5e59430735ce1afc2d"},
+    "QUARTERS_THEORY_DESTINATION_EXHAUSTION_REPORT_2026-08-07.md": {"bytes": 7545, "sha256": "352ae8a565f9aa19b138bbf4c76a12ed28c6df9d6fa1d196cf0cce1bda16a087"}
+  }
+}

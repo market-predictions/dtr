@@ -1,0 +1,31 @@
+{
+  "assurance_role": "governance_release_assurance",
+  "candidate": "QT-DESTINATION-EXHAUSTION-V1",
+  "decision": "PASS",
+  "checks": [
+    {"check": "pairs_exact", "pass": true, "detail": null},
+    {"check": "years_2015_2021_only", "pass": true, "detail": null},
+    {"check": "holdout_absent", "pass": true, "detail": null},
+    {"check": "counts_match", "pass": true, "detail": {"legs": 272065, "a2_events": 47571, "a3_arrivals": 10901}},
+    {"check": "phase_domain", "pass": true, "detail": null},
+    {"check": "a3_is_target_subset", "pass": true, "detail": null},
+    {"check": "a1_score_formula", "pass": true, "detail": null},
+    {"check": "independent_points_match", "pass": true, "detail": {"A1_development_2015_2019": true, "A1_internal_validation_2020_2021": true, "A1_all_2015_2021": true, "A2_development_2015_2019": true, "A3_development_2015_2019": true, "A2_internal_validation_2020_2021": true, "A3_internal_validation_2020_2021": true, "A2_all_2015_2021": true, "A3_all_2015_2021": true}},
+    {"check": "all_70_source_partitions_hash_verified", "pass": true, "detail": 70},
+    {"check": "independent_bootstrap_all_span_zero", "pass": true, "detail": {"A1": {"draws": 2000, "ci_low": -0.004405607660666239, "ci_high": 0.004961191967673613, "p_two_sided": 0.987, "spans_zero": true}, "A2": {"draws": 2000, "ci_low": -0.030383218668631837, "ci_high": 0.025445012586344483, "p_two_sided": 0.836, "spans_zero": true}, "A3": {"draws": 2000, "ci_low": -0.0822510230036298, "ci_high": 0.0876532885339889, "p_two_sided": 0.952, "spans_zero": true}}},
+    {"check": "all_temporal_gates_fail", "pass": true, "detail": [true, true, true]},
+    {"check": "holm_no_primary_pass", "pass": true, "detail": null},
+    {"check": "binding_decision", "pass": true, "detail": "REJECT_DESTINATION_EXHAUSTION_MECHANISM"}
+  ],
+  "independent_bootstrap": {
+    "A1": {"draws": 2000, "ci_low": -0.004405607660666239, "ci_high": 0.004961191967673613, "p_two_sided": 0.987, "spans_zero": true},
+    "A2": {"draws": 2000, "ci_low": -0.030383218668631837, "ci_high": 0.025445012586344483, "p_two_sided": 0.836, "spans_zero": true},
+    "A3": {"draws": 2000, "ci_low": -0.0822510230036298, "ci_high": 0.0876532885339889, "p_two_sided": 0.952, "spans_zero": true}
+  },
+  "candidate_file_sha256": {
+    "destination_exhaustion_results.json": "477e50e5230faaf7ca3ca59fdfdfd47adc185edf5b8a33dad38f67ce156cd15e",
+    "a1_leg_endpoints.csv.gz": "eb377e805a052f02bc3c0932418a792c6a2fd13941ebd23aa7700e3c373d5d86",
+    "a2_destination_events.csv.gz": "1c394b93cd64a68bddbc8b81b5cd41661fc4467fd1575edf9c4af6db88deeb83",
+    "a3_arrival_events.csv.gz": "e055f6ffde862c2d1556d8378ad7cf194ce0fc689a758d73e1b11e7a016ad815"
+  }
+}
