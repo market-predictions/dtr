@@ -1,5 +1,33 @@
 # Changelog
 
+## v0.6.0 — 2026-08-07
+
+- Added a separately preregistered destination/exhaustion programme rather than modifying the failed continuation hypothesis.
+- Added independent H1 ATR directional-change terminal clustering across the registered ten-pair Dukascopy FX Cache.
+- Added a causal four-hour trend destination-completion study resolved on M1 BID/ASK midpoint data.
+- Added a post-arrival 25-pip reversal-before-25-pip-extension test.
+- Added native source-pip processing to avoid JPY quote-scale boundary drift.
+- Added pair-week bootstrap inference, temporal validation, pair breadth, leave-one-pair-out and Holm family correction.
+- Recorded 272,065 terminal legs, 47,571 destination episodes and 10,901 qualified arrivals.
+- Recorded that A1, A2 and A3 all failed temporal, interval and multiplicity gates.
+- Added independent assurance that reverified all 70 annual source partitions and independently recomputed the decision.
+- Closed the price-only Quarter Theory programme with decision `REJECT_DESTINATION_EXHAUSTION_MECHANISM`.
+- Known limitation: M1/H1 price data cannot test unobserved dealer inventory, option barriers or order-book liquidity.
+- Next: no further grid-threshold optimization; only a genuinely new externally informed mechanism may reopen Quarter-related research.
+
+## v0.5.0 — 2026-08-06
+
+- Expanded the frozen Stage-1 test to the complete ten-pair registered Dukascopy FX Cache.
+- Recorded 47,278 eligible crossings, 9,480 canonical LQP events and 0/10 positive-and-stable pairs.
+- Confirmed global demotion of the canonical 250-pip continuation theory without pair exceptions.
+- Preserved 2022–2025 as outcome-unopened holdout.
+
+## v0.4.0 — 2026-08-05
+
+- Restored retained EURUSD and USDJPY source artifacts instead of reacquiring history.
+- Added deterministic quote normalization and cross-pair replication.
+- Recorded that both pairs reversed from positive development to negative validation.
+
 ## v0.3.0 — 2026-08-05
 
 - Added the first GBP/USD Stage-1 distinctiveness study on 2015-2021 Dukascopy M1 bid/ask data.
