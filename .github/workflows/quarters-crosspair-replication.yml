@@ -1,36 +1,47 @@
-name: Quarters Theory Cross-Pair Replication
+name: Quarters Theory Ten-Pair Universe Confirmation
 
 on:
   workflow_dispatch:
   push:
     branches:
-      - agent/quarters-theory-crosspair
+      - agent/quarters-theory-universe
     paths:
       - .github/workflows/quarters-crosspair-replication.yml
       - scripts/prepare_quarters_from_stacey_source.py
       - scripts/run_quarters_crosspair.py
       - scripts/aggregate_quarters_crosspair.py
       - tests/test_quarters_crosspair.py
+      - tests/test_quarters_universe.py
+      - strategies/quarters_theory/docs/TEN_PAIR_UNIVERSE_PREREGISTRATION.md
 
 permissions:
   actions: read
   contents: read
 
 concurrency:
-  group: quarters-theory-crosspair-retained-source-v1
+  group: quarters-theory-ten-pair-universe-v1
   cancel-in-progress: true
 
 jobs:
   analyze:
-    name: Analyze ${{ matrix.pair }} from retained source
+    name: Analyze ${{ matrix.pair }} from registered cache source
     runs-on: ubuntu-latest
     timeout-minutes: 120
     strategy:
       fail-fast: false
+      max-parallel: 4
       matrix:
         include:
           - {pair: EURUSD, symbol: EURUSD, normalization_scale: "1.0"}
+          - {pair: GBPUSD, symbol: GBPUSD, normalization_scale: "1.0"}
+          - {pair: USDCHF, symbol: USDCHF, normalization_scale: "1.0"}
+          - {pair: AUDUSD, symbol: AUDUSD, normalization_scale: "1.0"}
+          - {pair: NZDUSD, symbol: NZDUSD, normalization_scale: "1.0"}
+          - {pair: USDCAD, symbol: USDCAD, normalization_scale: "1.0"}
           - {pair: USDJPY, symbol: USDJPY, normalization_scale: "0.01"}
+          - {pair: EURJPY, symbol: EURJPY, normalization_scale: "0.01"}
+          - {pair: GBPJPY, symbol: GBPJPY, normalization_scale: "0.01"}
+          - {pair: EURGBP, symbol: EURGBP, normalization_scale: "1.0"}
 
     steps:
       - name: Checkout
@@ -45,7 +56,7 @@ jobs:
       - name: Install project
         run: python -m pip install -e ".[research]"
 
-      - name: Restore retained ten-pair Dukascopy source artifact
+      - name: Restore registered Dukascopy FX Cache source artifact
         uses: actions/download-artifact@v4
         with:
           name: stacey-burke-fx-source-${{ matrix.pair }}
@@ -54,7 +65,7 @@ jobs:
           repository: market-predictions/dtr
           run-id: "30129064261"
 
-      - name: Verify and adapt retained source to frozen engine schema
+      - name: Verify source hashes and adapt to frozen engine schema
         run: |
           python scripts/prepare_quarters_from_stacey_source.py \
             --source-dir "retained_source/${{ matrix.pair }}" \
@@ -77,7 +88,7 @@ jobs:
       - name: Upload compact pair evidence
         uses: actions/upload-artifact@v4
         with:
-          name: quarters-stage1-${{ matrix.pair }}
+          name: quarters-stage1-universe-${{ matrix.pair }}
           path: |
             replication_results/${{ matrix.pair }}/key_results.json
             replication_results/${{ matrix.pair }}/canonical_60m_bootstrap.csv
@@ -88,10 +99,10 @@ jobs:
             replication_results/${{ matrix.pair }}/data_audit.json
             data/quarters/${{ matrix.pair }}/*_audit.json
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 30
 
   aggregate:
-    name: Aggregate frozen decision gate
+    name: Aggregate frozen ten-pair confirmation gate
     needs: analyze
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -108,20 +119,20 @@ jobs:
       - name: Download pair evidence
         uses: actions/download-artifact@v4
         with:
-          pattern: quarters-stage1-*
+          pattern: quarters-stage1-universe-*
           path: artifacts
 
-      - name: Apply preregistered decision rule
+      - name: Apply preregistered universe confirmation rule
         run: |
           python scripts/aggregate_quarters_crosspair.py \
             --artifacts-dir artifacts \
-            --output-dir cross_pair_summary
-          cat cross_pair_summary/CROSS_PAIR_REPLICATION_REPORT.md >> "$GITHUB_STEP_SUMMARY"
+            --output-dir universe_summary
+          cat universe_summary/QUARTERS_THEORY_UNIVERSE_REPORT.md >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Upload combined report
+      - name: Upload combined universe report
         uses: actions/upload-artifact@v4
         with:
-          name: quarters-stage1-cross-pair-summary
-          path: cross_pair_summary
+          name: quarters-stage1-ten-pair-universe-summary
+          path: universe_summary
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 90
