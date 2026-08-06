@@ -1,0 +1,65 @@
+{
+  "programme": "QT-DESTINATION-EXHAUSTION-V1",
+  "decision": "REJECT_DESTINATION_EXHAUSTION_MECHANISM",
+  "data": {
+    "pairs": ["EURUSD", "GBPUSD", "USDCHF", "AUDUSD", "NZDUSD", "USDCAD", "USDJPY", "EURJPY", "GBPJPY", "EURGBP"],
+    "years": [2015, 2021],
+    "holdout_opened": false,
+    "verified_source_partitions": 70
+  },
+  "counts": {"legs": 272065, "a2_events": 47571, "a3_arrivals": 10901},
+  "A1": {
+    "periods": {
+      "development_2015_2019": {"effect": -0.0005291415001806825, "n": 193710},
+      "internal_validation_2020_2021": {"effect": 0.0017803586242103248, "n": 78355},
+      "all_2015_2021": {"effect": 0.00013599691250252698, "n": 272065}
+    },
+    "combined_point": 0.00013599691250252698,
+    "ci_low": -0.004514738359221365,
+    "ci_high": 0.004970063577303311,
+    "bootstrap_draws": 5000,
+    "p_two_sided": 0.9428,
+    "holm_p": 1.0,
+    "pair_effects": {"AUDUSD": 0.0025656345552314344, "EURGBP": 0.007980165801503061, "EURJPY": 0.005991363799928031, "EURUSD": -0.01615428140324406, "GBPJPY": 0.0029743552540897385, "GBPUSD": -0.006966240526678404, "NZDUSD": 0.002555202846478529, "USDCAD": -0.002269998499174546, "USDCHF": 0.006208718626155878, "USDJPY": -0.002054378505841581},
+    "positive_pair_count": 6,
+    "leave_one_pair_out": {"EURUSD": 0.001894687544541956, "GBPUSD": 0.0008904647087285872, "USDCHF": -0.0005192002280408845, "AUDUSD": -0.00014777597162701344, "NZDUSD": -0.0001489330232787451, "USDCAD": 0.00039728946714314236, "USDJPY": 0.00038717448663531034, "EURJPY": -0.0005301402108279602, "GBPJPY": -0.00018405209083175185, "EURGBP": -0.0006862916292725714},
+    "gate_before_multiplicity": false,
+    "passes": false
+  },
+  "A2": {
+    "periods": {
+      "development_2015_2019": {"effect": 0.012758936330538964, "n_treated": 5142, "n_control": 9714, "n_strata": 3891},
+      "internal_validation_2020_2021": {"effect": -0.030446364816872584, "n_treated": 2048, "n_control": 3907, "n_strata": 1520},
+      "all_2015_2021": {"effect": 0.0004221723552323049, "n_treated": 7190, "n_control": 13621, "n_strata": 5411}
+    },
+    "combined_point": 0.0004221723552323049,
+    "ci_low": -0.028827046880262296,
+    "ci_high": 0.024432519663610486,
+    "bootstrap_draws": 5000,
+    "p_two_sided": 0.8784,
+    "holm_p": 1.0,
+    "pair_effects": {"AUDUSD": -0.022967901568003102, "EURGBP": -0.04768639363397165, "EURJPY": -0.024380253029002208, "EURUSD": 0.021781660348610177, "GBPJPY": 0.030796008990735146, "GBPUSD": -0.0012834318441057313, "NZDUSD": -0.04158865523612032, "USDCAD": 0.03361957754003725, "USDCHF": 0.05990272441247324, "USDJPY": 0.009051624516265622},
+    "positive_pair_count": 5,
+    "leave_one_pair_out": {"EURUSD": -0.001790565110656049, "GBPUSD": 0.0005829907195566705, "USDCHF": -0.004083781825633815, "AUDUSD": 0.0032105204354345596, "NZDUSD": 0.0013558900497883935, "USDCAD": -0.006039077859031246, "USDJPY": -0.0013243471837811743, "EURJPY": 0.005052547288471196, "GBPJPY": -0.00039885463471595143, "EURGBP": 0.007686554147117085},
+    "gate_before_multiplicity": false,
+    "passes": false
+  },
+  "A3": {
+    "periods": {
+      "development_2015_2019": {"effect": 0.026921597714411303, "n_treated": 560, "n_control": 760, "n_strata": 519},
+      "internal_validation_2020_2021": {"effect": -0.0313101501347363, "n_treated": 245, "n_control": 315, "n_strata": 222},
+      "all_2015_2021": {"effect": 0.009463722397476339, "n_treated": 805, "n_control": 1075, "n_strata": 741}
+    },
+    "combined_point": 0.009463722397476339,
+    "ci_low": -0.08558743617268628,
+    "ci_high": 0.09111000350055622,
+    "bootstrap_draws": 5000,
+    "p_two_sided": 0.9152,
+    "holm_p": 1.0,
+    "pair_effects": {"AUDUSD": -0.09128387500411603, "EURGBP": 0.026140309763735912, "EURJPY": 0.10696484589485691, "EURUSD": -0.0754811068970361, "GBPJPY": 0.04144004144004144, "GBPUSD": 0.03378640776699029, "NZDUSD": 0.03904900690846287, "USDCAD": -0.011336892873891589, "USDCHF": 0.07572608934182308, "USDJPY": -0.08876581188013358},
+    "positive_pair_count": 6,
+    "leave_one_pair_out": {"EURUSD": 0.0033404816892114893, "GBPUSD": 0.008768451200705001, "USDCHF": 0.009969133227663308, "AUDUSD": 0.008678841724251405, "NZDUSD": 0.011488593467913994, "USDCAD": 0.013978636423579062, "USDJPY": 0.030939041725896822, "EURJPY": -0.017096219931271472, "GBPJPY": 0.0016382049245432877, "EURGBP": 0.021068689700667928},
+    "gate_before_multiplicity": false,
+    "passes": false
+  }
+}
