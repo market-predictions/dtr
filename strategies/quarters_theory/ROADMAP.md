@@ -1,96 +1,73 @@
 # Quarters Theory Roadmap
 
-**Version:** 0.3.0  
-**Updated:** 2026-08-05  
-**Status:** Stage 1 complete for GBP/USD; Gate 0 not passed
+**Version:** 0.6.0  
+**Updated:** 2026-08-07  
+**Status:** `PRICE_ONLY_QUARTER_PROGRAMME_CLOSED`
 
 ## Research objective
 
-Determine whether canonical 250-pip Large Quarter Points provide stable, economically meaningful information beyond generic round-number and momentum effects. Strategy P&L is downstream and is prohibited until the structural claim survives.
+Determine whether canonical 250-pip Large Quarter Points provide stable, economically meaningful information beyond generic round-number behaviour. The programme has now tested both post-crossing continuation and the materially different destination/exhaustion mechanism.
 
 ## Stage 0 — Source fidelity and governance
 
-- [x] Separate the grid-only hypothesis from Yotov's broader discretionary methodology.
-- [x] Record the original 25/75/125/225-pip ladder as a hypothesis rather than a law.
-- [x] Obtain and assess an adversarial second opinion.
-- [x] Incorporate barrier-null, roundness-control, power and execution criticisms.
-- [x] Preserve 2022-2025 as outcome-unopened holdout; metadata/schema inspection only.
-- [ ] Verify the exact faithful book trade stop rule from the primary source before coding F0.
+- [x] Separate the grid-only hypothesis from the broader discretionary methodology.
+- [x] Obtain and incorporate adversarial review.
+- [x] Establish the permanent ten-pair Dukascopy FX Cache.
+- [x] Verify annual source integrity and preserve 2022–2025 as outcome-unopened holdout.
+- [x] Freeze development 2015–2019 and internal validation 2020–2021.
 
-## Stage 1 — Cheap distinctiveness screen
+## Stage 1 — Post-crossing distinctiveness
 
-### QT-00 Data audit
+- [x] Build the 50-pip round-level engine and canonical modulo-250 phase classification.
+- [x] Test short-horizon directional outcomes after crossing.
+- [x] Match canonical levels against roundness, year, direction and session controls.
+- [x] Run reset, overshoot, spread and first-passage diagnostics.
+- [x] Replicate across EURUSD and USDJPY.
+- [x] Confirm across the complete ten-pair universe.
 
-- [x] Validate 2015-2021 GBP/USD Dukascopy M1 bid/ask archive.
-- [x] Verify annual checksums, row counts, timestamps and non-negative spreads.
-- [x] Record 3,682,080 calendar-minute rows and 2,612,846 active quote minutes.
+Binding decision:
 
-### QT-01 Round-level engine
+`CONFIRM_GLOBAL_DEMOTION_NO_PAIR_EXCEPTIONS`
 
-- [x] Generate every 50-pip level.
-- [x] Identify canonical phase 0 modulo 250 pips.
-- [x] Classify whole-100 and half-100 roundness.
-- [x] Use close-based crossing and per-level/direction reset state.
-- [x] Add deterministic synthetic tests.
+Evidence: 47,278 eligible crossings, 9,480 canonical events and 0/10 positive-and-stable pairs.
 
-### QT-B Short-horizon crossing study
+## Stage 2 — Destination and exhaustion mechanism
 
-- [x] Evaluate 5, 15, 30, 60, 120, 240 and 1,440-minute directional outcomes.
-- [x] Compare canonical LQPs with other 50-pip phases inside matched year, direction, roundness and session strata.
-- [x] Run year-preserving weekly block bootstrap.
-- [x] Run adjusted return regressions and +10/-10-pip first-passage models.
-- [x] Run reset, overshoot and spread sensitivities.
+- [x] Preregister a new mechanism rather than rescue the continuation test.
+- [x] Test independent ATR directional-change leg endpoint clustering.
+- [x] Test causal trend completion toward the next round-level destination.
+- [x] Test reversal-before-extension after qualified arrival.
+- [x] Apply 5,000 pair-week bootstrap draws, pair breadth, leave-one-pair-out and Holm correction.
+- [x] Complete independent source, arithmetic and bootstrap assurance.
 
-### QT-C Encompassing interpretation
+Binding decision:
 
-- [x] Evaluate whether LQP status adds positive short-horizon information beyond roundness-matched controls.
-- [x] Gate 0 decision for GBP/USD: **not passed**.
-- [ ] Replicate Stage 1 on EUR/USD and a JPY pair before deciding whether the grid family is globally demoted.
+`REJECT_DESTINATION_EXHAUSTION_MECHANISM`
 
-## Stage 2 — Episode census and power
+Evidence:
 
-Status: **deferred** pending cross-pair Stage-1 replication.
+- A1: 272,065 leg endpoints; combined effect +0.000136; 95% interval [-0.004515, +0.004970].
+- A2: 47,571 approach episodes; combined matched effect +0.000422; 95% interval [-0.028827, +0.024433].
+- A3: 10,901 arrivals; combined matched effect +0.009464; 95% interval [-0.085587, +0.091110].
+- All three failed temporal stability and multiplicity gates.
 
-- [ ] Build the 25/75/125/225 first-passage state machine.
-- [ ] Align structural rejection with executable stop boundaries.
-- [ ] Estimate real episode counts and cross-pair dependence.
-- [ ] Freeze minimum detectable and minimum economically useful effects.
+## Closed work
 
-## Stage 3 — Structural transition tests
+The following are not authorized as continuation of this programme:
 
-Status: **blocked by Gate 0 unless cross-pair evidence reverses the conclusion**.
+- phase, reset, ATR, endpoint-window, barrier or session sensitivity searches;
+- pair or year selection after outcomes;
+- the 25/75/125/225 transition census;
+- strategy candidates F0, C1, C2, C3 or R1;
+- execution P&L, Pine, alerts, sizing, paper trading or deployment;
+- opening 2022–2025 to increase sample size or rescue a result.
 
-- [ ] Test P75-to-P225 excess over matched timed null.
-- [ ] Test P125 incremental information.
-- [ ] Evaluate target, rejection and timeout jointly.
-- [ ] Compare FX-clock and realised-volatility time.
-- [ ] Test the three-day rule as a survival/hazard claim.
+## Future research boundary
 
-## Stage 4 — Frozen strategy candidates
+A future Quarter-related programme must introduce genuinely new causal information unavailable to this price-only M1/H1 design, such as independently sourced order flow, dealer or options barrier information, or event-specific liquidity evidence. It must be a new preregistered programme and compete against alternative strategy research for resources.
 
-Status: **not authorized**.
-
-- [ ] F0 faithful book Large Quarter Trade.
-- [ ] C1 +75 acceptance continuation.
-- [ ] C2 +125 half-point confirmation.
-- [ ] C3 accepted-transition pullback.
-- [ ] R1 failed-overshoot rejection.
-
-No trend, candle, session, macro or regime filter may be introduced before structural survival. A filter cannot rescue a level hypothesis that has no standalone incremental content.
-
-## Stage 5 — Costs, holdout and replication
-
-- [ ] Executable bid/ask backtests.
-- [ ] Spread, slippage and financing stress.
-- [ ] Joint cross-pair calendar-block resampling.
-- [ ] Pair/year leave-one-out analysis.
-- [ ] One-time 2022-2025 holdout opening.
-- [ ] Independent code-path replication.
+Further threshold subdivision of the same grid is not a roadmap item.
 
 ## Decision policy
 
-Continue structural research only when canonical LQP status is positive against roundness-matched controls, stable across development and validation, not dependent on one pair or event-quality definition, and large enough to remain relevant after execution costs.
-
-Demote or stop when canonical levels are ordinary relative to matched 50/100-pip levels, any advantage is explained by generic momentum or event composition, positive results depend on one reset/horizon/pair, or costs dominate the upper confidence bound.
-
-A well-supported negative conclusion is a successful research outcome.
+A well-supported negative conclusion is a successful research outcome. The current evidence supports closing the canonical price-only Quarter Theory research line rather than optimizing it into a trading strategy.
