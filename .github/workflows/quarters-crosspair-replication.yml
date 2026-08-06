@@ -13,13 +13,22 @@ on:
       - tests/test_quarters_crosspair.py
       - tests/test_quarters_universe.py
       - strategies/quarters_theory/docs/TEN_PAIR_UNIVERSE_PREREGISTRATION.md
+  pull_request:
+    paths:
+      - .github/workflows/quarters-crosspair-replication.yml
+      - scripts/prepare_quarters_from_stacey_source.py
+      - scripts/run_quarters_crosspair.py
+      - scripts/aggregate_quarters_crosspair.py
+      - tests/test_quarters_crosspair.py
+      - tests/test_quarters_universe.py
+      - strategies/quarters_theory/docs/TEN_PAIR_UNIVERSE_PREREGISTRATION.md
 
 permissions:
   actions: read
   contents: read
 
 concurrency:
-  group: quarters-theory-ten-pair-universe-v1
+  group: quarters-theory-ten-pair-universe-v1-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
