@@ -1,0 +1,19 @@
+{
+  "verdict": "PASS_PROCESS_AND_ARITHMETIC",
+  "checks": {
+    "ten_pairs_present": true,
+    "no_positive_stable_pairs": true,
+    "confirmation_panel_size": true,
+    "no_confirmation_exceptions": true,
+    "all_bootstraps_5000": true,
+    "all_intervals_ordered": true,
+    "gbpusd_counts_match": true,
+    "gbpusd_point_match": true,
+    "eurusd_point_match": true,
+    "usdjpy_point_match": true,
+    "holdout_unopened": true,
+    "no_strategy_optimization": true
+  },
+  "all_pass": true,
+  "binding_decision": "CONFIRM_GLOBAL_DEMOTION_NO_PAIR_EXCEPTIONS"
+}
