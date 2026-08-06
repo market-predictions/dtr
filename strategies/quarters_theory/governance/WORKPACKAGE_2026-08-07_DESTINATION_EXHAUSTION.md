@@ -1,11 +1,13 @@
 # Work Package — Quarter Destination and Exhaustion Mechanism
 
 - **ID:** `QT-WP-20260807-04`
-- **Status:** Active
+- **Status:** Complete
 - **Primary objective:** determine whether canonical 250-pip levels act as trend destinations or exhaustion/reversal zones rather than continuation levels.
 - **Parent evidence:** `QT-WP-20260806-03`, decision `CONFIRM_GLOBAL_DEMOTION_NO_PAIR_EXCEPTIONS`.
 - **Implementation role:** `implementation_operations`
 - **Assurance role:** `governance_release_assurance`
+- **Binding decision:** `REJECT_DESTINATION_EXHAUSTION_MECHANISM`
+- **Assurance decision:** `PASS`
 
 ## Reconstructed variables
 
@@ -16,35 +18,43 @@
 - H1 structural layer with M1 first-passage resolution — `DEFAULTED` for noise reduction and causal ordering.
 - No strategy construction in this package — `DERIVED` from the repository decision hierarchy.
 
+## Completion evidence
+
+- Ten registered pairs processed.
+- 70 annual BID/ASK source partitions hash-verified by implementation and independent assurance.
+- 272,065 A1 trend-leg endpoints.
+- 47,571 A2 causal destination episodes.
+- 10,901 A3 qualified arrivals.
+- A1 combined effect +0.000136, 95% interval [-0.004515, +0.004970].
+- A2 combined effect +0.000422, 95% interval [-0.028827, +0.024433].
+- A3 combined effect +0.009464, 95% interval [-0.085587, +0.091110].
+- Development/validation stability failed for A1, A2 and A3.
+- Holm-adjusted p-value 1.0 for every primary test.
+- Independent 2,000-draw block bootstraps independently preserved all null conclusions.
+- 2022–2025 remained unopened.
+- Four focused implementation tests passed; Python byte-compilation passed.
+
 ## Deliverables
 
-1. Frozen preregistration before outcomes.
-2. Reproducible source-verification and analysis implementation.
-3. Pair-level and pooled A1/A2/A3 evidence.
-4. Development, validation and combined results kept separate.
-5. Machine-readable summary and readable decision report.
-6. Independent process and arithmetic assurance that does not modify the candidate.
-7. Updated status, changelog, claim and handover.
+- [x] Frozen preregistration before outcomes.
+- [x] Source-verification and analysis implementation.
+- [x] Pair-level and pooled A1/A2/A3 evidence.
+- [x] Separate development, validation and combined results.
+- [x] Machine-readable summary and readable decision report.
+- [x] Independent process and arithmetic assurance.
+- [x] Updated status, roadmap, changelog, claim and handover.
 
 ## Acceptance criteria
 
-- Ten registered pair archives used; no network acquisition.
-- Annual BID and ASK SHA-256 values pass for 2015–2021.
-- No 2022–2025 file is read by the analysis.
-- Event definitions and thresholds match the preregistration exactly.
-- Pair/week block bootstrap and Holm family correction are implemented.
-- Pair breadth and leave-one-pair-out gates are reported.
-- A separate assurance recomputation verifies counts, effects, intervals, multiplicity and decision.
-- Negative or null results are retained without rescue variants.
+All acceptance criteria passed. The scientific hypotheses did not pass; the negative decision is the accepted work-package outcome.
 
-## Non-scope
+## Restrictions retained
 
-- opening the holdout;
-- retuning trend, ATR, proximity, distance or barrier thresholds;
-- selecting pairs, sessions or phases after outcomes;
-- execution-cost or P&L optimization;
-- Pine, alerts, sizing, paper trading or deployment.
+- Do not open the holdout to rescue this result.
+- Do not retune trend, ATR, proximity, distance, barrier, phase, pair or session definitions.
+- Do not construct execution P&L, entries, stops or targets.
+- Do not build Pine, alerts, sizing, paper trading or deployment from this mechanism.
 
-## Stop conditions
+## Closeout
 
-Stop only when the complete mechanism decision is recorded and independently assured, or when data integrity or computational feasibility creates a genuine blocker.
+The price-only Quarter destination/exhaustion line is closed. A future study requires genuinely new causal information and a new preregistration.
