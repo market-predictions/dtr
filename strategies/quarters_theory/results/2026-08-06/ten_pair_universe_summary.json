@@ -1,0 +1,42 @@
+{
+  "decision": "CONFIRM_GLOBAL_DEMOTION_NO_PAIR_EXCEPTIONS",
+  "canonical_250_pip_theory_status": "DEMOTED_CONFIRMED_TEN_PAIR_UNIVERSE",
+  "positive_stable_pairs_all": [],
+  "positive_stable_pairs_confirmation": [],
+  "development_positive_pairs": ["AUDUSD", "EURUSD", "NZDUSD", "USDJPY"],
+  "validation_positive_pairs": ["AUDUSD", "EURGBP"],
+  "combined_positive_pairs": ["AUDUSD", "EURUSD"],
+  "development_to_validation_sign_flips": ["EURGBP", "EURUSD", "NZDUSD", "USDJPY"],
+  "median_combined_effect_pips": -0.395781477261256,
+  "total_events": 47278,
+  "total_lqp_events": 9480,
+  "interval_order": ["point", "ci_low", "ci_high"],
+  "pairs": {
+    "AUDUSD": {"events": 2779, "lqp_events": 551, "development": [0.2034716893223432, -1.6878882327983356, 2.0343228169141225], "validation": [2.5603374748003582, -0.17925542255836602, 5.328307458869713], "combined": [1.0195676334797041, -0.4945651087946087, 2.605577546682243], "positive_stable": false, "normalization_scale": 1.0},
+    "EURGBP": {"events": 2461, "lqp_events": 470, "development": [-3.1117090480331786, -7.893298391930433, 1.027639176892491], "validation": [1.3470134643205565, -3.5617551676108836, 6.1763925649421685], "combined": [-1.9322041299632382, -5.77515569314285, 1.605989406615756], "positive_stable": false, "normalization_scale": 1.0},
+    "EURJPY": {"events": 5652, "lqp_events": 1099, "development": [-0.26729484745328164, -2.2080561427542507, 1.8432508458996935], "validation": [-0.7880359234833164, -3.6383159207586355, 1.6504298456945419], "combined": [-0.3687794666831593, -2.039559247915595, 1.4582463220704358], "positive_stable": false, "normalization_scale": 0.01},
+    "EURUSD": {"events": 3743, "lqp_events": 709, "development": [0.5318617725508064, -1.584563947673994, 2.6544711475143425], "validation": [-0.8047559823167392, -4.390540575998274, 2.73120655274533], "combined": [0.24626935514119583, -1.5994332839752126, 2.0290154951828505], "positive_stable": false, "normalization_scale": 1.0},
+    "GBPJPY": {"events": 11614, "lqp_events": 2379, "development": [-0.24028308905693924, -2.4606074942369647, 1.695273046433303], "validation": [-1.162384537833154, -4.037775435971773, 2.06973260629961], "combined": [-0.42278348783935266, -2.3347404439507358, 1.2337671342201508], "positive_stable": false, "normalization_scale": 0.01},
+    "GBPUSD": {"events": 6843, "lqp_events": 1373, "development": [-0.7890947759880694, -2.9892317811912017, 1.8311775784681574], "validation": [-0.7538688626364902, -3.188232384498604, 1.58913867637436], "combined": [-0.7799077709456916, -2.5754686471153847, 1.1952599205832357], "positive_stable": false, "normalization_scale": 1.0},
+    "NZDUSD": {"events": 2722, "lqp_events": 564, "development": [0.20026550645474134, -1.7827173314116438, 2.585739326411905], "validation": [-0.8706643427520853, -2.9869116520181835, 1.4979727578278033], "combined": [-0.10873969534346979, -1.6408349204595283, 1.7506330294282513], "positive_stable": false, "normalization_scale": 1.0},
+    "USDCAD": {"events": 4750, "lqp_events": 946, "development": [-0.3298076881363582, -2.3899771996339596, 1.7957281070071123], "validation": [-2.4720326641723256, -4.553580626129162, -0.4365531992217799], "combined": [-0.9177265933481993, -2.558770443885935, 0.7174872591033732], "positive_stable": false, "normalization_scale": 1.0},
+    "USDCHF": {"events": 3037, "lqp_events": 635, "development": [-2.9973224055259324, -8.191295451527047, 0.48493676609097464], "validation": [-0.6448521548739432, -4.294258569438762, 2.2740080962299993], "combined": [-2.577632584294535, -7.2896250698075145, 0.36779637359813133], "positive_stable": false, "normalization_scale": 1.0},
+    "USDJPY": {"events": 3677, "lqp_events": 754, "development": [0.7838053182113273, -1.4702655490675545, 2.954319753672145], "validation": [-3.2387900722480896, -6.461419371352828, 0.271893806237534], "combined": [-0.03604612560436306, -2.1110092209131324, 1.911639105560126], "positive_stable": false, "normalization_scale": 0.01}
+  },
+  "source": {
+    "dataset": "Dukascopy FX Cache",
+    "canonical_private_drive_folder_id": "160qGdjm9Gi6pr05nRHuUXaTZc9EgJOOU",
+    "temporary_transport_run_id": 30129064261,
+    "years_processed": [2015, 2021],
+    "construction": "Dukascopy M1 separate BID/ASK UTC; inactive calendar minutes preserved",
+    "annual_source_hashes_verified": true
+  },
+  "parity": {
+    "EURUSD_official_crosspair_result_matched": true,
+    "GBPUSD_frozen_stage1_result_matched": true,
+    "USDJPY_official_crosspair_result_matched_after_exact_jpy_roundtrip": true
+  },
+  "holdout_2022_2025_opened": false,
+  "strategy_optimization_performed": false,
+  "transition_census_authorized": false
+}
