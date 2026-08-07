@@ -1,0 +1,66 @@
+{
+  "programme": "PIVOT-SPATIAL-ZONE-V1",
+  "work_package": "PIV-WP-20260807-02",
+  "role": "governance_release_assurance",
+  "decision": "PASS",
+  "candidate_decision_confirmed": "PROMOTE_DAILY_WEEKLY_PIVOT_TERMINAL_ZONE_TO_HOLDOUT_CONFIRMATION",
+  "source_integrity": {
+    "registered_archives_checked": 10,
+    "all_archive_sha256_match_registry": true,
+    "pairs": ["EURUSD", "GBPUSD", "USDCHF", "AUDUSD", "NZDUSD", "USDCAD", "USDJPY", "EURJPY", "GBPJPY", "EURGBP"]
+  },
+  "sample_boundary": {
+    "all_result_ledgers_min_year": 2015,
+    "all_result_ledgers_max_year": 2021,
+    "holdout_2022_2025_absent": true
+  },
+  "independent_recomputation": {
+    "S1_S4_primary_point_max_abs_difference": 2.7755575615628914e-17,
+    "method": "fresh grouped-stratum implementation from raw result ledgers",
+    "S5_separate_bootstrap_draws": 2000,
+    "S5_separate_bootstrap_seed_family": 880807,
+    "S5_close_daily": {"development": 0.04506407965244186, "validation": 0.046478437014568, "combined": 0.045457378658408154, "ci95": [0.037327, 0.053348], "p_two": 0.0},
+    "S5_close_weekly": {"development": 0.015455191018054482, "validation": 0.005445835197221971, "combined": 0.012599130183256313, "ci95": [0.005816, 0.019435], "p_two": 0.0},
+    "S5_extrema_daily": {"development": 0.02209630205582447, "validation": 0.02305334337933962, "combined": 0.022364431972237142, "ci95": [0.019696, 0.025138], "p_two": 0.0},
+    "S5_extrema_weekly": {"development": 0.007018207919400221, "validation": 0.004438700648199567, "combined": 0.006294856287500095, "ci95": [0.003661, 0.009027], "p_two": 0.0},
+    "S5_extrema_monthly": {"combined": -0.0009126403071630929, "ci95": [-0.003337, 0.001656]},
+    "S5_extrema_quarterly": {"combined": 0.0007397525097239677, "ci95": [-0.001421, 0.003043]},
+    "S5_extrema_yearly": {"combined": 0.0014523792433979166, "ci95": [-0.000594, 0.003631]}
+  },
+  "construct_validity_challenge": {
+    "issue": "preregistered S5 used H1 closes as occupancy exposure while ATR trend-leg endpoints are H1 high/low extrema",
+    "resolution": "rerun with up-leg endpoints versus all H1 highs and down-leg endpoints versus all H1 lows",
+    "daily_survives": true,
+    "weekly_survives": true,
+    "monthly_quarterly_yearly_do_not_pass": true
+  },
+  "breadth_and_dominance": {
+    "daily_positive_pairs": 10,
+    "weekly_positive_pairs": 9,
+    "daily_leave_one_pair_out_all_positive": true,
+    "weekly_leave_one_pair_out_all_positive": true,
+    "daily_positive_named_levels": 5,
+    "weekly_positive_named_levels": 6,
+    "daily_leave_one_named_level_out_all_positive": true,
+    "weekly_leave_one_named_level_out_all_positive": true
+  },
+  "familywise_result": {
+    "primary_hypotheses": 25,
+    "daily_S5_Holm_p": 0.0,
+    "weekly_S5_Holm_p": 0.008,
+    "other_positive_qualifiers": 0
+  },
+  "scientific_boundary": {
+    "broad_target_advantage": false,
+    "broad_containment_stall_advantage": false,
+    "broad_reversal_advantage": false,
+    "daily_weekly_terminal_zone_enrichment": true,
+    "holdout_opened": false,
+    "strategy_or_deployment_authorized": false
+  },
+  "assurance_notes": [
+    "PASS certifies process, recomputation and the internal promotion decision; it is not an out-of-sample strategy validation.",
+    "The parent exact-coordinate null remains intact.",
+    "A separate preregistered 2022-2025 confirmation is required before any causal trading-rule research is promoted."
+  ]
+}

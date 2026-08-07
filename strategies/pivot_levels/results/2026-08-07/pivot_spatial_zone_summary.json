@@ -1,0 +1,94 @@
+{
+  "programme": "PIVOT-SPATIAL-ZONE-V1",
+  "work_package": "PIV-WP-20260807-02",
+  "date": "2026-08-07",
+  "binding_decision": "PROMOTE_DAILY_WEEKLY_PIVOT_TERMINAL_ZONE_TO_HOLDOUT_CONFIRMATION",
+  "holdout_opened": false,
+  "data_split": {"development": "2015-2019", "validation": "2020-2021", "holdout": "2022-2025"},
+  "primary_zone_halfwidth_fraction_of_local_spacing": 0.20,
+  "secondary_widths": [0.05, 0.10, 0.15, 0.20, 0.25],
+  "control_center_fraction_of_adjacent_spacing": 0.50,
+  "familywise_hypotheses": 25,
+  "primary_qualifiers": [
+    {
+      "timeframe": "daily",
+      "test": "S5_DISTANCE_OCCUPANCY_TERMINAL_ENRICHMENT",
+      "development": 0.04506407965244186,
+      "validation": 0.046478437014568,
+      "combined": 0.045457378658408154,
+      "ci95": [0.03736086104473753, 0.0533370317219483],
+      "raw_p_two": 0.0,
+      "holm_p": 0.0,
+      "positive_pairs": 10,
+      "leave_one_pair_out_all_positive": true
+    },
+    {
+      "timeframe": "weekly",
+      "test": "S5_DISTANCE_OCCUPANCY_TERMINAL_ENRICHMENT",
+      "development": 0.015455191018054482,
+      "validation": 0.005445835197221971,
+      "combined": 0.012599130183256313,
+      "ci95": [0.005964267889610545, 0.019384458988286602],
+      "raw_p_two": 0.0004,
+      "holm_p": 0.008,
+      "positive_pairs": 9,
+      "leave_one_pair_out_all_positive": true
+    }
+  ],
+  "same_geometry_extrema_robustness": {
+    "daily": {
+      "development": 0.02209630205582447,
+      "validation": 0.02305334337933962,
+      "combined": 0.022364431972237142,
+      "ci95": [0.01949824369027806, 0.025172046071872824],
+      "positive_pairs": 10,
+      "core_rate_0_20": 0.32360810738068024,
+      "outer_rate_30_50": 0.3012436754084431,
+      "relative_enrichment": 0.07424033696944576,
+      "bin_rates_0_10_through_40_50": [0.3275893413671307, 0.3198182885750487, 0.31072639239357625, 0.30157385055388614, 0.30092023702247345]
+    },
+    "weekly": {
+      "development": 0.007018207919400221,
+      "validation": 0.004438700648199567,
+      "combined": 0.006294856287500095,
+      "ci95": [0.003506738152888217, 0.009063463299308532],
+      "positive_pairs": 9,
+      "core_rate_0_20": 0.3160635398063728,
+      "outer_rate_30_50": 0.3097686835188727,
+      "relative_enrichment": 0.020321151305524365,
+      "bin_rates_0_10_through_40_50": [0.3165438191616537, 0.3156018999281075, 0.31133134651218836, 0.3096770239627383, 0.3098581591141471]
+    },
+    "monthly": {"combined": -0.0009126403071630929, "ci95": [-0.003491654222161078, 0.0015866823146428823]},
+    "quarterly": {"combined": 0.0007397525097239677, "ci95": [-0.0015099974067890737, 0.002985434995211341]},
+    "yearly": {"combined": 0.0014523792433979166, "ci95": [-0.0005874341037535771, 0.0034663974636636227]}
+  },
+  "named_level_non_dominance": {
+    "daily": {
+      "positive_levels": 5,
+      "levels_total": 7,
+      "level_effects": {"PP": 0.02237, "R1": 0.04477, "R2": 0.00119, "R3": -0.00041, "S1": 0.04647, "S2": -0.01233, "S3": 0.00911},
+      "all_leave_one_level_out_positive": true
+    },
+    "weekly": {
+      "positive_levels": 6,
+      "levels_total": 7,
+      "level_effects": {"PP": 0.01020, "R1": 0.00339, "R2": 0.00669, "R3": -0.00288, "S1": 0.00558, "S2": 0.00232, "S3": 0.00593},
+      "all_leave_one_level_out_positive": true
+    }
+  },
+  "broad_zone_mechanism_decisions": {
+    "S1_raw_endpoint_clustering": "NO_POSITIVE_PIVOT_ZONE_ADVANTAGE",
+    "S2_target_completion": "NO_PIVOT_ZONE_ADVANTAGE",
+    "S3_containment_stall": "NO_PIVOT_ZONE_ADVANTAGE",
+    "S4_reversal_before_extension": "NO_PIVOT_ZONE_ADVANTAGE",
+    "S5_terminal_hazard": "DAILY_AND_WEEKLY_PASS_INTERNAL_GATE"
+  },
+  "authorization": {
+    "separate_2022_2025_confirmation_package": true,
+    "execution_pnl": false,
+    "pine": false,
+    "alerts": false,
+    "sizing": false,
+    "paper_or_live_deployment": false
+  }
+}

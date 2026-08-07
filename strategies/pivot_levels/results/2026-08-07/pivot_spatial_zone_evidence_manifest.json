@@ -1,0 +1,32 @@
+{
+  "programme": "PIVOT-SPATIAL-ZONE-V1",
+  "work_package": "PIV-WP-20260807-02",
+  "evidence_archive": {
+    "name": "pivot_spatial_zone_followup_evidence_2026-08-07.zip",
+    "files": 94,
+    "bytes": 13763776,
+    "sha256": "ba3cb91baad5fde8831690ff6959fbf3a112ebb917e150b035230c5fb8ba6af0"
+  },
+  "executed_source_sha256": {
+    "spatial_pair.py": "247dd397a1756422638eb61deee42ac26801e4fb04ac120caa757a7df9e2b1e6",
+    "spatial_bootstrap.py": "c5def2c54308cca488b64c474ceba35d41a2566e21164540e07b47571cb6728c",
+    "s5_extrema_pair.py": "c10494b1d1e0e9094dcddcea6af00b6a54b1b796009fed450a497e51bb2effce",
+    "s5_extrema_level_pair.py": "163a64b0ec81e5ef3468333f3b5c3b54a73c4e8edac720604fc13894ea9d2920"
+  },
+  "report_sha256": "b40c40035126f9ba342c611688cbe16b22a9f0e5d6da0c24fede8382dc2bbeb6",
+  "bulk_evidence_contents": [
+    "ten pair S1 broad-zone cluster ledgers",
+    "ten pair preregistered S5 close-occupancy ledgers",
+    "ten pair five-width target/stall/reversal event ledgers",
+    "ten pair same-geometry H1-high/H1-low robustness ledgers",
+    "ten pair named-level robustness ledgers",
+    "five 5,000-draw primary inference records",
+    "source/audit records",
+    "independent assurance record",
+    "final report",
+    "exact executed research source"
+  ],
+  "raw_market_data_in_public_repository": false,
+  "canonical_market_data_location": "Dukascopy FX Cache",
+  "holdout_2022_2025_included": false
+}
