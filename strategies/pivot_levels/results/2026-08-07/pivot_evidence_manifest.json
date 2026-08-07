@@ -1,0 +1,23 @@
+{
+  "programme": "PIVOT-TARGET-REVERSAL-V1",
+  "decision": "NO_PIVOT_MECHANISM_PASSES_INTERNAL_GATE",
+  "holdout_2022_2025_opened": false,
+  "candidate_sources": {
+    "run_pivot_levels.py": {"bytes":30178,"sha256":"25b57dffbb5c5d6d969baa2433d320ab0e114735f0f0341520eaa5354056e88b"},
+    "pivot_p01.py": {"bytes":3006,"sha256":"34b4f3134ab63d6623f82d254bbae07b2125624abedc9d21fb371830aefc4490"},
+    "pivot_events.py": {"bytes":3244,"sha256":"5754dc30c11faabd7a5c3b7b7a99c72c9bb307a2de2ad3386bd1abd205761b95"},
+    "bootstrap_fast.py": {"bytes":5152,"sha256":"d85e5ae7393685646cf0e80f2b7b4aec661632544db927349421c809fe6bf711"},
+    "build_pivot_summary.py": {"bytes":4994,"sha256":"3868faf740e3e54a04a1df36a5fb386ec90a13695f8ef5042cdf905aa136df1c"},
+    "assure_pivot_stats.py": {"bytes":6499,"sha256":"961de89df6e014b26270b79c83d003a0cb790ad9ebe953ab4051af4b7c78d16a"}
+  },
+  "local_full_evidence": {
+    "pivot_summary.json": {"bytes":51167,"sha256":"b7bf13bfa778b84ebb660cad9f79c4cc30e90a6717cea140b53c4c38d41139d6"},
+    "independent_assurance.json": {"bytes":9369,"sha256":"d13056fe0964f7ce3cc82bf8c365f9d0a989ced3532ea4a7832d66928b97f298"},
+    "implementation_tests.json": {"bytes":116,"sha256":"fd9763e563794d43c45a81fd705165d97896317466a5bfcda1a7d63139acccf8"},
+    "source_assurance_a.json": {"bytes":11340,"sha256":"5393adb16bd0ee26e939fdcdc99aa827c4a91a85de1372e66c6e1e6f29e33d71"},
+    "source_assurance_b.json": {"bytes":11341,"sha256":"e469b088d0c16dd6a9f04103bb9a961dba3397b646a0efbe6d0dd4677c2d83d9"},
+    "full_bulk_manifest": {"sha256":"fde122cca51c98575ce2372bb00900609c1c3d24e8375c07914b3444ad5c2bcb"}
+  },
+  "report": {"sha256":"5037dda9d7e3b1b421bcc9b9ad1e33d8114e29762bcb0c05ab6dbc013c8b858f"},
+  "note": "Bulk P0/P1/event ledgers and exact executed sources are retained in the downloadable evidence archive; the public repository stores compact outcomes and cryptographic identities rather than raw/bulk market-derived rows."
+}
