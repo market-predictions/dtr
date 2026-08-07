@@ -1,7 +1,7 @@
 # Work Package — Pivot Target / Stall / Reversal Research
 
 - **ID:** `PIV-WP-20260807-01`
-- **Status:** Active
+- **Status:** Complete
 - **Branch:** `agent/pivot-level-target-reversal`
 - **Implementation role:** `implementation_operations`
 - **Assurance role:** `governance_release_assurance`
@@ -10,32 +10,37 @@
 
 Determine whether daily, weekly, monthly, quarterly and yearly classic floor pivot levels provide distinctive target, containment/stall, trend-terminal or reversal information versus nearby placebo price coordinates.
 
-## Explicit scope
+## Completed scope
 
 - Daily and weekly: `S3/S2/S1/PP/R1/R2/R3`.
 - Monthly, quarterly, yearly: the same principal levels plus all six adjacent arithmetic pivot midlevels.
 - Registered Dukascopy FX Cache only.
-- Development 2015–2019 where prior-period construction is possible; validation 2020–2021.
-- 2022–2025 holdout remains unopened.
+- Development 2015–2019 where prior-period construction was possible; validation 2020–2021.
+- 2022–2025 remained unopened.
 
-## Acceptance criteria
+## Acceptance evidence
 
-1. Frozen preregistration exists before outcomes.
-2. All 2015–2021 source partitions actually used are checksum verified.
-3. Pivot period construction is causal and New York 17:00 DST-safe.
-4. Exact classic floor formulas and midlevels match preregistration.
-5. P0 touch census and P1–P4 mechanism tests are produced for all five timeframes where sample exists.
-6. Tolerance-zone logic explicitly permits sideways rotation before reversal.
-7. Nearby placebo controls are created deterministically before outcomes.
-8. 5,000 pair-year-week bootstrap and Holm family correction are applied to primary hypotheses.
-9. Pair breadth and leave-one-pair-out stability are reported.
-10. Separate assurance recomputes key results without modifying the candidate.
-11. Status, roadmap/changelog, evidence hashes and handover are updated.
+1. Preregistration and both pre-outcome operational amendments were frozen before outcomes. — PASS
+2. All 140 compressed source members used in 2015–2021 were independently checksum verified. — PASS
+3. New York 17:00 DST-safe period construction and classic formulas/midlevels independently checked. — PASS
+4. P0 and P1–P4 produced for all five timeframes. — PASS
+5. Sideways dwell/rotation inside tolerance zone explicitly permitted in P3/P4. — PASS
+6. Nearby placebo controls deterministic. — PASS
+7. 5,000 pair-year-week bootstrap and Holm correction applied across 20 primary hypotheses. — PASS
+8. Pair breadth and leave-one-pair-out stability reported. — PASS
+9. Independent assurance recomputed exact points and a separately seeded 2,000-draw bootstrap. — PASS
+10. Negative result retained without rescue variants. — PASS
 
-## Non-scope
+## Binding result
 
-No formula shopping, pivot-method variants, session/pair/year rescue, parameter tuning, 2022–2025 opening, P&L, Pine, alerts, sizing or deployment.
+`NO_PIVOT_MECHANISM_PASSES_INTERNAL_GATE`
+
+Absolute fresh-touch probabilities form a stable pivot-distance ladder, but exact pivot coordinates do not show a reliable incremental target, stall or reversal edge over nearby placebo coordinates.
+
+## Non-scope preserved
+
+No formula shopping, session/pair/year rescue, parameter tuning, 2022–2025 opening, P&L, Pine, alerts, sizing or deployment.
 
 ## Definition of done
 
-The complete five-timeframe mechanism decision is frozen, independently assured and recorded with reproducible evidence, or a genuine data/computational blocker is documented.
+Satisfied. Result frozen, independently assured, records and handover prepared, claim released.
