@@ -72,7 +72,11 @@ For each real level or its local placebo, define zone half-width in pips:
 
 with a lower numerical floor of 1 pip only when the spacing permits it; zone width may be smaller than 1 pip if required to prevent overlap with neighbouring controls.
 
-A level is considered reached when M1 high/low first enters its tolerance zone. Time spent inside the zone is neutral: price is not required to reverse immediately.
+A level is considered reached when derived M15 high/low first enters its tolerance zone. Time spent inside the zone is neutral: price is not required to reverse immediately.
+
+## Execution-resolution amendment frozen before outcomes
+
+The first dry execution produced no result or event files before reaching the runtime limit. Before any outcome was persisted, first-passage resolution was therefore frozen at deterministic **M15** bars derived directly from the same verified M1 BID/ASK source. H1 remains the causal trend layer. This changes only computational resolution, not formulas, thresholds, controls, periods, promotion gates or data boundaries. Same-M15 target/failure or reversal/extension crossings are classified ambiguous/non-success.
 
 ## Independent trend definition
 
@@ -114,11 +118,11 @@ The timeframe score is the mean across eligible endpoint/parent-level observatio
 
 ### P2 — Trend-approach target completion
 
-At a qualified approach event, outcome is `1` if price enters the level tolerance zone before an adverse move of `0.50 * ATR24_H1`, `-1` if the adverse barrier occurs first, and `0` for timeout/ambiguous ordering.
+At a qualified approach event, `target_hit = 1` if price enters the level tolerance zone before an adverse move of `0.50 * ATR24_H1`; failure, timeout or same-M15 ambiguity is `0`.
 
 Observation ends at the earliest of 24 hours or expiry of the active pivot period.
 
-Real levels are compared with their local placebos within matched strata.
+Real levels are compared with their local placebos within matched strata. The effect is therefore an absolute probability lift in target completion.
 
 ### P3 — Post-touch containment / stall
 
@@ -143,11 +147,7 @@ After first zone entry, define symmetric barriers outside the tolerance zone:
 - reversal barrier: opposite-side zone edge plus `0.25 * ATR24_H1` away from the incoming trend;
 - extension barrier: trend-side zone edge plus `0.25 * ATR24_H1` in the incoming trend direction.
 
-Whichever barrier is reached first within 24 hours or active-period expiry determines the result:
-
-- `+1`: reversal first;
-- `-1`: extension first;
-- `0`: timeout or same-minute ambiguity.
+`reversal_first = 1` only when the reversal barrier is reached before the extension barrier within 24 hours or active-period expiry. Extension first, timeout, or same-M15 ambiguity is `0`.
 
 Time spent inside the tolerance zone is neutral and does not count as extension.
 
