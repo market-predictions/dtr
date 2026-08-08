@@ -2,7 +2,7 @@
 
 Canonical machine source: `research_registry/dukascopy_fx_cash/index.json`.
 
-Registered studies: **9**.
+Registered studies: **11**.
 
 | Study ID | Date | Family | Question / title | Disposition | Holdout | Assurance | Source |
 |---|---|---|---|---|---|---|---|
@@ -15,6 +15,8 @@ Registered studies: **9**.
 | `DFXC-20260808-003-pivot-daily-wick-holdout` | 2026-08-08 | pivot_levels | Daily classic-pivot × H1 wick interaction — protected holdout confirmation | `SUPPORTED_INTERNAL` | `OPENED` | `NOT_REVIEWED` | `agent/pivot-daily-holdout-weekly-zone-geometry` @ `c4aeaced` |
 | `DFXC-20260808-004-pivot-weekly-h4-zone-geometry` | 2026-08-08 | pivot_levels | Weekly classic-pivot × H4 zone geometry — spacing/ATR robustness | `PROMOTE_TO_HOLDOUT_CONFIRMATION` | `UNOPENED` | `NOT_REVIEWED` | `agent/pivot-daily-holdout-weekly-zone-geometry` @ `c4aeaced` |
 | `DFXC-20260808-005-pivot-fibonacci-substitution` | 2026-08-08 | pivot_levels | Fibonacci pivot formula substitution — Daily/H1 and Weekly/H4 | `SUPPORTED_INTERNAL` | `UNOPENED` | `NOT_REVIEWED` | `agent/pivot-fibonacci-formula-substitution` @ `0febc662` |
+| `DFXC-20260808-006-pivot-daily-level-decomposition` | 2026-08-08 | pivot_levels | Daily classic-pivot × H1 wick — named-level decomposition | `DESCRIPTIVE_ONLY` | `OPENED` | `NOT_REVIEWED` | `agent/pivot-daily-h1-level-decomposition` @ `a73bb881` |
+| `DFXC-20260808-007-pivot-daily-time-weekday` | 2026-08-08 | pivot_levels | Daily S1/R1 × H1 rejection — time-of-day and weekday heterogeneity | `REJECT_NO_INCREMENTAL_VALUE` | `NOT_APPLICABLE` | `NOT_REVIEWED` | `agent/pivot-daily-h1-time-weekday-v4` @ `3891d6c7` |
 
 ## Reading rule
 
