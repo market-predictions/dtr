@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0.0",
+  "study_id": "DFXC-20260808-002-pivot-wick-rejection",
+  "title": "Classic pivot zones — conditional wick-rejection interaction",
+  "family": "pivot_levels",
+  "date": "2026-08-08",
+  "study_type": "falsification",
+  "lifecycle_status": "RUN_COMPLETE",
+  "dataset": {
+    "canonical_name": "Dukascopy FX Cash",
+    "dataset_id": "dukascopy_fx_cash_m1_bid_ask_v1",
+    "pairs": ["EURUSD", "GBPUSD", "USDCHF", "AUDUSD", "NZDUSD", "USDCAD", "USDJPY", "EURJPY", "GBPJPY", "EURGBP"],
+    "base_timeframe": "M1",
+    "analysis_timeframe": "Conditional on parent survivors: Daily/H1 and Weekly/H4",
+    "quote_sides": ["BID", "ASK"],
+    "timezone": "UTC source; NY17 DST-safe pivot periods",
+    "price_basis": "midpoint structural measurement",
+    "windows": {"development": "2015-2019", "internal_validation": "2020-2021", "protected_holdout": "2022-2025"},
+    "pip_convention": "0.0001 non-JPY; 0.01 JPY",
+    "cache_registry": "data/private_market_data_cache_registry.json"
+  },
+  "hypotheses": {
+    "market_question": "Among scale-aligned pivot mappings that survive the parent study, does directionally appropriate wick rejection in the pivot core add terminal information beyond generic wick exhaustion away from pivots?",
+    "null": "The strong-versus-weak wick terminal effect is no larger in the 0-20% pivot core than in the 30-50% outer region.",
+    "alternative": "Strong directional wick rejection carries additional terminal information specifically inside a surviving pivot core.",
+    "mechanism": "A wick may expose failed continuation/exhaustion at candle close; if pivot proximity adds context, the same rejection geometry should have a larger terminal association near the pivot than away from it."
+  },
+  "method": {
+    "primary_endpoint": "Difference-in-differences: (core strong-wick terminal rate - core weak-wick terminal rate) - (outer strong-wick terminal rate - outer weak-wick terminal rate).",
+    "economic_effect_size": "Percentage-point incremental wick-associated terminal probability attributable to pivot-core context beyond generic outer-region wick exhaustion.",
+    "event_definition": "Directional wick fraction = high-side (H-max(O,C))/(H-L) or low-side (min(O,C)-L)/(H-L). Strong >=30% of candle range; weak <10%. Terminal label comes from the parent pivot-blind ATR24/0.75 detector and requires strictly later-bar confirmation.",
+    "controls": ["outer-region generic strong-versus-weak wick effect", "weak-wick pivot-core effect", "five frozen wick-strength bins", "pair breadth", "leave-one-pair-out"],
+    "variants": ["D_H1", "W_H4"],
+    "selection_family_size": 2,
+    "inference": {"method": "pair-year clustered bootstrap", "cluster_or_block_unit": "pair-year", "draws": 5000, "multiple_testing": "Holm correction across parent-eligible mappings only"},
+    "execution": {"applicable": false, "spread_policy": "structural midpoint study", "slippage_policy": "not_applicable", "same_bar_policy": "wick candidate endpoint must be confirmed on a strictly later detector bar"}
+  },
+  "source": {
+    "repository": "market-predictions/dtr",
+    "ref": "agent/pivot-multiscale-terminal-wick",
+    "commit_sha": "edf0f06f3357b1bdb65719f8f1a171cb1a8d819a",
+    "paths": ["strategies/pivot_levels/docs/PIVOT_WICK_REJECTION_PREREGISTRATION_2026-08-08.md", "strategies/pivot_levels/docs/PIVOT_MULTISCALE_TERMINAL_ZONE_PREREGISTRATION_AMENDMENT_02_2026-08-08.md", "strategies/pivot_levels/results/2026-08-08/pivot_wick_rejection_summary.json", "strategies/pivot_levels/reports/PIVOT_MULTISCALE_TERMINAL_WICK_REPORT_2026-08-08.md", "strategies/pivot_levels/results/2026-08-08/pivot_multiscale_evidence_manifest.json"]
+  },
+  "holdout": {"state": "UNOPENED", "protected_window": "2022-2025", "opened_in_this_study": false, "authorization_required": true, "authorization_record": null, "prior_exposure": "Eligibility derived only from 2015-2021 parent study; 2022-2025 untouched"},
+  "artifacts": {
+    "preregistration": ["strategies/pivot_levels/docs/PIVOT_WICK_REJECTION_PREREGISTRATION_2026-08-08.md", "strategies/pivot_levels/docs/PIVOT_MULTISCALE_TERMINAL_ZONE_PREREGISTRATION_AMENDMENT_02_2026-08-08.md"],
+    "results": ["strategies/pivot_levels/results/2026-08-08/pivot_wick_rejection_summary.json", "strategies/pivot_levels/results/2026-08-08/pivot_multiscale_evidence_manifest.json"],
+    "reports": ["strategies/pivot_levels/reports/PIVOT_MULTISCALE_TERMINAL_WICK_REPORT_2026-08-08.md"],
+    "reviews": ["strategies/pivot_levels/reviews/PIVOT_MULTISCALE_IMPLEMENTATION_VALIDATION_2026-08-08.md"],
+    "governance": ["strategies/pivot_levels/governance/WORKPACKAGE_2026-08-08_MULTISCALE_WICK.md", "claims/PIV-WP-20260808-03.md", "handovers/PIV-WP-20260808-03.md"]
+  },
+  "related_studies": ["DFXC-20260808-001-pivot-multiscale-terminal", "DFXC-20260807-002-pivot-spatial-zone"],
+  "tags": ["pivots", "zones", "wick", "rejection", "exhaustion", "daily", "weekly", "terminal-hazard", "interaction", "falsification", "holdout-candidate"],
+  "provenance": {"registration_mode": "prospective_conditional_preregistration", "registered_on": "2026-08-08", "notes": "Eligibility was frozen from the parent gate before wick outcomes. Only D/H1 and W/H4 were tested; no failed parent mapping was admitted."}
+}
