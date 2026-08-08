@@ -1,0 +1,81 @@
+{
+  "study_id": "DFXC-20260808-005-pivot-fibonacci-substitution",
+  "date": "2026-08-08",
+  "data_window": "2015-2021",
+  "holdout": "NOT_USED_NEW_FIBONACCI_HYPOTHESIS",
+  "formula": {
+    "PP": "(H+L+C)/3",
+    "S1/R1": "PP +/- 0.382*range",
+    "S2/R2": "PP +/- 0.618*range",
+    "S3/R3": "PP +/- 1.000*range"
+  },
+  "horizons": {
+    "D_H1": {
+      "fibonacci": {
+        "development_wick_interaction": 0.012921703316160105,
+        "validation_wick_interaction": 0.004555925590137719,
+        "combined_wick_interaction": 0.010520850756721031,
+        "wick_ci95": [0.006339031946647935, 0.014729334766568765],
+        "wick_raw_p": 0.0,
+        "wick_holm_p": 0.0,
+        "structural_effect": 0.01314379898524072,
+        "structural_ci95": [0.011153840814967703, 0.015149934382585188],
+        "structural_holm_p": 0.0,
+        "positive_pairs_wick": 9,
+        "positive_pairs_structural": 10,
+        "all_leave_one_pair_out_wick_positive": true,
+        "all_leave_one_pair_out_structural_positive": true,
+        "core_wick_gradient": [0.06694702747884233, 0.10319338628627006, 0.13470573806064495, 0.1584878311084095, 0.2085537712439721],
+        "pair_wick_interactions": {"AUDUSD":0.02316709764238875,"EURGBP":0.015325998400128243,"EURJPY":-0.003926119536446435,"EURUSD":0.011784344281545817,"GBPJPY":0.009906245994824675,"GBPUSD":0.015147585466950636,"NZDUSD":0.013009619916037315,"USDCAD":0.007717680672409258,"USDCHF":0.006929956862025688,"USDJPY":0.0065181758917979005},
+        "pair_structural_effects": {"AUDUSD":0.017871522321054628,"EURGBP":0.013361388824815176,"EURJPY":0.004242878061381183,"EURUSD":0.017345070427504092,"GBPJPY":0.013571164279826645,"GBPUSD":0.0166918383109846,"NZDUSD":0.01375555875942168,"USDCAD":0.013532996716064546,"USDCHF":0.010608298107715922,"USDJPY":0.010146484398949024}
+      },
+      "reconstructed_classic": {
+        "combined_wick_interaction": 0.009297069536580993,
+        "structural_effect": 0.011266561792810131,
+        "core_wick_gradient": [0.06828654128214114,0.10421321934000453,0.13426301587002057,0.15949206647263167,0.21052200278620012]
+      },
+      "fibonacci_minus_classic": {
+        "wick_delta": 0.0012237812201400383,
+        "wick_delta_ci95": [-0.00338438872454745, 0.005733094535420498],
+        "structural_delta": 0.0018772371924305892,
+        "structural_delta_ci95": [-0.00006135568494523601, 0.0037446729593068073]
+      }
+    },
+    "W_H4": {
+      "fibonacci": {
+        "development_wick_interaction": 0.014795790172453693,
+        "validation_wick_interaction": 0.006142703217877105,
+        "combined_wick_interaction": 0.012340877793815722,
+        "wick_ci95": [0.0001221724522747633, 0.024413327396885467],
+        "wick_raw_p": 0.0488,
+        "wick_holm_p": 0.0488,
+        "structural_effect": 0.011593438957139893,
+        "structural_ci95": [0.006412125335134341, 0.01667009813283787],
+        "structural_holm_p": 0.0,
+        "positive_pairs_wick": 7,
+        "positive_pairs_structural": 9,
+        "all_leave_one_pair_out_wick_positive": true,
+        "all_leave_one_pair_out_structural_positive": true,
+        "core_wick_gradient": [0.0635978835978836,0.09946587537091989,0.12804878048780488,0.16480198898952228,0.21245067952652347],
+        "pair_wick_interactions": {"AUDUSD":-0.0022143038596694475,"EURGBP":0.011801835539312189,"EURJPY":0.010973550746206678,"EURUSD":0.02094694600903571,"GBPJPY":-0.019314470932254496,"GBPUSD":0.039277402971565345,"NZDUSD":0.0396850681323192,"USDCAD":0.010484978252141036,"USDCHF":-0.007011854011765392,"USDJPY":0.019010732007669395},
+        "pair_structural_effects": {"AUDUSD":-0.0019434765866505332,"EURGBP":0.007250048533655351,"EURJPY":0.013974539888817583,"EURUSD":0.010149511927113747,"GBPJPY":0.010342343975864171,"GBPUSD":0.004933619777058973,"NZDUSD":0.02298123008703412,"USDCAD":0.010844856563663338,"USDCHF":0.01880611392988031,"USDJPY":0.01885345109530291}
+      },
+      "reconstructed_classic": {
+        "combined_wick_interaction": 0.0160663773016613,
+        "structural_effect": 0.010683557927359255,
+        "core_wick_gradient": [0.06092077087794433,0.09645098985997103,0.12737284451528763,0.1679901182283395,0.20984432646450105]
+      },
+      "fibonacci_minus_classic": {
+        "wick_delta": -0.0037254995078455783,
+        "wick_delta_ci95": [-0.016314531344573856, 0.008795091195313342],
+        "structural_delta": 0.0009098810297806376,
+        "structural_delta_ci95": [-0.004189085035606629, 0.006262301783428608]
+      }
+    }
+  },
+  "comparator_reproduction": {
+    "D_H1": {"frozen_parent_wick":0.009206482826313117,"reconstructed_classic_wick":0.009297069536580993,"wick_abs_error_pp":0.00905867102678759,"frozen_parent_structural":0.01023166831730335,"reconstructed_classic_structural":0.011266561792810131,"structural_abs_error_pp":0.10348934755067818},
+    "W_H4": {"frozen_parent_wick":0.016157711979495448,"reconstructed_classic_wick":0.0160663773016613,"wick_abs_error_pp":0.00913346778341484,"frozen_parent_structural":0.010019046333827608,"reconstructed_classic_structural":0.010683557927359255,"structural_abs_error_pp":0.0664511593531647}
+  },
+  "decision": "DAILY_FIBONACCI_SUPPORTED_WEEKLY_FIBONACCI_BORDERLINE_FORMULA_NOT_SUPERIOR"
+}
