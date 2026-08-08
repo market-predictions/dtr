@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0.0",
+  "study_id": "DFXC-20260808-007-pivot-daily-time-weekday",
+  "decision": "NO_MATERIAL_DIRECTIONAL_TIME_OR_WEEKDAY_EDGE_TIME_MAINLY_MODULATES_MOVEMENT_MAGNITUDE",
+  "scientific_disposition": "REJECT_NO_INCREMENTAL_VALUE",
+  "summary": "Time-of-day and weekday did not add a stable directional 4H reversal edge to the Daily S1/R1 + strong H1 rejection signal. None of nine preregistered Tokyo/London/New York Hour-1/2/3 comparisons survived Holm correction, global FWD4 phase heterogeneity was unsupported (p≈0.33), and weekday heterogeneity was unsupported (p≈0.55). Session phase strongly changed MFE/MAE path amplitude, indicating volatility/execution context rather than directional entry value.",
+  "primary_findings": [
+    {"metric":"S1/R1 core strong-wick mean FWD4 reversal return","estimate":-0.009325179031458219,"unit":"ATR24","uncertainty":"95% pair-year clustered-bootstrap CI approximately [-0.02344,+0.00498]; p=0.2044"},
+    {"metric":"global session-phase FWD4 heterogeneity","estimate":0.3301509215709357,"unit":"cluster-robust omnibus p-value","uncertainty":"nine frozen phase categories versus non-transition control"},
+    {"metric":"weekday FWD4 heterogeneity","estimate":0.5471600862884402,"unit":"cluster-robust omnibus p-value","uncertainty":"Monday-Friday under NY17 FX trading date"},
+    {"metric":"pooled Hour-3 minus Hours-1/2 FWD4","estimate":0.0070964571953587696,"unit":"ATR24","uncertainty":"95% pair-year bootstrap CI approximately [-0.03294,+0.04520]; descriptive p=0.7208"},
+    {"metric":"London H3 MFE4 change versus non-transition","estimate":0.4061,"unit":"ATR24","uncertainty":"secondary path-amplitude effect; MFE and MAE both expand"},
+    {"metric":"New York H1 MFE4 change versus non-transition","estimate":0.4027,"unit":"ATR24","uncertainty":"secondary path-amplitude effect; MFE and MAE both expand"}
+  ],
+  "breadth": {
+    "pairs":"10/10 canonical Dukascopy FX Cash pairs",
+    "total_signal_control_observations":180010,
+    "S1R1_core_observations":68118,
+    "valid_contiguous_FWD4":64771,
+    "S2R2_core_controls":18583,
+    "S1R1_outer_controls":93309
+  },
+  "robustness": [
+    "Independent full-history reconstruction reproduced all 65,135 2022-2025 event keys, groups, distances, wick fractions, ATR values and forward/excursion fields exactly.",
+    "A deterministic 4H same-side/group cooldown reduced overlap but left phase omnibus p≈0.319 and weekday omnibus p≈0.836.",
+    "The 2022-2025 pooled Hour-3 improvement reverses in 2015-2019 and 2020-2021 and is therefore not a durable session law.",
+    "Tokyo H3 phase premium is positive across the three broad partitions but its combined interval crosses zero and matched controls show similar time behavior; it is not promoted."
+  ],
+  "limitations": [
+    "All 2015-2025 data were already exposed in related pivot research; this is not a pristine holdout confirmation.",
+    "Structural midpoint entry/forward measurement is not executable BID/ASK P&L.",
+    "Repeated H1 signals are retained in the primary observational ledger; cooldown is robustness only.",
+    "Session phase materially changes volatility, so later execution research must predefine stop/target scaling rather than infer profitability from MFE alone.",
+    "No session×weekday interactions were tested after the main directional effects failed."
+  ],
+  "authorized_next": [
+    "Treat session time as an execution/volatility context variable rather than a directional entry filter.",
+    "Design a separately preregistered execution study with explicit rearm/cooldown, executable BID/ASK entry, stop, target and holding rules.",
+    "Preserve Tokyo H3 only as a non-promoted observation for genuinely fresh data monitoring."
+  ],
+  "prohibited_next": [
+    "Do not mine a fourth or fifth session hour, arbitrary clock windows, weekdays or session×weekday combinations on 2015-2025.",
+    "Do not select the best UTC hour from the descriptive 24-hour profile.",
+    "Do not represent MFE/MAE session differences as directional trading edge.",
+    "Do not treat this study as Pine, alert, sizing or live-trading authorization."
+  ],
+  "assurance": {"status":"NOT_REVIEWED","decision":null,"evidence":["strategies/pivot_levels/reviews/PIVOT_DAILY_H1_TIME_WEEKDAY_IMPLEMENTATION_VALIDATION_2026-08-08.md"]},
+  "holdout": {"state_after":"NO_PRISTINE_HOLDOUT_RELATED_DATA_EXPOSED","opened_in_this_study":false},
+  "evidence": [
+    {"repository":"market-predictions/dtr","ref":"agent/pivot-daily-h1-time-weekday-v4","commit_sha":"24cecf035885cbd79ab4f5d08ec1bc12693825b1","path":"strategies/pivot_levels/docs/PIVOT_DAILY_H1_TIME_WEEKDAY_PREREGISTRATION_2026-08-08.md"},
+    {"repository":"market-predictions/dtr","ref":"agent/pivot-daily-h1-time-weekday-v4","commit_sha":"24cecf035885cbd79ab4f5d08ec1bc12693825b1","path":"strategies/pivot_levels/results/2026-08-08/pivot_daily_h1_time_weekday_summary.json"},
+    {"repository":"market-predictions/dtr","ref":"agent/pivot-daily-h1-time-weekday-v4","commit_sha":"24cecf035885cbd79ab4f5d08ec1bc12693825b1","path":"strategies/pivot_levels/reports/PIVOT_DAILY_H1_TIME_WEEKDAY_REPORT_2026-08-08.md"},
+    {"repository":"market-predictions/dtr","ref":"agent/pivot-daily-h1-time-weekday-v4","commit_sha":"24cecf035885cbd79ab4f5d08ec1bc12693825b1","path":"strategies/pivot_levels/reviews/PIVOT_DAILY_H1_TIME_WEEKDAY_IMPLEMENTATION_VALIDATION_2026-08-08.md"}
+  ]
+}
