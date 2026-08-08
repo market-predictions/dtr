@@ -13,7 +13,7 @@
     "base_timeframe": "M1",
     "analysis_timeframe": "D/H1, W/H4, M/D1, Q/W1, Y/MN1 with H1 mismatch benchmarks",
     "quote_sides": ["BID", "ASK"],
-    "timezone": "UTC source; NY17 DST-safe FX trading periods",
+    "timezone": "UTC",
     "price_basis": "midpoint structural measurement",
     "windows": {"development": "2015-2019", "internal_validation": "2020-2021", "protected_holdout": "2022-2025"},
     "pip_convention": "0.0001 non-JPY; 0.01 JPY",
@@ -28,7 +28,7 @@
   "method": {
     "primary_endpoint": "For D/H1, W/H4, M/D1, Q/W1 and Y/MN1: terminal_rate(0-20% normalized pivot spacing) minus terminal_rate(30-50%) using same-geometry high/low occupancy.",
     "economic_effect_size": "Percentage-point enrichment in independently confirmed ATR-defined terminal-extreme incidence per eligible high/low occupancy observation.",
-    "event_definition": "Classic floor pivots from prior completed period. Directional termination is pivot-blind: ATR24 simple mean, lagged one detector bar, 0.75 ATR directional-change threshold, with a candidate extreme confirmable only by a strictly later detector candle.",
+    "event_definition": "Classic floor pivots from prior completed period. Directional termination is pivot-blind: ATR24 simple mean, lagged one detector bar, 0.75 ATR directional-change threshold, with a candidate extreme confirmable only by a strictly later detector candle. Pivot periods use the frozen NY17 DST-safe FX calendar.",
     "controls": ["H1 scale-mismatch benchmarks for weekly/monthly/quarterly/yearly", "five normalized distance bins", "pair breadth", "leave-one-pair-out", "named-level leave-one-out", "negative fitted distance slope"],
     "variants": ["D_H1", "W_H4", "M_D1", "Q_W1", "Y_MN1", "W_H1_BENCH", "M_H1_BENCH", "Q_H1_BENCH", "Y_H1_BENCH"],
     "selection_family_size": 5,
