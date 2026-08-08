@@ -2,7 +2,7 @@
 
 Canonical machine source: `research_registry/dukascopy_fx_cash/index.json`.
 
-Registered studies: **13**.
+Registered studies: **14**.
 
 | Study ID | Date | Family | Question / title | Disposition | Holdout | Assurance | Source |
 |---|---|---|---|---|---|---|---|
@@ -19,6 +19,7 @@ Registered studies: **13**.
 | `DFXC-20260808-007-pivot-daily-time-weekday` | 2026-08-08 | pivot_levels | Daily S1/R1 × H1 rejection — time-of-day and weekday heterogeneity | `REJECT_NO_INCREMENTAL_VALUE` | `NOT_APPLICABLE` | `NOT_REVIEWED` | `agent/pivot-daily-h1-time-weekday-v4` @ `3891d6c7` |
 | `DFXC-20260808-008-pivot-daily-execution-entry` | 2026-08-08 | pivot_levels | Daily S1/R1 × H1 rejection — executable entry architecture | `REJECT_MECHANISM` | `UNOPENED` | `NOT_REVIEWED` | `agent/pivot-daily-h1-execution-entry` @ `509c736f` |
 | `DFXC-20260808-009-pivot-daily-continuation-management` | 2026-08-08 | pivot_levels | Daily S1/R1 × H1 rejection — continuation-position management | `REJECT_MECHANISM` | `UNOPENED` | `NOT_REVIEWED` | `agent/pivot-daily-h1-continuation-management` @ `1701b3e1` |
+| `DFXC-20260808-010-extension-conditioned-reversal` | 2026-08-08 | pivot_levels | Directional extension × strong H1 rejection — executable reversal | `REJECT_MECHANISM` | `UNOPENED` | `NOT_REVIEWED` | `agent/pivot-extension-reversal` @ `1d804794` |
 
 ## Reading rule
 
