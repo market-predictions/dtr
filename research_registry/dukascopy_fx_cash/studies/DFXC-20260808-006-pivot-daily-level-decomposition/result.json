@@ -27,7 +27,7 @@
     "Do not retune pivot zone width, wick thresholds, ATR detector, pair universe or sessions on this evidence."
   ],
   "assurance": {"status":"NOT_REVIEWED","decision":null,"evidence":["strategies/pivot_levels/reviews/PIVOT_DAILY_H1_LEVEL_DECOMPOSITION_IMPLEMENTATION_VALIDATION_2026-08-08.md"]},
-  "holdout": {"state_after":"OPENED_CONSUMED_PARENT","opened_in_this_study":false},
+  "holdout": {"state_after":"OPENED","opened_in_this_study":false},
   "evidence": [
     {"repository":"market-predictions/dtr","ref":"agent/pivot-daily-h1-level-decomposition","commit_sha":"96bba620d09d2eea2d4e61fc35cdaa0ff0d19197","path":"strategies/pivot_levels/results/2026-08-08/pivot_daily_h1_level_decomposition_summary.json"},
     {"repository":"market-predictions/dtr","ref":"agent/pivot-daily-h1-level-decomposition","commit_sha":"96bba620d09d2eea2d4e61fc35cdaa0ff0d19197","path":"strategies/pivot_levels/reports/PIVOT_DAILY_H1_LEVEL_DECOMPOSITION_REPORT_2026-08-08.md"},
