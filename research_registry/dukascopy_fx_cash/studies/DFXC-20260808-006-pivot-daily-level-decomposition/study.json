@@ -15,16 +15,19 @@
     "quote_sides": ["BID","ASK"],
     "timezone": "UTC",
     "price_basis": "midpoint structural measurement",
-    "windows": {"diagnostic_outcome":"2022-2025 consumed parent holdout","warmup":"2021"},
+    "windows": {"development":"not_applicable_diagnostic","internal_validation":"not_applicable_diagnostic","protected_holdout":"2022-2025"},
     "cache_registry": "data/private_market_data_cache_registry.json"
   },
   "hypotheses": {
     "market_question": "Does the confirmed Daily/H1 pivot-specific wick interaction differ materially by named classic daily pivot tier, especially S1/R1 versus S2/R2?",
+    "null": "The pivot-specific wick interaction at S1/R1 is not materially greater than at S2/R2 under the frozen parent geometry.",
+    "alternative": "The pivot-specific wick interaction is materially greater at first-order S1/R1 than at second-order S2/R2.",
     "primary_diagnostic": "interaction(S1+R1) - interaction(S2+R2)",
     "mechanism": "If first-order pivots represent a distinct local exhaustion geometry, strong rejection wicks should gain more incremental terminal information near S1/R1 than near S2/R2 after matched outer-zone control."
   },
   "method": {
     "primary_endpoint": "S1/R1 minus S2/R2 difference in pivot-specific strong-vs-weak wick interaction",
+    "controls": ["S2/R2 second-order pivot tier", "matched 30-50% outer zone for each named pivot", "weak-wick <10% baseline"],
     "secondary": ["individual PP/S1/R1/S2/R2/S3/R3 interactions","weak and strong core/outer rates","S3/R3 pooled","pair/year breadth","reconstruction sensitivity"],
     "inference": {"method":"pair-year clustered bootstrap on primary reconstructed tier contrast","draws":5000},
     "selection_family_size": 1
@@ -36,7 +39,7 @@
     "paths": ["strategies/pivot_levels/docs/PIVOT_DAILY_H1_LEVEL_DECOMPOSITION_SCOPE_2026-08-08.md"]
   },
   "holdout": {
-    "state": "OPENED_CONSUMED_PARENT",
+    "state": "OPENED",
     "protected_window": "2022-2025",
     "opened_in_this_study": false,
     "authorization_required": false,
