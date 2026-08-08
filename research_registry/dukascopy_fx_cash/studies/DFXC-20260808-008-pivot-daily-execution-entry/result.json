@@ -1,0 +1,60 @@
+{
+  "schema_version": "1.0.0",
+  "study_id": "DFXC-20260808-008-pivot-daily-execution-entry",
+  "decision": "REJECT_CONFIRMATION_AS_STANDALONE_EXECUTABLE_EDGE_DO_NOT_OPTIMIZE_EXITS",
+  "scientific_disposition": "REJECT_MECHANISM",
+  "summary": "Rejection-candle confirmation improves S1/R1 per-signal executable 4H return by +0.0174 ATR versus immediate entry, 95% pair-year bootstrap CI [+0.0084,+0.0262], but confirmation expectancy remains decisively negative at -0.0822 ATR, CI [-0.0978,-0.0659]. Confirmed trades themselves average -0.1041 ATR. The matched S1/R1 outer strong-wick control improves more (+0.0307 ATR), so the confirmation uplift is not pivot-specific. The frozen promotion gate fails and stop/target optimization is prohibited.",
+  "primary_findings": [
+    {"metric":"immediate executable per-signal return","estimate":-0.09957969850839228,"unit":"ATR24","uncertainty":"95% pair-year bootstrap CI [-0.115023,-0.082636]"},
+    {"metric":"confirmation executable per-signal return","estimate":-0.08220114269498004,"unit":"ATR24","uncertainty":"95% pair-year bootstrap CI [-0.097783,-0.065872]"},
+    {"metric":"confirmation minus immediate","estimate":0.01737855581341224,"unit":"ATR24","uncertainty":"95% pair-year bootstrap CI [+0.008445,+0.026197], two-sided sign-mass p=0.0004"},
+    {"metric":"confirmation entered-trade return","estimate":-0.10406423397179713,"unit":"ATR24","uncertainty":"50,765 confirmed trades; descriptive"},
+    {"metric":"S1/R1 core minus matched outer confirmation uplift","estimate":-0.013366187930634287,"unit":"ATR24","uncertainty":"95% pair-year clustered-bootstrap CI [-0.025197,-0.001423], p=0.0272"},
+    {"metric":"parent midpoint versus executable immediate correlation","estimate":0.9981094016391463,"unit":"correlation","uncertainty":"64,267 jointly valid signals"}
+  ],
+  "breadth": {
+    "signals": 68118,
+    "jointly_valid": 64267,
+    "confirmation_rate": 0.7899077286943532,
+    "confirmation_improvement_positive_pairs": "8/10",
+    "confirmation_improvement_positive_years": "10/11",
+    "development_difference": 0.015043995400807857,
+    "validation_difference": 0.03472593119094292,
+    "stability_2022_2025_difference": 0.011345213504316717
+  },
+  "falsification": {
+    "S1R1_outer": {"immediate":-0.10503955417421523,"confirmation_per_signal":-0.0742948104301687,"difference":0.030744743744046527,"confirmed_trade":-0.09308365445900924,"positive_pair_differences":"10/10"},
+    "S2R2_core": {"immediate":-0.11487273292207298,"confirmation_per_signal":-0.09589679888968981,"difference":0.018975934032383186,"confirmed_trade":-0.12500936685863026,"positive_pair_differences":"8/10"}
+  },
+  "robustness": [
+    "A 4H same-pair/same-direction cooldown leaves confirmation expectancy negative (-0.0789 ATR) while preserving the +0.01795 ATR improvement over immediate entry.",
+    "S1 and R1 separately remain negative after confirmation.",
+    "Direct-source audit of 20 randomly sampled 2024 observations reproduced immediate and confirmation returns exactly and matched all 20 confirmation triggers.",
+    "Executable immediate return correlates 0.9981 with the parent midpoint FWD4 return; the -0.0873 ATR mean deterioration is consistent with the observed spread scale."
+  ],
+  "limitations": [
+    "2015-2025 had already been exposed in related pivot research; only the entry architecture was newly preregistered.",
+    "The study isolates entry quality with a fixed 240-minute exit and does not establish optimal exit geometry.",
+    "No commission beyond observed BID/ASK spread and no ordinary slippage were added; gap-through confirmation fills use the worse of trigger and minute open.",
+    "2026 YTD remains unopened and cannot be represented as confirmation evidence for this study."
+  ],
+  "authorized_next": [
+    "Preserve 2026 YTD unopened.",
+    "If pivot research continues, preregister a genuinely different decision-role study asking whether S1/R1 strong rejection helps exit, reduce, or avoid continuation exposure in the incoming direction.",
+    "Use the confirmation result only as evidence that generic candle-break abstention reduces losses; do not represent it as a profitable entry edge."
+  ],
+  "prohibited_next": [
+    "Do not optimize stops or targets for this failed confirmation entry architecture.",
+    "Do not retune wick threshold, S1/R1 zone width, confirmation window, session, weekday, S1/R1 selection, or add indicators as a rescue on 2015-2025.",
+    "Do not open 2026 YTD merely to rescue the failed entry hypothesis.",
+    "Do not create Pine alerts, sizing, or live-trading rules from this study."
+  ],
+  "assurance": {"status":"NOT_REVIEWED","decision":null,"evidence":["strategies/pivot_levels/reviews/PIVOT_DAILY_H1_EXECUTION_ENTRY_IMPLEMENTATION_VALIDATION_2026-08-08.md"]},
+  "holdout": {"state_after":"UNOPENED","opened_in_this_study":false},
+  "evidence": [
+    {"repository":"market-predictions/dtr","ref":"agent/pivot-daily-h1-execution-entry","commit_sha":"aa7e789434101866834e506e548f2d59686cfa18","path":"strategies/pivot_levels/results/2026-08-08/pivot_daily_h1_execution_entry_summary.json"},
+    {"repository":"market-predictions/dtr","ref":"agent/pivot-daily-h1-execution-entry","commit_sha":"aa7e789434101866834e506e548f2d59686cfa18","path":"strategies/pivot_levels/results/2026-08-08/pivot_daily_h1_execution_entry_source_audit.json"},
+    {"repository":"market-predictions/dtr","ref":"agent/pivot-daily-h1-execution-entry","commit_sha":"aa7e789434101866834e506e548f2d59686cfa18","path":"strategies/pivot_levels/reports/PIVOT_DAILY_H1_EXECUTION_ENTRY_REPORT_2026-08-08.md"},
+    {"repository":"market-predictions/dtr","ref":"agent/pivot-daily-h1-execution-entry","commit_sha":"aa7e789434101866834e506e548f2d59686cfa18","path":"strategies/pivot_levels/reviews/PIVOT_DAILY_H1_EXECUTION_ENTRY_IMPLEMENTATION_VALIDATION_2026-08-08.md"}
+  ]
+}
