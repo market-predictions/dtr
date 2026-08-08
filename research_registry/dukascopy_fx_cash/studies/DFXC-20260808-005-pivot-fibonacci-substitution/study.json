@@ -15,7 +15,7 @@
     "quote_sides": ["BID", "ASK"],
     "timezone": "UTC",
     "price_basis": "midpoint structural measurement",
-    "windows": {"development": "2015-2019", "internal_validation": "2020-2021", "protected_holdout": "2022-2025 already exposed for related Daily/H1 classic-pivot question; not used as pristine holdout here"},
+    "windows": {"development": "2015-2019", "internal_validation": "2020-2021", "protected_holdout": "2022-2025"},
     "pip_convention": "0.0001 non-JPY; 0.01 JPY",
     "cache_registry": "data/private_market_data_cache_registry.json"
   },
@@ -39,12 +39,12 @@
     "repository": "market-predictions/dtr",
     "ref": "agent/pivot-fibonacci-formula-substitution",
     "commit_sha": "0febc662d071f90363a44cf6f3e95a76b87155d0",
-    "paths": ["strategies/pivot_levels/docs/PIVOT_FIBONACCI_FORMULA_SUBSTITUTION_PREREGISTRATION_2026-08-08.md", "strategies/pivot_levels/governance/WORKPACKAGE_2026-08-08_FIBONACCI_SUBSTITUTION.md", "strategies/pivot_levels/results/2026-08-08/pivot_fibonacci_formula_substitution_summary.json", "strategies/pivot_levels/reports/PIVOT_FIBONACCI_FORMULA_SUBSTITUTION_REPORT_2026-08-08.md", "strategies/pivot_levels/reviews/PIVOT_FIBONACCI_IMPLEMENTATION_VALIDATION_2026-08-08.md"]
+    "paths": ["strategies/pivot_levels/docs/PIVOT_FIBONACCI_FORMULA_SUBSTITUTION_PREREGISTRATION_2026-08-08.md", "strategies/pivot_levels/governance/WORKPACKAGE_2026-08-08_FIBONACCI_SUBSTITUTION.md", "strategies/pivot_levels/results/2026-08-08/pivot_fibonacci_formula_substitution_summary.json", "strategies/pivot_levels/reports/PIVOT_FIBONACCI_FORMULA_SUBSTITUTION_REPORT_2026-08-08.md", "strategies/pivot_levels/reviews/PIVOT_FIBONACCI_IMPLEMENTATION_VALIDATION_2026-08-08.md", "strategies/pivot_levels/results/2026-08-08/pivot_fibonacci_evidence_manifest.json"]
   },
-  "holdout": {"state": "UNOPENED", "protected_window": "2022-2025 already exposed for related Daily/H1 classic-pivot question", "opened_in_this_study": false, "authorization_required": true, "authorization_record": null, "prior_exposure": "2022-2025 was consumed for DFXC-20260808-003. This Fibonacci study uses 2015-2021 only and makes no pristine-holdout claim."},
+  "holdout": {"state": "UNOPENED", "protected_window": "2022-2025", "opened_in_this_study": false, "authorization_required": true, "authorization_record": null, "prior_exposure": "2022-2025 was consumed for DFXC-20260808-003 and is not pristine for this related Fibonacci hypothesis. This Fibonacci study uses 2015-2021 outcomes only."},
   "artifacts": {
     "preregistration": ["strategies/pivot_levels/docs/PIVOT_FIBONACCI_FORMULA_SUBSTITUTION_PREREGISTRATION_2026-08-08.md"],
-    "results": ["strategies/pivot_levels/results/2026-08-08/pivot_fibonacci_formula_substitution_summary.json"],
+    "results": ["strategies/pivot_levels/results/2026-08-08/pivot_fibonacci_formula_substitution_summary.json", "strategies/pivot_levels/results/2026-08-08/pivot_fibonacci_evidence_manifest.json"],
     "reports": ["strategies/pivot_levels/reports/PIVOT_FIBONACCI_FORMULA_SUBSTITUTION_REPORT_2026-08-08.md"],
     "reviews": ["strategies/pivot_levels/reviews/PIVOT_FIBONACCI_IMPLEMENTATION_VALIDATION_2026-08-08.md"],
     "governance": ["strategies/pivot_levels/governance/WORKPACKAGE_2026-08-08_FIBONACCI_SUBSTITUTION.md", "claims/PIV-WP-20260808-05.md", "handovers/PIV-WP-20260808-05.md"]
