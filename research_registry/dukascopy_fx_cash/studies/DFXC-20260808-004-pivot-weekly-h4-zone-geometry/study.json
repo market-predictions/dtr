@@ -5,7 +5,7 @@
   "family": "pivot_levels",
   "date": "2026-08-08",
   "study_type": "robustness",
-  "lifecycle_status": "PREREGISTERED",
+  "lifecycle_status": "RUN_COMPLETE",
   "dataset": {
     "canonical_name": "Dukascopy FX Cash",
     "dataset_id": "dukascopy_fx_cash_m1_bid_ask_v1",
@@ -41,15 +41,16 @@
     "commit_sha": "c4aeaced560ee9ffb47a70b6b34128120b44df8d",
     "paths": ["strategies/pivot_levels/docs/PIVOT_WEEKLY_H4_ZONE_GEOMETRY_PREREGISTRATION_2026-08-08.md", "strategies/pivot_levels/governance/WORKPACKAGE_2026-08-08_DAILY_HOLDOUT_WEEKLY_ZONE.md"]
   },
-  "holdout": {"state": "UNOPENED", "protected_window": "2022-2025", "opened_in_this_study": false, "authorization_required": true, "authorization_record": null, "prior_exposure": "Weekly/H4 outcomes use 2015-2021 only. A separate authorized Daily/H1 question may consume 2022-2025, but this study does not inspect Weekly/H4 holdout outcomes."},
+  "holdout": {"state": "UNOPENED", "protected_window": "2022-2025", "opened_in_this_study": false, "authorization_required": true, "authorization_record": null, "prior_exposure": "Weekly/H4 outcomes in this study are 2015-2021 only. The same 2022-2025 calendar window has now been opened separately for the Daily/H1 wick-confirmation question, but Weekly/H4 outcomes were not inspected."},
   "artifacts": {
     "preregistration": ["strategies/pivot_levels/docs/PIVOT_WEEKLY_H4_ZONE_GEOMETRY_PREREGISTRATION_2026-08-08.md"],
-    "results": [],
-    "reports": [],
-    "reviews": [],
-    "governance": ["strategies/pivot_levels/governance/WORKPACKAGE_2026-08-08_DAILY_HOLDOUT_WEEKLY_ZONE.md"]
+    "results": ["strategies/pivot_levels/results/2026-08-08/pivot_weekly_h4_zone_geometry_summary.json"],
+    "reports": ["strategies/pivot_levels/reports/PIVOT_DAILY_HOLDOUT_WEEKLY_ZONE_REPORT_2026-08-08.md"],
+    "reviews": ["strategies/pivot_levels/reviews/PIVOT_DAILY_HOLDOUT_WEEKLY_ZONE_IMPLEMENTATION_VALIDATION_2026-08-08.md"],
+    "governance": ["strategies/pivot_levels/governance/WORKPACKAGE_2026-08-08_DAILY_HOLDOUT_WEEKLY_ZONE.md"],
+    "deviations": ["strategies/pivot_levels/docs/PIVOT_WEEKLY_H4_ZONE_GEOMETRY_IMPLEMENTATION_DEVIATION_01_2026-08-08.md", "strategies/pivot_levels/docs/PIVOT_WEEKLY_H4_ZONE_GEOMETRY_IMPLEMENTATION_DEVIATION_02_2026-08-08.md"]
   },
   "related_studies": ["DFXC-20260808-001-pivot-multiscale-terminal", "DFXC-20260808-002-pivot-wick-rejection", "DFXC-20260808-003-pivot-daily-wick-holdout"],
-  "tags": ["pivots", "weekly", "H4", "zones", "ATR", "spacing", "wick", "robustness", "terminal-hazard"],
-  "provenance": {"registration_mode": "prospective_robustness_preregistration", "registered_on": "2026-08-08", "notes": "Seven geometries frozen before any new weekly geometry outcome calculation. 2022-2025 Weekly/H4 outcomes prohibited."}
+  "tags": ["pivots", "weekly", "H4", "zones", "ATR", "spacing", "wick", "robustness", "terminal-hazard", "SP10"],
+  "provenance": {"registration_mode": "prospective_robustness_preregistration", "registered_on": "2026-08-08", "notes": "Seven geometries frozen before any new weekly geometry outcome calculation. Two preliminary runs were invalidated under the preregistered deterministic SP20 reference-reproduction gate; final admissible run reproduces the parent SP20 reference exactly. 2022-2025 Weekly/H4 outcomes remained uninspected."}
 }
