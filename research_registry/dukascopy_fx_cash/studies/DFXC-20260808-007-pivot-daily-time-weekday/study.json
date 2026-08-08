@@ -13,9 +13,9 @@
     "base_timeframe": "M1",
     "analysis_timeframe": "Daily classic pivots / H1 forward response",
     "quote_sides": ["BID","ASK"],
-    "timezone": "UTC source with DST-safe local session mapping",
+    "timezone": "UTC",
     "price_basis": "midpoint structural forward study",
-    "windows": {"development":"2015-2019","internal_validation":"2020-2021","related_sample_replication":"2022-2025","fresh_holdout":"none"},
+    "windows": {"development":"2015-2019","internal_validation":"2020-2021","protected_holdout":"NOT_APPLICABLE_RELATED_SAMPLE_2022-2025_EXPOSED","related_sample_replication":"2022-2025"},
     "cache_registry": "data/private_market_data_cache_registry.json"
   },
   "hypotheses": {
@@ -48,15 +48,15 @@
     ]
   },
   "holdout": {
-    "state": "NO_PRISTINE_HOLDOUT_RELATED_DATA_EXPOSED",
-    "protected_window": "none for this study",
+    "state": "NOT_APPLICABLE",
+    "protected_window": "NOT_APPLICABLE_RELATED_SAMPLE_2022-2025_EXPOSED",
     "opened_in_this_study": false,
     "authorization_required": false,
     "prior_exposure": "2015-2025 had already been exposed in related pivot research. The time/session outcomes were frozen before inspection, but this is not represented as a pristine holdout confirmation."
   },
   "artifacts": {
     "preregistration": ["strategies/pivot_levels/docs/PIVOT_DAILY_H1_TIME_WEEKDAY_PREREGISTRATION_2026-08-08.md","strategies/pivot_levels/docs/PIVOT_DAILY_H1_TIME_WEEKDAY_PREREGISTRATION_AMENDMENT_01_2026-08-08.md"],
-    "results": ["strategies/pivot_levels/results/2026-08-08/pivot_daily_h1_time_weekday_summary.json"],
+    "results": ["strategies/pivot_levels/results/2026-08-08/pivot_daily_h1_time_weekday_summary.json","strategies/pivot_levels/results/2026-08-08/pivot_daily_h1_time_weekday_evidence_manifest.json"],
     "reports": ["strategies/pivot_levels/reports/PIVOT_DAILY_H1_TIME_WEEKDAY_REPORT_2026-08-08.md"],
     "reviews": ["strategies/pivot_levels/reviews/PIVOT_DAILY_H1_TIME_WEEKDAY_IMPLEMENTATION_VALIDATION_2026-08-08.md"],
     "governance": ["strategies/pivot_levels/governance/WORKPACKAGE_2026-08-08_DAILY_H1_TIME_WEEKDAY.md","claims/PIV-WP-20260808-07.md","handovers/PIV-WP-20260808-07.md"]
