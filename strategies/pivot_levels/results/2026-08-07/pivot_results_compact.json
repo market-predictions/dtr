@@ -1,0 +1,38 @@
+{
+  "programme": "PIVOT-TARGET-REVERSAL-V1",
+  "decision": "NO_PIVOT_MECHANISM_PASSES_INTERNAL_GATE",
+  "holdout_2022_2025_opened": false,
+  "pairs": ["EURUSD","GBPUSD","USDCHF","AUDUSD","NZDUSD","USDCAD","USDJPY","EURJPY","GBPJPY","EURGBP"],
+  "rows": {"p0":166434,"p1":1304522,"events":92470},
+  "passing_primary": [],
+  "fresh_touch_rates": {
+    "daily": {"PP":0.79318858,"R1":0.47027087,"S1":0.465,"R2":0.18462991,"S2":0.188,"R3":0.06440509,"S3":0.072},
+    "weekly": {"PP":0.79309282,"R1":0.46882793,"S1":0.460,"R2":0.17534626,"S2":0.180,"R3":0.05927978,"S3":0.059},
+    "monthly": {"PP":0.822,"MID_PP_R1":0.71320755,"MID_S1_PP":0.71791614,"R1":0.445,"S1":0.437,"MID_R1_R2":0.25180723,"MID_S2_S1":0.284,"R2":0.163,"S2":0.182,"MID_R2_R3":0.09036145,"MID_S3_S2":0.113,"R3":0.047,"S3":0.061},
+    "quarterly": {"PP":0.810,"MID_PP_R1":0.73584906,"MID_S1_PP":0.71863118,"R1":0.411,"S1":0.452,"MID_R1_R2":0.23703704,"MID_S2_S1":0.274,"R2":0.156,"S2":0.174,"MID_R2_R3":0.09259259,"MID_S3_S2":0.100,"R3":0.041,"S3":0.037},
+    "yearly": {"PP":0.780,"MID_PP_R1":0.700,"MID_S1_PP":0.750,"R1":0.300,"S1":0.4667,"R2":0.100,"S2":0.1667,"R3":0.050,"S3":0.100}
+  },
+  "primary": {
+    "daily:P1":{"dev":-0.000325923775,"val":-0.000591629671,"all":-0.000403249983,"ci95":[-0.000678681487,-0.000134511022],"holm_p":0.096,"positive_pairs":2,"passes":false},
+    "daily:P2":{"dev":0.01075773133,"val":0.002458128539,"all":0.00805131922,"ci95":[-0.011728688995,0.028717442455],"holm_p":1.0,"positive_pairs":4,"raw_real":0.4629477714,"raw_control":0.4621904662,"passes":false},
+    "daily:P3":{"dev":0.033410138249,"val":0.009853099248,"all":0.025745152139,"ci95":[-0.010596813746,0.059147232703],"holm_p":1.0,"positive_pairs":5,"raw_real":0.6621846200,"raw_control":0.6540899954,"passes":false},
+    "daily:P4":{"dev":0.006128760191,"val":-0.009929326558,"all":0.000910971513,"ci95":[-0.026694333204,0.025277682891],"holm_p":1.0,"positive_pairs":2,"raw_real":0.8479031305,"raw_control":0.8522279479,"passes":false},
+    "weekly:P1":{"dev":-0.00031909,"val":-0.00018688,"all":-0.00028059,"ci95":[-0.00053424,-0.00002310],"holm_p":0.6688,"positive_pairs":3,"passes":false},
+    "weekly:P2":{"dev":0.00520023,"val":-0.00462250,"all":0.00214356,"ci95":[-0.0451550,0.0522814],"holm_p":1.0,"passes":false},
+    "weekly:P3":{"dev":0.004336513443,"val":0.081081081081,"all":0.028126870138,"ci95":[-0.057530988926,0.126096074893],"holm_p":1.0,"positive_pairs":8,"raw_real":0.7411167513,"raw_control":0.7244969996,"passes":false},
+    "weekly:P4":{"dev":-0.0086730,"val":-0.0458015,"all":-0.0202743,"ci95":[-0.0692695,0.0308738],"holm_p":1.0,"passes":false},
+    "monthly:P1":{"dev":-0.0000600952,"val":0.0000731385,"all":-0.0000212978,"ci95":[-0.000187172,0.000147936],"holm_p":1.0,"passes":false},
+    "monthly:P2":{"dev":0.046130385055,"val":0.008295625943,"all":0.033426183844,"ci95":[-0.034565694600,0.097511429761],"holm_p":1.0,"positive_pairs":4,"raw_real":0.4653291095,"raw_control":0.4619151727,"passes":false},
+    "monthly:P3":{"dev":0.0337838,"val":0.00581395,"all":0.0235043,"ci95":[-0.100315,0.146108],"holm_p":1.0,"positive_pairs":7,"passes":false},
+    "monthly:P4":{"dev":0.00675676,"val":0.01714286,"all":0.0106157,"ci95":[-0.0563890,0.0789743],"holm_p":1.0,"positive_pairs":5,"passes":false},
+    "quarterly:P1":{"dev":-0.0000896102,"val":0.00021598,"all":0.00000146289,"ci95":[-0.000207431,0.000203959],"holm_p":1.0,"passes":false},
+    "quarterly:P2":{"dev":0.00511073,"val":0.0,"all":0.00332963,"ci95":[-0.0955706,0.100586],"holm_p":1.0,"passes":false},
+    "quarterly:P3":{"dev":-0.146853,"val":0.130435,"all":-0.056604,"ci95":[-0.271781,0.120878],"holm_p":1.0,"passes":false},
+    "quarterly:P4":{"dev":-0.0839161,"val":0.130435,"all":-0.0141509,"ci95":[-0.122352,0.102953],"holm_p":1.0,"passes":false},
+    "yearly:P1":{"dev":0.0000281327,"val":0.000392690,"all":0.000150095,"ci95":[-0.0000523143,0.000359278],"holm_p":1.0,"positive_pairs":8,"passes":false},
+    "yearly:P2":{"dev":0.0153846,"val":-0.125,"all":-0.0422961,"ci95":[-0.191183,0.119038],"holm_p":1.0,"passes":false},
+    "yearly:P3":{"dev":0.0714286,"val":-0.0975610,"all":-0.0120482,"ci95":[-0.277187,0.244898],"holm_p":1.0,"passes":false},
+    "yearly:P4":{"dev":-0.0714286,"val":-0.243902,"all":-0.156627,"ci95":[-0.399536,0.0470958],"holm_p":1.0,"passes":false}
+  },
+  "independent_assurance": "PASS"
+}

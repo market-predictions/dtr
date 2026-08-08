@@ -1,0 +1,48 @@
+{
+  "role": "governance_release_assurance",
+  "decision": "PASS",
+  "candidate_decision": "NO_PIVOT_MECHANISM_PASSES_INTERNAL_GATE",
+  "date": "2026-08-07",
+  "source_integrity": {
+    "pairs": 10,
+    "years": [2015,2016,2017,2018,2019,2020,2021],
+    "sides": ["bid","ask"],
+    "compressed_members_independently_rehashed": 140,
+    "status": "PASS"
+  },
+  "structural_checks": {
+    "classic_floor_formula": "PASS",
+    "requested_midlevels": "PASS",
+    "ny_1700_dst_boundary": "PASS",
+    "daily_weekly_level_membership": "PASS",
+    "monthly_quarterly_yearly_13_level_membership": "PASS"
+  },
+  "ledger_checks": {
+    "p0_rows": 166434,
+    "p1_rows": 1304522,
+    "event_rows": 92470,
+    "ten_pair_membership": "PASS",
+    "max_year": 2021,
+    "holdout_2022_2025_absent": true
+  },
+  "statistical_recomputation": {
+    "primary_points_exactly_reproduced": true,
+    "independent_bootstrap_draws": 2000,
+    "independent_seed": 99170807,
+    "cluster_unit": "pair-year-week",
+    "all_formal_positive_candidates_have_independent_ci_low_above_zero": false,
+    "binding_decision_reproduced": true,
+    "status": "PASS"
+  },
+  "implementation_tests": {
+    "python_byte_compile": "PASS",
+    "formula_fixture_H110_L90_C100": "PASS",
+    "summer_and_winter_ny17_boundary_fixture": "PASS"
+  },
+  "authorization": {
+    "open_2022_2025_holdout": false,
+    "strategy_optimization": false,
+    "pine_or_deployment": false
+  },
+  "conclusion": "The candidate is process-valid and its negative promotion decision is independently supported. No pivot-specific target, stall or reversal mechanism qualifies for holdout opening."
+}
