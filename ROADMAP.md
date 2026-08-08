@@ -15,6 +15,22 @@ Status: **active and mandatory**
 
 Canonical folder ID: `160qGdjm9Gi6pr05nRHuUXaTZc9EgJOOU`.
 
+## Priority 0A — Dukascopy FX Cash research memory
+
+Status: **implementation complete; independent assurance pending**
+
+- [x] Adopt canonical research name **Dukascopy FX Cash** and stable machine dataset ID without breaking the legacy catalog key.
+- [x] Define a repository-wide falsification-first research standard above the existing cache/provenance layer.
+- [x] Add immutable `DFXC-*` study IDs, normalized study/result records and deterministic human/machine indexes.
+- [x] Make exact branch + commit + artifact paths first-class so branch-resident research remains recoverable.
+- [x] Preserve negative findings, holdout exposure, authorized next steps and prohibited rescue steps.
+- [x] Add validator/tests that reject dataset/pair drift, inconsistent result/index state and unregistered study directories.
+- [x] Seed Quarters Theory and recent classic-pivot research from frozen historical branch evidence.
+- [x] Add a migration queue for older Dukascopy FX Cash strategy branches.
+- [ ] Complete independent assurance of `DTR-DFXC-WP-20260808-01`.
+- [ ] Merge the assured registry to `main` and make it mandatory for all subsequent Dukascopy FX Cash studies.
+- [ ] Backfill the highest-value older Stacey Burke, Asian Sweep, DTR-FX and Wayne McDonnell studies from immutable evidence.
+
 ## Phase 0 — Data and execution validity
 
 Status: **active; deployment-blocking**

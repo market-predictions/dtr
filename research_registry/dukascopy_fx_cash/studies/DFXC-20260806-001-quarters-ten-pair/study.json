@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0.0",
+  "study_id": "DFXC-20260806-001-quarters-ten-pair",
+  "title": "Quarters Theory ten-pair Stage-1 universe confirmation",
+  "family": "quarters_theory",
+  "date": "2026-08-06",
+  "study_type": "replication",
+  "lifecycle_status": "REJECTED",
+  "dataset": {
+    "canonical_name": "Dukascopy FX Cash",
+    "dataset_id": "dukascopy_fx_cash_m1_bid_ask_v1",
+    "pairs": ["EURUSD", "GBPUSD", "USDCHF", "AUDUSD", "NZDUSD", "USDCAD", "USDJPY", "EURJPY", "GBPJPY", "EURGBP"],
+    "base_timeframe": "M1",
+    "analysis_timeframe": "M1",
+    "quote_sides": ["BID", "ASK"],
+    "timezone": "UTC",
+    "price_basis": "midpoint",
+    "windows": {"development": "2015-2019", "internal_validation": "2020-2021", "protected_holdout": "2022-2025"},
+    "pip_convention": "0.0001 non-JPY; 0.01 JPY",
+    "cache_registry": "data/private_market_data_cache_registry.json"
+  },
+  "hypotheses": {
+    "market_question": "Does any pair in the registered ten-pair Dukascopy FX Cash universe show a positive and stable canonical 250-pip Large Quarter Point continuation effect?",
+    "null": "The canonical grid has no positive-and-stable incremental continuation effect versus matched 50-pip round-level controls across the pair universe.",
+    "alternative": "At least one pair meets the preregistered positive-and-stable criterion without pair shopping.",
+    "mechanism": "A genuinely privileged Quarters grid should reproduce beyond GBPUSD and remain stable across development and validation partitions."
+  },
+  "method": {
+    "primary_endpoint": "Direction-aligned midpoint return 60 minutes after eligible crossing.",
+    "economic_effect_size": "Canonical-minus-matched-control return in pips per pair.",
+    "event_definition": "Candidate levels every 50 pips; canonical phase 0 modulo 250; midpoint crossing; 25-pip directional rearm.",
+    "controls": ["Phases 50, 100, 150 and 200 matched by year, direction, whole/half-100 roundness and four-hour UTC session."],
+    "variants": ["One frozen Stage-1 definition applied to all ten registered pairs."],
+    "selection_family_size": 10,
+    "inference": {"method": "year-preserving weekly block bootstrap", "cluster_or_block_unit": "week within year", "draws": 5000, "multiple_testing": "preregistered pair-level stability gate"},
+    "execution": {"applicable": false, "spread_policy": "structural midpoint study", "slippage_policy": "not_applicable", "same_bar_policy": "not_applicable"}
+  },
+  "source": {
+    "repository": "market-predictions/dtr",
+    "ref": "agent/quarters-theory-universe",
+    "commit_sha": "3dfb4d36c14e20a3df045c7d05d68a3d81b3c946",
+    "paths": ["strategies/quarters_theory/reports/TEN_PAIR_UNIVERSE_CONFIRMATION_2026-08-06.md", "strategies/quarters_theory/results/2026-08-06/ten_pair_universe_summary.json", "strategies/quarters_theory/docs/TEN_PAIR_UNIVERSE_PREREGISTRATION.md", "strategies/quarters_theory/governance/WORKPACKAGE_2026-08-06_TEN_PAIR_UNIVERSE.md"]
+  },
+  "holdout": {"state": "UNOPENED", "protected_window": "2022-2025", "opened_in_this_study": false, "authorization_required": true, "authorization_record": null, "prior_exposure": "2015-2021 internal development/validation only"},
+  "artifacts": {
+    "preregistration": ["strategies/quarters_theory/docs/TEN_PAIR_UNIVERSE_PREREGISTRATION.md"],
+    "results": ["strategies/quarters_theory/results/2026-08-06/ten_pair_universe_summary.json"],
+    "reports": ["strategies/quarters_theory/reports/TEN_PAIR_UNIVERSE_CONFIRMATION_2026-08-06.md"],
+    "reviews": ["strategies/quarters_theory/reviews/TEN_PAIR_UNIVERSE_ARITHMETIC_AUDIT_2026-08-06.json"],
+    "governance": ["strategies/quarters_theory/governance/WORKPACKAGE_2026-08-06_TEN_PAIR_UNIVERSE.md"]
+  },
+  "related_studies": ["DFXC-20260805-001-quarters-stage1"],
+  "tags": ["quarters-theory", "250-pip", "ten-pair", "replication", "round-numbers", "falsification"],
+  "provenance": {"registration_mode": "retrospective_reconstruction", "registered_on": "2026-08-08", "notes": "Final ten-pair closure reconstructed from exact branch commit."}
+}

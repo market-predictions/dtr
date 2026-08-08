@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0.0",
+  "study_id": "DFXC-YYYYMMDD-NNN-slug",
+  "decision": "EXACT_PROGRAMME_DECISION",
+  "scientific_disposition": "INDETERMINATE",
+  "summary": "One-paragraph scientific conclusion.",
+  "primary_findings": [{"metric": "primary endpoint", "estimate": null, "unit": "declared", "uncertainty": "declared"}],
+  "breadth": {},
+  "robustness": [],
+  "limitations": [],
+  "authorized_next": [],
+  "prohibited_next": [],
+  "assurance": {"status": "NOT_REVIEWED", "decision": null, "evidence": []},
+  "holdout": {"state_after": "UNOPENED", "opened_in_this_study": false},
+  "evidence": [{"repository": "market-predictions/dtr", "ref": "agent/example", "commit_sha": "0000000000000000000000000000000000000000", "path": "path/to/report.md"}]
+}

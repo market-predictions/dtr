@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0.0",
+  "study_id": "DFXC-20260807-001-pivot-target-reversal",
+  "decision": "NO_PIVOT_MECHANISM_PASSES_INTERNAL_GATE",
+  "scientific_disposition": "REJECT_MECHANISM",
+  "summary": "Classic pivots formed a stable distance/reach ladder, but exact pivot coordinates did not show a reliable incremental magnet, stall, trend-terminal or reversal mechanism versus nearby placebo coordinates. Pivots were retained only as a descriptive range/distance map.",
+  "primary_findings": [
+    {"metric": "daily PP fresh-touch probability", "estimate": 79.3, "unit": "percent", "uncertainty": "descriptive absolute rate"},
+    {"metric": "daily R1 fresh-touch probability", "estimate": 47.0, "unit": "percent", "uncertainty": "descriptive absolute rate"},
+    {"metric": "daily S1 fresh-touch probability", "estimate": 46.5, "unit": "percent", "uncertainty": "descriptive absolute rate"},
+    {"metric": "predeclared mechanisms passing internal gate", "estimate": 0, "unit": "mechanisms", "uncertainty": "Holm-corrected gate"}
+  ],
+  "breadth": {"pairs": "10 registered pairs", "timeframes": ["daily", "weekly", "monthly", "quarterly", "yearly"], "higher_timeframe_midlevels": "included"},
+  "robustness": ["5,000 pair-year-week clustered bootstrap; Holm correction across 20 primaries; pair breadth and leave-one-pair-out stability reported.", "Independent assurance recomputed exact primary points and used a separately seeded bootstrap."],
+  "limitations": ["High absolute reach rates do not prove magnetism because opportunity/distance and nearby deterministic controls explain the apparent effect.", "The result rejects the preregistered broad exact-coordinate mechanisms; it does not claim that pivots have no descriptive value."],
+  "authorized_next": ["Use pivots descriptively as a probabilistic range/distance map.", "A separately preregistered spatial-zone question may be tested without rewriting this failed exact-coordinate result."],
+  "prohibited_next": ["No formula shopping, pair/session/year rescue, P&L optimization, Pine implementation or protected-holdout opening for the rejected broad mechanism."],
+  "assurance": {"status": "PASS", "decision": "Independent assurance PASS; exact primary points and independently seeded bootstrap reproduced.", "evidence": ["strategies/pivot_levels/reviews/PIVOT_TARGET_REVERSAL_ASSURANCE_2026-08-07.json"]},
+  "holdout": {"state_after": "UNOPENED", "opened_in_this_study": false},
+  "evidence": [
+    {"repository": "market-predictions/dtr", "ref": "agent/pivot-level-target-reversal", "commit_sha": "22c8192f66239d4e9aea644f137d524540f1b91d", "path": "strategies/pivot_levels/results/2026-08-07/pivot_results_compact.json"},
+    {"repository": "market-predictions/dtr", "ref": "agent/pivot-level-target-reversal", "commit_sha": "22c8192f66239d4e9aea644f137d524540f1b91d", "path": "strategies/pivot_levels/reports/PIVOT_TARGET_REVERSAL_REPORT_2026-08-07.md"},
+    {"repository": "market-predictions/dtr", "ref": "agent/pivot-level-target-reversal", "commit_sha": "22c8192f66239d4e9aea644f137d524540f1b91d", "path": "strategies/pivot_levels/reviews/PIVOT_TARGET_REVERSAL_ASSURANCE_2026-08-07.json"}
+  ]
+}

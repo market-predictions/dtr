@@ -9,6 +9,7 @@ Before starting **any** strategy test, market-data audit, FX research programme,
 3. Read `data/private_market_data_cache_registry.json`.
 4. Search the canonical private Google Drive cache first.
 5. Verify the registered SHA-256 values and reuse the qualified cached data.
+6. For the ten-pair cash-FX dataset, read `research_registry/DUKASCOPY_FX_CASH_RESEARCH_STANDARD.md` and search `research_registry/dukascopy_fx_cash/INDEX.md` before defining a new hypothesis.
 
 Canonical dataset folder:
 
@@ -24,6 +25,8 @@ A download is allowed only for a proven missing/corrupt partition, a materially 
 
 Raw market data must never be committed to the public repository.
 
+The canonical research name for the ten-pair source is **Dukascopy FX Cash**. A Dukascopy FX Cash study is not durably complete until its methodology and result are registered in `research_registry/dukascopy_fx_cash/` and the registry validator passes.
+
 ## Research operating rules
 
 - Treat `REPOSITORY_CONTROL.md` as the repository-wide authority.
@@ -34,3 +37,4 @@ Raw market data must never be committed to the public repository.
 - Verify dataset checksums before performance execution.
 - Do not generalize a pair-specific result without cross-pair evidence.
 - Do not release Pine, alerts, sizing or deployment guidance before the relevant scientific and operational gates pass.
+- Every Dukascopy FX Cash study must preserve its exact source commit, data windows, holdout state, null/placebo design, scientific disposition and negative findings in the central research registry.

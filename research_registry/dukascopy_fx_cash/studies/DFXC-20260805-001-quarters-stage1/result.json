@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "study_id": "DFXC-20260805-001-quarters-stage1",
+  "decision": "GATE_0_NOT_PASSED_DEMOTE_AND_REPLICATE_BEFORE_UNIVERSAL_TERMINATION",
+  "scientific_disposition": "REJECT_MECHANISM",
+  "summary": "On GBPUSD, the canonical 250-pip grid did not show a positive short-horizon continuation advantage over matched generic round-number controls.",
+  "primary_findings": [
+    {"metric": "60-minute canonical-minus-control return", "estimate": -0.78, "unit": "pips", "uncertainty": "95% block-bootstrap CI [-2.58, +1.20]"},
+    {"metric": "+10 before -10 odds ratio", "estimate": 1.02, "unit": "odds ratio", "uncertainty": "95% CI [0.89, 1.17], p=0.79"},
+    {"metric": "raw follow-through", "estimate": "48.4% canonical vs 48.3% controls", "unit": "probability", "uncertainty": "descriptive"}
+  ],
+  "breadth": {"pairs": "GBPUSD only", "development_and_validation": "both primary continuation effects negative"},
+  "robustness": ["Reset sensitivity did not rescue the primary claim."],
+  "limitations": ["Single-pair Stage-1 result; cross-pair confirmation was still required before a global claim."],
+  "authorized_next": ["Replicate the unchanged test across the registered FX pair universe."],
+  "prohibited_next": ["Do not optimize entries/stops/targets or add rescue filters on the same sample."],
+  "assurance": {"status": "SOURCE_RECORD_PRESENT", "decision": "Stage-1 decision frozen in branch evidence", "evidence": ["strategies/quarters_theory/reports/STAGE1_DISTINCTIVENESS_2026-08-05.md"]},
+  "holdout": {"state_after": "UNOPENED", "opened_in_this_study": false},
+  "evidence": [{"repository": "market-predictions/dtr", "ref": "agent/quarters-theory-stage1", "commit_sha": "a1ed9e501b619ed464c601cc21d77e80950c72cf", "path": "strategies/quarters_theory/reports/STAGE1_DISTINCTIVENESS_2026-08-05.md"}]
+}

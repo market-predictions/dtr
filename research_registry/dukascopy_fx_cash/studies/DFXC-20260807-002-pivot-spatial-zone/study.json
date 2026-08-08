@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0.0",
+  "study_id": "DFXC-20260807-002-pivot-spatial-zone",
+  "title": "Classic pivot spatial-zone follow-up",
+  "family": "pivot_levels",
+  "date": "2026-08-07",
+  "study_type": "falsification",
+  "lifecycle_status": "INTERNAL_ASSURANCE_PASS",
+  "dataset": {
+    "canonical_name": "Dukascopy FX Cash",
+    "dataset_id": "dukascopy_fx_cash_m1_bid_ask_v1",
+    "pairs": ["EURUSD", "GBPUSD", "USDCHF", "AUDUSD", "NZDUSD", "USDCAD", "USDJPY", "EURJPY", "GBPJPY", "EURGBP"],
+    "base_timeframe": "M1",
+    "analysis_timeframe": "H1 causal trend state and M15 reaction/first-passage layer derived from M1",
+    "quote_sides": ["BID", "ASK"],
+    "timezone": "UTC",
+    "price_basis": "midpoint structural measurement",
+    "windows": {"development": "2015-2019", "internal_validation": "2020-2021", "protected_holdout": "2022-2025"},
+    "pip_convention": "0.0001 non-JPY; 0.01 JPY",
+    "cache_registry": "data/private_market_data_cache_registry.json"
+  },
+  "hypotheses": {
+    "market_question": "If exact pivot lines are not privileged, does a measurable spatial zone around pivots alter attraction, stall, reversal or trend-terminal hazard?",
+    "null": "Occupancy-adjusted behavior near pivots is no different from matched spatial controls after predeclared falsification.",
+    "alternative": "A predeclared pivot-proximity zone shows a monotonic and cross-pair robust effect on at least one mechanism after correction.",
+    "mechanism": "Pivot relevance, if real, may be spatial rather than point-exact; price can overshoot/undershoot a watched reference before a terminal response."
+  },
+  "method": {
+    "primary_endpoint": "S1-S5 primary family at the preregistered 20%-of-adjacent-spacing pivot zone, including occupancy-adjusted terminal-extreme enrichment; secondary 5/10/15/20/25% width curves are descriptive coherence evidence only.",
+    "economic_effect_size": "For promoted S5: percentage-point enrichment in terminal-extreme incidence per H1 occupancy exposure in normalized 0-20% proximity versus 30-50% distance.",
+    "event_definition": "Same New York 17:00 classic-pivot construction as parent. Real zones use symmetric half-widths 5%,10%,15%,20%,25% of applicable adjacent spacing, with 20% primary. Far-control centers are at 50% of adjacent spacing and use equal width. S5 assigns each valid H1 close to nearest pivot, normalizes distance by side-specific adjacent spacing, bins 0-10 through 40-50%, and compares independently confirmed ATR-defined H1 trend-leg terminal extrema per occupancy exposure.",
+    "controls": ["equal-width far midpoint controls centered 50% of adjacent spacing from the pivot", "occupancy-adjusted continuous-distance null", "same-geometry H1 high/low robustness", "cross-pair breadth", "leave-one-pair-out", "named-level non-dominance", "monotonic spatial gradient"],
+    "variants": ["daily", "weekly", "monthly", "quarterly", "yearly", "5%", "10%", "15%", "20% primary", "25%"],
+    "selection_family_size": 25,
+    "inference": {"method": "pair-year-week clustered bootstrap", "cluster_or_block_unit": "pair-year-week", "draws": 5000, "multiple_testing": "Holm correction across 25 primary hypotheses (S1-S5 × five timeframes); secondary width curves cannot promote"},
+    "execution": {"applicable": false, "spread_policy": "structural/retrospective terminal-event study", "slippage_policy": "not_applicable", "same_bar_policy": "not_applicable"}
+  },
+  "source": {
+    "repository": "market-predictions/dtr",
+    "ref": "agent/pivot-spatial-zone-followup",
+    "commit_sha": "59515ee9d958f1273649089e6a83e1802064bb3c",
+    "paths": ["strategies/pivot_levels/docs/PIVOT_SPATIAL_ZONE_PREREGISTRATION_2026-08-07.md", "strategies/pivot_levels/docs/PIVOT_SPATIAL_ZONE_PREREGISTRATION_AMENDMENT_01_2026-08-07.md", "strategies/pivot_levels/results/2026-08-07/pivot_spatial_zone_summary.json", "strategies/pivot_levels/reports/PIVOT_SPATIAL_ZONE_REPORT_2026-08-07.md", "strategies/pivot_levels/reviews/PIVOT_SPATIAL_ZONE_ASSURANCE_2026-08-07.json"]
+  },
+  "holdout": {"state": "UNOPENED", "protected_window": "2022-2025", "opened_in_this_study": false, "authorization_required": true, "authorization_record": null, "prior_exposure": "2015-2021 pivot target/reversal and spatial-zone development programme; 2022-2025 untouched"},
+  "artifacts": {
+    "preregistration": ["strategies/pivot_levels/docs/PIVOT_SPATIAL_ZONE_PREREGISTRATION_2026-08-07.md", "strategies/pivot_levels/docs/PIVOT_SPATIAL_ZONE_PREREGISTRATION_AMENDMENT_01_2026-08-07.md"],
+    "results": ["strategies/pivot_levels/results/2026-08-07/pivot_spatial_zone_summary.json", "strategies/pivot_levels/results/2026-08-07/pivot_spatial_zone_evidence_manifest.json"],
+    "reports": ["strategies/pivot_levels/reports/PIVOT_SPATIAL_ZONE_REPORT_2026-08-07.md"],
+    "reviews": ["strategies/pivot_levels/reviews/PIVOT_SPATIAL_ZONE_ASSURANCE_2026-08-07.json"],
+    "governance": ["strategies/pivot_levels/governance/WORKPACKAGE_2026-08-07_SPATIAL_ZONE.md", "claims/PIV-WP-20260807-02.md", "handovers/PIV-WP-20260807-02.md"]
+  },
+  "related_studies": ["DFXC-20260807-001-pivot-target-reversal"],
+  "tags": ["pivots", "zones", "daily", "weekly", "terminal-hazard", "trend-leg", "occupancy-adjusted", "falsification", "holdout-candidate", "midlevels"],
+  "provenance": {"registration_mode": "retrospective_reconstruction", "registered_on": "2026-08-08", "notes": "Broad pivot magnet/reversal claim remains rejected; only the narrower daily/weekly terminal-hazard mechanism was promoted."}
+}

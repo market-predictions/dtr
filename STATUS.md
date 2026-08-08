@@ -10,6 +10,23 @@ The ten-pair Dukascopy M1 BID/ASK universe for 2015–2025 plus 2026 YTD is perm
 
 Full historic redownload of registered data is prohibited. See `REPOSITORY_CONTROL.md`.
 
+## Dukascopy FX Cash research memory
+
+Status: `IMPLEMENTATION_COMPLETE_ASSURANCE_PENDING`
+
+Candidate work package: `DTR-DFXC-WP-20260808-01` on `agent/dukascopy-fx-cash-research-registry`.
+
+The ten-pair source is canonically named **Dukascopy FX Cash** for research. The candidate adds a durable central registry that separates data provenance from scientific memory, requires immutable evidence pointers, preserves negative results and holdout state, and makes branch-resident studies discoverable from one index.
+
+Recovered seed records include:
+
+- Quarters Theory GBPUSD Stage-1 distinctiveness;
+- Quarters Theory unchanged ten-pair confirmation (`0/10` positive-and-stable pairs);
+- classic pivot target/stall/reversal falsification;
+- pivot spatial-zone follow-up, with only the narrower daily/weekly terminal-hazard effect promoted to unchanged protected-holdout confirmation.
+
+No 2022–2025 protected FX holdout was opened by this infrastructure work. Independent assurance is required before merge.
+
 ## Current work package
 
 `DTR-NQ-WP-20260722-06 — Baseline validity reset`
@@ -55,6 +72,8 @@ Decision: `CONTINUE_RESEARCH_DO_NOT_DEPLOY`
 
 - permanent FX cache: ten pair folders present and private;
 - EURUSD real-archive restore drill: exact SHA-256 match and safe extraction;
+- Dukascopy FX Cash registry local validator: PASS on implementation candidate;
+- Dukascopy FX Cash registry focused tests: 2 passed locally on implementation candidate;
 - local cache-control suite: 8 tests passed;
 - local suite: 75 tests passed;
 - baseline validity: 15/15 artifacts identical;
@@ -72,8 +91,8 @@ Decision: `CONTINUE_RESEARCH_DO_NOT_DEPLOY`
 
 ## Remaining closure gates
 
-- final adversarial PR review;
-- squash merge of PR #6;
+- independent assurance and CI for `DTR-DFXC-WP-20260808-01` before registry merge;
+- final adversarial PR review of the older NQ baseline-validity line;
 - retire or rebuild PR #5 against the accepted causal benchmark.
 
 ## Deployment restriction
