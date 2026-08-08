@@ -1,0 +1,28 @@
+{
+  "date": "2026-08-08",
+  "study_id": "DFXC-20260808-005-pivot-fibonacci-substitution",
+  "dataset": "Dukascopy FX Cash",
+  "result_year_range": "2015_2021_ONLY",
+  "fibonacci_holdout_opened": false,
+  "source_ref": "agent/pivot-fibonacci-formula-substitution",
+  "preregistration_commit": "0febc662d071f90363a44cf6f3e95a76b87155d0",
+  "artifacts": {
+    "summary": {"commit":"881ac3b3fef91b39efa952dedc11764e01aaaaaf","path":"strategies/pivot_levels/results/2026-08-08/pivot_fibonacci_formula_substitution_summary.json"},
+    "report": {"commit":"741e70b599217be59afc3ca6f33f4236e0781310","path":"strategies/pivot_levels/reports/PIVOT_FIBONACCI_FORMULA_SUBSTITUTION_REPORT_2026-08-08.md"},
+    "implementation_validation": {"commit":"12e89a09775ceeeef1dfb1ee65599dd3f009f2ca","path":"strategies/pivot_levels/reviews/PIVOT_FIBONACCI_IMPLEMENTATION_VALIDATION_2026-08-08.md"},
+    "registry_result": {"commit":"00422571a68d25d2be95eb96fa5f17a257c9e3f9","path":"research_registry/dukascopy_fx_cash/studies/DFXC-20260808-005-pivot-fibonacci-substitution/result.json"}
+  },
+  "validation": {
+    "strict_later_bar_ordering": "PASS_CORRECTED_FROM_FROZEN_AMENDMENT_02",
+    "daily_classic_primary_wick_reference_error_pp": 0.00905867102678759,
+    "weekly_classic_primary_wick_reference_error_pp": 0.00913346778341484,
+    "daily_classic_structural_reference_error_pp": 0.10348934755067818,
+    "weekly_classic_structural_reference_error_pp": 0.0664511593531647,
+    "daily_fibonacci_interpretation": "SUPPORTED_INTERNAL",
+    "weekly_fibonacci_interpretation": "BORDERLINE_INDETERMINATE_FOR_PROMOTION",
+    "formula_superiority": "NOT_ESTABLISHED_BOTH_PAIRED_WICK_CIS_CROSS_ZERO"
+  },
+  "rejected_preliminary_run": "Initial update-before-confirmation detector reconstruction was rejected before accepted Fibonacci interpretation because it violated the frozen strict-later event ordering.",
+  "heavy_intermediates": "Raw market data and large local intermediate ledgers are private/uncommitted. The historical parent terminal-event ledger is unavailable for byte-for-byte replay; this limitation is explicit in the report and validation record.",
+  "governance_assurance": "PENDING_INDEPENDENT_REVIEW"
+}
