@@ -1,5 +1,28 @@
 # Research Registry Changelog
 
+## v1.1.0 — 2026-08-08
+
+### Added
+
+- Prospectively preregistered `DFXC-20260808-001-pivot-multiscale-terminal`.
+- Prospectively conditional `DFXC-20260808-002-pivot-wick-rejection`.
+- Scale-aligned pivot/leg mapping test: D/H1, W/H4, M/D1, Q/W1, Y/MN1 plus H1 mismatch benchmarks.
+- Strict later-bar endpoint-confirmation amendment to prevent wick/termination circularity.
+- Compact multiscale and wick result records, final internal report, evidence manifest and implementation-validation record.
+
+### Scientific state
+
+- Daily/H1 and Weekly/H4 terminal-zone mappings pass the frozen internal structural gate.
+- Monthly/D1, Quarterly/W1 and Yearly/MN1 fail; higher-timeframe scale alignment does not rescue those pivot horizons.
+- Daily/H1 pivot-core wick interaction passes internally at +0.92 pp beyond generic wick exhaustion.
+- Weekly/H4 wick interaction remains failed because its uncertainty interval crosses zero / p=0.0744.
+- Protected 2022–2025 remains unopened.
+
+### Governance
+
+- Implementation validation is complete.
+- Independent `governance_release_assurance` remains pending; no holdout, strategy or deployment authority is created by these internal results.
+
 ## v1.0.0 — 2026-08-08
 
 ### Added
@@ -22,4 +45,4 @@
 
 ### Governance
 
-This candidate is implementation-complete but requires independent assurance before merge to `main`.
+The initial registry candidate was implementation-complete and independently validated before merge to `main`.
