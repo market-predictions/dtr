@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0.0",
+  "study_id": "DFXC-20260808-002-pivot-wick-rejection",
+  "decision": "PROMOTE_DAILY_PIVOT_WICK_INTERACTION_WEEKLY_FAILS_GATE",
+  "scientific_disposition": "PROMOTE_TO_HOLDOUT_CONFIRMATION",
+  "summary": "Strong directional wicks are powerful generic exhaustion information on both eligible mappings, but only Daily/H1 shows a statistically defensible incremental pivot-core interaction beyond that generic wick effect. Daily/H1 interaction is +0.92 pp with 95% CI [+0.49,+1.36], positive in 8/10 pairs and all leave-one-pair-out tests positive. Weekly/H4 is +0.77 pp but fails because its CI crosses zero and p=0.0744.",
+  "primary_findings": [
+    {"metric": "Daily/H1 pivot-specific wick interaction", "estimate": 0.9206, "unit": "percentage points", "uncertainty": "95% CI [+0.49,+1.36], development +1.13 pp, validation +0.39 pp, 8/10 pairs"},
+    {"metric": "Daily/H1 generic outer strong-minus-weak wick effect", "estimate": 9.5471, "unit": "percentage points", "uncertainty": "descriptive companion effect; demonstrates wick exhaustion is largely generic"},
+    {"metric": "Daily/H1 core strong-wick terminal probability", "estimate": 17.6672, "unit": "percent", "uncertainty": "22,605 terminals / 127,949 observations"},
+    {"metric": "Daily/H1 core weak-wick terminal probability", "estimate": 7.1994, "unit": "percent", "uncertainty": "5,543 terminals / 76,992 observations"},
+    {"metric": "Weekly/H4 pivot-specific wick interaction", "estimate": 0.7737, "unit": "percentage points", "uncertainty": "95% CI [-0.07,+1.59], p=0.0744; frozen gate FAIL"}
+  ],
+  "breadth": {"eligible_parent_mappings": ["D_H1", "W_H4"], "daily_positive_pairs": "8/10", "weekly_positive_pairs": "9/10 but gate failed"},
+  "robustness": ["Daily core terminal probability rises monotonically across frozen wick bins: 7.20%, 9.53%, 11.88%, 14.13%, 19.43%.", "Daily pooled interaction remains positive after removing any one pair.", "Daily effect survives development/validation sign, bootstrap interval, multiplicity and breadth gates.", "Weekly has a coherent wick gradient and 9/10 positive pair interactions but correctly remains failed because the uncertainty gate is not met.", "Separate arithmetic recalculation reproduced both eligible difference-in-differences interactions exactly."],
+  "limitations": ["The dominant wick signal is generic: strong wicks increase terminal probability substantially even away from pivots; the daily pivot premium is incremental and modest.", "The endpoint remains retrospectively confirmed even though wick geometry is observable at candle close.", "This is a conditional internal mechanism result because parent eligibility was selected on the same exposed 2015-2021 sample."],
+  "authorized_next": ["Obtain independent governance assurance on the frozen candidate.", "If independently assured and separately authorized, perform one unchanged protected 2022-2025 confirmation of the Daily/H1 pivot-core wick interaction before designing an execution rule.", "Keep Weekly/H4 wick interaction classified failed internally; only fresh independent data may reopen it without tuning."],
+  "prohibited_next": ["No wick-threshold tuning, pair removal, named-level selection or session optimization to strengthen Daily/H1 or rescue Weekly/H4.", "No volume/tick-activity filter inside this frozen study.", "No protected-holdout opening inside this work package.", "No direct conversion to reversal entry, P&L, Pine, alerts, sizing or deployment."],
+  "assurance": {"status": "NOT_REVIEWED", "decision": null, "evidence": ["strategies/pivot_levels/reviews/PIVOT_MULTISCALE_IMPLEMENTATION_VALIDATION_2026-08-08.md", "handovers/PIV-WP-20260808-03.md"]},
+  "holdout": {"state_after": "UNOPENED", "opened_in_this_study": false},
+  "evidence": [
+    {"repository": "market-predictions/dtr", "ref": "agent/pivot-multiscale-terminal-wick", "commit_sha": "edf0f06f3357b1bdb65719f8f1a171cb1a8d819a", "path": "strategies/pivot_levels/results/2026-08-08/pivot_wick_rejection_summary.json"},
+    {"repository": "market-predictions/dtr", "ref": "agent/pivot-multiscale-terminal-wick", "commit_sha": "edf0f06f3357b1bdb65719f8f1a171cb1a8d819a", "path": "strategies/pivot_levels/reports/PIVOT_MULTISCALE_TERMINAL_WICK_REPORT_2026-08-08.md"},
+    {"repository": "market-predictions/dtr", "ref": "agent/pivot-multiscale-terminal-wick", "commit_sha": "edf0f06f3357b1bdb65719f8f1a171cb1a8d819a", "path": "strategies/pivot_levels/results/2026-08-08/pivot_multiscale_evidence_manifest.json"}
+  ]
+}
