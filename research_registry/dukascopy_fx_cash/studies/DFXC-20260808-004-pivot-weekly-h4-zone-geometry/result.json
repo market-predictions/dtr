@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0.0",
+  "study_id": "DFXC-20260808-004-pivot-weekly-h4-zone-geometry",
+  "decision": "WEEKLY_H4_ZONE_GEOMETRY_MATERIALLY_STRENGTHENS_PIVOT_WICK_INTERACTION",
+  "scientific_disposition": "PROMOTE_TO_HOLDOUT_CONFIRMATION",
+  "summary": "The inherited Weekly/H4 20%-of-pivot-spacing zone was too broad for the pivot-specific wick interaction. In the preregistered seven-geometry 2015-2021 family, only SP10 (core 0-10% of adjacent weekly-pivot spacing with equal-width 40-50% control) passed both structural and wick gates after Holm correction. Its structural terminal effect was +1.002 pp and wick interaction +1.616 pp, versus +0.669 pp and +0.774 pp for the exactly reproduced SP20 reference. ATR-capped hybrid zones did not pass the wick gate.",
+  "primary_findings": [
+    {"metric": "SP10 pivot-specific wick interaction", "estimate": 0.016157711979495448, "unit": "probability difference / +1.616 pp", "uncertainty": "95% pair-year clustered-bootstrap CI [0.005229123355332755,0.026860714716208735]; raw p=0.0044; Holm p=0.0308"},
+    {"metric": "SP10 structural terminal effect", "estimate": 0.010019046333827608, "unit": "probability difference / +1.002 pp", "uncertainty": "95% CI [0.004781251312506291,0.015254394206034678]; Holm p=0.0016"},
+    {"metric": "SP20 reference wick interaction", "estimate": 0.007736672031333339, "unit": "probability difference / +0.774 pp", "uncertainty": "95% CI [-0.00039092204134086897,0.01607207678081772]; fails wick gate"}
+  ],
+  "breadth": {"SP10_structural_positive_pairs": "8/10", "SP10_wick_positive_pairs": "9/10", "SP10_all_structural_leave_one_pair_out_positive": true, "SP10_all_wick_leave_one_pair_out_positive": true},
+  "robustness": ["SP10 development wick interaction +1.688 pp and validation +1.436 pp", "SP10 frozen core wick-bin gradient is non-decreasing", "SP20_REF reproduces the parent structural and wick point estimates exactly to floating-point precision", "SP15, SP20, SP25 and all three ATR-capped hybrids fail the joint wick gate", "two preliminary weekly runs were invalidated before acceptance and documented because they did not meet deterministic SP20 reference reproduction"],
+  "limitations": ["SP10 was selected within a preregistered seven-geometry internal 2015-2021 family; it is not yet an independently confirmed Weekly/H4 result.", "The equal-width SP10 control is 40-50% of spacing, so the larger contrast reflects both a more local core and greater distance from the pivot in the matched control.", "Post-decision decomposition showing stronger 0-10% wick exhaustion versus the adjacent 10-20% bin is descriptive only.", "ATR-capped hybrids tested only coefficients 0.50, 0.75 and 1.00 under the preregistered min(20% spacing, k*ATR) construction.", "Structural midpoint analysis only; no executable strategy or P&L."],
+  "authorized_next": ["Freeze SP10 unchanged for future independent Weekly/H4 confirmation.", "Prefer genuinely fresh data after the current cache end for the cleanest confirmation because 2022-2025 has now been viewed for a separate Daily/H1 pivot hypothesis."],
+  "prohibited_next": ["Do not tune 5%, 7.5%, 12.5% or other weekly spacing widths on 2015-2021.", "Do not add new ATR coefficients, switch min to max hybrid geometry, remove pairs, select named pivots, change wick thresholds or add sessions as a rescue on the same sample.", "Do not use 2022-2025 Weekly/H4 outcomes without a new explicit authorization and preregistration."],
+  "assurance": {"status": "NOT_REVIEWED", "decision": null, "evidence": ["strategies/pivot_levels/reviews/PIVOT_DAILY_HOLDOUT_WEEKLY_ZONE_IMPLEMENTATION_VALIDATION_2026-08-08.md"]},
+  "holdout": {"state_after": "UNOPENED", "opened_in_this_study": false},
+  "evidence": [
+    {"repository": "market-predictions/dtr", "ref": "agent/pivot-daily-holdout-weekly-zone-geometry", "commit_sha": "15c5009dd8e028ecec7039352abdcb2af929179e", "path": "strategies/pivot_levels/results/2026-08-08/pivot_weekly_h4_zone_geometry_summary.json"},
+    {"repository": "market-predictions/dtr", "ref": "agent/pivot-daily-holdout-weekly-zone-geometry", "commit_sha": "15c5009dd8e028ecec7039352abdcb2af929179e", "path": "strategies/pivot_levels/reports/PIVOT_DAILY_HOLDOUT_WEEKLY_ZONE_REPORT_2026-08-08.md"},
+    {"repository": "market-predictions/dtr", "ref": "agent/pivot-daily-holdout-weekly-zone-geometry", "commit_sha": "15c5009dd8e028ecec7039352abdcb2af929179e", "path": "strategies/pivot_levels/docs/PIVOT_WEEKLY_H4_ZONE_GEOMETRY_IMPLEMENTATION_DEVIATION_01_2026-08-08.md"},
+    {"repository": "market-predictions/dtr", "ref": "agent/pivot-daily-holdout-weekly-zone-geometry", "commit_sha": "15c5009dd8e028ecec7039352abdcb2af929179e", "path": "strategies/pivot_levels/docs/PIVOT_WEEKLY_H4_ZONE_GEOMETRY_IMPLEMENTATION_DEVIATION_02_2026-08-08.md"}
+  ]
+}
