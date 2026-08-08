@@ -2,7 +2,7 @@
 
 Canonical machine source: `research_registry/dukascopy_fx_cash/index.json`.
 
-Registered studies: **6**.
+Registered studies: **8**.
 
 | Study ID | Date | Family | Question / title | Disposition | Holdout | Assurance | Source |
 |---|---|---|---|---|---|---|---|
@@ -12,6 +12,8 @@ Registered studies: **6**.
 | `DFXC-20260807-002-pivot-spatial-zone` | 2026-08-07 | pivot_levels | Classic pivot spatial-zone follow-up | `PROMOTE_TO_HOLDOUT_CONFIRMATION` | `UNOPENED` | `PASS` | `agent/pivot-spatial-zone-followup` @ `59515ee9` |
 | `DFXC-20260808-001-pivot-multiscale-terminal` | 2026-08-08 | pivot_levels | Classic pivot zones — scale-aligned terminal-hazard test | `PROMOTE_TO_HOLDOUT_CONFIRMATION` | `UNOPENED` | `NOT_REVIEWED` | `agent/pivot-multiscale-terminal-wick` @ `edf0f06f` |
 | `DFXC-20260808-002-pivot-wick-rejection` | 2026-08-08 | pivot_levels | Classic pivot zones — conditional wick-rejection interaction | `PROMOTE_TO_HOLDOUT_CONFIRMATION` | `UNOPENED` | `NOT_REVIEWED` | `agent/pivot-multiscale-terminal-wick` @ `edf0f06f` |
+| `DFXC-20260808-003-pivot-daily-wick-holdout` | 2026-08-08 | pivot_levels | Daily classic-pivot × H1 wick interaction — protected holdout confirmation | `SUPPORTED_INTERNAL` | `OPENED` | `NOT_REVIEWED` | `agent/pivot-daily-holdout-weekly-zone-geometry` @ `c4aeaced` |
+| `DFXC-20260808-004-pivot-weekly-h4-zone-geometry` | 2026-08-08 | pivot_levels | Weekly classic-pivot × H4 zone geometry — spacing/ATR robustness | `PROMOTE_TO_HOLDOUT_CONFIRMATION` | `UNOPENED` | `NOT_REVIEWED` | `agent/pivot-daily-holdout-weekly-zone-geometry` @ `c4aeaced` |
 
 ## Reading rule
 
