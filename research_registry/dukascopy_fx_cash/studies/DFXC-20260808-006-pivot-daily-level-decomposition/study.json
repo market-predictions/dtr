@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0.0",
+  "study_id": "DFXC-20260808-006-pivot-daily-level-decomposition",
+  "title": "Daily classic-pivot × H1 wick — named-level decomposition",
+  "family": "pivot_levels",
+  "date": "2026-08-08",
+  "study_type": "diagnostic",
+  "lifecycle_status": "RUN_COMPLETE",
+  "dataset": {
+    "canonical_name": "Dukascopy FX Cash",
+    "dataset_id": "dukascopy_fx_cash_m1_bid_ask_v1",
+    "pairs": ["EURUSD", "GBPUSD", "USDCHF", "AUDUSD", "NZDUSD", "USDCAD", "USDJPY", "EURJPY", "GBPJPY", "EURGBP"],
+    "base_timeframe": "M1",
+    "analysis_timeframe": "Daily classic pivots / H1",
+    "quote_sides": ["BID", "ASK"],
+    "timezone": "UTC",
+    "price_basis": "midpoint structural measurement",
+    "windows": {"diagnostic_outcome": "2022-2025 consumed parent holdout", "warmup": "2021"}
+  },
+  "hypotheses": {
+    "market_question": "Does the confirmed Daily/H1 pivot-specific wick interaction differ materially by named classic daily pivot tier, especially S1/R1 versus S2/R2?",
+    "primary_diagnostic": "interaction(S1+R1) - interaction(S2+R2)",
+    "mechanism": "If first-order pivots represent a distinct local exhaustion geometry, strong rejection wicks should gain more incremental terminal information near S1/R1 than near S2/R2 after matched outer-zone control."
+  },
+  "method": {
+    "primary_endpoint": "S1/R1 minus S2/R2 difference in pivot-specific strong-vs-weak wick interaction",
+    "secondary": ["individual PP/S1/R1/S2/R2/S3/R3 interactions", "weak and strong core/outer rates", "S3/R3 pooled", "pair/year breadth", "reconstruction sensitivity"],
+    "inference": {"method": "pair-year clustered bootstrap on primary reconstructed tier contrast", "draws": 5000},
+    "selection_family_size": 1
+  },
+  "source": {
+    "repository": "market-predictions/dtr",
+    "ref": "agent/pivot-daily-h1-level-decomposition",
+    "commit_sha": "branch-history; see evidence manifest",
+    "paths": [
+      "strategies/pivot_levels/docs/PIVOT_DAILY_H1_LEVEL_DECOMPOSITION_SCOPE_2026-08-08.md",
+      "strategies/pivot_levels/results/2026-08-08/pivot_daily_h1_level_decomposition_summary.json",
+      "strategies/pivot_levels/reports/PIVOT_DAILY_H1_LEVEL_DECOMPOSITION_REPORT_2026-08-08.md",
+      "strategies/pivot_levels/reviews/PIVOT_DAILY_H1_LEVEL_DECOMPOSITION_IMPLEMENTATION_VALIDATION_2026-08-08.md"
+    ]
+  },
+  "holdout": {
+    "state": "OPENED_CONSUMED_PARENT",
+    "protected_window": "2022-2025",
+    "opened_in_this_study": false,
+    "prior_exposure": "Consumed by DFXC-20260808-003. Parent preregistration already specified named-level diagnostics as descriptive only."
+  },
+  "related_studies": ["DFXC-20260808-002-pivot-wick-rejection", "DFXC-20260808-003-pivot-daily-wick-holdout"],
+  "tags": ["pivots", "daily", "H1", "wick", "named-level", "S1", "R1", "S2", "R2", "diagnostic", "terminal-hazard"]
+}
