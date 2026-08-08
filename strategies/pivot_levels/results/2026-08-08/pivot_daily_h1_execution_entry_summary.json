@@ -1,0 +1,72 @@
+{
+  "study_id": "DFXC-20260808-008-pivot-daily-execution-entry",
+  "n_all_signals": 68118,
+  "n_joint_valid": 64267,
+  "joint_valid_rate": 0.9434657506092369,
+  "confirmation_rate_joint": 0.7899077286943532,
+  "confirmation_timing_minutes": {
+    "count": 50765.0,
+    "mean": 36.01958041958042,
+    "std": 52.00378899043238,
+    "min": 0.0,
+    "10%": 0.0,
+    "25%": 1.0,
+    "50%": 12.0,
+    "75%": 50.0,
+    "90%": 117.0,
+    "max": 239.0
+  },
+  "mean_spread_atr_immediate": 0.08416166977100624,
+  "mean_spread_atr_confirmation": 0.10171609998654772,
+  "primary_bootstrap": {
+    "imm_ret": {"estimate": -0.09957969850839228, "ci95": [-0.11502328618956587, -0.08263618851040443], "p_two_sided_sign": 0.0},
+    "conf_ret_signal": {"estimate": -0.08220114269498004, "ci95": [-0.09778345120483317, -0.06587180971019105], "p_two_sided_sign": 0.0},
+    "diff": {"estimate": 0.01737855581341224, "ci95": [0.008444609163259443, 0.026197376787909073], "p_two_sided_sign": 0.0004}
+  },
+  "partitions": {
+    "development_2015_2019": {"n": 29191, "immediate": -0.08666109404022493, "confirmation_per_signal": -0.07161709863941708, "difference": 0.015043995400807857, "confirmation_rate": 0.7841115412284608, "confirmation_per_trade": -0.09133534564127854},
+    "validation_2020_2021": {"n": 11966, "immediate": -0.11895685883404167, "confirmation_per_signal": -0.08423092764309877, "difference": 0.03472593119094292, "confirmation_rate": 0.787982617416012, "confirmation_per_trade": -0.10689439815222394},
+    "stability_2022_2025": {"n": 23110, "immediate": -0.10586441865437031, "confirmation_per_signal": -0.09451920515005356, "difference": 0.011345213504316717, "confirmation_rate": 0.7982258762440502, "confirmation_per_trade": -0.11841160248375009}
+  },
+  "levels": [
+    {"level": "R1", "n": 33090, "immediate": -0.11126844830590968, "confirmation_per_signal": -0.09471512393514532, "difference": 0.01655332437076438, "confirmation_rate": 0.7906618313689937, "confirmation_per_trade": -0.11979220467889609},
+    {"level": "S1", "n": 31177, "immediate": -0.08717373479155449, "confirmation_per_signal": -0.06891931188261613, "difference": 0.018254422908938358, "confirmation_rate": 0.7891073547807679, "confirmation_per_trade": -0.08733832154151383}
+  ],
+  "positive_return_probability": {"immediate": 0.4582756313504598, "confirmation_trade": 0.4499556781246922},
+  "confirmation_trade_mean": -0.10406423397179713,
+  "immediate_mfe4_mean": 1.0231321435932228,
+  "immediate_mae4_mean": 1.22609697522625,
+  "confirmation_trade_mfe4_mean": 1.0376287005305962,
+  "confirmation_trade_mae4_mean": 1.2680247750536484,
+  "cooldown_4h": {
+    "n": 42608,
+    "bootstrap": {
+      "imm_ret": {"estimate": -0.09686976493086727, "ci95": [-0.11280175143440552, -0.0808726086387472], "p_two_sided_sign": 0.0},
+      "conf_ret_signal": {"estimate": -0.0789212412222408, "ci95": [-0.09331855850582718, -0.06397318617456263], "p_two_sided_sign": 0.0},
+      "diff": {"estimate": 0.017948523708626478, "ci95": [0.0072981337055150084, 0.02806241372113974], "p_two_sided_sign": 0.0008}
+    },
+    "confirmation_rate": 0.7756993991738641,
+    "confirmation_trade_mean": -0.10174204247972031
+  },
+  "falsification_controls": {
+    "S1R1_OUTER": {"n": 89453, "confirmation_rate": 0.7981509843157859, "immediate": -0.10503955417421523, "confirmation_per_signal": -0.0742948104301687, "difference": 0.030744743744046527, "confirmation_per_trade": -0.09308365445900924, "positive_pair_differences": 10},
+    "S2R2_CORE": {"n": 17176, "confirmation_rate": 0.7671169073125291, "immediate": -0.11487273292207298, "confirmation_per_signal": -0.09589679888968981, "difference": 0.018975934032383186, "confirmation_per_trade": -0.12500936685863026, "positive_pair_differences": 8}
+  },
+  "confirmation_uplift_control_contrasts": {
+    "S1R1_CORE_minus_S1R1_OUTER": {"estimate": -0.013366187930634287, "ci95": [-0.025196660056096026, -0.001422544131556211], "p_two_sided_sign": 0.0272},
+    "S1R1_CORE_minus_S2R2_CORE": {"estimate": -0.0015973782189709455, "ci95": [-0.020740979932569372, 0.01816118619631359], "p_two_sided_sign": 0.8872}
+  },
+  "parent_midpoint_parity_audit": {"n": 64267, "parent_midpoint_fwd4_mean": -0.012288140883486814, "executable_immediate_mean": -0.09957969850839228, "execution_minus_midpoint": -0.08729155762490547, "mean_entry_spread_atr": 0.08416166977100624, "correlation_parent_vs_executable": 0.9981094016391463},
+  "breadth": {"confirmation_diff_positive_pairs": 8, "confirmation_diff_positive_years": 10, "pairs_total": 10, "years_total": 11},
+  "promotion_gate": {
+    "1_full_diff_positive": true,
+    "2_diff_ci_lower_positive": true,
+    "3_confirmation_positive_ci_lower_positive": false,
+    "4_diff_positive_dev_and_validation": true,
+    "5_pair_concentration_under_35pct": "NOT_APPLICABLE_AGGREGATE_CONFIRMATION_RETURN_NON_POSITIVE",
+    "passed": false
+  },
+  "decision": "REJECT_CONFIRMATION_AS_STANDALONE_EXECUTABLE_EDGE_DO_NOT_OPTIMIZE_EXITS",
+  "scientific_disposition": "REJECT_MECHANISM",
+  "interpretation": "Confirmation is a statistically real loss-reduction/abstention effect, but not a positive-expectancy executable reversal edge; the uplift is not pivot-specific because matched S1/R1 outer controls improve even more."
+}

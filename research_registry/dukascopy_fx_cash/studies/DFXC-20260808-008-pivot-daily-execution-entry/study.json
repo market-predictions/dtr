@@ -1,0 +1,91 @@
+{
+  "schema_version": "1.0.0",
+  "study_id": "DFXC-20260808-008-pivot-daily-execution-entry",
+  "title": "Daily S1/R1 × H1 rejection — executable entry architecture",
+  "family": "pivot_levels",
+  "date": "2026-08-08",
+  "study_type": "strategy",
+  "lifecycle_status": "RUN_COMPLETE",
+  "dataset": {
+    "canonical_name": "Dukascopy FX Cash",
+    "dataset_id": "dukascopy_fx_cash_m1_bid_ask_v1",
+    "pairs": ["EURUSD","GBPUSD","USDCHF","AUDUSD","NZDUSD","USDCAD","USDJPY","EURJPY","GBPJPY","EURGBP"],
+    "base_timeframe": "M1",
+    "analysis_timeframe": "Daily classic pivots / H1 signal / M1 BID-ASK execution",
+    "quote_sides": ["BID","ASK"],
+    "timezone": "UTC",
+    "price_basis": "executable BID/ASK with midpoint structural signal",
+    "windows": {
+      "development": "2015-2019",
+      "internal_validation": "2020-2021",
+      "protected_holdout": "2026 YTD ending exclusive 2026-07-24 — reserved and unopened",
+      "related_exposed_stability": "2022-2025"
+    },
+    "cache_registry": "data/private_market_data_cache_registry.json"
+  },
+  "hypotheses": {
+    "market_question": "Can rejection-candle confirmation convert the structurally meaningful Daily S1/R1 + strong H1 rejection state into positive executable countertrend expectancy after real Dukascopy BID/ASK spread?",
+    "null": "Confirmation does not improve per-signal executable expectancy over immediate entry and/or does not produce positive executable expectancy.",
+    "alternative": "Confirmation improves per-signal executable expectancy over immediate entry and produces positive executable expectancy under the frozen gate.",
+    "mechanism": "If first-order Daily pivot rejection identifies a tradable reversal rather than only terminal/stall context, waiting for price to break the completed rejection candle in the reversal direction should select a positive-expectancy subset after spread."
+  },
+  "method": {
+    "primary_endpoint": "confirmation per-signal executable 4H ATR-normalized return minus immediate executable 4H ATR-normalized return",
+    "event_definition": "Daily S1/R1 core d<0.20 with directional H1 wick >=30%, observable only at completed H1 close",
+    "entry_architectures": [
+      "Immediate: first active M1 next-H1 quote, long ASK / short BID",
+      "Confirmation: within four contiguous hours, long ASK reaches rejection H1 high or short BID reaches rejection H1 low; no valid trigger = zero strategy return"
+    ],
+    "exit": "fixed 240 clock minutes from executable entry; long BID exit / short ASK exit",
+    "controls": ["immediate executable entry", "S1/R1 matched outer strong-wick cohort", "S2/R2 core strong-wick cohort"],
+    "overlap_rule": "primary preserves parent side-specific signals; deterministic 4H same-pair/same-direction cooldown is robustness only",
+    "unsafe_gap_rule": "each constituent clock hour must contain an active quote; endpoint must have active quote within final 10 minutes; no weekend bridging",
+    "inference": {"method":"pair-year clustered bootstrap","draws":5000,"selection_family_size":1},
+    "execution": {"spread":"observed BID/ASK embedded","commission":0,"slippage":"0 except conservative gap-through trigger fill","same_bar":"signal candle must close before entry eligibility"},
+    "promotion_gate": [
+      "full confirmation-minus-immediate >0",
+      "95% CI lower bound of architecture difference >0",
+      "confirmation expectancy >0 with 95% CI lower bound >0",
+      "architecture difference positive in development and validation",
+      "no single pair >35% of aggregate positive normalized confirmation return"
+    ]
+  },
+  "source": {
+    "repository": "market-predictions/dtr",
+    "ref": "agent/pivot-daily-h1-execution-entry",
+    "commit_sha": "509c736f99cc964b9f0b0f0ac53858b77881fbfb",
+    "paths": [
+      "strategies/pivot_levels/docs/PIVOT_DAILY_H1_EXECUTION_ENTRY_PREREGISTRATION_2026-08-08.md",
+      "strategies/pivot_levels/docs/PIVOT_DAILY_H1_EXECUTION_ENTRY_PREREGISTRATION_AMENDMENT_01_2026-08-08.md"
+    ]
+  },
+  "holdout": {
+    "state": "UNOPENED",
+    "protected_window": "2026 YTD ending exclusive 2026-07-24 — reserved and unopened",
+    "opened_in_this_study": false,
+    "prior_exposure": "2015-2025 had prior exposure in related pivot research; entry mechanics were preregistered before executable outcome inspection. 2026 YTD remains untouched."
+  },
+  "artifacts": {
+    "preregistration": [
+      "strategies/pivot_levels/docs/PIVOT_DAILY_H1_EXECUTION_ENTRY_PREREGISTRATION_2026-08-08.md",
+      "strategies/pivot_levels/docs/PIVOT_DAILY_H1_EXECUTION_ENTRY_PREREGISTRATION_AMENDMENT_01_2026-08-08.md"
+    ],
+    "results": [
+      "strategies/pivot_levels/results/2026-08-08/pivot_daily_h1_execution_entry_summary.json",
+      "strategies/pivot_levels/results/2026-08-08/pivot_daily_h1_execution_entry_source_audit.json"
+    ],
+    "reports": ["strategies/pivot_levels/reports/PIVOT_DAILY_H1_EXECUTION_ENTRY_REPORT_2026-08-08.md"],
+    "reviews": ["strategies/pivot_levels/reviews/PIVOT_DAILY_H1_EXECUTION_ENTRY_IMPLEMENTATION_VALIDATION_2026-08-08.md"]
+  },
+  "related_studies": [
+    "DFXC-20260808-003-pivot-daily-wick-holdout",
+    "DFXC-20260808-006-pivot-daily-level-decomposition",
+    "DFXC-20260808-007-pivot-daily-time-weekday"
+  ],
+  "tags": ["pivots","daily","H1","S1","R1","wick","execution","bid-ask","confirmation","entry","reversal","falsification"],
+  "provenance": {
+    "registration_mode": "prospective_entry_architecture_preregistration",
+    "registered_on": "2026-08-08",
+    "notes": "2026 YTD explicitly reserved; stop/target optimization conditional on frozen entry promotion gate."
+  }
+}

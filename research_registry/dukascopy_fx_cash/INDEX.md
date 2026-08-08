@@ -2,7 +2,7 @@
 
 Canonical machine source: `research_registry/dukascopy_fx_cash/index.json`.
 
-Registered studies: **11**.
+Registered studies: **12**.
 
 | Study ID | Date | Family | Question / title | Disposition | Holdout | Assurance | Source |
 |---|---|---|---|---|---|---|---|
@@ -17,6 +17,7 @@ Registered studies: **11**.
 | `DFXC-20260808-005-pivot-fibonacci-substitution` | 2026-08-08 | pivot_levels | Fibonacci pivot formula substitution — Daily/H1 and Weekly/H4 | `SUPPORTED_INTERNAL` | `UNOPENED` | `NOT_REVIEWED` | `agent/pivot-fibonacci-formula-substitution` @ `0febc662` |
 | `DFXC-20260808-006-pivot-daily-level-decomposition` | 2026-08-08 | pivot_levels | Daily classic-pivot × H1 wick — named-level decomposition | `DESCRIPTIVE_ONLY` | `OPENED` | `NOT_REVIEWED` | `agent/pivot-daily-h1-level-decomposition` @ `a73bb881` |
 | `DFXC-20260808-007-pivot-daily-time-weekday` | 2026-08-08 | pivot_levels | Daily S1/R1 × H1 rejection — time-of-day and weekday heterogeneity | `REJECT_NO_INCREMENTAL_VALUE` | `NOT_APPLICABLE` | `NOT_REVIEWED` | `agent/pivot-daily-h1-time-weekday-v4` @ `3891d6c7` |
+| `DFXC-20260808-008-pivot-daily-execution-entry` | 2026-08-08 | pivot_levels | Daily S1/R1 × H1 rejection — executable entry architecture | `REJECT_MECHANISM` | `UNOPENED` | `NOT_REVIEWED` | `agent/pivot-daily-h1-execution-entry` @ `509c736f` |
 
 ## Reading rule
 

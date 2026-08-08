@@ -1,5 +1,36 @@
 # Research Registry Changelog
 
+## v1.5.0 — 2026-08-08
+
+### Added
+
+- `DFXC-20260808-008-pivot-daily-execution-entry`: prospectively preregistered executable BID/ASK entry study for the Daily S1/R1 + strong H1 rejection state.
+- Frozen comparison of immediate next-H1 executable entry versus a four-hour rejection-candle-break confirmation architecture.
+- Direct-source 20-observation audit, parent-midpoint/executable reconciliation, four-hour overlap cooldown robustness, and matched S1/R1 outer plus S2/R2 falsification controls.
+- Explicit reservation of 2026 YTD ending exclusive 2026-07-24 as unopened fresh evidence.
+
+### Scientific state
+
+- Immediate executable 4H expectancy is **−0.0996 ATR** per signal, 95% pair-year bootstrap CI **[−0.1150,−0.0826]**.
+- Confirmation reduces losses to **−0.0822 ATR** per signal; confirmation-minus-immediate is **+0.0174 ATR**, CI **[+0.0084,+0.0262]**.
+- Confirmed trades themselves remain negative at **−0.1041 ATR**; the preregistered positive-expectancy promotion gate therefore fails.
+- The improvement is not pivot-specific: matched S1/R1 outer-zone strong-wick controls improve by **+0.0307 ATR**, larger than the S1/R1 core. Core-minus-outer uplift is **−0.0134 ATR**, CI **[−0.0252,−0.0014]**.
+- The parent midpoint and executable immediate signal returns correlate **0.9981**; the mean execution deterioration (**−0.0873 ATR**) is consistent with observed spread scale (mean entry spread **0.0842 ATR**).
+- Decision: `REJECT_CONFIRMATION_AS_STANDALONE_EXECUTABLE_EDGE_DO_NOT_OPTIMIZE_EXITS`.
+
+### Reproducibility / holdout
+
+- Direct reconstruction of 20 randomly sampled 2024 source observations reproduces immediate and confirmation returns exactly and matches all 20 confirmation triggers.
+- A deterministic 4H same-pair/same-direction cooldown preserves negative confirmation expectancy and the positive loss-reduction contrast.
+- No 2026 YTD candle was opened; boundary observations requiring 2026 are missing rather than bridged.
+
+### Governance / next direction
+
+- Stop/target optimization of this failed reversal-entry architecture is prohibited by the frozen gate.
+- No session/day rescue, threshold retuning, indicator combination, Pine, alert, sizing or live-trading action is authorized.
+- If the pivot programme continues, the clean next hypothesis is a different decision role: whether S1/R1 strong rejection helps **exit, reduce, or avoid continuation exposure** in the incoming direction.
+- Independent `governance_release_assurance` remains required before merge/closeout.
+
 ## v1.4.0 — 2026-08-08
 
 ### Added
