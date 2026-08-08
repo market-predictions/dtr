@@ -2,7 +2,7 @@
 
 Canonical machine source: `research_registry/dukascopy_fx_cash/index.json`.
 
-Registered studies: **12**.
+Registered studies: **13**.
 
 | Study ID | Date | Family | Question / title | Disposition | Holdout | Assurance | Source |
 |---|---|---|---|---|---|---|---|
@@ -18,6 +18,7 @@ Registered studies: **12**.
 | `DFXC-20260808-006-pivot-daily-level-decomposition` | 2026-08-08 | pivot_levels | Daily classic-pivot × H1 wick — named-level decomposition | `DESCRIPTIVE_ONLY` | `OPENED` | `NOT_REVIEWED` | `agent/pivot-daily-h1-level-decomposition` @ `a73bb881` |
 | `DFXC-20260808-007-pivot-daily-time-weekday` | 2026-08-08 | pivot_levels | Daily S1/R1 × H1 rejection — time-of-day and weekday heterogeneity | `REJECT_NO_INCREMENTAL_VALUE` | `NOT_APPLICABLE` | `NOT_REVIEWED` | `agent/pivot-daily-h1-time-weekday-v4` @ `3891d6c7` |
 | `DFXC-20260808-008-pivot-daily-execution-entry` | 2026-08-08 | pivot_levels | Daily S1/R1 × H1 rejection — executable entry architecture | `REJECT_MECHANISM` | `UNOPENED` | `NOT_REVIEWED` | `agent/pivot-daily-h1-execution-entry` @ `509c736f` |
+| `DFXC-20260808-009-pivot-daily-continuation-management` | 2026-08-08 | pivot_levels | Daily S1/R1 × H1 rejection — continuation-position management | `REJECT_MECHANISM` | `UNOPENED` | `NOT_REVIEWED` | `agent/pivot-daily-h1-continuation-management` @ `1701b3e1` |
 
 ## Reading rule
 
@@ -28,6 +29,7 @@ The row is a locator, not the evidence. Open the study's `study.json` and `resul
 - **Quarters Theory:** the canonical 250-pip continuation mechanism was demoted on GBPUSD and then failed unchanged across the ten-pair universe (`0/10` positive-and-stable pairs).
 - **Classic pivots — broad mechanism:** high absolute reach rates do not establish magnetism; exact pivot coordinates did not beat nearby deterministic placebos on the preregistered target/stall/reversal mechanisms.
 - **Classic pivots — spatial follow-up:** broad magnet/stall/reversal claims remained rejected, but a narrower daily/weekly pivot-proximity terminal-hazard effect survived internal falsification and is eligible only for one unchanged protected-holdout confirmation.
+- **Classic pivots — executable decision roles:** neither fresh countertrend entry nor a universal immediate continuation-exit rule is supported after real BID/ASK execution; 2026 YTD remains unopened for these failed hypotheses.
 
 ## Search tags
 
