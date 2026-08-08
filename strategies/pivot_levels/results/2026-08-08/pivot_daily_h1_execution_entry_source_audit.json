@@ -1,0 +1,29 @@
+{
+  "n": 20,
+  "max_immediate_abs_error": 0.0,
+  "max_confirmation_abs_error": 0.0,
+  "trigger_matches": 20,
+  "all_trigger_match": true,
+  "sample": [
+    {"pair":"AUDUSD","year":2024,"timestamp":"2024-05-08 05:00:00+00:00","imm_abs_error":0.0,"conf_abs_error":0.0,"trigger_match":true},
+    {"pair":"AUDUSD","year":2024,"timestamp":"2024-06-04 18:00:00+00:00","imm_abs_error":0.0,"conf_abs_error":0.0,"trigger_match":true},
+    {"pair":"EURGBP","year":2024,"timestamp":"2024-08-28 15:00:00+00:00","imm_abs_error":0.0,"conf_abs_error":0.0,"trigger_match":true},
+    {"pair":"EURGBP","year":2024,"timestamp":"2024-07-05 13:00:00+00:00","imm_abs_error":0.0,"conf_abs_error":0.0,"trigger_match":true},
+    {"pair":"EURJPY","year":2024,"timestamp":"2024-08-22 12:00:00+00:00","imm_abs_error":0.0,"conf_abs_error":0.0,"trigger_match":true},
+    {"pair":"EURJPY","year":2024,"timestamp":"2024-10-17 06:00:00+00:00","imm_abs_error":0.0,"conf_abs_error":0.0,"trigger_match":true},
+    {"pair":"EURUSD","year":2024,"timestamp":"2024-06-25 14:00:00+00:00","imm_abs_error":0.0,"conf_abs_error":0.0,"trigger_match":true},
+    {"pair":"EURUSD","year":2024,"timestamp":"2024-01-29 18:00:00+00:00","imm_abs_error":0.0,"conf_abs_error":0.0,"trigger_match":true},
+    {"pair":"GBPJPY","year":2024,"timestamp":"2024-02-20 07:00:00+00:00","imm_abs_error":0.0,"conf_abs_error":0.0,"trigger_match":true},
+    {"pair":"GBPJPY","year":2024,"timestamp":"2024-04-08 08:00:00+00:00","imm_abs_error":0.0,"conf_abs_error":0.0,"trigger_match":true},
+    {"pair":"GBPUSD","year":2024,"timestamp":"2024-07-19 13:00:00+00:00","imm_abs_error":0.0,"conf_abs_error":0.0,"trigger_match":true},
+    {"pair":"GBPUSD","year":2024,"timestamp":"2024-08-06 14:00:00+00:00","imm_abs_error":0.0,"conf_abs_error":0.0,"trigger_match":true},
+    {"pair":"NZDUSD","year":2024,"timestamp":"2024-10-04 09:00:00+00:00","imm_abs_error":0.0,"conf_abs_error":0.0,"trigger_match":true},
+    {"pair":"NZDUSD","year":2024,"timestamp":"2024-01-24 11:00:00+00:00","imm_abs_error":0.0,"conf_abs_error":0.0,"trigger_match":true},
+    {"pair":"USDCAD","year":2024,"timestamp":"2024-01-09 18:00:00+00:00","imm_abs_error":0.0,"conf_abs_error":0.0,"trigger_match":true},
+    {"pair":"USDCAD","year":2024,"timestamp":"2024-05-27 19:00:00+00:00","imm_abs_error":0.0,"conf_abs_error":0.0,"trigger_match":true},
+    {"pair":"USDCHF","year":2024,"timestamp":"2024-04-18 06:00:00+00:00","imm_abs_error":0.0,"conf_abs_error":0.0,"trigger_match":true},
+    {"pair":"USDCHF","year":2024,"timestamp":"2024-04-08 09:00:00+00:00","imm_abs_error":0.0,"conf_abs_error":0.0,"trigger_match":true},
+    {"pair":"USDJPY","year":2024,"timestamp":"2024-03-27 17:00:00+00:00","imm_abs_error":0.0,"conf_abs_error":0.0,"trigger_match":true},
+    {"pair":"USDJPY","year":2024,"timestamp":"2024-07-22 17:00:00+00:00","imm_abs_error":0.0,"conf_abs_error":0.0,"trigger_match":true}
+  ]
+}
