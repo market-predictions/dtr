@@ -1,0 +1,67 @@
+{
+  "schema_version": "1.0.0",
+  "study_id": "DFXC-20260808-007-pivot-daily-time-weekday",
+  "title": "Daily S1/R1 × H1 rejection — time-of-day and weekday heterogeneity",
+  "family": "pivot_levels",
+  "date": "2026-08-08",
+  "study_type": "event_study",
+  "lifecycle_status": "RUN_COMPLETE",
+  "dataset": {
+    "canonical_name": "Dukascopy FX Cash",
+    "dataset_id": "dukascopy_fx_cash_m1_bid_ask_v1",
+    "pairs": ["EURUSD","GBPUSD","USDCHF","AUDUSD","NZDUSD","USDCAD","USDJPY","EURJPY","GBPJPY","EURGBP"],
+    "base_timeframe": "M1",
+    "analysis_timeframe": "Daily classic pivots / H1 forward response",
+    "quote_sides": ["BID","ASK"],
+    "timezone": "UTC source with DST-safe local session mapping",
+    "price_basis": "midpoint structural forward study",
+    "windows": {"development":"2015-2019","internal_validation":"2020-2021","related_sample_replication":"2022-2025","fresh_holdout":"none"},
+    "cache_registry": "data/private_market_data_cache_registry.json"
+  },
+  "hypotheses": {
+    "market_question": "Does the observable Daily S1/R1 + strong directional H1 rejection signal have materially different forward reversal behavior depending on major FX session phase and day of week?",
+    "null": "Session Hour 1/2/3 and weekday do not add stable directional forward-reversal information to the S1/R1 strong-wick signal beyond non-transition time and matched controls.",
+    "alternative": "At least one frozen session phase produces stable incremental directional forward-reversal information, while weekday may show stable heterogeneity.",
+    "mechanism": "If price and economically important market time interact, rejection at first-order daily pivots may have different forward behavior around session liquidity transitions than at otherwise comparable hours."
+  },
+  "method": {
+    "primary_endpoint": "direction-adjusted next-contiguous-H1-open to four-hour close return divided by lagged H1 ATR24",
+    "event_definition": "Daily classic S1/R1 nearest-pivot core d<0.20 with directional H1 wick >=30%; high-side signal is reversal-down, low-side signal is reversal-up; observed at H1 close.",
+    "session_phases": ["TOKYO_H1","TOKYO_H2","TOKYO_H3","LONDON_H1","LONDON_H2","LONDON_H3","NEWYORK_H1","NEWYORK_H2","NEWYORK_H3","NON_TRANSITION"],
+    "session_anchors": {"Tokyo":"09:00 Asia/Tokyo","London":"08:00 Europe/London","New_York_FX":"08:00 America/New_York"},
+    "weekday_basis": "NY17 FX trading date Monday-Friday",
+    "controls": ["S2/R2 core strong-wick signal", "S1/R1 matched outer 30-50% strong-wick signal", "non-transition hours"],
+    "secondary_endpoints": ["FWD1_ATR_RETURN","FWD2_ATR_RETURN","FWD8_ATR_RETURN","MFE4_ATR","MAE4_ATR","MFE4_minus_MAE4","FWD4_positive_probability"],
+    "overlap_rule": "primary observation ledger retains all side-specific signals; deterministic four-hour same-side/group cooldown is reported as robustness only",
+    "unsafe_gap_rule": "all forward bars must be contiguous UTC H1 bars; gaps make the affected endpoint missing",
+    "selection_family_size": 9,
+    "inference": {"method":"pair-year clustered bootstrap","cluster_or_block_unit":"pair-year","draws":5000,"multiple_testing":"Holm correction across nine primary phase-versus-non-transition comparisons"},
+    "execution": {"applicable":false,"entry_reference":"next contiguous H1 midpoint open","spread_policy":"structural midpoint study; executable BID/ASK not yet tested","same_bar_policy":"signal observable only after rejection H1 closes"}
+  },
+  "source": {
+    "repository": "market-predictions/dtr",
+    "ref": "agent/pivot-daily-h1-time-weekday-v4",
+    "commit_sha": "3891d6c74b1c49bd2a4e88573de7de65a7a496c0",
+    "paths": [
+      "strategies/pivot_levels/docs/PIVOT_DAILY_H1_TIME_WEEKDAY_PREREGISTRATION_2026-08-08.md",
+      "strategies/pivot_levels/docs/PIVOT_DAILY_H1_TIME_WEEKDAY_PREREGISTRATION_AMENDMENT_01_2026-08-08.md"
+    ]
+  },
+  "holdout": {
+    "state": "NO_PRISTINE_HOLDOUT_RELATED_DATA_EXPOSED",
+    "protected_window": "none for this study",
+    "opened_in_this_study": false,
+    "authorization_required": false,
+    "prior_exposure": "2015-2025 had already been exposed in related pivot research. The time/session outcomes were frozen before inspection, but this is not represented as a pristine holdout confirmation."
+  },
+  "artifacts": {
+    "preregistration": ["strategies/pivot_levels/docs/PIVOT_DAILY_H1_TIME_WEEKDAY_PREREGISTRATION_2026-08-08.md","strategies/pivot_levels/docs/PIVOT_DAILY_H1_TIME_WEEKDAY_PREREGISTRATION_AMENDMENT_01_2026-08-08.md"],
+    "results": ["strategies/pivot_levels/results/2026-08-08/pivot_daily_h1_time_weekday_summary.json"],
+    "reports": ["strategies/pivot_levels/reports/PIVOT_DAILY_H1_TIME_WEEKDAY_REPORT_2026-08-08.md"],
+    "reviews": ["strategies/pivot_levels/reviews/PIVOT_DAILY_H1_TIME_WEEKDAY_IMPLEMENTATION_VALIDATION_2026-08-08.md"],
+    "governance": ["strategies/pivot_levels/governance/WORKPACKAGE_2026-08-08_DAILY_H1_TIME_WEEKDAY.md","claims/PIV-WP-20260808-07.md","handovers/PIV-WP-20260808-07.md"]
+  },
+  "related_studies": ["DFXC-20260808-003-pivot-daily-wick-holdout","DFXC-20260808-006-pivot-daily-level-decomposition"],
+  "tags": ["pivots","daily","H1","S1","R1","wick","session","time-of-day","weekday","Tokyo","London","New-York","forward-return","causal"],
+  "provenance": {"registration_mode":"prospective_time_heterogeneity_preregistration","registered_on":"2026-08-08","notes":"Hour 1/2/3 design and weekday variables were frozen before outcome inspection. Contiguous-H1 forward rule was clarified in a pre-outcome amendment."}
+}
