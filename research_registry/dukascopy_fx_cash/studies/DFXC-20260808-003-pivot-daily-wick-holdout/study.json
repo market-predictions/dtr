@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0.0",
+  "study_id": "DFXC-20260808-003-pivot-daily-wick-holdout",
+  "title": "Daily classic-pivot × H1 wick interaction — protected holdout confirmation",
+  "family": "pivot_levels",
+  "date": "2026-08-08",
+  "study_type": "holdout_confirmation",
+  "lifecycle_status": "HOLDOUT_CONFIRMED",
+  "dataset": {
+    "canonical_name": "Dukascopy FX Cash",
+    "dataset_id": "dukascopy_fx_cash_m1_bid_ask_v1",
+    "pairs": ["EURUSD", "GBPUSD", "USDCHF", "AUDUSD", "NZDUSD", "USDCAD", "USDJPY", "EURJPY", "GBPJPY", "EURGBP"],
+    "base_timeframe": "M1",
+    "analysis_timeframe": "Daily classic pivots / H1 terminal and wick observations",
+    "quote_sides": ["BID", "ASK"],
+    "timezone": "UTC",
+    "price_basis": "midpoint structural measurement",
+    "windows": {"development": "2015-2019 parent evidence", "internal_validation": "2020-2021 parent evidence", "protected_holdout": "2022-2025"},
+    "pip_convention": "0.0001 non-JPY; 0.01 JPY",
+    "cache_registry": "data/private_market_data_cache_registry.json"
+  },
+  "hypotheses": {
+    "market_question": "Does the unchanged Daily classic-pivot × H1 directional-wick terminal interaction replicate on the protected 2022-2025 sample?",
+    "null": "The protected-holdout difference-in-differences interaction is not positive and robust under the frozen gate.",
+    "alternative": "Strong directional H1 wick rejection carries additional terminal information inside the unchanged Daily pivot core on protected 2022-2025 data.",
+    "mechanism": "Directional wick rejection is generic exhaustion information; Daily pivot proximity may add a smaller independent contextual premium."
+  },
+  "method": {
+    "primary_endpoint": "(core strong terminal rate - core weak terminal rate) - (outer strong terminal rate - outer weak terminal rate), with core 0-20% and outer 30-50% of adjacent daily-pivot spacing.",
+    "economic_effect_size": "Percentage-point incremental terminal probability associated with Daily pivot-core context beyond generic wick exhaustion.",
+    "event_definition": "Classic prior-day NY17 floor pivots; H1 directional wick >=30% strong and <10% weak; terminal labels from pivot-blind ATR24 lagged one H1 bar with 0.75 ATR directional-change and strictly later-bar confirmation.",
+    "controls": ["outer 30-50% matched spacing region", "weak-wick contrast", "pair breadth", "leave-one-pair-out", "2022-2023 versus 2024-2025 temporal split", "five frozen wick bins"],
+    "variants": ["UNCHANGED_D_H1_HOLDOUT"],
+    "selection_family_size": 1,
+    "inference": {"method": "pair-year clustered bootstrap", "cluster_or_block_unit": "pair-year", "draws": 5000, "multiple_testing": "one primary confirmatory hypothesis; no primary multiplicity adjustment"},
+    "execution": {"applicable": false, "spread_policy": "structural midpoint study", "slippage_policy": "not_applicable", "same_bar_policy": "candidate endpoint cannot self-confirm on same H1 candle"}
+  },
+  "source": {
+    "repository": "market-predictions/dtr",
+    "ref": "agent/pivot-daily-holdout-weekly-zone-geometry",
+    "commit_sha": "c4aeaced560ee9ffb47a70b6b34128120b44df8d",
+    "paths": ["strategies/pivot_levels/docs/PIVOT_DAILY_H1_WICK_HOLDOUT_PREREGISTRATION_2026-08-08.md", "strategies/pivot_levels/governance/HOLDOUT_AUTHORIZATION_2026-08-08_DAILY_H1_WICK.md", "strategies/pivot_levels/governance/WORKPACKAGE_2026-08-08_DAILY_HOLDOUT_WEEKLY_ZONE.md"]
+  },
+  "holdout": {"state": "OPENED", "protected_window": "2022-2025", "opened_in_this_study": true, "authorization_required": true, "authorization_record": "strategies/pivot_levels/governance/HOLDOUT_AUTHORIZATION_2026-08-08_DAILY_H1_WICK.md", "prior_exposure": "Parent Daily/H1 interaction selected on 2015-2021 only; 2022-2025 was unopened before this authorized confirmation and is now consumed for the exact Daily/H1 question."},
+  "artifacts": {
+    "preregistration": ["strategies/pivot_levels/docs/PIVOT_DAILY_H1_WICK_HOLDOUT_PREREGISTRATION_2026-08-08.md"],
+    "results": ["strategies/pivot_levels/results/2026-08-08/pivot_daily_h1_wick_holdout_summary.json"],
+    "reports": ["strategies/pivot_levels/reports/PIVOT_DAILY_HOLDOUT_WEEKLY_ZONE_REPORT_2026-08-08.md"],
+    "reviews": ["strategies/pivot_levels/reviews/PIVOT_DAILY_HOLDOUT_WEEKLY_ZONE_IMPLEMENTATION_VALIDATION_2026-08-08.md"],
+    "governance": ["strategies/pivot_levels/governance/HOLDOUT_AUTHORIZATION_2026-08-08_DAILY_H1_WICK.md", "strategies/pivot_levels/governance/WORKPACKAGE_2026-08-08_DAILY_HOLDOUT_WEEKLY_ZONE.md"]
+  },
+  "related_studies": ["DFXC-20260808-002-pivot-wick-rejection", "DFXC-20260808-001-pivot-multiscale-terminal", "DFXC-20260808-004-pivot-weekly-h4-zone-geometry"],
+  "tags": ["pivots", "daily", "H1", "wick", "rejection", "terminal-hazard", "holdout", "confirmation"],
+  "provenance": {"registration_mode": "prospective_holdout_preregistration", "registered_on": "2026-08-08", "notes": "Principal authorized exact 2022-2025 exposure before outcomes. No parameter change from the internally promoted Daily/H1 interaction. Holdout consumed only after frozen preregistration and authorization were committed."}
+}

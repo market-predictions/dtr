@@ -1,5 +1,33 @@
 # Research Registry Changelog
 
+## v1.2.0 — 2026-08-08
+
+### Added
+
+- `DFXC-20260808-003-pivot-daily-wick-holdout`: exact protected 2022–2025 confirmation of the frozen Daily-pivot × H1 wick interaction.
+- `DFXC-20260808-004-pivot-weekly-h4-zone-geometry`: preregistered seven-geometry Weekly/H4 spacing/ATR robustness family.
+- Principal holdout-authorization record, two weekly implementation-deviation records, machine summaries, final report, implementation validation, claim and assurance handover.
+
+### Scientific state
+
+- Daily/H1 protected holdout **CONFIRMS**: +1.08 pp pivot-specific wick interaction, 95% CI [+0.65,+1.54] pp; 10/10 pair effects, 4/4 years, both preregistered halves and all leave-one-pair-out pools positive.
+- The Daily/H1 2022–2025 holdout is now consumed for that exact question.
+- The inherited Weekly/H4 zone is confirmed to be spacing-relative, not ATR-based.
+- Weekly/H4 `SP10` (0–10% adjacent-pivot spacing core versus equal-width 40–50% control) is the sole joint survivor of the seven-geometry family: structural +1.00 pp; wick interaction +1.62 pp, 95% CI [+0.52,+2.69] pp, Holm p=0.0308.
+- `SP15`, `SP20_REF`, `SP25` and all three ATR-capped hybrids fail the joint wick gate.
+- Weekly/H4 2022–2025 outcomes were not inspected; `SP10` remains an internal candidate requiring future independent confirmation.
+
+### Reproducibility
+
+- Two preliminary Weekly/H4 challenger runs were invalidated before scientific acceptance because `SP20_REF` did not exactly reproduce the parent result.
+- Final boundary semantics reproduce the parent SP20 structural and wick point estimates exactly to floating-point precision.
+- Separate compact-ledger arithmetic validation recomputed the Daily holdout, SP10 and SP20 primary effects exactly.
+
+### Governance
+
+- Implementation candidate is ready for independent `governance_release_assurance`.
+- No Weekly/H4 holdout exposure, strategy/P&L, Pine, alerts, sizing or live deployment is authorized.
+
 ## v1.1.0 — 2026-08-08
 
 ### Added

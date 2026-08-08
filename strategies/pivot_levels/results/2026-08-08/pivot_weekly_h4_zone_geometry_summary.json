@@ -1,0 +1,58 @@
+{
+  "study_id": "DFXC-20260808-004-pivot-weekly-h4-zone-geometry",
+  "decision": "WEEKLY_H4_ZONE_GEOMETRY_MATERIALLY_STRENGTHENS_PIVOT_WICK_INTERACTION",
+  "reference_interaction": 0.007736672031333339,
+  "joint_pass_variants": ["SP10"],
+  "materially_stronger_variants": ["SP10"],
+  "variants": {
+    "SP10": {
+      "geometry_meta": {"n_base_observations": 222456, "n_core_outer_observations": 88986, "width_over_spacing_median": 0.1, "width_over_spacing_q10_q90": [0.1, 0.1], "width_over_atr_median": 0.3086549966762772, "width_over_atr_q10_q90": [0.19552667946905025, 0.5137614678899186], "atr_cap_binding_fraction": 0.0},
+      "structural": {"development": 0.011477076348015425, "validation": 0.0064874511443763355, "combined": 0.010019046333827608, "ci95": [0.004781251312506291, 0.015254394206034678], "raw_p": 0.0004, "holm_p": 0.0016, "positive_pairs": 8, "all_loo_positive": true, "passes_gate": true, "pair_effects": {"AUDUSD": -0.004437477973617696, "EURGBP": 0.011274294324410364, "EURJPY": 0.006985603884867325, "EURUSD": 0.012955883660683037, "GBPJPY": 0.017783596974723537, "GBPUSD": -0.0006546583933262629, "NZDUSD": 0.018262867114350684, "USDCAD": 0.016996034646580213, "USDCHF": 0.0038606794619392426, "USDJPY": 0.017604464383153565}, "loo_effects": {"AUDUSD": 0.011666473738321054, "EURGBP": 0.009880682012147687, "EURJPY": 0.010357362472018378, "EURUSD": 0.00969016249615895, "GBPJPY": 0.009146472363550193, "GBPUSD": 0.011196591637142539, "NZDUSD": 0.009113921290884577, "USDCAD": 0.009212602458099836, "USDCHF": 0.0107069405124057, "USDJPY": 0.009224793378077079}},
+      "wick": {"development": 0.01688294451578838, "validation": 0.01436471093571308, "combined": 0.016157711979495448, "ci95": [0.005229123355332755, 0.026860714716208735], "raw_p": 0.0044, "holm_p": 0.0308, "positive_pairs": 9, "all_loo_positive": true, "passes_gate": true, "core_gradient_nondecreasing": true, "core_wick_gradient": [0.0667740203972088, 0.09248275027236412, 0.10925468545692285, 0.14791224345364473, 0.19657194406856113], "pair_effects": {"AUDUSD": 0.0011281298377120025, "EURGBP": 0.013369246586198716, "EURJPY": 0.02415275984503705, "EURUSD": 0.023603217599167337, "GBPJPY": -0.0025389383026693246, "GBPUSD": 0.016963864263340858, "NZDUSD": 0.03650216167506519, "USDCAD": 0.010943473891747268, "USDCHF": 0.028693729125996895, "USDJPY": 0.008325240314294796}, "loo_effects": {"AUDUSD": 0.01755667019249922, "EURGBP": 0.016443754401125735, "EURJPY": 0.015288870789838802, "EURUSD": 0.01542740848413078, "GBPJPY": 0.018052271443574838, "GBPUSD": 0.016153686518609517, "NZDUSD": 0.013943164247508619, "USDCAD": 0.01694364818048666, "USDCHF": 0.014727370949441349, "USDJPY": 0.017038811431518655}, "cells": {"core_strong": [0.18013981000179244, 3015, 16737], "core_weak": [0.0667740203972088, 622, 9315], "outer_strong": [0.16128361158787122, 3101, 19227], "outer_weak": [0.06407553396278302, 699, 10909]}},
+      "passes_joint_gate": true,
+      "materially_stronger_than_reference": true
+    },
+    "SP15": {
+      "geometry_meta": {"n_base_observations": 222456, "n_core_outer_observations": 133324, "width_over_spacing_median": 0.15, "width_over_spacing_q10_q90": [0.15, 0.15], "width_over_atr_median": 0.4629824950144158, "width_over_atr_q10_q90": [0.29329001920357534, 0.7706422018348777], "atr_cap_binding_fraction": 0.0},
+      "structural": {"development": 0.007389000834688408, "validation": 0.00694323797677289, "combined": 0.007238899032248655, "ci95": [0.0031679172062505927, 0.011251577820728078], "raw_p": 0.0008, "holm_p": 0.0024000000000000002, "positive_pairs": 9, "all_loo_positive": true, "passes_gate": true},
+      "wick": {"development": 0.008628620878173912, "validation": 0.012381771073108908, "combined": 0.009692401789737903, "ci95": [-0.00006565629072679337, 0.019381995123966097], "raw_p": 0.052, "holm_p": 0.312, "positive_pairs": 8, "all_loo_positive": true, "passes_gate": false, "core_gradient_nondecreasing": true, "core_wick_gradient": [0.06723768736616702, 0.09244508810041033, 0.11105805958747135, 0.1456930166607586, 0.19289764249477767]},
+      "passes_joint_gate": false,
+      "materially_stronger_than_reference": false
+    },
+    "SP20_REF": {
+      "geometry_meta": {"n_base_observations": 222456, "n_core_outer_observations": 178023, "width_over_spacing_median": 0.2, "width_over_spacing_q10_q90": [0.2, 0.2], "width_over_atr_median": 0.6173099933525544, "width_over_atr_q10_q90": [0.3910533589381005, 1.0275229357798372], "atr_cap_binding_fraction": 0.0},
+      "structural": {"development": 0.007310862135199464, "validation": 0.005197834223009859, "combined": 0.0066856022635854995, "ci95": [0.003362643274543145, 0.01012364305473821], "raw_p": 0.0, "holm_p": 0.0, "positive_pairs": 8, "all_loo_positive": true, "passes_gate": true, "pair_effects": {"AUDUSD": -0.0038878768687894416, "EURGBP": 0.005257539013074644, "EURJPY": 0.008594598419753366, "EURUSD": 0.011666660469317539, "GBPJPY": 0.01024024199971904, "GBPUSD": 0.0019398517155257838, "NZDUSD": 0.011419290031781076, "USDCAD": 0.009466209190677727, "USDCHF": -0.0009291297387866576, "USDJPY": 0.013179772262566863}},
+      "wick": {"development": 0.006800804494118254, "validation": 0.010123242015904005, "combined": 0.007736672031333339, "ci95": [-0.00039092204134086897, 0.01607207678081772], "raw_p": 0.0636, "holm_p": 0.318, "positive_pairs": 9, "all_loo_positive": true, "passes_gate": false, "core_gradient_nondecreasing": true, "core_wick_gradient": [0.06790156125959249, 0.09198155578178334, 0.11137322181714204, 0.14220665499124344, 0.19131127939418094], "pair_effects": {"AUDUSD": 0.0010308988105646871, "EURGBP": 0.01434263671315067, "EURJPY": 0.009693238073000654, "EURUSD": 0.011895384260620562, "GBPJPY": -0.0188448520717637, "GBPUSD": 0.00996821595917076, "NZDUSD": 0.018472472545244062, "USDCAD": 0.008181843250250245, "USDCHF": 0.01655764507786496, "USDJPY": 0.005283789179692452}, "cells": {"core_strong": [0.17481838769447958, 5944, 34001], "core_weak": [0.06790156125959249, 1283, 18895], "outer_strong": [0.16422721268163804, 6216, 37850], "outer_weak": [0.06504705827808428, 1403, 21569]}},
+      "passes_joint_gate": false,
+      "materially_stronger_than_reference": false
+    },
+    "SP25": {
+      "geometry_meta": {"n_base_observations": 222456, "n_core_outer_observations": 222456, "width_over_spacing_median": 0.25, "width_over_spacing_q10_q90": [0.25, 0.25], "width_over_atr_median": 0.771637491690693, "width_over_atr_q10_q90": [0.48881669867262567, 1.2844036697247962], "atr_cap_binding_fraction": 0.0},
+      "structural": {"development": 0.006086904530028733, "validation": 0.0035107551946833293, "combined": 0.005331221241871006, "ci95": [0.002448461128859819, 0.008373054866323747], "raw_p": 0.0, "holm_p": 0.0, "positive_pairs": 9, "all_loo_positive": true, "passes_gate": true},
+      "wick": {"development": 0.005231404370748954, "validation": 0.00589840652339603, "combined": 0.005416484575892833, "ci95": [-0.002213128293900458, 0.01277612615655864], "raw_p": 0.166, "holm_p": 0.3504, "positive_pairs": 8, "all_loo_positive": true, "passes_gate": false, "core_gradient_nondecreasing": true, "core_wick_gradient": [0.06867404011943311, 0.09192029157002887, 0.11078536392851102, 0.1403216860787576, 0.19109865077974417]},
+      "passes_joint_gate": false,
+      "materially_stronger_than_reference": false
+    },
+    "HYB_ATR050": {
+      "geometry_meta": {"n_base_observations": 222456, "n_core_outer_observations": 138815, "width_over_spacing_median": 0.16199316563289232, "width_over_spacing_q10_q90": [0.09732142857142663, 0.2], "width_over_atr_median": 0.5, "width_over_atr_q10_q90": [0.3910533589381005, 0.5], "atr_cap_binding_fraction": 0.7174677239544},
+      "structural": {"development": 0.006546145453037236, "validation": 0.0012642669806680051, "combined": 0.005000493287822122, "ci95": [0.001067495297142053, 0.00904707507490572], "raw_p": 0.0124, "holm_p": 0.0124, "positive_pairs": 9, "all_loo_positive": true, "passes_gate": true},
+      "wick": {"development": 0.004810718284629853, "validation": 0.00817013708494925, "combined": 0.005814314444996652, "ci95": [-0.004257738478408986, 0.015953244672301765], "raw_p": 0.2696, "holm_p": 0.3504, "positive_pairs": 7, "all_loo_positive": true, "passes_gate": false, "core_gradient_nondecreasing": true, "core_wick_gradient": [0.06796698176008521, 0.09029720940784995, 0.11014334966430775, 0.14244636142446362, 0.19124888093106535]},
+      "passes_joint_gate": false,
+      "materially_stronger_than_reference": false
+    },
+    "HYB_ATR075": {
+      "geometry_meta": {"n_base_observations": 222456, "n_core_outer_observations": 166546, "width_over_spacing_median": 0.2, "width_over_spacing_q10_q90": [0.14598214285713995, 0.2], "width_over_atr_median": 0.6173099933525544, "width_over_atr_q10_q90": [0.3910533589381005, 0.75], "atr_cap_binding_fraction": 0.3144936526773834},
+      "structural": {"development": 0.007292564571360544, "validation": 0.003915063731521465, "combined": 0.006300528421277957, "ci95": [0.0027640268345469855, 0.009962468026021394], "raw_p": 0.0012, "holm_p": 0.0024000000000000002, "positive_pairs": 8, "all_loo_positive": true, "passes_gate": true},
+      "wick": {"development": 0.005261550870190326, "validation": 0.010295214064070413, "combined": 0.006711322505558059, "ci95": [-0.0016755922985410819, 0.015042361577324666], "raw_p": 0.1152, "holm_p": 0.3504, "positive_pairs": 8, "all_loo_positive": true, "passes_gate": false, "core_gradient_nondecreasing": true, "core_wick_gradient": [0.06826858297776779, 0.09151657862916057, 0.1116335507356287, 0.14085422469823583, 0.1909763104601328]},
+      "passes_joint_gate": false,
+      "materially_stronger_than_reference": false
+    },
+    "HYB_ATR100": {
+      "geometry_meta": {"n_base_observations": 222456, "n_core_outer_observations": 175049, "width_over_spacing_median": 0.2, "width_over_spacing_q10_q90": [0.19464285714285326, 0.2], "width_over_atr_median": 0.6173099933525544, "width_over_atr_q10_q90": [0.3910533589381005, 1.0], "atr_cap_binding_fraction": 0.1133078001941957},
+      "structural": {"development": 0.007261563810678051, "validation": 0.0046069138910411755, "combined": 0.00648229021887585, "ci95": [0.0030828180122343665, 0.009944611217004597], "raw_p": 0.0, "holm_p": 0.0, "positive_pairs": 7, "all_loo_positive": true, "passes_gate": true},
+      "wick": {"development": 0.00621647752667176, "validation": 0.009227190599391144, "combined": 0.007064851175589776, "ci95": [-0.0011598101184554395, 0.015410752954657117], "raw_p": 0.0876, "holm_p": 0.3504, "positive_pairs": 9, "all_loo_positive": true, "passes_gate": false, "core_gradient_nondecreasing": true, "core_wick_gradient": [0.06789957529165098, 0.0914456072036992, 0.11097410604192355, 0.142387635459229, 0.19052541687266844]},
+      "passes_joint_gate": false,
+      "materially_stronger_than_reference": false
+    }
+  }
+}

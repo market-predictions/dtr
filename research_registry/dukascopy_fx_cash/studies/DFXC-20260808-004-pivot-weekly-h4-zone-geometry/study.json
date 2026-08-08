@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.0.0",
+  "study_id": "DFXC-20260808-004-pivot-weekly-h4-zone-geometry",
+  "title": "Weekly classic-pivot × H4 zone geometry — spacing/ATR robustness",
+  "family": "pivot_levels",
+  "date": "2026-08-08",
+  "study_type": "robustness",
+  "lifecycle_status": "RUN_COMPLETE",
+  "dataset": {
+    "canonical_name": "Dukascopy FX Cash",
+    "dataset_id": "dukascopy_fx_cash_m1_bid_ask_v1",
+    "pairs": ["EURUSD", "GBPUSD", "USDCHF", "AUDUSD", "NZDUSD", "USDCAD", "USDJPY", "EURJPY", "GBPJPY", "EURGBP"],
+    "base_timeframe": "M1",
+    "analysis_timeframe": "Weekly classic pivots / H4 terminal and wick observations",
+    "quote_sides": ["BID", "ASK"],
+    "timezone": "UTC",
+    "price_basis": "midpoint structural measurement",
+    "windows": {"development": "2015-2019", "internal_validation": "2020-2021", "protected_holdout": "2022-2025"},
+    "pip_convention": "0.0001 non-JPY; 0.01 JPY",
+    "cache_registry": "data/private_market_data_cache_registry.json"
+  },
+  "hypotheses": {
+    "market_question": "Does the Weekly-pivot × H4 terminal/wick relationship become materially stronger under a principled pivot-zone geometry that accounts for adjacent pivot spacing and/or lagged H4 ATR?",
+    "null": "None of the seven preregistered geometries yields a robust structural terminal effect and pivot-specific wick interaction after full-family correction and validation.",
+    "alternative": "At least one preregistered spacing or spacing-plus-ATR geometry yields a temporally and cross-pair robust Weekly/H4 terminal zone and wick interaction.",
+    "mechanism": "A fixed fraction of weekly pivot spacing can represent different H4 noise scales; volatility-aware capping may reduce dilution while structural spacing prevents zone overlap."
+  },
+  "method": {
+    "primary_endpoint": "For each geometry, Weekly/H4 wick difference-in-differences: (core strong - core weak) - (equal-width matched outer strong - matched outer weak).",
+    "economic_effect_size": "Percentage-point pivot-specific wick interaction; structural core-minus-matched-outer terminal effect is a required companion endpoint.",
+    "event_definition": "Classic prior-week NY17 floor pivots S3-R3; H4 high/low observations; terminal label from pivot-blind ATR24 lagged one H4 bar and 0.75 ATR directional change with strictly later-bar confirmation; strong wick >=30%, weak <10%.",
+    "controls": ["equal-width outer band at 50% nearest-pivot corridor edge", "SP20 inherited reference", "seven-geometry Holm family", "development/internal-validation sign stability", "pair breadth", "leave-one-pair-out"],
+    "variants": ["SP10", "SP15", "SP20_REF", "SP25", "HYB_ATR050", "HYB_ATR075", "HYB_ATR100"],
+    "selection_family_size": 7,
+    "inference": {"method": "pair-year clustered bootstrap", "cluster_or_block_unit": "pair-year", "draws": 5000, "multiple_testing": "separate Holm correction across seven structural effects and seven wick interactions"},
+    "execution": {"applicable": false, "spread_policy": "structural midpoint study", "slippage_policy": "not_applicable", "same_bar_policy": "candidate endpoint cannot self-confirm on same H4 candle"}
+  },
+  "source": {
+    "repository": "market-predictions/dtr",
+    "ref": "agent/pivot-daily-holdout-weekly-zone-geometry",
+    "commit_sha": "c4aeaced560ee9ffb47a70b6b34128120b44df8d",
+    "paths": ["strategies/pivot_levels/docs/PIVOT_WEEKLY_H4_ZONE_GEOMETRY_PREREGISTRATION_2026-08-08.md", "strategies/pivot_levels/governance/WORKPACKAGE_2026-08-08_DAILY_HOLDOUT_WEEKLY_ZONE.md"]
+  },
+  "holdout": {"state": "UNOPENED", "protected_window": "2022-2025", "opened_in_this_study": false, "authorization_required": true, "authorization_record": null, "prior_exposure": "Weekly/H4 outcomes in this study are 2015-2021 only. The same 2022-2025 calendar window has now been opened separately for the Daily/H1 wick-confirmation question, but Weekly/H4 outcomes were not inspected."},
+  "artifacts": {
+    "preregistration": ["strategies/pivot_levels/docs/PIVOT_WEEKLY_H4_ZONE_GEOMETRY_PREREGISTRATION_2026-08-08.md"],
+    "results": ["strategies/pivot_levels/results/2026-08-08/pivot_weekly_h4_zone_geometry_summary.json"],
+    "reports": ["strategies/pivot_levels/reports/PIVOT_DAILY_HOLDOUT_WEEKLY_ZONE_REPORT_2026-08-08.md"],
+    "reviews": ["strategies/pivot_levels/reviews/PIVOT_DAILY_HOLDOUT_WEEKLY_ZONE_IMPLEMENTATION_VALIDATION_2026-08-08.md"],
+    "governance": ["strategies/pivot_levels/governance/WORKPACKAGE_2026-08-08_DAILY_HOLDOUT_WEEKLY_ZONE.md"],
+    "deviations": ["strategies/pivot_levels/docs/PIVOT_WEEKLY_H4_ZONE_GEOMETRY_IMPLEMENTATION_DEVIATION_01_2026-08-08.md", "strategies/pivot_levels/docs/PIVOT_WEEKLY_H4_ZONE_GEOMETRY_IMPLEMENTATION_DEVIATION_02_2026-08-08.md"]
+  },
+  "related_studies": ["DFXC-20260808-001-pivot-multiscale-terminal", "DFXC-20260808-002-pivot-wick-rejection", "DFXC-20260808-003-pivot-daily-wick-holdout"],
+  "tags": ["pivots", "weekly", "H4", "zones", "ATR", "spacing", "wick", "robustness", "terminal-hazard", "SP10"],
+  "provenance": {"registration_mode": "prospective_robustness_preregistration", "registered_on": "2026-08-08", "notes": "Seven geometries frozen before any new weekly geometry outcome calculation. Two preliminary runs were invalidated under the preregistered deterministic SP20 reference-reproduction gate; final admissible run reproduces the parent SP20 reference exactly. 2022-2025 Weekly/H4 outcomes remained uninspected."}
+}

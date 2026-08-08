@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0.0",
+  "work_package": "PIV-WP-20260808-04",
+  "repository": "market-predictions/dtr",
+  "branch": "agent/pivot-daily-holdout-weekly-zone-geometry",
+  "preregistration_freeze": {
+    "commit": "c4aeaced560ee9ffb47a70b6b34128120b44df8d",
+    "daily": "strategies/pivot_levels/docs/PIVOT_DAILY_H1_WICK_HOLDOUT_PREREGISTRATION_2026-08-08.md",
+    "weekly": "strategies/pivot_levels/docs/PIVOT_WEEKLY_H4_ZONE_GEOMETRY_PREREGISTRATION_2026-08-08.md"
+  },
+  "holdout_authorization": {
+    "commit": "b27b8e79952d0de9ebecb3f3ec049ad852c3b474",
+    "path": "strategies/pivot_levels/governance/HOLDOUT_AUTHORIZATION_2026-08-08_DAILY_H1_WICK.md",
+    "scope": "Daily/H1 exact 2022-2025 confirmation only"
+  },
+  "accepted_evidence_snapshot": {
+    "commit": "8830915c8af7ee5342371b2eb82ad9ebc4a33f69",
+    "daily_result": "strategies/pivot_levels/results/2026-08-08/pivot_daily_h1_wick_holdout_summary.json",
+    "weekly_result": "strategies/pivot_levels/results/2026-08-08/pivot_weekly_h4_zone_geometry_summary.json",
+    "report": "strategies/pivot_levels/reports/PIVOT_DAILY_HOLDOUT_WEEKLY_ZONE_REPORT_2026-08-08.md",
+    "implementation_validation": "strategies/pivot_levels/reviews/PIVOT_DAILY_HOLDOUT_WEEKLY_ZONE_IMPLEMENTATION_VALIDATION_2026-08-08.md",
+    "claim": "claims/PIV-WP-20260808-04.md",
+    "handover": "handovers/PIV-WP-20260808-04.md"
+  },
+  "invalidated_weekly_preliminary_runs": [
+    "strategies/pivot_levels/docs/PIVOT_WEEKLY_H4_ZONE_GEOMETRY_IMPLEMENTATION_DEVIATION_01_2026-08-08.md",
+    "strategies/pivot_levels/docs/PIVOT_WEEKLY_H4_ZONE_GEOMETRY_IMPLEMENTATION_DEVIATION_02_2026-08-08.md"
+  ],
+  "private_full_result_sha256": {
+    "daily_h1_holdout_results.json": "9ee5426efd6dee03fb05243a2d96876ee6d0ad03f0d987dd5f86fdb7910e38ca",
+    "weekly_h4_zone_geometry_results.json": "8b525ca4f3b90b59150112e35af958e60e7064f416c92645662baba6c6264df9",
+    "independent_arithmetic_validation.json": "527a90efb3c342ccc4d1c9be54ca7bd189a42937545fa9c9086c36af3a85d5cf"
+  },
+  "data_boundaries": {
+    "daily_outcome_years": [2022, 2023, 2024, 2025],
+    "daily_warmup_year": 2021,
+    "daily_2026_read": false,
+    "weekly_outcome_years": [2015, 2016, 2017, 2018, 2019, 2020, 2021],
+    "weekly_2022_2025_inspected": false,
+    "pairs": ["EURUSD", "GBPUSD", "USDCHF", "AUDUSD", "NZDUSD", "USDCAD", "USDJPY", "EURJPY", "GBPJPY", "EURGBP"]
+  },
+  "reference_reproduction": {
+    "SP20_structural_parent": 0.0066856022635854995,
+    "SP20_structural_final": 0.0066856022635854995,
+    "SP20_wick_parent": 0.007736672031333339,
+    "SP20_wick_final": 0.007736672031333339,
+    "exact_within_floating_tolerance": true
+  },
+  "implementation_assurance": "PENDING_INDEPENDENT_GOVERNANCE_RELEASE_ASSURANCE"
+}
