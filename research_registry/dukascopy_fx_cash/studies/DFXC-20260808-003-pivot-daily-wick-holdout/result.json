@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0.0",
+  "study_id": "DFXC-20260808-003-pivot-daily-wick-holdout",
+  "decision": "CONFIRM_DAILY_H1_PIVOT_WICK_INTERACTION_ON_PROTECTED_HOLDOUT",
+  "scientific_disposition": "SUPPORTED_INTERNAL",
+  "summary": "The unchanged Daily classic-pivot × H1 wick interaction confirmed on the protected 2022-2025 Dukascopy FX Cash holdout: +1.084 pp with 95% CI [+0.654,+1.543] pp, positive in all ten pairs, all four calendar years, both preregistered two-year halves and every leave-one-pair-out pool. The five-bin core wick gradient remained monotonic. This confirms the structural/observable association but does not establish an executable reversal strategy.",
+  "primary_findings": [
+    {"metric": "protected-holdout pivot-specific wick interaction", "estimate": 0.010844802114020016, "unit": "probability difference / +1.084 pp", "uncertainty": "95% pair-year clustered-bootstrap CI [0.006540788730155262,0.01543400620878258]; 0/5000 non-positive draws"},
+    {"metric": "protected-holdout structural core-minus-outer terminal effect", "estimate": 0.008913600118553924, "unit": "probability difference / +0.891 pp", "uncertainty": "95% pair-year clustered-bootstrap CI [0.006786660022216561,0.01100824634265292]"},
+    {"metric": "generic outer strong-versus-weak wick effect", "estimate": 0.09666252387612553, "unit": "probability difference / +9.666 pp", "uncertainty": "descriptive control decomposition"}
+  ],
+  "breadth": {"positive_pairs": "10/10", "years_positive": "4/4 (2022,2023,2024,2025)", "two_year_halves_positive": "2/2", "all_leave_one_pair_out_positive": true},
+  "robustness": ["2022-2023 interaction +1.049 pp", "2024-2025 interaction +1.109 pp", "core wick-bin terminal rates 6.63% -> 9.13% -> 11.53% -> 14.14% -> 18.98%", "independent compact-ledger arithmetic recalculation matched the recorded primary and structural effects exactly"],
+  "limitations": ["Structural midpoint analysis; no executable BID/ASK P&L.", "Terminal identity is retrospective although wick geometry is observable at H1 close.", "This holdout confirms an association, not entry timing, stop placement, target logic or cost-adjusted expectancy.", "The 2022-2025 Daily/H1 holdout is consumed for this exact question."],
+  "authorized_next": ["Design a new causal/execution study using the frozen confirmed Daily/H1 structural signal without retuning it.", "Test observable confirmation timing, invalidation geometry and executable BID/ASK costs under a new preregistration."],
+  "prohibited_next": ["Do not retune the Daily pivot-zone width, wick thresholds, pair universe, named pivots or sessions on the consumed 2022-2025 holdout.", "Do not treat holdout confirmation as live-trading, Pine, alert or sizing authorization."],
+  "assurance": {"status": "NOT_REVIEWED", "decision": null, "evidence": ["strategies/pivot_levels/reviews/PIVOT_DAILY_HOLDOUT_WEEKLY_ZONE_IMPLEMENTATION_VALIDATION_2026-08-08.md"]},
+  "holdout": {"state_after": "OPENED", "opened_in_this_study": true},
+  "evidence": [
+    {"repository": "market-predictions/dtr", "ref": "agent/pivot-daily-holdout-weekly-zone-geometry", "commit_sha": "15c5009dd8e028ecec7039352abdcb2af929179e", "path": "strategies/pivot_levels/results/2026-08-08/pivot_daily_h1_wick_holdout_summary.json"},
+    {"repository": "market-predictions/dtr", "ref": "agent/pivot-daily-holdout-weekly-zone-geometry", "commit_sha": "15c5009dd8e028ecec7039352abdcb2af929179e", "path": "strategies/pivot_levels/reports/PIVOT_DAILY_HOLDOUT_WEEKLY_ZONE_REPORT_2026-08-08.md"},
+    {"repository": "market-predictions/dtr", "ref": "agent/pivot-daily-holdout-weekly-zone-geometry", "commit_sha": "15c5009dd8e028ecec7039352abdcb2af929179e", "path": "strategies/pivot_levels/reviews/PIVOT_DAILY_HOLDOUT_WEEKLY_ZONE_IMPLEMENTATION_VALIDATION_2026-08-08.md"}
+  ]
+}
