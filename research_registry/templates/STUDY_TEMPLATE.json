@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.0.0",
+  "study_id": "DFXC-YYYYMMDD-NNN-slug",
+  "title": "Study title",
+  "family": "strategy_or_research_family",
+  "date": "YYYY-MM-DD",
+  "study_type": "structural",
+  "lifecycle_status": "PREREGISTERED",
+  "dataset": {
+    "canonical_name": "Dukascopy FX Cash",
+    "dataset_id": "dukascopy_fx_cash_m1_bid_ask_v1",
+    "pairs": ["EURUSD"],
+    "base_timeframe": "M1",
+    "analysis_timeframe": "M1",
+    "quote_sides": ["BID", "ASK"],
+    "timezone": "UTC",
+    "price_basis": "midpoint",
+    "windows": {
+      "development": "YYYY-MM-DD/YYYY-MM-DD",
+      "internal_validation": "YYYY-MM-DD/YYYY-MM-DD",
+      "protected_holdout": "YYYY-MM-DD/YYYY-MM-DD"
+    },
+    "pip_convention": "0.0001 non-JPY; 0.01 JPY",
+    "cache_registry": "data/private_market_data_cache_registry.json"
+  },
+  "hypotheses": {
+    "market_question": "What market question is being tested?",
+    "null": "Null hypothesis",
+    "alternative": "Alternative hypothesis",
+    "mechanism": "Why should the effect exist?"
+  },
+  "method": {
+    "primary_endpoint": "Frozen primary endpoint",
+    "economic_effect_size": "Effect size to report",
+    "event_definition": "Eligibility/state/reset rules",
+    "controls": ["Placebo or baseline"],
+    "variants": ["Frozen variants"],
+    "selection_family_size": 1,
+    "inference": {
+      "method": "block bootstrap / exact / other",
+      "cluster_or_block_unit": "week",
+      "draws": 5000,
+      "multiple_testing": "none"
+    },
+    "execution": {
+      "applicable": false,
+      "spread_policy": "not_applicable",
+      "slippage_policy": "not_applicable",
+      "same_bar_policy": "not_applicable"
+    }
+  },
+  "source": {
+    "repository": "market-predictions/dtr",
+    "ref": "agent/example",
+    "commit_sha": "0000000000000000000000000000000000000000",
+    "paths": ["path/to/preregistration.md"]
+  },
+  "holdout": {
+    "state": "UNOPENED",
+    "protected_window": "YYYY-MM-DD/YYYY-MM-DD",
+    "opened_in_this_study": false,
+    "authorization_required": true,
+    "authorization_record": null,
+    "prior_exposure": "none known"
+  },
+  "artifacts": {
+    "preregistration": ["path/to/preregistration.md"],
+    "results": [],
+    "reports": [],
+    "reviews": [],
+    "governance": []
+  },
+  "related_studies": [],
+  "tags": ["example"],
+  "provenance": {
+    "registration_mode": "prospective",
+    "registered_on": "YYYY-MM-DD",
+    "notes": ""
+  }
+}

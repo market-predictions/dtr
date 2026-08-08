@@ -1,6 +1,11 @@
 datasets:
   dukascopy_fx_m1_bid_ask_2015_2025_2026_ytd:
     status: canonical_private_cache
+    canonical_research_name: Dukascopy FX Cash
+    research_dataset_id: dukascopy_fx_cash_m1_bid_ask_v1
+    market_semantics: otc_cash_fx
+    research_registry: research_registry/dukascopy_fx_cash/index.json
+    research_standard: research_registry/DUKASCOPY_FX_CASH_RESEARCH_STANDARD.md
     priority: cache_first_mandatory
     registry: data/private_market_data_cache_registry.json
     runbook: docs/PERMANENT_MARKET_DATA_CACHE.md

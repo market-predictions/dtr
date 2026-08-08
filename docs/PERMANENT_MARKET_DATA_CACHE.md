@@ -16,10 +16,15 @@ The public repository stores identifiers, checksums, schema, provenance and rest
 
 ## Dataset contract
 
+- Canonical research name: **Dukascopy FX Cash**.
+- Research dataset ID: `dukascopy_fx_cash_m1_bid_ask_v1`.
+- Legacy technical catalog key remains unchanged for backward compatibility.
 - Pairs: EURUSD, GBPUSD, USDCHF, AUDUSD, NZDUSD, USDCAD, USDJPY, EURJPY, GBPJPY and EURGBP.
 - Dukascopy M1, separate BID and ASK, UTC.
 - Complete 2015–2025 plus 2026 YTD ending exclusive 2026-07-24.
 - Annual compressed CSV files, annual audits and pair source manifests.
+
+Every study using this ten-pair source must also follow `research_registry/DUKASCOPY_FX_CASH_RESEARCH_STANDARD.md` and register its methodology/outcome under `research_registry/dukascopy_fx_cash/`. The market-data cache registry proves source identity; the research registry preserves scientific memory. They are complementary and neither replaces the other.
 
 The original source ZIPs were split without transformation into 64 MiB binary parts because the Drive connector has a 100 MB transfer limit. Concatenating parts in registered order reconstructs the exact source artifact. The registry contains every pair-folder ID, part size, part SHA-256, original ZIP size and original ZIP SHA-256.
 

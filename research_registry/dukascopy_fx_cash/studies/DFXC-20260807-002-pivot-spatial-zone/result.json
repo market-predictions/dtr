@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0.0",
+  "study_id": "DFXC-20260807-002-pivot-spatial-zone",
+  "decision": "PROMOTE_DAILY_WEEKLY_PIVOT_TERMINAL_ZONE_TO_HOLDOUT_CONFIRMATION",
+  "scientific_disposition": "PROMOTE_TO_HOLDOUT_CONFIRMATION",
+  "summary": "Broad pivot-zone magnet/stall/reversal hypotheses still failed, but a narrower daily/weekly pivot-proximity terminal-hazard effect survived internal falsification and was promoted—unchanged—to protected holdout confirmation.",
+  "primary_findings": [
+    {"metric": "daily S5 terminal enrichment, close-based", "estimate": 4.55, "unit": "percentage points", "uncertainty": "95% CI [+3.74, +5.33], Holm p<0.001, 10/10 pairs"},
+    {"metric": "weekly S5 terminal enrichment, close-based", "estimate": 1.26, "unit": "percentage points", "uncertainty": "95% CI [+0.60, +1.94], Holm p=0.008, 9/10 pairs"},
+    {"metric": "daily same-geometry high/low robustness", "estimate": 2.24, "unit": "percentage points", "uncertainty": "95% CI [+1.95, +2.52], 10/10 pairs"},
+    {"metric": "weekly same-geometry high/low robustness", "estimate": 0.63, "unit": "percentage points", "uncertainty": "95% CI [+0.35, +0.91], 9/10 pairs"}
+  ],
+  "breadth": {"pairs": "daily 10/10; weekly 9/10 on promoted effect", "higher_timeframes": "monthly/quarterly/yearly not robust"},
+  "robustness": ["Daily normalized spatial gradient was monotonic: 32.76%, 31.98%, 31.07%, 30.16%, 30.09% from nearest to farthest 10%-wide bins.", "Same-geometry high/low robustness remained positive for daily and weekly.", "Named-level non-dominance and leave-one-pair-out checks passed for promoted daily/weekly S5 effects."],
+  "limitations": ["The endpoint is a retrospectively confirmed ATR-defined terminal extreme. It is not yet a causal reversal entry or trading strategy.", "Broad attraction, target, stall and reversal claims remain rejected.", "Internal data through 2021 were used to discover/validate the narrowed terminal-hazard mechanism; the protected 2022-2025 confirmation is still required."],
+  "authorized_next": ["One separately preregistered 2022-2025 holdout confirmation of the exact unchanged daily/weekly terminal-zone mechanism."],
+  "prohibited_next": ["Do not convert the retrospective terminal label directly into an entry rule.", "Do not optimize zone width, pair subset, timeframe or endpoint before the protected confirmation."],
+  "assurance": {"status": "PASS", "decision": "Independent assurance PASS on the frozen internal study.", "evidence": ["strategies/pivot_levels/reviews/PIVOT_SPATIAL_ZONE_ASSURANCE_2026-08-07.json"]},
+  "holdout": {"state_after": "UNOPENED", "opened_in_this_study": false},
+  "evidence": [
+    {"repository": "market-predictions/dtr", "ref": "agent/pivot-spatial-zone-followup", "commit_sha": "59515ee9d958f1273649089e6a83e1802064bb3c", "path": "strategies/pivot_levels/results/2026-08-07/pivot_spatial_zone_summary.json"},
+    {"repository": "market-predictions/dtr", "ref": "agent/pivot-spatial-zone-followup", "commit_sha": "59515ee9d958f1273649089e6a83e1802064bb3c", "path": "strategies/pivot_levels/reports/PIVOT_SPATIAL_ZONE_REPORT_2026-08-07.md"},
+    {"repository": "market-predictions/dtr", "ref": "agent/pivot-spatial-zone-followup", "commit_sha": "59515ee9d958f1273649089e6a83e1802064bb3c", "path": "strategies/pivot_levels/reviews/PIVOT_SPATIAL_ZONE_ASSURANCE_2026-08-07.json"}
+  ]
+}

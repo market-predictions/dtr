@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/market-predictions/dtr/research_registry/schemas/result.schema.json",
+  "title": "Dukascopy FX Cash Study Result",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "study_id",
+    "decision",
+    "scientific_disposition",
+    "summary",
+    "primary_findings",
+    "limitations",
+    "authorized_next",
+    "prohibited_next",
+    "assurance",
+    "holdout",
+    "evidence"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "study_id": {"type": "string", "pattern": "^DFXC-[0-9]{8}-[0-9]{3}-[a-z0-9-]+$"},
+    "decision": {"type": "string", "minLength": 1},
+    "scientific_disposition": {"enum": ["SUPPORTED_INTERNAL", "PROMOTE_TO_HOLDOUT_CONFIRMATION", "REJECT_NO_INCREMENTAL_VALUE", "REJECT_MECHANISM", "DESCRIPTIVE_ONLY", "HOLD_FOR_FRESH_DATA", "INDETERMINATE", "INVALIDATED_DATA", "SUPERSEDED", "ABANDONED"]},
+    "summary": {"type": "string", "minLength": 1},
+    "primary_findings": {"type": "array", "minItems": 1},
+    "limitations": {"type": "array"},
+    "authorized_next": {"type": "array"},
+    "prohibited_next": {"type": "array"},
+    "assurance": {"type": "object"},
+    "holdout": {"type": "object"},
+    "evidence": {"type": "array", "minItems": 1}
+  },
+  "additionalProperties": true
+}

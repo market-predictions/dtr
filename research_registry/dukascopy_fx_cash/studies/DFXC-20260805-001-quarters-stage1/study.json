@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0.0",
+  "study_id": "DFXC-20260805-001-quarters-stage1",
+  "title": "Quarters Theory Stage-1 distinctiveness — GBPUSD",
+  "family": "quarters_theory",
+  "date": "2026-08-05",
+  "study_type": "falsification",
+  "lifecycle_status": "REJECTED",
+  "dataset": {
+    "canonical_name": "Dukascopy FX Cash",
+    "dataset_id": "dukascopy_fx_cash_m1_bid_ask_v1",
+    "pairs": ["GBPUSD"],
+    "base_timeframe": "M1",
+    "analysis_timeframe": "M1",
+    "quote_sides": ["BID", "ASK"],
+    "timezone": "UTC",
+    "price_basis": "midpoint",
+    "windows": {"development": "2015-2019", "internal_validation": "2020-2021", "protected_holdout": "2022-2025"},
+    "pip_convention": "0.0001 non-JPY; 0.01 JPY",
+    "cache_registry": "data/private_market_data_cache_registry.json"
+  },
+  "hypotheses": {
+    "market_question": "Does the canonical 250-pip Large Quarter Point grid contain unique short-horizon continuation information on GBPUSD?",
+    "null": "Canonical Large Quarter Points do not outperform matched nearby 50-pip round-level controls on the frozen 60-minute continuation endpoint.",
+    "alternative": "Canonical Large Quarter Points show a positive and stable continuation effect relative to matched controls.",
+    "mechanism": "If Quarters Theory describes a privileged price grid, crossings of canonical Large Quarter Points should alter continuation probability/return beyond generic round-number geometry."
+  },
+  "method": {
+    "primary_endpoint": "Direction-aligned midpoint return 60 minutes after an eligible crossing.",
+    "economic_effect_size": "Canonical-minus-matched-control return in pips.",
+    "event_definition": "Candidate levels every 50 pips; canonical phase 0 modulo 250; midpoint crossing; 25-pip directional rearm.",
+    "controls": ["50-pip round levels at phases 50, 100, 150 and 200, matched by year, direction, roundness and four-hour UTC session."],
+    "variants": ["Frozen Stage-1 endpoint and reset sensitivity reported in source artifacts."],
+    "selection_family_size": 1,
+    "inference": {"method": "year-preserving weekly block bootstrap", "cluster_or_block_unit": "week within year", "draws": 5000, "multiple_testing": "frozen Stage-1 gate"},
+    "execution": {"applicable": false, "spread_policy": "structural midpoint study", "slippage_policy": "not_applicable", "same_bar_policy": "not_applicable"}
+  },
+  "source": {
+    "repository": "market-predictions/dtr",
+    "ref": "agent/quarters-theory-stage1",
+    "commit_sha": "a1ed9e501b619ed464c601cc21d77e80950c72cf",
+    "paths": ["strategies/quarters_theory/reports/STAGE1_DISTINCTIVENESS_2026-08-05.md", "strategies/quarters_theory/results/2026-08-05/key_results.json", "strategies/quarters_theory/governance/WORKPACKAGE_2026-08-05_STAGE1_DISTINCTIVENESS.md"]
+  },
+  "holdout": {"state": "UNOPENED", "protected_window": "2022-2025", "opened_in_this_study": false, "authorization_required": true, "authorization_record": null, "prior_exposure": "none for this Quarters programme at Stage-1"},
+  "artifacts": {
+    "preregistration": ["strategies/quarters_theory/docs/RESEARCH_PREREGISTRATION.md"],
+    "results": ["strategies/quarters_theory/results/2026-08-05/key_results.json", "strategies/quarters_theory/results/2026-08-05/reset_sensitivity_bootstrap.csv"],
+    "reports": ["strategies/quarters_theory/reports/STAGE1_DISTINCTIVENESS_2026-08-05.md"],
+    "reviews": ["strategies/quarters_theory/docs/SECOND_OPINION_ASSESSMENT.md"],
+    "governance": ["strategies/quarters_theory/governance/WORKPACKAGE_2026-08-05_STAGE1_DISTINCTIVENESS.md"]
+  },
+  "related_studies": ["DFXC-20260806-001-quarters-ten-pair"],
+  "tags": ["quarters-theory", "250-pip", "round-numbers", "placebo", "falsification", "gbpusd"],
+  "provenance": {"registration_mode": "retrospective_reconstruction", "registered_on": "2026-08-08", "notes": "Normalized from frozen branch-resident research; no historical result was altered."}
+}

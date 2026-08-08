@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0.0",
+  "purpose": "Historical branch-resident work that may have used Dukascopy FX Cash and requires evidence-based reconstruction before formal registration.",
+  "rule": "Presence here is not a claim that the branch qualifies as a Dukascopy FX Cash study. Verify dataset identity, outcome and exact evidence before creating a DFXC study ID.",
+  "candidates": [
+    {"ref": "agent/stacey-burke-fx-source-census", "family": "stacey_burke", "status": "needs_reconstruction"},
+    {"ref": "agent/asia-sweep-fx-ten-pair", "family": "asia_sweep", "status": "needs_reconstruction"},
+    {"ref": "agent/gbpusd-dtr-replication", "family": "dtr_fx", "status": "needs_reconstruction"},
+    {"ref": "agent/wayne-direction-first-research", "family": "wayne_mcdonnell", "status": "needs_reconstruction"},
+    {"ref": "agent/wayne-independent-fx-replication", "family": "wayne_mcdonnell", "status": "needs_reconstruction"},
+    {"ref": "agent/wayne-pivots-research", "family": "wayne_mcdonnell", "status": "needs_reconstruction"},
+    {"ref": "agent/quarters-theory-crosspair", "family": "quarters_theory", "status": "historical_intermediate_superseded_by_ten_pair_confirmation"},
+    {"ref": "agent/quarters-theory-destination-exhaustion", "family": "quarters_theory", "status": "needs_reconstruction"}
+  ],
+  "already_registered_refs": [
+    "agent/quarters-theory-stage1",
+    "agent/quarters-theory-universe",
+    "agent/pivot-level-target-reversal",
+    "agent/pivot-spatial-zone-followup"
+  ]
+}

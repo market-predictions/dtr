@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/market-predictions/dtr/research_registry/schemas/study.schema.json",
+  "title": "Dukascopy FX Cash Study Manifest",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "study_id",
+    "title",
+    "family",
+    "date",
+    "study_type",
+    "lifecycle_status",
+    "dataset",
+    "hypotheses",
+    "method",
+    "source",
+    "holdout",
+    "artifacts",
+    "tags",
+    "provenance"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "study_id": {"type": "string", "pattern": "^DFXC-[0-9]{8}-[0-9]{3}-[a-z0-9-]+$"},
+    "title": {"type": "string", "minLength": 1},
+    "family": {"type": "string", "minLength": 1},
+    "date": {"type": "string", "format": "date"},
+    "study_type": {"enum": ["structural", "event_study", "strategy", "falsification", "robustness", "replication", "holdout_confirmation", "data_validity"]},
+    "lifecycle_status": {"enum": ["DESIGN", "PREREGISTERED", "RUN_COMPLETE", "INTERNAL_ASSURANCE_PASS", "HOLDOUT_CONFIRMED", "REJECTED", "SUPERSEDED", "ABANDONED"]},
+    "dataset": {"type": "object"},
+    "hypotheses": {"type": "object"},
+    "method": {"type": "object"},
+    "source": {"type": "object"},
+    "holdout": {"type": "object"},
+    "artifacts": {"type": "object"},
+    "tags": {"type": "array", "items": {"type": "string"}},
+    "related_studies": {"type": "array", "items": {"type": "string"}},
+    "provenance": {"type": "object"}
+  },
+  "additionalProperties": true
+}

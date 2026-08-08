@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0.0",
+  "study_id": "DFXC-20260807-001-pivot-target-reversal",
+  "title": "Classic pivot levels — target, stall and reversal falsification",
+  "family": "pivot_levels",
+  "date": "2026-08-07",
+  "study_type": "falsification",
+  "lifecycle_status": "REJECTED",
+  "dataset": {
+    "canonical_name": "Dukascopy FX Cash",
+    "dataset_id": "dukascopy_fx_cash_m1_bid_ask_v1",
+    "pairs": ["EURUSD", "GBPUSD", "USDCHF", "AUDUSD", "NZDUSD", "USDCAD", "USDJPY", "EURJPY", "GBPJPY", "EURGBP"],
+    "base_timeframe": "M1",
+    "analysis_timeframe": "H1 trend state and M15 first-passage/reaction bars derived from M1",
+    "quote_sides": ["BID", "ASK"],
+    "timezone": "UTC",
+    "price_basis": "midpoint structural measurement",
+    "windows": {"development": "2015-2019", "internal_validation": "2020-2021", "protected_holdout": "2022-2025"},
+    "pip_convention": "0.0001 non-JPY; 0.01 JPY",
+    "cache_registry": "data/private_market_data_cache_registry.json"
+  },
+  "hypotheses": {
+    "market_question": "Do daily, weekly, monthly, quarterly and yearly classic pivot coordinates act as distinctive price targets, containment/stall points, trend terminals or reversal points?",
+    "null": "Exact pivot coordinates are not incrementally different from deterministic nearby placebo coordinates after distance/opportunity controls.",
+    "alternative": "Exact pivots show stronger target/stall/terminal/reversal behavior than nearby placebo coordinates.",
+    "mechanism": "Widely followed prior-period-derived levels may concentrate expectations/orders and therefore alter local price behavior."
+  },
+  "method": {
+    "primary_endpoint": "P1-P4 exact-pivot versus placebo effect family across daily, weekly, monthly, quarterly and yearly pivots; P0 fresh-touch census descriptive only.",
+    "economic_effect_size": "Exact-pivot minus placebo effect for each predeclared mechanism.",
+    "event_definition": "Classic floor pivots; daily/weekly test S3-S1, PP, R1-R3; monthly/quarterly/yearly additionally test six arithmetic midlevels; New York 17:00 DST-safe periods. A coordinate is reached when derived M15 high/low first enters its causal tolerance zone, whose half-width is min(25 pips, 0.10*lagged prior ATR20_D1, 0.10*local pivot spacing), with the preregistered numerical floor/anti-overlap rule.",
+    "controls": ["Each exact level compared with deterministic nearby placebo coordinates shifted ±25% of local pivot spacing; the same tolerance-zone construction applies."],
+    "variants": ["daily", "weekly", "monthly", "quarterly", "yearly", "higher-timeframe midlevels"],
+    "selection_family_size": 20,
+    "inference": {"method": "pair-year-week clustered bootstrap", "cluster_or_block_unit": "pair-year-week", "draws": 5000, "multiple_testing": "Holm correction across 20 primary hypotheses (P1-P4 × five timeframes)"},
+    "execution": {"applicable": false, "spread_policy": "structural midpoint study", "slippage_policy": "not_applicable", "same_bar_policy": "same-M15 target/failure or reversal/extension crossings classified ambiguous/non-success"}
+  },
+  "source": {
+    "repository": "market-predictions/dtr",
+    "ref": "agent/pivot-level-target-reversal",
+    "commit_sha": "22c8192f66239d4e9aea644f137d524540f1b91d",
+    "paths": ["strategies/pivot_levels/docs/PIVOT_TARGET_REVERSAL_PREREGISTRATION_2026-08-07.md", "strategies/pivot_levels/docs/PIVOT_TARGET_REVERSAL_PREREGISTRATION_AMENDMENT_01_2026-08-07.md", "strategies/pivot_levels/results/2026-08-07/pivot_results_compact.json", "strategies/pivot_levels/reports/PIVOT_TARGET_REVERSAL_REPORT_2026-08-07.md", "strategies/pivot_levels/reviews/PIVOT_TARGET_REVERSAL_ASSURANCE_2026-08-07.json"]
+  },
+  "holdout": {"state": "UNOPENED", "protected_window": "2022-2025", "opened_in_this_study": false, "authorization_required": true, "authorization_record": null, "prior_exposure": "none for this pivot programme before internal 2015-2021 study"},
+  "artifacts": {
+    "preregistration": ["strategies/pivot_levels/docs/PIVOT_TARGET_REVERSAL_PREREGISTRATION_2026-08-07.md", "strategies/pivot_levels/docs/PIVOT_TARGET_REVERSAL_PREREGISTRATION_AMENDMENT_01_2026-08-07.md"],
+    "results": ["strategies/pivot_levels/results/2026-08-07/pivot_results_compact.json", "strategies/pivot_levels/results/2026-08-07/pivot_evidence_manifest.json"],
+    "reports": ["strategies/pivot_levels/reports/PIVOT_TARGET_REVERSAL_REPORT_2026-08-07.md"],
+    "reviews": ["strategies/pivot_levels/reviews/PIVOT_TARGET_REVERSAL_ASSURANCE_2026-08-07.json"],
+    "governance": ["strategies/pivot_levels/governance/WORKPACKAGE_2026-08-07_TARGET_REVERSAL.md", "claims/PIV-WP-20260807-01.md", "handovers/PIV-WP-20260807-01.md"]
+  },
+  "related_studies": ["DFXC-20260807-002-pivot-spatial-zone"],
+  "tags": ["pivots", "daily", "weekly", "monthly", "quarterly", "yearly", "midlevels", "magnet", "reversal", "placebo", "zones"],
+  "provenance": {"registration_mode": "retrospective_reconstruction", "registered_on": "2026-08-08", "notes": "Exact programme decision, tolerance geometry and ±25%-of-local-spacing placebo construction preserved from immutable branch evidence."}
+}

@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0.0",
+  "study_id": "DFXC-20260806-001-quarters-ten-pair",
+  "decision": "CONFIRM_GLOBAL_DEMOTION_NO_PAIR_EXCEPTIONS",
+  "scientific_disposition": "REJECT_MECHANISM",
+  "summary": "The canonical 250-pip Large Quarter Point continuation claim failed the unchanged ten-pair confirmation: zero of ten pairs met the preregistered positive-and-stable criterion.",
+  "primary_findings": [
+    {"metric": "positive-and-stable pairs", "estimate": "0/10", "unit": "pairs", "uncertainty": "predeclared gate"},
+    {"metric": "median combined canonical-minus-control effect", "estimate": -0.396, "unit": "pips", "uncertainty": "pair median"},
+    {"metric": "eligible crossings", "estimate": 47278, "unit": "events", "uncertainty": "exact study count"},
+    {"metric": "canonical LQP crossings", "estimate": 9480, "unit": "events", "uncertainty": "exact study count"}
+  ],
+  "breadth": {"pairs": "10/10 registered pairs", "positive_combined_point_estimate": "2/10", "development_validation_sign_flips": "4/10"},
+  "robustness": ["Frozen GBPUSD/EURUSD/USDJPY references reproduced; JPY normalization was explicitly guarded."],
+  "limitations": ["Rejects the tested distinct short-horizon continuation mechanism, not every conceivable quarter-themed trading rule."],
+  "authorized_next": ["Treat Quarters Theory's canonical-grid edge as globally demoted for this research programme."],
+  "prohibited_next": ["No threshold rescue, pair shopping, transition census, strategy optimization, Pine implementation or holdout opening to rescue the failed mechanism."],
+  "assurance": {"status": "ARITHMETIC_AUDIT_RECORDED", "decision": "programme closure recorded", "evidence": ["strategies/quarters_theory/reviews/TEN_PAIR_UNIVERSE_ARITHMETIC_AUDIT_2026-08-06.json"]},
+  "holdout": {"state_after": "UNOPENED", "opened_in_this_study": false},
+  "evidence": [{"repository": "market-predictions/dtr", "ref": "agent/quarters-theory-universe", "commit_sha": "3dfb4d36c14e20a3df045c7d05d68a3d81b3c946", "path": "strategies/quarters_theory/reports/TEN_PAIR_UNIVERSE_CONFIRMATION_2026-08-06.md"}]
+}

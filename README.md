@@ -12,6 +12,25 @@ It contains qualified Dukascopy M1 BID/ASK data for EURUSD, GBPUSD, USDCHF, AUDU
 
 See `docs/PERMANENT_MARKET_DATA_CACHE.md`.
 
+## Dukascopy FX Cash research memory
+
+The registered ten-pair FX source is canonically called **Dukascopy FX Cash** for research purposes.
+
+Every study using that dataset must be registered under `research_registry/dukascopy_fx_cash/` before it is considered durably complete. The registry preserves the frozen methodology, data windows, holdout state, falsification controls, normalized result, exact source commit, negative findings and authorized next steps.
+
+Start with:
+
+- `research_registry/DUKASCOPY_FX_CASH_RESEARCH_STANDARD.md`
+- `research_registry/dukascopy_fx_cash/INDEX.md`
+
+Validate with:
+
+```bash
+python scripts/validate_dukascopy_fx_cash_registry.py
+```
+
+The detailed implementation may remain on a strategy/research branch; the registry freezes the exact commit so future work can recover it without relying on chat history.
+
 Python-first research and validation framework for the Daytrading Rauf strategy.
 
 ## Current decision
