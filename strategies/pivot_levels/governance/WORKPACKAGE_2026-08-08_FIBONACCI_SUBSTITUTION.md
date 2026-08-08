@@ -3,7 +3,7 @@
 Date: 2026-08-08
 Work package: `PIV-WP-20260808-05`
 Role: `implementation_operations`
-State: `PREREGISTERED`
+State: `RELEASE_CANDIDATE_READY`
 
 ## Objective
 
@@ -55,6 +55,46 @@ No alternative Fibonacci ratios.
 - monotonic core wick gradient;
 - paired Fibonacci-minus-Classic effect distribution by pair-year block.
 
+## Result
+
+### Daily Fibonacci → H1
+
+- wick interaction: **+1.052 pp**, 95% CI **[+0.634,+1.473] pp**;
+- development +1.292 pp; validation +0.456 pp;
+- structural terminal effect: **+1.314 pp**, CI **[+1.115,+1.515] pp**;
+- wick positive in 9/10 pairs; structural positive in 10/10;
+- all pooled leave-one-pair-out effects positive;
+- wick-severity gradient monotonic.
+
+Disposition: `SUPPORTED_INTERNAL` as an alternative representation, not as a superior formula.
+
+### Weekly Fibonacci → H4 SP10
+
+- wick interaction: **+1.234 pp**, 95% CI **[+0.012,+2.441] pp**;
+- raw/Holm p=0.0488;
+- development +1.480 pp; validation +0.614 pp;
+- structural terminal effect: **+1.159 pp**, CI **[+0.641,+1.667] pp**;
+- wick positive in 7/10 pairs; structural positive in 9/10;
+- all pooled leave-one-pair-out effects positive;
+- wick-severity gradient monotonic.
+
+Disposition: `BORDERLINE / INDETERMINATE FOR PROMOTION`. The point estimate passes the numerical internal gate but sits too close to zero for the remaining comparator-reproduction limitation to be ignored.
+
+### Formula comparison
+
+- Daily Fib minus Classic wick delta: **+0.122 pp**, paired CI **[-0.338,+0.573] pp**.
+- Weekly Fib minus Classic wick delta: **−0.373 pp**, paired CI **[-1.631,+0.880] pp**.
+
+Neither horizon establishes Fibonacci superiority.
+
+## Comparator validation
+
+A first provisional reconstruction was rejected before Fibonacci conclusions because it updated the current candle extreme before testing the previous candidate, violating the frozen strict-later anti-circularity ordering.
+
+After applying Amendment 02 exactly at the event-order level, reconstructed classic primary wick interactions are within approximately **0.01 pp** of the frozen parent values on both horizons. Companion structural effects retain residual differences of about **0.103 pp Daily** and **0.066 pp Weekly**, because the historical parent runner/terminal-event ledger was intentionally not committed and cannot be replayed byte-for-byte.
+
+Validation status: `PASS_WITH_RECORDED_REPRODUCTION_LIMITATION`.
+
 ## Non-scope
 
 - no new zone search;
@@ -63,12 +103,15 @@ No alternative Fibonacci ratios.
 - no pair, pivot-level, wick-threshold or session selection;
 - no P&L, entry, stop, target, Pine, alerts, sizing or deployment.
 
-## Acceptance criteria
+## Acceptance status
 
-- preregistration committed before outcome computation;
-- permanent cache reused and data boundaries enforced;
-- classic comparator reproduces parent Daily/H1 and Weekly/H4 2015–2021 effects under the inherited geometries;
-- all Fibonacci positive and negative results retained;
-- formula-difference uncertainty reported;
-- registry record, result, report and evidence stored durably;
-- implementation candidate not self-certified; independent assurance remains separate.
+- [x] preregistration committed before outcome computation;
+- [x] permanent cache reused and data boundaries enforced;
+- [x] classic comparator reconstructed with primary wick endpoints within ~0.01 pp of frozen parents;
+- [x] all Fibonacci positive and negative results retained;
+- [x] formula-difference uncertainty reported;
+- [x] registry result/report/validation evidence stored durably;
+- [ ] independent `governance_release_assurance` of exact candidate;
+- [ ] merge after assurance PASS.
+
+Implementation does not self-certify the candidate.
