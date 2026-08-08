@@ -13,7 +13,7 @@ Registered studies: **4**.
 
 ## Reading rule
 
-The row is a locator, not the evidence. Open the study's `study.json` and `result.json`, then follow the frozen source commit and artifact paths for the complete report, results, code and review evidence.
+The row is a locator, not the evidence. Open the study's `study.json` and `result.json` when present, then follow the frozen source commit and artifact paths for the complete preregistration, run outputs, report, code and review evidence.
 
 ## Current recovered conclusions
 
