@@ -1,0 +1,32 @@
+{
+  "study_id": "DFXC-20260808-006-pivot-daily-level-decomposition",
+  "date": "2026-08-08",
+  "branch": "agent/pivot-daily-h1-level-decomposition",
+  "parent_head": "2c127dbd4125bc2f929072ce1b37efceaf459de4",
+  "cache": {
+    "canonical_name": "Dukascopy FX Cash",
+    "dataset_id": "dukascopy_fx_cash_m1_bid_ask_v1",
+    "historical_reacquisition": false
+  },
+  "validation": {
+    "population_observations": {"reconstructed": 491589, "frozen": 491589, "match": true},
+    "denominators": {
+      "core_strong": [73296, 73296],
+      "core_weak": [43563, 43563],
+      "outer_strong": [83336, 83336],
+      "outer_weak": [50501, 50501]
+    },
+    "terminal_ledger_exact": false,
+    "pooled_interaction_reconstructed": 0.011241838659815331,
+    "pooled_interaction_frozen": 0.010844802114020016,
+    "terminal_reconstructed": 62143,
+    "terminal_frozen": 57863
+  },
+  "artifacts_sha256": {
+    "summary_json": "d36864799ff9da2329429fc6227ec36eec9038469d2d887f9cb2dae419c2fe2d",
+    "report_md": "1896e4638a3258f1774e13a7ecfd9f5c113c5c472257b5947970ea82733bdff5",
+    "scope_md": "6edd9675548e2080e07199d5073c51d7bce359f7dde4b74e0fe3b806f0fdcbeb",
+    "validation_md": "7a17c9df88bd854377984b9b6ef406f690b8b923443ad8fe7436b832b0151634"
+  },
+  "assurance": "NOT_REVIEWED"
+}

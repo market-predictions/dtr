@@ -1,0 +1,63 @@
+{
+  "study_id": "DFXC-20260808-006-pivot-daily-level-decomposition",
+  "scope": "diagnostic reconstruction of preregistered named-level diagnostics on consumed 2022-2025 Daily/H1 holdout",
+  "population_geometry_validation": {
+    "status": "EXACT",
+    "n_observations": 491589,
+    "frozen_n_observations": 491589,
+    "cell_denominators": {
+      "core_strong": 73296,
+      "core_weak": 43563,
+      "outer_strong": 83336,
+      "outer_weak": 50501
+    }
+  },
+  "terminal_reconstruction_validation": {
+    "status": "NON_EXACT_RECONSTRUCTION",
+    "reference_pooled_interaction": 0.011241838659815331,
+    "frozen_pooled_interaction": 0.010844802114020016,
+    "absolute_interaction_residual": 0.0003970365457953149,
+    "reference_retained_terminals": 62143,
+    "frozen_retained_terminals": 57863,
+    "note": "Original heavy terminal ledger was not retained; named-level estimates are reconstructed diagnostics, not exact replay."
+  },
+  "primary_tier_comparison": {
+    "S1_R1_interaction": 0.0239276730534482,
+    "S2_R2_interaction": 0.002032056379321079,
+    "delta": 0.021895616674127122,
+    "bootstrap_ci95": [0.00354448, 0.03960861],
+    "bootstrap_two_sided_sign_p": 0.0176,
+    "positive_pair_deltas": 9,
+    "positive_year_deltas": 4
+  },
+  "individual_levels": {
+    "S3": {"interaction": -0.02333413, "core_strong_rate": 0.22822492, "core_weak_rate": 0.10091743, "outer_strong_rate": 0.24952741, "outer_weak_rate": 0.09888579, "strong_core_minus_outer": -0.02130249, "weak_core_minus_outer": 0.00203164},
+    "S2": {"interaction": -0.00286647, "core_strong_rate": 0.24737, "core_weak_rate": 0.08564232, "outer_strong_rate": 0.24920954, "outer_weak_rate": 0.08461538, "strong_core_minus_outer": -0.00183954, "weak_core_minus_outer": 0.00102694},
+    "S1": {"interaction": 0.01580536, "core_strong_rate": 0.23609342, "core_weak_rate": 0.07232267, "outer_strong_rate": 0.21356167, "outer_weak_rate": 0.06559628, "strong_core_minus_outer": 0.02253175, "weak_core_minus_outer": 0.00672639},
+    "PP": {"interaction": 0.01254948, "core_strong_rate": 0.15297471, "core_weak_rate": 0.05032175, "outer_strong_rate": 0.13504589, "outer_weak_rate": 0.04494291, "strong_core_minus_outer": 0.01792882, "weak_core_minus_outer": 0.00537884},
+    "R1": {"interaction": 0.03107543, "core_strong_rate": 0.22813211, "core_weak_rate": 0.065209, "outer_strong_rate": 0.19718632, "outer_weak_rate": 0.06533838, "strong_core_minus_outer": 0.03094579, "weak_core_minus_outer": -0.00012938},
+    "R2": {"interaction": 0.00693635, "core_strong_rate": 0.24066879, "core_weak_rate": 0.0705036, "outer_strong_rate": 0.23637865, "outer_weak_rate": 0.07314974, "strong_core_minus_outer": 0.00429014, "weak_core_minus_outer": -0.00264614},
+    "R3": {"interaction": 0.00601391, "core_strong_rate": 0.24441833, "core_weak_rate": 0.09016393, "outer_strong_rate": 0.23953262, "outer_weak_rate": 0.09129213, "strong_core_minus_outer": 0.00488571, "weak_core_minus_outer": -0.0011282}
+  },
+  "tiers": {
+    "S1_R1": {"interaction": 0.0239276730534482, "core_strong_rate": 0.23195498, "core_weak_rate": 0.06863664, "outer_strong_rate": 0.20484957, "outer_weak_rate": 0.06545983, "strong_core_minus_outer": 0.02710541, "weak_core_minus_outer": 0.00317681},
+    "S2_R2": {"interaction": 0.002032056379321079, "core_strong_rate": 0.24400839, "core_weak_rate": 0.07788698, "outer_strong_rate": 0.2426543, "outer_weak_rate": 0.078565},
+    "S3_R3": {"interaction": -0.009163560783178815, "core_strong_rate": 0.23606371, "core_weak_rate": 0.09572785, "outer_strong_rate": 0.24460432, "outer_weak_rate": 0.0951049},
+    "PP": {"interaction": 0.012549479787124285, "core_strong_rate": 0.15297471, "core_weak_rate": 0.05032175, "outer_strong_rate": 0.13504589, "outer_weak_rate": 0.04494291},
+    "ALL": {"interaction": 0.011241838659815331, "core_strong_rate": 0.18968293, "core_weak_rate": 0.06048665, "outer_strong_rate": 0.17539796, "outer_weak_rate": 0.05744441}
+  },
+  "years": {
+    "2022": {"S1_R1": 0.03042392, "S2_R2": 0.02740281, "delta": 0.0030211},
+    "2023": {"S1_R1": 0.00814036, "S2_R2": -0.00224356, "delta": 0.01038393},
+    "2024": {"S1_R1": 0.03648819, "S2_R2": -0.01082634, "delta": 0.04731453},
+    "2025": {"S1_R1": 0.02071834, "S2_R2": -0.00581821, "delta": 0.02653655}
+  },
+  "sensitivity": {
+    "no_gap_strict": {"all": 0.01124184, "S1_R1": 0.02392767, "S2_R2": 0.00203206, "delta": 0.02189562},
+    "gap_reset_strict": {"all": 0.01115742, "S1_R1": 0.022602, "S2_R2": 0.001987, "delta": 0.020615},
+    "no_gap_latest_tie": {"all": 0.01111315, "S1_R1": 0.023654, "S2_R2": 0.001664, "delta": 0.021989},
+    "gap_reset_latest_tie": {"all": 0.01102526, "S1_R1": 0.022292, "S2_R2": 0.001619, "delta": 0.020673},
+    "full_clock_gap_stress": {"all": 0.01000008, "S1_R1": 0.017721, "S2_R2": 0.001038, "delta": 0.016682}
+  },
+  "decision": "DIAGNOSTIC_FIRST_ORDER_PIVOTS_DOMINATE_SECOND_ORDER_PIVOTS_REQUIRES_EXACT_LEDGER_OR_FRESH_CONFIRMATION"
+}
