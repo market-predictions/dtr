@@ -13,7 +13,7 @@
     "base_timeframe": "M1",
     "analysis_timeframe": "Conditional on parent survivors: Daily/H1 and Weekly/H4",
     "quote_sides": ["BID", "ASK"],
-    "timezone": "UTC source; NY17 DST-safe pivot periods",
+    "timezone": "UTC",
     "price_basis": "midpoint structural measurement",
     "windows": {"development": "2015-2019", "internal_validation": "2020-2021", "protected_holdout": "2022-2025"},
     "pip_convention": "0.0001 non-JPY; 0.01 JPY",
@@ -28,7 +28,7 @@
   "method": {
     "primary_endpoint": "Difference-in-differences: (core strong-wick terminal rate - core weak-wick terminal rate) - (outer strong-wick terminal rate - outer weak-wick terminal rate).",
     "economic_effect_size": "Percentage-point incremental wick-associated terminal probability attributable to pivot-core context beyond generic outer-region wick exhaustion.",
-    "event_definition": "Directional wick fraction = high-side (H-max(O,C))/(H-L) or low-side (min(O,C)-L)/(H-L). Strong >=30% of candle range; weak <10%. Terminal label comes from the parent pivot-blind ATR24/0.75 detector and requires strictly later-bar confirmation.",
+    "event_definition": "Directional wick fraction = high-side (H-max(O,C))/(H-L) or low-side (min(O,C)-L)/(H-L). Strong >=30% of candle range; weak <10%. Terminal label comes from the parent pivot-blind ATR24/0.75 detector and requires strictly later-bar confirmation. Pivot periods use the frozen NY17 DST-safe FX calendar.",
     "controls": ["outer-region generic strong-versus-weak wick effect", "weak-wick pivot-core effect", "five frozen wick-strength bins", "pair breadth", "leave-one-pair-out"],
     "variants": ["D_H1", "W_H4"],
     "selection_family_size": 2,
