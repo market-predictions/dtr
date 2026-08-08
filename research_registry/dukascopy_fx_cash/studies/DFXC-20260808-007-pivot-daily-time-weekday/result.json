@@ -45,7 +45,7 @@
     "Do not treat this study as Pine, alert, sizing or live-trading authorization."
   ],
   "assurance": {"status":"NOT_REVIEWED","decision":null,"evidence":["strategies/pivot_levels/reviews/PIVOT_DAILY_H1_TIME_WEEKDAY_IMPLEMENTATION_VALIDATION_2026-08-08.md"]},
-  "holdout": {"state_after":"NO_PRISTINE_HOLDOUT_RELATED_DATA_EXPOSED","opened_in_this_study":false},
+  "holdout": {"state_after":"NOT_APPLICABLE","opened_in_this_study":false},
   "evidence": [
     {"repository":"market-predictions/dtr","ref":"agent/pivot-daily-h1-time-weekday-v4","commit_sha":"24cecf035885cbd79ab4f5d08ec1bc12693825b1","path":"strategies/pivot_levels/docs/PIVOT_DAILY_H1_TIME_WEEKDAY_PREREGISTRATION_2026-08-08.md"},
     {"repository":"market-predictions/dtr","ref":"agent/pivot-daily-h1-time-weekday-v4","commit_sha":"24cecf035885cbd79ab4f5d08ec1bc12693825b1","path":"strategies/pivot_levels/results/2026-08-08/pivot_daily_h1_time_weekday_summary.json"},
