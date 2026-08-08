@@ -5,7 +5,7 @@
   "family": "pivot_levels",
   "date": "2026-08-08",
   "study_type": "holdout_confirmation",
-  "lifecycle_status": "PREREGISTERED",
+  "lifecycle_status": "HOLDOUT_CONFIRMED",
   "dataset": {
     "canonical_name": "Dukascopy FX Cash",
     "dataset_id": "dukascopy_fx_cash_m1_bid_ask_v1",
@@ -41,15 +41,15 @@
     "commit_sha": "c4aeaced560ee9ffb47a70b6b34128120b44df8d",
     "paths": ["strategies/pivot_levels/docs/PIVOT_DAILY_H1_WICK_HOLDOUT_PREREGISTRATION_2026-08-08.md", "strategies/pivot_levels/governance/HOLDOUT_AUTHORIZATION_2026-08-08_DAILY_H1_WICK.md", "strategies/pivot_levels/governance/WORKPACKAGE_2026-08-08_DAILY_HOLDOUT_WEEKLY_ZONE.md"]
   },
-  "holdout": {"state": "UNOPENED", "protected_window": "2022-2025", "opened_in_this_study": false, "authorization_required": true, "authorization_record": "strategies/pivot_levels/governance/HOLDOUT_AUTHORIZATION_2026-08-08_DAILY_H1_WICK.md", "prior_exposure": "Parent Daily/H1 interaction selected on 2015-2021 only; 2022-2025 previously unopened for this question."},
+  "holdout": {"state": "OPENED", "protected_window": "2022-2025", "opened_in_this_study": true, "authorization_required": true, "authorization_record": "strategies/pivot_levels/governance/HOLDOUT_AUTHORIZATION_2026-08-08_DAILY_H1_WICK.md", "prior_exposure": "Parent Daily/H1 interaction selected on 2015-2021 only; 2022-2025 was unopened before this authorized confirmation and is now consumed for the exact Daily/H1 question."},
   "artifacts": {
     "preregistration": ["strategies/pivot_levels/docs/PIVOT_DAILY_H1_WICK_HOLDOUT_PREREGISTRATION_2026-08-08.md"],
-    "results": [],
-    "reports": [],
-    "reviews": [],
+    "results": ["strategies/pivot_levels/results/2026-08-08/pivot_daily_h1_wick_holdout_summary.json"],
+    "reports": ["strategies/pivot_levels/reports/PIVOT_DAILY_HOLDOUT_WEEKLY_ZONE_REPORT_2026-08-08.md"],
+    "reviews": ["strategies/pivot_levels/reviews/PIVOT_DAILY_HOLDOUT_WEEKLY_ZONE_IMPLEMENTATION_VALIDATION_2026-08-08.md"],
     "governance": ["strategies/pivot_levels/governance/HOLDOUT_AUTHORIZATION_2026-08-08_DAILY_H1_WICK.md", "strategies/pivot_levels/governance/WORKPACKAGE_2026-08-08_DAILY_HOLDOUT_WEEKLY_ZONE.md"]
   },
-  "related_studies": ["DFXC-20260808-002-pivot-wick-rejection", "DFXC-20260808-001-pivot-multiscale-terminal"],
+  "related_studies": ["DFXC-20260808-002-pivot-wick-rejection", "DFXC-20260808-001-pivot-multiscale-terminal", "DFXC-20260808-004-pivot-weekly-h4-zone-geometry"],
   "tags": ["pivots", "daily", "H1", "wick", "rejection", "terminal-hazard", "holdout", "confirmation"],
-  "provenance": {"registration_mode": "prospective_holdout_preregistration", "registered_on": "2026-08-08", "notes": "Principal authorized exact 2022-2025 exposure before outcomes. No parameter change from the internally promoted Daily/H1 interaction."}
+  "provenance": {"registration_mode": "prospective_holdout_preregistration", "registered_on": "2026-08-08", "notes": "Principal authorized exact 2022-2025 exposure before outcomes. No parameter change from the internally promoted Daily/H1 interaction. Holdout consumed only after frozen preregistration and authorization were committed."}
 }
