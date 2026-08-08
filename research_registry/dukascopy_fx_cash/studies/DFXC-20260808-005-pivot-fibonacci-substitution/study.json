@@ -5,7 +5,7 @@
   "family": "pivot_levels",
   "date": "2026-08-08",
   "study_type": "robustness",
-  "lifecycle_status": "PREREGISTERED",
+  "lifecycle_status": "RUN_COMPLETE",
   "dataset": {
     "canonical_name": "Dukascopy FX Cash",
     "dataset_id": "dukascopy_fx_cash_m1_bid_ask_v1",
@@ -39,17 +39,17 @@
     "repository": "market-predictions/dtr",
     "ref": "agent/pivot-fibonacci-formula-substitution",
     "commit_sha": "0febc662d071f90363a44cf6f3e95a76b87155d0",
-    "paths": ["strategies/pivot_levels/docs/PIVOT_FIBONACCI_FORMULA_SUBSTITUTION_PREREGISTRATION_2026-08-08.md", "strategies/pivot_levels/governance/WORKPACKAGE_2026-08-08_FIBONACCI_SUBSTITUTION.md"]
+    "paths": ["strategies/pivot_levels/docs/PIVOT_FIBONACCI_FORMULA_SUBSTITUTION_PREREGISTRATION_2026-08-08.md", "strategies/pivot_levels/governance/WORKPACKAGE_2026-08-08_FIBONACCI_SUBSTITUTION.md", "strategies/pivot_levels/results/2026-08-08/pivot_fibonacci_formula_substitution_summary.json", "strategies/pivot_levels/reports/PIVOT_FIBONACCI_FORMULA_SUBSTITUTION_REPORT_2026-08-08.md", "strategies/pivot_levels/reviews/PIVOT_FIBONACCI_IMPLEMENTATION_VALIDATION_2026-08-08.md"]
   },
   "holdout": {"state": "UNOPENED", "protected_window": "2022-2025 already exposed for related Daily/H1 classic-pivot question", "opened_in_this_study": false, "authorization_required": true, "authorization_record": null, "prior_exposure": "2022-2025 was consumed for DFXC-20260808-003. This Fibonacci study uses 2015-2021 only and makes no pristine-holdout claim."},
   "artifacts": {
     "preregistration": ["strategies/pivot_levels/docs/PIVOT_FIBONACCI_FORMULA_SUBSTITUTION_PREREGISTRATION_2026-08-08.md"],
-    "results": [],
-    "reports": [],
-    "reviews": [],
-    "governance": ["strategies/pivot_levels/governance/WORKPACKAGE_2026-08-08_FIBONACCI_SUBSTITUTION.md"]
+    "results": ["strategies/pivot_levels/results/2026-08-08/pivot_fibonacci_formula_substitution_summary.json"],
+    "reports": ["strategies/pivot_levels/reports/PIVOT_FIBONACCI_FORMULA_SUBSTITUTION_REPORT_2026-08-08.md"],
+    "reviews": ["strategies/pivot_levels/reviews/PIVOT_FIBONACCI_IMPLEMENTATION_VALIDATION_2026-08-08.md"],
+    "governance": ["strategies/pivot_levels/governance/WORKPACKAGE_2026-08-08_FIBONACCI_SUBSTITUTION.md", "claims/PIV-WP-20260808-05.md", "handovers/PIV-WP-20260808-05.md"]
   },
   "related_studies": ["DFXC-20260808-003-pivot-daily-wick-holdout", "DFXC-20260808-004-pivot-weekly-h4-zone-geometry"],
   "tags": ["pivots", "fibonacci", "daily", "H1", "weekly", "H4", "wick", "terminal-hazard", "formula-substitution", "robustness"],
-  "provenance": {"registration_mode": "prospective_formula_substitution_preregistration", "registered_on": "2026-08-08", "notes": "Standard 0.382/0.618/1.000 Fibonacci levels frozen before any Fibonacci outcome computation. Zone geometry and response logic inherited unchanged from successful classic-pivot studies."}
+  "provenance": {"registration_mode": "prospective_formula_substitution_preregistration", "registered_on": "2026-08-08", "notes": "Standard 0.382/0.618/1.000 Fibonacci levels frozen before any Fibonacci outcome computation. Zone geometry and response logic inherited unchanged from successful classic-pivot studies. Initial detector-order reconstruction was rejected before accepted outcomes; corrected strict-later ordering follows frozen parent Amendment 02."}
 }
