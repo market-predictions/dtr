@@ -1,6 +1,6 @@
 # Work Package — Daily H1 Continuation Management
 
-ID: `PIV-WP-20260808-08`
+ID: `PIV-WP-20260808-09`
 
 Objective: test whether the confirmed Daily S1/R1 + strong H1 rejection state has value for managing an existing continuation position, without changing the failed reversal-entry architecture.
 
