@@ -1,0 +1,7 @@
+{
+  "study_id": "DFXC-20260808-007-pivot-daily-time-weekday",
+  "candidate_branch": "agent/pivot-daily-h1-time-weekday-v4",
+  "scientific_decision": "NO_MATERIAL_DIRECTIONAL_TIME_OR_WEEKDAY_EDGE_TIME_MAINLY_MODULATES_MOVEMENT_MAGNITUDE",
+  "governance_state": "IMPLEMENTATION_COMPLETE_CI_AND_INDEPENDENT_ASSURANCE_PENDING",
+  "note": "Administrative final-head marker only; no scientific estimates changed."
+}

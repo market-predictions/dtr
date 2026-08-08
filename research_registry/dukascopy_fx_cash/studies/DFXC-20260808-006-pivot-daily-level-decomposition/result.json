@@ -2,36 +2,35 @@
   "schema_version": "1.0.0",
   "study_id": "DFXC-20260808-006-pivot-daily-level-decomposition",
   "decision": "DIAGNOSTIC_FIRST_ORDER_PIVOTS_DOMINATE_SECOND_ORDER_PIVOTS_REQUIRES_EXACT_LEDGER_OR_FRESH_CONFIRMATION",
-  "scientific_disposition": "DIAGNOSTIC_SUPPORTED_RECONSTRUCTION_LIMITED",
-  "summary": "Named-level reconstruction indicates the confirmed Daily/H1 pivot-wick association is concentrated at first-order S1/R1: +2.393 pp versus +0.203 pp at S2/R2, a +2.190 pp tier contrast with 95% pair-year bootstrap CI [+0.354,+3.961] pp. The observation geometry reproduces exactly, but the original heavy terminal ledger was not retained, so named-level terminal estimates are diagnostic reconstruction rather than exact replay.",
+  "scientific_disposition": "DESCRIPTIVE_ONLY",
+  "summary": "Named-level reconstruction indicates the confirmed Daily/H1 pivot-wick association is concentrated at first-order S1/R1: +2.393 pp versus +0.203 pp at S2/R2, a +2.190 pp tier contrast with 95% pair-year bootstrap CI [+0.354,+3.961] pp. The observation geometry reproduces exactly, but the original heavy terminal ledger was not retained, so named-level terminal estimates remain descriptive reconstructed diagnostics rather than exact replay or level-selection authority.",
   "primary_findings": [
-    {"metric": "S1/R1 pivot-specific wick interaction", "estimate": 0.0239276730534482, "unit": "probability difference / +2.393 pp"},
-    {"metric": "S2/R2 pivot-specific wick interaction", "estimate": 0.002032056379321079, "unit": "probability difference / +0.203 pp"},
-    {"metric": "S1/R1 minus S2/R2 interaction", "estimate": 0.021895616674127122, "unit": "probability difference / +2.190 pp", "uncertainty": "95% pair-year clustered-bootstrap CI [0.00354448,0.03960861]; reconstructed diagnostic"},
-    {"metric": "PP interaction", "estimate": 0.012549479787124285, "unit": "probability difference / +1.255 pp"},
-    {"metric": "S3/R3 interaction", "estimate": -0.009163560783178815, "unit": "probability difference / -0.916 pp"}
+    {"metric":"S1/R1 pivot-specific wick interaction","estimate":0.0239276730534482,"unit":"probability difference / +2.393 pp"},
+    {"metric":"S2/R2 pivot-specific wick interaction","estimate":0.002032056379321079,"unit":"probability difference / +0.203 pp"},
+    {"metric":"S1/R1 minus S2/R2 interaction","estimate":0.021895616674127122,"unit":"probability difference / +2.190 pp","uncertainty":"95% pair-year clustered-bootstrap CI [0.00354448,0.03960861]; reconstructed diagnostic"},
+    {"metric":"PP interaction","estimate":0.012549479787124285,"unit":"probability difference / +1.255 pp"},
+    {"metric":"S3/R3 interaction","estimate":-0.009163560783178815,"unit":"probability difference / -0.916 pp"}
   ],
-  "reconstruction": {
-    "population_geometry": "EXACT",
-    "terminal_ledger": "NON_EXACT",
-    "pooled_interaction_residual": 0.0003970365457953149,
-    "terminal_count_reconstructed": 62143,
-    "terminal_count_frozen": 57863
-  },
-  "breadth": {"positive_pair_tier_deltas": "9/10", "positive_year_tier_deltas": "4/4"},
+  "reconstruction": {"population_geometry":"EXACT","terminal_ledger":"NON_EXACT","pooled_interaction_residual":0.0003970365457953149,"terminal_count_reconstructed":62143,"terminal_count_frozen":57863},
+  "breadth": {"positive_pair_tier_deltas":"9/10","positive_year_tier_deltas":"4/4"},
   "limitations": [
     "The 2022-2025 Daily/H1 holdout is already consumed; this is not a new protected confirmation.",
     "The original heavy terminal ledger was intentionally not retained; named-level terminal labels are reconstructed.",
     "No named-level selection, weighting, Pine, alert, sizing or live-trading action is authorized."
   ],
   "authorized_next": [
-    "Use first-order S1/R1 concentration as a hypothesis for a separately preregistered causal execution study.",
-    "Preserve a fresh data segment or independent dataset for any level-selection confirmation."
+    "Use first-order S1/R1 concentration as a hypothesis for separately preregistered causal execution research.",
+    "Preserve fresh or independent evidence for any future named-level selection claim."
   ],
   "prohibited_next": [
     "Do not drop S2/R2/S3/R3 from a trading rule solely from this consumed-sample diagnostic.",
     "Do not retune pivot zone width, wick thresholds, ATR detector, pair universe or sessions on this evidence."
   ],
-  "assurance": {"status": "NOT_REVIEWED", "decision": null},
-  "holdout": {"state_after": "OPENED_CONSUMED_PARENT", "opened_in_this_study": false}
+  "assurance": {"status":"NOT_REVIEWED","decision":null,"evidence":["strategies/pivot_levels/reviews/PIVOT_DAILY_H1_LEVEL_DECOMPOSITION_IMPLEMENTATION_VALIDATION_2026-08-08.md"]},
+  "holdout": {"state_after":"OPENED","opened_in_this_study":false},
+  "evidence": [
+    {"repository":"market-predictions/dtr","ref":"agent/pivot-daily-h1-level-decomposition","commit_sha":"96bba620d09d2eea2d4e61fc35cdaa0ff0d19197","path":"strategies/pivot_levels/results/2026-08-08/pivot_daily_h1_level_decomposition_summary.json"},
+    {"repository":"market-predictions/dtr","ref":"agent/pivot-daily-h1-level-decomposition","commit_sha":"96bba620d09d2eea2d4e61fc35cdaa0ff0d19197","path":"strategies/pivot_levels/reports/PIVOT_DAILY_H1_LEVEL_DECOMPOSITION_REPORT_2026-08-08.md"},
+    {"repository":"market-predictions/dtr","ref":"agent/pivot-daily-h1-level-decomposition","commit_sha":"96bba620d09d2eea2d4e61fc35cdaa0ff0d19197","path":"strategies/pivot_levels/reviews/PIVOT_DAILY_H1_LEVEL_DECOMPOSITION_IMPLEMENTATION_VALIDATION_2026-08-08.md"}
+  ]
 }

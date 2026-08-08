@@ -1,5 +1,35 @@
 # Research Registry Changelog
 
+## v1.4.0 — 2026-08-08
+
+### Added
+
+- `DFXC-20260808-006-pivot-daily-level-decomposition`: named-level decomposition of the confirmed Daily/H1 pivot-wick association, with S1/R1 versus S2/R2 frozen as the primary diagnostic contrast.
+- `DFXC-20260808-007-pivot-daily-time-weekday`: prospectively frozen Tokyo/London/New York Hour-1/2/3 and Monday-Friday forward-response study for Daily S1/R1 + strong H1 rejection.
+- Causal forward endpoints from the next contiguous H1 open, including FWD1/FWD2/FWD4/FWD8 and 4H MFE/MAE.
+- Explicit third-session-hour buckets, DST-safe local session clocks, NY17 weekday classification, S2/R2 and outer-zone controls, and 4H overlap/cooldown robustness.
+
+### Scientific state
+
+- Named-level reconstruction is concentrated at first-order S1/R1: **+2.393 pp** interaction versus **+0.203 pp** at S2/R2, a **+2.190 pp** descriptive tier contrast. Because the historical heavy terminal ledger cannot be replayed exactly, this remains `DESCRIPTIVE_ONLY` and creates no level-selection authority.
+- The causal S1/R1 + strong-H1-wick baseline is not an immediate positive reversal strategy: mean FWD4 is approximately **−0.009 ATR**, with its clustered-bootstrap interval crossing zero.
+- None of the nine preregistered Tokyo/London/New York Hour-1/2/3 FWD4 comparisons survives Holm correction; global session-phase heterogeneity is unsupported (p≈0.33).
+- Weekday directional heterogeneity is unsupported (p≈0.55).
+- The 2022–2025 apparent third-hour improvement does not replicate in 2015–2019 or 2020–2021; pooled H3 versus H1/H2 over 2015–2025 is approximately **+0.007 ATR** with a confidence interval crossing zero.
+- Time nevertheless changes **movement magnitude** materially: London H1-H3 and New York H1-H2 expand both favorable and adverse 4H excursion, while Tokyo H2-H3 suppress both. Time is therefore retained as execution/volatility context rather than a directional entry filter.
+
+### Reproducibility / administration
+
+- The independent 2015–2025 full-history event implementation reproduces all 65,135 separately built 2022–2025 event keys, pivot groups, distances, wick values, ATR values, forward returns and excursion fields exactly.
+- A deterministic 4H same-side/group cooldown leaves the time and weekday conclusions unchanged.
+- Repaired inherited study-006 registry metadata to the canonical schema (`structural`, `DESCRIPTIVE_ONLY`, standard holdout labels, explicit controls/evidence/artifacts/provenance) without changing scientific estimates or interpretation.
+- Registered both studies in machine and rendered indexes.
+
+### Governance
+
+- Implementation evidence, claims and handovers are prepared; independent `governance_release_assurance` remains pending.
+- No extra session-hour mining, weekday mining, session×weekday mining, Pine, alerting, sizing or live trading is authorized.
+
 ## v1.3.0 — 2026-08-08
 
 ### Added
