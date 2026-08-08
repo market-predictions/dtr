@@ -29,7 +29,6 @@ The row is a locator, not the evidence. Open the study's `study.json` and `resul
 - **Quarters Theory:** the canonical 250-pip continuation mechanism was demoted on GBPUSD and then failed unchanged across the ten-pair universe (`0/10` positive-and-stable pairs).
 - **Classic pivots — broad mechanism:** high absolute reach rates do not establish magnetism; exact pivot coordinates did not beat nearby deterministic placebos on the preregistered target/stall/reversal mechanisms.
 - **Classic pivots — spatial follow-up:** broad magnet/stall/reversal claims remained rejected, but a narrower daily/weekly pivot-proximity terminal-hazard effect survived internal falsification and is eligible only for one unchanged protected-holdout confirmation.
-- **Classic pivots — executable decision roles:** neither fresh countertrend entry nor a universal immediate continuation-exit rule is supported after real BID/ASK execution; 2026 YTD remains unopened for these failed hypotheses.
 
 ## Search tags
 
