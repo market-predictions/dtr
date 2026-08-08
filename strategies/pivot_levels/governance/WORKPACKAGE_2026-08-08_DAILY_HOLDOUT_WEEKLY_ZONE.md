@@ -3,7 +3,7 @@
 Date: 2026-08-08
 Work package: `PIV-WP-20260808-04`
 Role: `implementation_operations`
-State: `PREREGISTERED`
+State: `RELEASE_CANDIDATE_READY_ASSURANCE_PENDING`
 
 ## Objective
 
@@ -11,6 +11,14 @@ State: `PREREGISTERED`
 2. Separately test whether the internally positive but non-promoted Weekly-pivot × H4 wick interaction is sensitive to a principled pivot-zone geometry that accounts for adjacent pivot spacing and/or contemporaneous H4 volatility.
 
 The two objectives are intentionally separated so weekly zone research cannot tune on the Daily/H1 holdout.
+
+## Implementation outcome
+
+- Daily/H1 protected 2022–2025 confirmation: **PASS under the preregistered implementation gate**, interaction +1.084 pp, 95% CI [+0.654,+1.543] pp, 10/10 pairs positive, all years/halves and all leave-one-pair-out pools positive. Decision `CONFIRM_DAILY_H1_PIVOT_WICK_INTERACTION_ON_PROTECTED_HOLDOUT`.
+- Weekly/H4 seven-geometry 2015–2021 robustness family: only `SP10` passes the full joint structural + wick gates and material-strength rule. SP10 structural +1.002 pp; wick interaction +1.616 pp, 95% CI [+0.523,+2.686] pp, Holm p=0.0308. Decision `WEEKLY_H4_ZONE_GEOMETRY_MATERIALLY_STRENGTHENS_PIVOT_WICK_INTERACTION`.
+- ATR-capped weekly hybrids do not pass the wick gate.
+- Daily/H1 2022–2025 holdout is consumed for the exact authorized question. Weekly/H4 2022–2025 outcomes remain uninspected.
+- Independent implementation-side arithmetic validation passed. Independent governance assurance remains pending.
 
 ## Scientific units
 
@@ -56,7 +64,7 @@ Only 2015–2021 outcomes are eligible. 2022–2025 weekly/H4 outcomes remain un
 
 The prior weekly reference zone is purely spacing-relative: core 0–20% of local adjacent weekly-pivot spacing and outer 30–50%. It contains no ATR term.
 
-The new frozen seven-geometry family is:
+The frozen seven-geometry family is:
 
 1. `SP10`: half-width `w = 0.10 * spacing`; outer matched band `[0.50*spacing-w, 0.50*spacing]`.
 2. `SP15`: `w = 0.15 * spacing`; same matched-control construction.
@@ -104,11 +112,11 @@ The original +0.92 pp internal estimate is not used as a minimum holdout effect 
 
 ## Acceptance criteria
 
-- Preregistrations and holdout authorization record committed before outcome computation.
-- Exact cache/archive identities verified.
-- Daily holdout code reads only 2021 warm-up plus 2022–2025 outcome members and hard-fails on 2026.
-- Weekly geometry code reads only 2015–2021 outcomes.
-- Reference weekly geometry numerically reproduces prior `SP20_REF` results within deterministic tolerance.
-- All seven weekly variants reported, including failures.
-- Study/result records, evidence, limitations, authorized next steps and prohibited rescue paths stored in the Dukascopy FX Cash Research Registry.
-- Implementation candidate is not self-certified; independent `governance_release_assurance` remains required before merge.
+- [x] Preregistrations and holdout authorization record committed before outcome computation.
+- [x] Exact cache/archive identities verified.
+- [x] Daily holdout reads only 2021 warm-up plus 2022–2025 outcome members and no 2026 member.
+- [x] Weekly geometry outcomes are only 2015–2021.
+- [x] Reference weekly geometry reproduces prior `SP20_REF` results exactly after documented invalidated preliminary runs.
+- [x] All seven weekly variants reported, including failures.
+- [x] Study/result records, evidence, limitations, authorized next steps and prohibited rescue paths stored in the Dukascopy FX Cash Research Registry.
+- [ ] Independent `governance_release_assurance` of the exact candidate before merge.
