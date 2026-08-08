@@ -1,0 +1,65 @@
+{
+  "schema_version": "1.0.0",
+  "study_id": "DFXC-20260808-009-pivot-daily-continuation-management",
+  "decision": "REJECT_EXIT_NOW_MANAGEMENT_RULE_NO_ABSOLUTE_OR_PIVOT_SPECIFIC_4H_EDGE",
+  "scientific_disposition": "REJECT_MECHANISM",
+  "summary": "The preregistered continuation-management hypothesis fails. After a strong H1 rejection at Daily S1/R1, four-hour incoming-direction continuation remains approximately flat/slightly positive at +0.0050 ATR, 95% pair-year bootstrap CI [-0.0094,+0.0189], rather than negative. Continuation is weaker than at matched outer strong-wick controls by -0.0106 ATR, but that pivot-specific contrast is not robust, CI [-0.0302,+0.0089]. Development and validation remain positive, only 3/10 pairs are negative, cooldown robustness remains positive, and 2026 YTD stays unopened.",
+  "primary_findings": [
+    {"metric":"S1/R1 core HOLD4 continuation return","estimate":0.00499957901948678,"unit":"ATR24","uncertainty":"95% pair-year clustered-bootstrap CI [-0.009354,+0.018896]"},
+    {"metric":"S1/R1 matched outer HOLD4 continuation return","estimate":0.015551657185465318,"unit":"ATR24","uncertainty":"95% CI [+0.003103,+0.027897]"},
+    {"metric":"core minus outer HOLD4 continuation return","estimate":-0.01055207816597854,"unit":"ATR24","uncertainty":"95% CI [-0.030217,+0.008886]"},
+    {"metric":"S2/R2 core HOLD4 continuation return","estimate":0.012819928480184317,"unit":"ATR24","uncertainty":"95% CI [-0.012701,+0.038095]"},
+    {"metric":"4H cooldown S1/R1 core HOLD4","estimate":0.005118931078811433,"unit":"ATR24","uncertainty":"95% CI [-0.009163,+0.019072]"}
+  ],
+  "breadth": {
+    "signals": 68118,
+    "hold4_valid": 64733,
+    "negative_pairs": "3/10",
+    "development_core": 0.00290258145591969,
+    "validation_core": 0.021987829757510752,
+    "stability_2022_2025_core": -0.0011508638190273134,
+    "S1_descriptive": -0.008791380699695905,
+    "R1_descriptive": 0.018003654732721565
+  },
+  "secondary": {
+    "HOLD1_core": 0.007362603739083448,
+    "HOLD2_core": 0.004967636326330488,
+    "HOLD8_core": 0.01434834959430239,
+    "HOLD8_core_minus_outer": 0.013052794582817037,
+    "MFE4_continuation": 1.1296954620959025,
+    "MAE4_reversal": 1.1156447869926454,
+    "plus_0p5_ATR_first": 0.488668839695364,
+    "minus_0p5_ATR_first": 0.4784576645605796
+  },
+  "robustness": [
+    "A deterministic 4H same-pair/same-direction cooldown leaves S1/R1 core HOLD4 positive at +0.0051 ATR.",
+    "Core-minus-outer remains negative under cooldown but its 95% interval still reaches slightly above zero.",
+    "The frozen 1H, 2H, 4H and 8H core continuation means are all non-negative; core-minus-outer reverses positive by 8H.",
+    "S1 and R1 differ descriptively, but named-side selection was prospectively prohibited as a rescue after pooled failure."
+  ],
+  "limitations": [
+    "The study evaluates a generic pre-existing incoming-direction position and intentionally does not model its original entry or accumulated P&L.",
+    "2015-2025 is related/exposed pivot research data; only the management decision semantics were newly preregistered.",
+    "The result rejects a simple universal EXIT_NOW rule; it does not prove that no more complex risk-management policy could ever have value.",
+    "2026 YTD remains unopened and supplies no confirmation evidence here."
+  ],
+  "authorized_next": [
+    "Preserve 2026 YTD unopened.",
+    "Treat S1/R1 rejection as structural/context information only; no deterministic exit instruction is supported.",
+    "If pivot research continues, choose a genuinely new market question rather than optimizing this failed management rule."
+  ],
+  "prohibited_next": [
+    "Do not optimize partial-exit percentages, trailing stops, management horizons, wick thresholds or pivot-zone widths as a rescue.",
+    "Do not mine S1-only, R1-only, session or weekday subsets to reverse the pooled decision.",
+    "Do not open 2026 YTD for this failed internal management hypothesis.",
+    "Do not create Pine alerts, sizing or live-management rules from this study."
+  ],
+  "assurance": {"status":"NOT_REVIEWED","decision":null,"evidence":["strategies/pivot_levels/reviews/PIVOT_DAILY_H1_CONTINUATION_MANAGEMENT_IMPLEMENTATION_VALIDATION_2026-08-08.md"]},
+  "holdout": {"state_after":"UNOPENED","opened_in_this_study":false},
+  "evidence": [
+    {"repository":"market-predictions/dtr","ref":"agent/pivot-daily-h1-continuation-management","commit_sha":"1701b3e1882d03f892a0e2d64770f11c406ad470","path":"strategies/pivot_levels/docs/PIVOT_DAILY_H1_CONTINUATION_MANAGEMENT_PREREG_2026-08-08.md"},
+    {"repository":"market-predictions/dtr","ref":"agent/pivot-daily-h1-continuation-management","commit_sha":"1701b3e1882d03f892a0e2d64770f11c406ad470","path":"strategies/pivot_levels/results/2026-08-08/pivot_daily_h1_continuation_management_summary.json"},
+    {"repository":"market-predictions/dtr","ref":"agent/pivot-daily-h1-continuation-management","commit_sha":"1701b3e1882d03f892a0e2d64770f11c406ad470","path":"strategies/pivot_levels/reports/PIVOT_DAILY_H1_CONTINUATION_MANAGEMENT_REPORT_2026-08-08.md"},
+    {"repository":"market-predictions/dtr","ref":"agent/pivot-daily-h1-continuation-management","commit_sha":"1701b3e1882d03f892a0e2d64770f11c406ad470","path":"strategies/pivot_levels/reviews/PIVOT_DAILY_H1_CONTINUATION_MANAGEMENT_IMPLEMENTATION_VALIDATION_2026-08-08.md"}
+  ]
+}
