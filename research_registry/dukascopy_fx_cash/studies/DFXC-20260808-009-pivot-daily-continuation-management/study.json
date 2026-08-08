@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0.0",
+  "study_id": "DFXC-20260808-009-pivot-daily-continuation-management",
+  "title": "Daily S1/R1 × H1 rejection — continuation-position management",
+  "family": "pivot_levels",
+  "date": "2026-08-08",
+  "study_type": "strategy",
+  "lifecycle_status": "RUN_COMPLETE",
+  "dataset": {
+    "canonical_name": "Dukascopy FX Cash",
+    "dataset_id": "dukascopy_fx_cash_m1_bid_ask_v1",
+    "pairs": ["EURUSD","GBPUSD","USDCHF","AUDUSD","NZDUSD","USDCAD","USDJPY","EURJPY","GBPJPY","EURGBP"],
+    "base_timeframe": "M1",
+    "analysis_timeframe": "Daily classic pivots / H1 signal / M1 BID-ASK position-management execution",
+    "quote_sides": ["BID","ASK"],
+    "timezone": "UTC",
+    "price_basis": "executable BID/ASK liquidation prices with midpoint structural signal",
+    "windows": {
+      "development": "2015-2019",
+      "internal_validation": "2020-2021",
+      "protected_holdout": "2026 YTD ending exclusive 2026-07-24 — reserved and unopened",
+      "related_exposed_stability": "2022-2025"
+    },
+    "cache_registry": "data/private_market_data_cache_registry.json"
+  },
+  "hypotheses": {
+    "market_question": "For an existing continuation position already travelling into Daily R1 (long) or S1 (short), does a strong completed H1 rejection justify exiting/reducing continuation exposure rather than continuing to hold?",
+    "null": "Four-hour continuation return after the S1/R1 rejection is non-negative and/or is not materially worse than matched outer-zone strong-wick continuation.",
+    "alternative": "Four-hour continuation return after the S1/R1 rejection is negative and materially worse than matched outer-zone strong-wick continuation.",
+    "mechanism": "If the confirmed structural terminal/exhaustion association has executable position-management value, continuing in the incoming direction after the rejection should destroy value from the observable post-H1 decision point."
+  },
+  "method": {
+    "primary_endpoint": "HOLD4 continuation-direction executable return from the post-signal decision quote, normalized by lagged H1 ATR24",
+    "event_definition": "Daily S1/R1 core d<0.20 with directional H1 wick >=30%, observable only at completed H1 close",
+    "decision_semantics": "R1 = existing incoming long; S1 = existing incoming short; EXIT_NOW liquidates at first active M1 quote after H1 close; HOLD4 liquidates 240 contiguous minutes later on the same executable side",
+    "controls": ["S1/R1 matched outer strong-wick cohort", "S2/R2 core strong-wick cohort"],
+    "secondary_horizons": ["HOLD1","HOLD2","HOLD8"],
+    "overlap_rule": "primary preserves frozen event population; deterministic 4H same-pair/same-direction cooldown is robustness only",
+    "unsafe_gap_rule": "no weekend bridging; each constituent clock-hour segment must contain an active quote; endpoint requires an active quote within final ten minutes",
+    "inference": {"method":"pair-year clustered bootstrap","draws":5000,"selection_family_size":1},
+    "execution": {"spread":"observed BID/ASK liquidation side embedded","commission":0,"slippage":0,"same_bar":"signal H1 must be complete before management decision"},
+    "promotion_gate": [
+      "S1/R1 core HOLD4 mean <0",
+      "95% CI upper bound for core HOLD4 <0",
+      "core-minus-outer HOLD4 <0",
+      "95% CI upper bound for core-minus-outer HOLD4 <0",
+      "core HOLD4 negative in development and validation",
+      "at least 7/10 pair-level core effects negative",
+      "4H cooldown does not reverse conclusion"
+    ]
+  },
+  "source": {
+    "repository": "market-predictions/dtr",
+    "ref": "agent/pivot-daily-h1-continuation-management",
+    "commit_sha": "1701b3e1882d03f892a0e2d64770f11c406ad470",
+    "paths": [
+      "strategies/pivot_levels/docs/PIVOT_DAILY_H1_CONTINUATION_MANAGEMENT_PREREG_2026-08-08.md",
+      "strategies/pivot_levels/results/2026-08-08/pivot_daily_h1_continuation_management_summary.json",
+      "strategies/pivot_levels/reports/PIVOT_DAILY_H1_CONTINUATION_MANAGEMENT_REPORT_2026-08-08.md",
+      "strategies/pivot_levels/reviews/PIVOT_DAILY_H1_CONTINUATION_MANAGEMENT_IMPLEMENTATION_VALIDATION_2026-08-08.md"
+    ]
+  },
+  "holdout": {
+    "state": "UNOPENED",
+    "protected_window": "2026 YTD ending exclusive 2026-07-24 — reserved and unopened",
+    "opened_in_this_study": false,
+    "prior_exposure": "2015-2025 had prior exposure in related pivot research; management decision semantics were preregistered before management-outcome inspection."
+  },
+  "artifacts": {
+    "preregistration": ["strategies/pivot_levels/docs/PIVOT_DAILY_H1_CONTINUATION_MANAGEMENT_PREREG_2026-08-08.md"],
+    "results": ["strategies/pivot_levels/results/2026-08-08/pivot_daily_h1_continuation_management_summary.json"],
+    "reports": ["strategies/pivot_levels/reports/PIVOT_DAILY_H1_CONTINUATION_MANAGEMENT_REPORT_2026-08-08.md"],
+    "reviews": ["strategies/pivot_levels/reviews/PIVOT_DAILY_H1_CONTINUATION_MANAGEMENT_IMPLEMENTATION_VALIDATION_2026-08-08.md"]
+  },
+  "related_studies": [
+    "DFXC-20260808-003-pivot-daily-wick-holdout",
+    "DFXC-20260808-007-pivot-daily-time-weekday",
+    "DFXC-20260808-008-pivot-daily-execution-entry"
+  ],
+  "tags": ["pivots","daily","H1","S1","R1","wick","position-management","continuation","exit","bid-ask","falsification"],
+  "provenance": {
+    "registration_mode": "prospective_position_management_preregistration",
+    "registered_on": "2026-08-08",
+    "notes": "2026 YTD conditional on a strict internal promotion gate; the gate failed and the holdout remained sealed."
+  }
+}

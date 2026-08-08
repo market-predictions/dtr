@@ -1,0 +1,64 @@
+{
+  "study_id": "DFXC-20260808-009-pivot-daily-continuation-management",
+  "decision": "REJECT_EXIT_NOW_MANAGEMENT_RULE_NO_ABSOLUTE_OR_PIVOT_SPECIFIC_4H_EDGE",
+  "internal_gate": "FAIL",
+  "holdout_2026_opened": false,
+  "population": {
+    "signals": {"S1R1_CORE": 68118, "S1R1_OUTER": 93309, "S2R2_CORE": 18583},
+    "hold4_valid": {"S1R1_CORE": 64733, "S1R1_OUTER": 89956, "S2R2_CORE": 17341}
+  },
+  "primary": {
+    "core_mean": 0.00499957901948678,
+    "core_ci95": [-0.009353777256268755, 0.018896347695913984],
+    "outer_mean": 0.015551657185465318,
+    "outer_ci95": [0.003102883234259742, 0.027896521602605192],
+    "s2r2_mean": 0.012819928480184317,
+    "s2r2_ci95": [-0.012700767153193068, 0.03809493737052025],
+    "core_minus_outer": -0.01055207816597854,
+    "core_minus_outer_ci95": [-0.030216920745050273, 0.00888576830287287]
+  },
+  "partitions": {
+    "2015-2019 development": {"S1R1_CORE": 0.00290258145591969, "S1R1_OUTER": 0.02289307702111308},
+    "2020-2021 validation": {"S1R1_CORE": 0.021987829757510752, "S1R1_OUTER": 0.0006415322250314046},
+    "2022-2025 exposed stability": {"S1R1_CORE": -0.0011508638190273134, "S1R1_OUTER": 0.014023129289224456}
+  },
+  "pair_core_means": {"AUDUSD": -0.0021000293528639536, "EURGBP": 0.0020594578696461184, "EURJPY": 0.0074941734299368325, "EURUSD": -0.013157509401084741, "GBPJPY": 0.006703587301508793, "GBPUSD": 0.02927688140891359, "NZDUSD": 0.01635611081634091, "USDCAD": 0.006598378741507356, "USDCHF": -0.0116493708346176, "USDJPY": 0.006499381162819845},
+  "negative_pair_count": 3,
+  "level_core_means": {"R1": 0.018003654732721565, "S1": -0.008791380699695905},
+  "secondary_horizons": {
+    "1": {"core": 0.007362603739083448, "outer": 0.013183859685149839, "core_minus_outer": -0.005821255946066391},
+    "2": {"core": 0.004967636326330488, "outer": 0.020120484249102736, "core_minus_outer": -0.015152847922772248},
+    "4": {"core": 0.00499957901948678, "outer": 0.015551657185465318, "core_minus_outer": -0.01055207816597854},
+    "8": {"core": 0.01434834959430239, "outer": 0.0012955550114853538, "core_minus_outer": 0.013052794582817037}
+  },
+  "path": {
+    "S1R1_CORE": {"mfe4": 1.1296954620959025, "mae4": 1.1156447869926454, "fav_first_0p5": 0.488668839695364, "adv_first_0p5": 0.4784576645605796},
+    "S1R1_OUTER": {"mfe4": 1.0938255951771756, "mae4": 1.0615463218654064, "fav_first_0p5": 0.4927075459113344, "adv_first_0p5": 0.47226421806216373}
+  },
+  "cooldown": {
+    "core_n": 42870,
+    "core_mean": 0.005118931078811433,
+    "core_ci95": [-0.00916308199967598, 0.019072363262813634],
+    "outer_n": 63791,
+    "outer_mean": 0.023297803984938886,
+    "core_minus_outer": -0.018178872906127453,
+    "core_minus_outer_ci95": [-0.03772816374553252, 0.0009473360686667158]
+  },
+  "validation": {
+    "source_audit_n": 20,
+    "source_audit_max_decision_px_abs_error": 0.0,
+    "source_audit_max_hold4_abs_error": 0.0,
+    "parent_entry_decision_price_exact_match_n": 64733,
+    "parent_entry_decision_price_max_abs_error": 0.0
+  },
+  "gate_results": {
+    "core_mean_negative": false,
+    "core_ci_upper_negative": false,
+    "core_minus_outer_negative": true,
+    "core_minus_outer_ci_upper_negative": false,
+    "development_negative": false,
+    "validation_negative": false,
+    "at_least_7_of_10_pairs_negative": false,
+    "cooldown_preserves_negative_absolute_conclusion": false
+  }
+}
