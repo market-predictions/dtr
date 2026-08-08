@@ -1,0 +1,31 @@
+{
+  "n": 20,
+  "max_rev4_abs_error": 0.0,
+  "max_extension_abs_error": 0.0,
+  "max_entry_abs_error": 0.0,
+  "sample_seed": 20260808,
+  "sample_window": "2024",
+  "audit_scope": "independent rebuild of lagged Daily-ATR extension, first executable post-H1 quote, and 4H BID/ASK return from original private Dukascopy archive members",
+  "rows": [
+    {"pair":"AUDUSD","timestamp":"2024-05-24 15:00:00+00:00","rev4":-0.4558521560574656,"extension":0.5032685591474847,"entry":0.66264,"errors":{"rev4":0.0,"extension":0.0,"entry":0.0}},
+    {"pair":"AUDUSD","timestamp":"2024-10-31 22:00:00+00:00","rev4":-0.12909009412820044,"extension":0.042544570502417375,"entry":0.65779,"errors":{"rev4":0.0,"extension":0.0,"entry":0.0}},
+    {"pair":"EURGBP","timestamp":"2024-02-21 23:00:00+00:00","rev4":-1.171232876712538,"extension":0.07493077048377728,"entry":0.85613,"errors":{"rev4":0.0,"extension":0.0,"entry":0.0}},
+    {"pair":"EURGBP","timestamp":"2024-03-18 08:00:00+00:00","rev4":-1.453077699293739,"extension":0.12493899463152339,"entry":0.85468,"errors":{"rev4":0.0,"extension":0.0,"entry":0.0}},
+    {"pair":"EURGBP","timestamp":"2024-05-30 05:00:00+00:00","rev4":0.18742678641153313,"extension":0.09918319719953482,"entry":0.85051,"errors":{"rev4":0.0,"extension":0.0,"entry":0.0}},
+    {"pair":"EURGBP","timestamp":"2024-08-08 19:00:00+00:00","rev4":-0.2529341317365222,"extension":1.2264673311184762,"entry":0.85654,"errors":{"rev4":0.0,"extension":0.0,"entry":0.0}},
+    {"pair":"EURGBP","timestamp":"2024-10-24 00:00:00+00:00","rev4":-0.2247892600686624,"extension":0.13214146910221766,"entry":0.83462,"errors":{"rev4":0.0,"extension":0.0,"entry":0.0}},
+    {"pair":"EURJPY","timestamp":"2024-04-18 07:00:00+00:00","rev4":0.224861095979984,"extension":0.05341336860312237,"entry":164.781,"errors":{"rev4":0.0,"extension":0.0,"entry":0.0}},
+    {"pair":"EURJPY","timestamp":"2024-05-07 10:00:00+00:00","rev4":-0.3900946553208106,"extension":0.38310259140931413,"entry":166.355,"errors":{"rev4":0.0,"extension":0.0,"entry":0.0}},
+    {"pair":"EURJPY","timestamp":"2024-10-14 12:00:00+00:00","rev4":-0.5917641077783686,"extension":0.24300838225116933,"entry":163.358,"errors":{"rev4":0.0,"extension":0.0,"entry":0.0}},
+    {"pair":"EURJPY","timestamp":"2024-10-15 05:00:00+00:00","rev4":-3.1644736842106562,"extension":0.33458124983638027,"entry":162.984,"errors":{"rev4":0.0,"extension":0.0,"entry":0.0}},
+    {"pair":"EURUSD","timestamp":"2024-04-24 19:00:00+00:00","rev4":0.04876809753624396,"extension":0.09571369121930809,"entry":1.07006,"errors":{"rev4":0.0,"extension":0.0,"entry":0.0}},
+    {"pair":"GBPJPY","timestamp":"2024-03-22 05:00:00+00:00","rev4":-2.4564958283671396,"extension":0.40864283580603755,"entry":191.524,"errors":{"rev4":0.0,"extension":0.0,"entry":0.0}},
+    {"pair":"GBPUSD","timestamp":"2024-03-08 00:00:00+00:00","rev4":0.5396145610277601,"extension":0.1740130318129727,"entry":1.28141,"errors":{"rev4":0.0,"extension":0.0,"entry":0.0}},
+    {"pair":"GBPUSD","timestamp":"2024-05-08 05:00:00+00:00","rev4":0.3395048887039642,"extension":0.28442896531706113,"entry":1.24887,"errors":{"rev4":0.0,"extension":0.0,"entry":0.0}},
+    {"pair":"GBPUSD","timestamp":"2024-11-04 09:00:00+00:00","rev4":-0.14910025706935506,"extension":0.34721504598533637,"entry":1.29721,"errors":{"rev4":0.0,"extension":0.0,"entry":0.0}},
+    {"pair":"NZDUSD","timestamp":"2024-06-17 12:00:00+00:00","rev4":1.4074074074072822,"extension":0.5841208820545534,"entry":0.61104,"errors":{"rev4":0.0,"extension":0.0,"entry":0.0}},
+    {"pair":"USDCAD","timestamp":"2024-02-15 07:00:00+00:00","rev4":-0.46712802768174655,"extension":0.07100759781298958,"entry":1.35449,"errors":{"rev4":0.0,"extension":0.0,"entry":0.0}},
+    {"pair":"USDJPY","timestamp":"2024-02-13 21:00:00+00:00","rev4":1.2200023643456699,"extension":1.2884896960161092,"entry":150.764,"errors":{"rev4":0.0,"extension":0.0,"entry":0.0}},
+    {"pair":"USDJPY","timestamp":"2024-07-04 17:00:00+00:00","rev4":0.41420285754709657,"extension":0.5834335576652334,"entry":161.161,"errors":{"rev4":0.0,"extension":0.0,"entry":0.0}}
+  ]
+}

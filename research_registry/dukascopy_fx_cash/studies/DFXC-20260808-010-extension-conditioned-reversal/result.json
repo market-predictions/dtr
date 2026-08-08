@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0.0",
+  "study_id": "DFXC-20260808-010-extension-conditioned-reversal",
+  "decision": "REJECT_EXTENSION_CONDITIONED_REVERSAL_NO_STABLE_EXECUTABLE_EDGE",
+  "scientific_disposition": "REJECT_MECHANISM",
+  "summary": "Greater pre-rejection directional extension has a small positive pooled association with 4H countertrend return, but the extreme-extension cohort remains negative after spread, the relationship is unstable across development/validation eras, only 6/10 pairs improve, cooldown removes statistical support, and extension-matched S2/R2 does not add reversal expectancy. The frozen promotion gate fails and 2026 remains unopened.",
+  "primary_findings": [
+    {"metric":"continuous extension slope on REV4_ATR","estimate":0.023894032665246045,"unit":"H1_ATR_return_per_Daily_ATR_extension","uncertainty":"95% pair-year bootstrap CI [+0.001057,+0.046628]"},
+    {"metric":"E3 executable REV4_ATR mean","estimate":-0.0860713692842634,"unit":"H1_ATR24","uncertainty":"95% pair-year bootstrap CI [-0.201239,+0.027901]; 1,279 valid E3 observations"},
+    {"metric":"E3 minus E0 REV4_ATR","estimate":0.018400099585081084,"unit":"H1_ATR24","uncertainty":"95% pair-year bootstrap CI [-0.095719,+0.131405]"},
+    {"metric":"extension-matched S2/R2 core minus NON_CORE","estimate":-0.01843715200604976,"unit":"H1_ATR24","uncertainty":"95% pair-year bootstrap CI [-0.056744,+0.018931]; development -0.05409; validation -0.02906"}
+  ],
+  "breadth": {
+    "generic_events": 249882,
+    "valid_REV4": 242866,
+    "E3_valid": 1279,
+    "positive_pair_E3_minus_E0": "6/10",
+    "development_E3_minus_E0": -0.22916977212205458,
+    "validation_E3_minus_E0": 0.12791952175524993,
+    "stability_2022_2025_E3_minus_E0": 0.26208829273638184,
+    "development_continuous_slope": -0.01115527369755557,
+    "validation_continuous_slope": -0.02921055707355414,
+    "stability_2022_2025_continuous_slope": 0.09808887447920303
+  },
+  "robustness": [
+    "A 4H same-pair/same-reversal-direction cooldown reduces the sample to 141,000 and leaves E3 mean negative (-0.1018 H1 ATR); the continuous slope CI then crosses zero.",
+    "Extreme-extension path amplitude increases in both directions: E3 reversal MFE 1.058 H1 ATR and adverse continuation MAE 1.316 H1 ATR.",
+    "At E3, +0.5 ATR reversal is reached first in 45.89% while -0.5 ATR continuation is reached first in 54.03% of path-observable events.",
+    "A 20-observation direct-source 2024 audit reproduces extension, executable entry price and REV4 with maximum absolute error 0.0.",
+    "Secondary 8H E3 mean turns slightly positive (+0.0134 H1 ATR), but 4H was preregistered primary and horizon switching is prohibited."
+  ],
+  "limitations": [
+    "2015-2025 was exposed in related pivot research; only this generic extension architecture was newly preregistered.",
+    "E3 is rare, so uncertainty is materially wider than in low-extension cohorts.",
+    "The positive pooled continuous slope is not stable across historical partitions and is concentrated in 2022-2025.",
+    "No commission beyond observed BID/ASK spread and no ordinary slippage were added.",
+    "2026 YTD remains unopened and is not confirmation evidence for this study."
+  ],
+  "authorized_next": [
+    "Preserve 2026 YTD unopened.",
+    "Retain directional extension as a potentially regime-sensitive descriptive state variable, not as a standalone mean-reversion rule.",
+    "If further research is undertaken, require a materially different market hypothesis rather than another extension threshold, pivot subset or horizon rescue."
+  ],
+  "prohibited_next": [
+    "Do not retune the 0.75/1.25/1.75 extension thresholds or replace Daily ATR20 normalization based on these outcomes.",
+    "Do not select only 2022-2025, only favorable pairs, only upper/lower rejections, only S2 or only R2.",
+    "Do not switch the primary horizon to 8H because its descriptive E3 mean is positive.",
+    "Do not optimize stops, targets, sessions, weekdays or indicator filters on this failed architecture.",
+    "Do not open 2026 YTD to rescue the failed internal gate."
+  ],
+  "assurance": {"status":"NOT_REVIEWED","decision":null,"evidence":["strategies/pivot_levels/reviews/PIVOT_EXTENSION_REVERSAL_IMPLEMENTATION_VALIDATION_2026-08-08.md"]},
+  "holdout": {"state_after":"UNOPENED","opened_in_this_study":false},
+  "evidence": [
+    {"repository":"market-predictions/dtr","ref":"agent/pivot-extension-reversal","commit_sha":"e2491f52dd32f11290fac8f5c2bd2e0655af4681","path":"strategies/pivot_levels/results/2026-08-08/pivot_extension_reversal_summary.json"},
+    {"repository":"market-predictions/dtr","ref":"agent/pivot-extension-reversal","commit_sha":"e2491f52dd32f11290fac8f5c2bd2e0655af4681","path":"strategies/pivot_levels/results/2026-08-08/pivot_extension_reversal_source_audit.json"},
+    {"repository":"market-predictions/dtr","ref":"agent/pivot-extension-reversal","commit_sha":"e2491f52dd32f11290fac8f5c2bd2e0655af4681","path":"strategies/pivot_levels/reports/PIVOT_EXTENSION_REVERSAL_REPORT_2026-08-08.md"},
+    {"repository":"market-predictions/dtr","ref":"agent/pivot-extension-reversal","commit_sha":"e2491f52dd32f11290fac8f5c2bd2e0655af4681","path":"strategies/pivot_levels/reviews/PIVOT_EXTENSION_REVERSAL_IMPLEMENTATION_VALIDATION_2026-08-08.md"}
+  ]
+}

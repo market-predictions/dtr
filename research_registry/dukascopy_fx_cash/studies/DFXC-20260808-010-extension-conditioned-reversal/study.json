@@ -1,0 +1,88 @@
+{
+  "schema_version": "1.0.0",
+  "study_id": "DFXC-20260808-010-extension-conditioned-reversal",
+  "title": "Directional extension × strong H1 rejection — executable reversal",
+  "family": "pivot_levels",
+  "date": "2026-08-08",
+  "study_type": "strategy",
+  "lifecycle_status": "RUN_COMPLETE",
+  "dataset": {
+    "canonical_name": "Dukascopy FX Cash",
+    "dataset_id": "dukascopy_fx_cash_m1_bid_ask_v1",
+    "pairs": ["EURUSD","GBPUSD","USDCHF","AUDUSD","NZDUSD","USDCAD","USDJPY","EURJPY","GBPJPY","EURGBP"],
+    "base_timeframe": "M1",
+    "analysis_timeframe": "NY17 Daily extension / H1 rejection / M1 BID-ASK execution",
+    "quote_sides": ["BID","ASK"],
+    "timezone": "UTC",
+    "price_basis": "midpoint structural H1 signal with executable BID/ASK response",
+    "windows": {
+      "development": "2015-2019",
+      "internal_validation": "2020-2021",
+      "protected_holdout": "2026 YTD ending exclusive 2026-07-24 — reserved and unopened",
+      "related_exposed_stability": "2022-2025"
+    },
+    "cache_registry": "data/private_market_data_cache_registry.json"
+  },
+  "hypotheses": {
+    "market_question": "Does a generic strong H1 rejection become more reversal-prone as pre-rejection directional extension from the NY17 day open increases, and does S2/R2 add reversal information after extension is controlled?",
+    "null": "Greater extension does not create stable positive executable 4H countertrend expectancy, and S2/R2 does not add positive matched reversal expectancy beyond generic strong rejection at comparable extension.",
+    "alternative": "Greater extension creates a stable positive executable 4H countertrend edge under the frozen gate, with S2/R2 tested only as an incremental matched explanatory layer.",
+    "mechanism": "If directional travel exhausts the incoming move, a strong H1 rejection after unusually large lagged-Daily-ATR extension should have increasingly favorable countertrend response."
+  },
+  "method": {
+    "primary_endpoint": "REV4_ATR executable four-hour countertrend return normalized by lagged H1 ATR24",
+    "event_definition": "generic directional H1 strong rejection wick >=30%, above/below NY17 day open in incoming direction, dual-strong bars excluded",
+    "extension": "distance from NY17 FX-day open to rejection extreme divided by lagged 20-day NY17 Daily ATR",
+    "extension_bins": ["E0:[0,0.75)","E1:[0.75,1.25)","E2:[1.25,1.75)","E3:[1.75,+inf)"],
+    "execution": "first active M1 after H1 close; long ASK/BID exit, short BID/ASK exit; fixed 240-minute primary horizon; no unsafe gap bridging",
+    "controls": ["continuous extension slope", "E0 low-extension strong rejection", "extension-matched NON_CORE strong rejection for pivot increments"],
+    "pivot_increment": "S2/R2-core and S1/R1-core versus NON_CORE within pair-year-direction and frozen 0.25-Daily-ATR extension strata using min(n_pivot,n_control) weights",
+    "overlap_rule": "primary preserves all eligible signals; 4H same-pair/same-reversal-direction cooldown is robustness only",
+    "inference": {"method":"pair-year clustered bootstrap","draws":5000,"slope":"event-level OLS with intercept via cluster sufficient statistics"},
+    "promotion_gate": [
+      "continuous extension slope >0 with 95% CI lower bound >0",
+      "E3 minus E0 >0 with 95% CI lower bound >0",
+      "E3 mean executable REV4_ATR >0 with 95% CI lower bound >0",
+      "E3 minus E0 positive in development and validation",
+      "at least 7/10 pair-level E3 minus E0 contrasts positive",
+      "4H cooldown preserves positive slope, positive E3 mean and positive E3-minus-E0"
+    ]
+  },
+  "source": {
+    "repository": "market-predictions/dtr",
+    "ref": "agent/pivot-extension-reversal",
+    "commit_sha": "1d804794222e3be1df8b70c0f2cf2acc2d310bd2",
+    "paths": [
+      "strategies/pivot_levels/docs/PIVOT_EXTENSION_REVERSAL_PREREGISTRATION_2026-08-08.md",
+      "strategies/pivot_levels/docs/PIVOT_EXTENSION_REVERSAL_PREREGISTRATION_AMENDMENT_01_2026-08-08.md"
+    ]
+  },
+  "holdout": {
+    "state": "UNOPENED",
+    "protected_window": "2026 YTD ending exclusive 2026-07-24 — reserved and unopened",
+    "opened_in_this_study": false,
+    "prior_exposure": "2015-2025 had prior exposure in related pivot research, but this generic extension architecture and bins were prospectively frozen before outcome calculation. 2026 remained untouched."
+  },
+  "artifacts": {
+    "preregistration": [
+      "strategies/pivot_levels/docs/PIVOT_EXTENSION_REVERSAL_PREREGISTRATION_2026-08-08.md",
+      "strategies/pivot_levels/docs/PIVOT_EXTENSION_REVERSAL_PREREGISTRATION_AMENDMENT_01_2026-08-08.md"
+    ],
+    "results": [
+      "strategies/pivot_levels/results/2026-08-08/pivot_extension_reversal_summary.json",
+      "strategies/pivot_levels/results/2026-08-08/pivot_extension_reversal_source_audit.json"
+    ],
+    "reports": ["strategies/pivot_levels/reports/PIVOT_EXTENSION_REVERSAL_REPORT_2026-08-08.md"],
+    "reviews": ["strategies/pivot_levels/reviews/PIVOT_EXTENSION_REVERSAL_IMPLEMENTATION_VALIDATION_2026-08-08.md"]
+  },
+  "related_studies": [
+    "DFXC-20260808-008-pivot-daily-execution-entry",
+    "DFXC-20260808-009-pivot-daily-continuation-management"
+  ],
+  "tags": ["extension","exhaustion","mean-reversion","H1","wick","rejection","daily-ATR","S2","R2","execution","bid-ask","falsification"],
+  "provenance": {
+    "registration_mode": "prospective_extension_mechanism_preregistration",
+    "registered_on": "2026-08-08",
+    "notes": "S2/R2 is evaluated only after direct extension control; 2026 exposure conditional on the full frozen primary extension gate."
+  }
+}
