@@ -1,0 +1,53 @@
+{
+  "study_id": "DFXC-20260808-001-pivot-multiscale-terminal",
+  "decision": "PROMOTE_DAILY_H1_AND_WEEKLY_H4_TERMINAL_ZONES_REJECT_HIGHER_TF_SCALE_RESCUE",
+  "holdout": "UNOPENED",
+  "bootstrap_draws": 5000,
+  "cluster_unit": "pair-year",
+  "primary_mappings": {
+    "D_H1": {
+      "development_effect": 0.010034433698779266,
+      "validation_effect": 0.010710375421266183,
+      "combined_effect": 0.01023166831730335,
+      "ci95": [0.008500753717526462, 0.012010745982790803],
+      "empirical_bootstrap_p": 0.0,
+      "holm_p": 0.0,
+      "positive_pairs": 10,
+      "all_pair_leave_one_out_positive": true,
+      "all_named_level_leave_one_out_positive": true,
+      "distance_slope": -0.0003254384896761033,
+      "distance_bin_terminal_rates": [0.12751354991821942, 0.1248633429222322, 0.11875900456520606, 0.1163685821898196, 0.11548900580062053],
+      "observations": 859394,
+      "terminals": 103385,
+      "pair_effects": {"AUDUSD": 0.00943988108169666, "EURGBP": 0.00582032453232241, "EURJPY": 0.00796429142327476, "EURUSD": 0.01359242710842791, "GBPJPY": 0.010208213138587746, "GBPUSD": 0.014387292800775109, "NZDUSD": 0.009774581871649063, "USDCAD": 0.01434053630833941, "USDCHF": 0.008705548693420564, "USDJPY": 0.007569508470085778},
+      "passes_gate": true
+    },
+    "W_H4": {
+      "development_effect": 0.007310862135199464,
+      "validation_effect": 0.005197834223009859,
+      "combined_effect": 0.0066856022635854995,
+      "ci95": [0.0033366773853998307, 0.010078628241341231],
+      "empirical_bootstrap_p": 0.0,
+      "holm_p": 0.0,
+      "positive_pairs": 8,
+      "all_pair_leave_one_out_positive": true,
+      "all_named_level_leave_one_out_positive": true,
+      "distance_slope": -0.00023393076757909537,
+      "distance_bin_terminal_rates": [0.12508495970482572, 0.12192129848070209, 0.1225890666846713, 0.11856631439044782, 0.11506591337099811],
+      "observations": 222456,
+      "terminals": 26798,
+      "pair_effects": {"AUDUSD": -0.0038878768687894416, "EURGBP": 0.005257539013074644, "EURJPY": 0.008594598419753366, "EURUSD": 0.011666660469317539, "GBPJPY": 0.01024024199971904, "GBPUSD": 0.0019398517155257838, "NZDUSD": 0.011419290031781076, "USDCAD": 0.009466209190677727, "USDCHF": -0.0009291297387866576, "USDJPY": 0.013179772262566863},
+      "passes_gate": true
+    },
+    "M_D1": {"development_effect": 0.002695158302422729, "validation_effect": -0.011789522339050298, "combined_effect": -0.0015491595752376575, "ci95": [-0.010089346567048964, 0.007080842794255982], "holm_p": 1.0, "positive_pairs": 4, "passes_gate": false},
+    "Q_W1": {"development_effect": -0.011801428143840595, "validation_effect": 0.013251261865552755, "combined_effect": -0.004310728734922789, "ci95": [-0.020603575734230037, 0.012135063727804627], "holm_p": 1.0, "positive_pairs": 3, "passes_gate": false},
+    "Y_MN1": {"development_effect": 0.01878954975526216, "validation_effect": -0.016786360716996546, "combined_effect": 0.004629588092268766, "ci95": [-0.03591336614534503, 0.0444840276757943], "holm_p": 1.0, "positive_pairs": 6, "passes_gate": false}
+  },
+  "h1_mismatch_benchmarks": {
+    "W_H1": {"development_effect": 0.003845069328796552, "validation_effect": 0.0003891973057214976, "combined_effect": 0.002845149641760983},
+    "M_H1": {"development_effect": -0.000903776129989986, "validation_effect": -0.001033297775166267, "combined_effect": -0.0009461042714654783},
+    "Q_H1": {"development_effect": 0.0001643607007435488, "validation_effect": 0.0002534811748662741, "combined_effect": 0.00019060796535409763},
+    "Y_H1": {"development_effect": 0.0004854983165921978, "validation_effect": -0.0007541595792348588, "combined_effect": -0.00002832540135583317}
+  },
+  "survivors": ["D_H1", "W_H4"]
+}
