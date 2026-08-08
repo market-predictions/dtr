@@ -2,7 +2,7 @@
 
 Canonical machine source: `research_registry/dukascopy_fx_cash/index.json`.
 
-Registered studies: **4**.
+Registered studies: **6**.
 
 | Study ID | Date | Family | Question / title | Disposition | Holdout | Assurance | Source |
 |---|---|---|---|---|---|---|---|
@@ -10,6 +10,8 @@ Registered studies: **4**.
 | `DFXC-20260806-001-quarters-ten-pair` | 2026-08-06 | quarters_theory | Quarters Theory ten-pair Stage-1 universe confirmation | `REJECT_MECHANISM` | `UNOPENED` | `ARITHMETIC_AUDIT_RECORDED` | `agent/quarters-theory-universe` @ `3dfb4d36` |
 | `DFXC-20260807-001-pivot-target-reversal` | 2026-08-07 | pivot_levels | Classic pivot levels — target, stall and reversal falsification | `REJECT_MECHANISM` | `UNOPENED` | `PASS` | `agent/pivot-level-target-reversal` @ `22c8192f` |
 | `DFXC-20260807-002-pivot-spatial-zone` | 2026-08-07 | pivot_levels | Classic pivot spatial-zone follow-up | `PROMOTE_TO_HOLDOUT_CONFIRMATION` | `UNOPENED` | `PASS` | `agent/pivot-spatial-zone-followup` @ `59515ee9` |
+| `DFXC-20260808-001-pivot-multiscale-terminal` | 2026-08-08 | pivot_levels | Classic pivot zones — scale-aligned terminal-hazard test | `PROMOTE_TO_HOLDOUT_CONFIRMATION` | `UNOPENED` | `NOT_REVIEWED` | `agent/pivot-multiscale-terminal-wick` @ `edf0f06f` |
+| `DFXC-20260808-002-pivot-wick-rejection` | 2026-08-08 | pivot_levels | Classic pivot zones — conditional wick-rejection interaction | `PROMOTE_TO_HOLDOUT_CONFIRMATION` | `UNOPENED` | `NOT_REVIEWED` | `agent/pivot-multiscale-terminal-wick` @ `edf0f06f` |
 
 ## Reading rule
 
