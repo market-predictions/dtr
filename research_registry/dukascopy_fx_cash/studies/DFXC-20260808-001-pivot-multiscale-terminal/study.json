@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0.0",
+  "study_id": "DFXC-20260808-001-pivot-multiscale-terminal",
+  "title": "Classic pivot zones — scale-aligned terminal-hazard test",
+  "family": "pivot_levels",
+  "date": "2026-08-08",
+  "study_type": "falsification",
+  "lifecycle_status": "RUN_COMPLETE",
+  "dataset": {
+    "canonical_name": "Dukascopy FX Cash",
+    "dataset_id": "dukascopy_fx_cash_m1_bid_ask_v1",
+    "pairs": ["EURUSD", "GBPUSD", "USDCHF", "AUDUSD", "NZDUSD", "USDCAD", "USDJPY", "EURJPY", "GBPJPY", "EURGBP"],
+    "base_timeframe": "M1",
+    "analysis_timeframe": "D/H1, W/H4, M/D1, Q/W1, Y/MN1 with H1 mismatch benchmarks",
+    "quote_sides": ["BID", "ASK"],
+    "timezone": "UTC",
+    "price_basis": "midpoint structural measurement",
+    "windows": {"development": "2015-2019", "internal_validation": "2020-2021", "protected_holdout": "2022-2025"},
+    "pip_convention": "0.0001 non-JPY; 0.01 JPY",
+    "cache_registry": "data/private_market_data_cache_registry.json"
+  },
+  "hypotheses": {
+    "market_question": "Does pivot-proximity terminal hazard become more coherent when the directional-leg detector is scale-aligned to the pivot horizon instead of forcing all pivot horizons through H1 legs?",
+    "null": "Occupancy-adjusted terminal-extreme incidence near classic pivots is not positively enriched after scale alignment and frozen cross-pair falsification.",
+    "alternative": "At least one preregistered scale-aligned pivot/leg mapping shows stable positive terminal-hazard enrichment in the 0-20% pivot core versus the 30-50% outer region.",
+    "mechanism": "If pivot relevance is horizon-dependent, the price-response horizon should scale with the period used to construct the pivot reference."
+  },
+  "method": {
+    "primary_endpoint": "For D/H1, W/H4, M/D1, Q/W1 and Y/MN1: terminal_rate(0-20% normalized pivot spacing) minus terminal_rate(30-50%) using same-geometry high/low occupancy.",
+    "economic_effect_size": "Percentage-point enrichment in independently confirmed ATR-defined terminal-extreme incidence per eligible high/low occupancy observation.",
+    "event_definition": "Classic floor pivots from prior completed period. Directional termination is pivot-blind: ATR24 simple mean, lagged one detector bar, 0.75 ATR directional-change threshold, with a candidate extreme confirmable only by a strictly later detector candle. Pivot periods use the frozen NY17 DST-safe FX calendar.",
+    "controls": ["H1 scale-mismatch benchmarks for weekly/monthly/quarterly/yearly", "five normalized distance bins", "pair breadth", "leave-one-pair-out", "named-level leave-one-out", "negative fitted distance slope"],
+    "variants": ["D_H1", "W_H4", "M_D1", "Q_W1", "Y_MN1", "W_H1_BENCH", "M_H1_BENCH", "Q_H1_BENCH", "Y_H1_BENCH"],
+    "selection_family_size": 5,
+    "inference": {"method": "pair-year clustered bootstrap", "cluster_or_block_unit": "pair-year", "draws": 5000, "multiple_testing": "Holm correction across five primary scale-aligned horizon hypotheses"},
+    "execution": {"applicable": false, "spread_policy": "structural midpoint study", "slippage_policy": "not_applicable", "same_bar_policy": "candidate endpoint cannot self-confirm on same detector candle"}
+  },
+  "source": {
+    "repository": "market-predictions/dtr",
+    "ref": "agent/pivot-multiscale-terminal-wick",
+    "commit_sha": "edf0f06f3357b1bdb65719f8f1a171cb1a8d819a",
+    "paths": ["strategies/pivot_levels/docs/PIVOT_MULTISCALE_TERMINAL_ZONE_PREREGISTRATION_2026-08-08.md", "strategies/pivot_levels/docs/PIVOT_MULTISCALE_TERMINAL_ZONE_PREREGISTRATION_AMENDMENT_01_2026-08-08.md", "strategies/pivot_levels/docs/PIVOT_MULTISCALE_TERMINAL_ZONE_PREREGISTRATION_AMENDMENT_02_2026-08-08.md", "strategies/pivot_levels/results/2026-08-08/pivot_multiscale_terminal_summary.json", "strategies/pivot_levels/reports/PIVOT_MULTISCALE_TERMINAL_WICK_REPORT_2026-08-08.md", "strategies/pivot_levels/results/2026-08-08/pivot_multiscale_evidence_manifest.json"]
+  },
+  "holdout": {"state": "UNOPENED", "protected_window": "2022-2025", "opened_in_this_study": false, "authorization_required": true, "authorization_record": null, "prior_exposure": "2015-2021 pivot programme only; 2022-2025 untouched"},
+  "artifacts": {
+    "preregistration": ["strategies/pivot_levels/docs/PIVOT_MULTISCALE_TERMINAL_ZONE_PREREGISTRATION_2026-08-08.md", "strategies/pivot_levels/docs/PIVOT_MULTISCALE_TERMINAL_ZONE_PREREGISTRATION_AMENDMENT_01_2026-08-08.md", "strategies/pivot_levels/docs/PIVOT_MULTISCALE_TERMINAL_ZONE_PREREGISTRATION_AMENDMENT_02_2026-08-08.md"],
+    "results": ["strategies/pivot_levels/results/2026-08-08/pivot_multiscale_terminal_summary.json", "strategies/pivot_levels/results/2026-08-08/pivot_multiscale_evidence_manifest.json"],
+    "reports": ["strategies/pivot_levels/reports/PIVOT_MULTISCALE_TERMINAL_WICK_REPORT_2026-08-08.md"],
+    "reviews": ["strategies/pivot_levels/reviews/PIVOT_MULTISCALE_IMPLEMENTATION_VALIDATION_2026-08-08.md"],
+    "governance": ["strategies/pivot_levels/governance/WORKPACKAGE_2026-08-08_MULTISCALE_WICK.md", "claims/PIV-WP-20260808-03.md", "handovers/PIV-WP-20260808-03.md"]
+  },
+  "related_studies": ["DFXC-20260807-002-pivot-spatial-zone", "DFXC-20260808-002-pivot-wick-rejection"],
+  "tags": ["pivots", "zones", "multiscale", "daily", "weekly", "monthly", "quarterly", "yearly", "terminal-hazard", "occupancy-adjusted", "falsification", "holdout-candidate"],
+  "provenance": {"registration_mode": "prospective_preregistration", "registered_on": "2026-08-08", "notes": "Preregistration and two implementation clarifications were committed before outcome computation. Amendment 02 froze strict later-bar terminal confirmation to prevent wick circularity."}
+}

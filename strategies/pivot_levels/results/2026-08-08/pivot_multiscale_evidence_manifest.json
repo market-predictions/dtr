@@ -1,0 +1,31 @@
+{
+  "date": "2026-08-08",
+  "holdout": "UNOPENED",
+  "runner_sha256": "286d054c8f0479bb30d76393759fd9ec10bc18697b2613cc13be0e12d7554794",
+  "aggregated_counts_sha256": "e684614d5ada5637a563d80ce51ce47b7c158c8a0347ddc32675bba2073ef7c6",
+  "study1_full_results_sha256": "cf0a84df5b1af92c118f807ac1ade2de73e0f5b6d3cc80f17ed0fb94a9aa05fe",
+  "study2_full_results_sha256": "2c74e12c79f134df2f03289fadf0f71fb41868d37bdaa65045dbad6292322ca1",
+  "wick_eligibility_freeze_sha256": "22edde8b808830458dafb0639d05a69251f88a69c0bbbec7a3e3c1cc48c4122e",
+  "pair_count_ledgers": {
+    "AUDUSD": "1b8ead246a55c1ed349b74126bb511cbdc2075a10cc3eb730da699da4b5549e7",
+    "EURGBP": "50cc0b3015257ca8badf03a16dc6337d0e32da85a4164d37915f8c8b81d1f421",
+    "EURJPY": "6b55d41a2b675e6c08fac0ed50179ab111dd0fc6095d4dca73ac4b9bc5e12c8c",
+    "EURUSD": "c991c32501ab36c563de686386c2dc8829002978018fba073b488613db0ddac2",
+    "GBPJPY": "93aa25901707f8dc5ad486cba44cb94419918bdf71e5d27e78f33d395027c9c0",
+    "GBPUSD": "b3f7b963af4af18fc2b1db3525dbcf69a93c70a4ed259bcac5e563e2b88cea39",
+    "NZDUSD": "a8a057bdc63fa59081d822a49a6455de6227369268383c13e476ade9c8d6218a",
+    "USDCAD": "a10dc8b5a4538ade4fa0af7726f27a7e51614eca8f1069be01d294633b2ff69b",
+    "USDCHF": "e2c9e046b10fde6bacb4eddf1f92adc0f93ec597685b5935c1c11cd8cad76abb",
+    "USDJPY": "10f09273cf9a45e9542e3917dcf77b7e779be6cce2cea9bbcd1fe5949ef4c566"
+  },
+  "validation": {
+    "registered_source_parts_sha256": "PASS_22_OF_22",
+    "reconstructed_pair_archive_sha256": "PASS_10_OF_10",
+    "pair_mapping_completeness": "PASS_10_PAIRS_X_9_MAPPINGS",
+    "result_year_range": "2015_2021_ONLY",
+    "independent_arithmetic_recalculation": "PASS_EXACT",
+    "strict_later_bar_anti_circularity_unit_check": "PASS"
+  },
+  "large_intermediates": "Not committed; raw market data remain private. Hashes freeze the executed intermediate evidence while compact scientific results and methodology are committed.",
+  "governance_assurance": "PENDING_INDEPENDENT_REVIEW"
+}

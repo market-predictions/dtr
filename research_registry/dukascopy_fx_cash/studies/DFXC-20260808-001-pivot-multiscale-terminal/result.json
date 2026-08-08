@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0.0",
+  "study_id": "DFXC-20260808-001-pivot-multiscale-terminal",
+  "decision": "PROMOTE_DAILY_H1_AND_WEEKLY_H4_TERMINAL_ZONES_REJECT_HIGHER_TF_SCALE_RESCUE",
+  "scientific_disposition": "PROMOTE_TO_HOLDOUT_CONFIRMATION",
+  "summary": "Scale alignment strengthened the weekly pivot terminal-hazard effect but did not rescue monthly, quarterly or yearly pivots. Daily/H1 passed every frozen gate at +1.02 pp terminal enrichment and 10/10 positive pairs; Weekly/H4 passed at +0.67 pp and 8/10 positive pairs. Monthly/D1, Quarterly/W1 and Yearly/MN1 failed their preregistered development/validation and uncertainty gates.",
+  "primary_findings": [
+    {"metric": "Daily/H1 core-minus-outer terminal enrichment", "estimate": 1.0232, "unit": "percentage points", "uncertainty": "95% CI [+0.85,+1.20], 10/10 pairs, empirical bootstrap p below first non-zero 5,000-draw resolution"},
+    {"metric": "Weekly/H4 core-minus-outer terminal enrichment", "estimate": 0.6686, "unit": "percentage points", "uncertainty": "95% CI [+0.33,+1.01], 8/10 pairs, empirical bootstrap p below first non-zero 5,000-draw resolution"},
+    {"metric": "Monthly/D1 combined enrichment", "estimate": -0.1549, "unit": "percentage points", "uncertainty": "95% CI [-1.01,+0.71], development/validation sign instability"},
+    {"metric": "Quarterly/W1 combined enrichment", "estimate": -0.4311, "unit": "percentage points", "uncertainty": "95% CI [-2.06,+1.21], development/validation sign reversal"},
+    {"metric": "Yearly/MN1 combined enrichment", "estimate": 0.4630, "unit": "percentage points", "uncertainty": "95% CI [-3.59,+4.45], sparse and development/validation sign reversal"}
+  ],
+  "breadth": {"pairs": "10 canonical Dukascopy FX Cash pairs", "primary_survivors": ["D_H1", "W_H4"], "higher_timeframe_scale_rescue": "M_D1/Q_W1/Y_MN1 all failed"},
+  "robustness": ["Daily/H1 positive in 10/10 pairs; every pair leave-one-out and named-level leave-one-out pooled effect positive.", "Weekly/H4 positive in 8/10 pairs; every pair leave-one-out and named-level leave-one-out pooled effect positive.", "Weekly/H4 combined effect +0.67 pp exceeded the frozen Weekly/H1 mismatch benchmark +0.28 pp.", "Separate arithmetic recalculation reproduced all five primary combined effects exactly from aggregated counts.", "Strict later-bar unit check confirmed a large-wick candidate candle cannot self-confirm as terminal."],
+  "limitations": ["The result does not support a universal fractal pivot effect; scale alignment only helped the weekly mapping.", "Yearly/MN1 is severely sample-limited by the frozen ATR24 monthly warm-up.", "Terminal endpoints remain retrospectively confirmed and structural midpoint prices are not executable P&L."],
+  "authorized_next": ["Obtain independent governance assurance on the frozen candidate.", "If independently assured and separately authorized, use protected 2022-2025 only for unchanged confirmation candidates; do not optimize the failed M/Q/Y mappings."],
+  "prohibited_next": ["No higher-timeframe threshold rescue, pair/level/session selection, ATR retuning or formula shopping.", "No protected-holdout opening inside this work package.", "No P&L, Pine, alerts, sizing or live deployment based on this result alone."],
+  "assurance": {"status": "NOT_REVIEWED", "decision": null, "evidence": ["strategies/pivot_levels/reviews/PIVOT_MULTISCALE_IMPLEMENTATION_VALIDATION_2026-08-08.md", "handovers/PIV-WP-20260808-03.md"]},
+  "holdout": {"state_after": "UNOPENED", "opened_in_this_study": false},
+  "evidence": [
+    {"repository": "market-predictions/dtr", "ref": "agent/pivot-multiscale-terminal-wick", "commit_sha": "edf0f06f3357b1bdb65719f8f1a171cb1a8d819a", "path": "strategies/pivot_levels/results/2026-08-08/pivot_multiscale_terminal_summary.json"},
+    {"repository": "market-predictions/dtr", "ref": "agent/pivot-multiscale-terminal-wick", "commit_sha": "edf0f06f3357b1bdb65719f8f1a171cb1a8d819a", "path": "strategies/pivot_levels/reports/PIVOT_MULTISCALE_TERMINAL_WICK_REPORT_2026-08-08.md"},
+    {"repository": "market-predictions/dtr", "ref": "agent/pivot-multiscale-terminal-wick", "commit_sha": "edf0f06f3357b1bdb65719f8f1a171cb1a8d819a", "path": "strategies/pivot_levels/results/2026-08-08/pivot_multiscale_evidence_manifest.json"}
+  ]
+}
