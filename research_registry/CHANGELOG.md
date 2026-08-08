@@ -1,5 +1,36 @@
 # Research Registry Changelog
 
+## v1.3.0 — 2026-08-08
+
+### Added
+
+- `DFXC-20260808-005-pivot-fibonacci-substitution`: prospectively preregistered standard-Fibonacci pivot formula substitution for the established Daily→H1 and Weekly→H4 response architectures.
+- Frozen standard Fibonacci coordinates: PP plus/minus 0.382, 0.618 and 1.000 prior-period range.
+- Same-engine classic comparator and paired Fibonacci-minus-Classic formula-difference inference.
+- Formula-substitution report, compact machine result, evidence manifest, implementation-validation record, work claim and assurance handover.
+
+### Scientific state
+
+- Daily Fibonacci→H1 preserves the pivot-specific wick phenomenon internally: **+1.052 pp**, 95% CI **[+0.634,+1.473] pp**, positive in 9/10 pairs; structural terminal effect **+1.314 pp**.
+- Weekly Fibonacci→H4 SP10 is directionally positive but **borderline**: **+1.234 pp**, CI **[+0.012,+2.441] pp**, Holm p=0.0488, positive in 7/10 pairs.
+- Paired Fibonacci-minus-Classic wick intervals cross zero on both horizons; **Fibonacci superiority is not established**.
+- The most defensible interpretation is that Daily/H1 exhaustion is not uniquely dependent on classic floor-pivot algebra; range-derived local reference geometry can preserve the phenomenon under Fibonacci redistribution.
+- Classic Daily/H1 remains the mature protected-holdout-confirmed benchmark; classic Weekly/H4 SP10 remains the stronger current weekly candidate.
+
+### Reproducibility
+
+- An initial provisional detector reconstruction was rejected before accepted Fibonacci conclusions because it updated the current-bar extreme before testing the earlier candidate, violating the frozen strict-later anti-circularity ordering.
+- After restoring Amendment-02 event ordering, classic primary wick interactions reproduce the frozen parent headline effects within approximately **0.01 percentage point** on both horizons.
+- Companion structural comparator effects retain recorded residuals of approximately +0.103 pp Daily and +0.066 pp Weekly because the historical large parent terminal-event ledger was intentionally not committed and cannot be replayed byte-for-byte.
+- That residual is treated as immaterial to the robust Daily Fibonacci conclusion but material to the inference-boundary Weekly result.
+
+### Data / governance
+
+- Fibonacci outcomes use 2015–2021 only.
+- 2022–2025 is not relabelled as a pristine Fibonacci holdout after its prior exposure in the related classic Daily/H1 programme.
+- Implementation is release-candidate ready; independent `governance_release_assurance` remains required before merge.
+- No formula retuning, alternative Fibonacci ratios, P&L strategy, Pine, alerts, sizing or live deployment is authorized.
+
 ## v1.2.0 — 2026-08-08
 
 ### Added
