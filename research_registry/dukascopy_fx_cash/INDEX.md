@@ -2,7 +2,7 @@
 
 Canonical machine source: `research_registry/dukascopy_fx_cash/index.json`.
 
-Registered studies: **8**.
+Registered studies: **9**.
 
 | Study ID | Date | Family | Question / title | Disposition | Holdout | Assurance | Source |
 |---|---|---|---|---|---|---|---|
@@ -14,6 +14,7 @@ Registered studies: **8**.
 | `DFXC-20260808-002-pivot-wick-rejection` | 2026-08-08 | pivot_levels | Classic pivot zones — conditional wick-rejection interaction | `PROMOTE_TO_HOLDOUT_CONFIRMATION` | `UNOPENED` | `NOT_REVIEWED` | `agent/pivot-multiscale-terminal-wick` @ `edf0f06f` |
 | `DFXC-20260808-003-pivot-daily-wick-holdout` | 2026-08-08 | pivot_levels | Daily classic-pivot × H1 wick interaction — protected holdout confirmation | `SUPPORTED_INTERNAL` | `OPENED` | `NOT_REVIEWED` | `agent/pivot-daily-holdout-weekly-zone-geometry` @ `c4aeaced` |
 | `DFXC-20260808-004-pivot-weekly-h4-zone-geometry` | 2026-08-08 | pivot_levels | Weekly classic-pivot × H4 zone geometry — spacing/ATR robustness | `PROMOTE_TO_HOLDOUT_CONFIRMATION` | `UNOPENED` | `NOT_REVIEWED` | `agent/pivot-daily-holdout-weekly-zone-geometry` @ `c4aeaced` |
+| `DFXC-20260808-005-pivot-fibonacci-substitution` | 2026-08-08 | pivot_levels | Fibonacci pivot formula substitution — Daily/H1 and Weekly/H4 | `SUPPORTED_INTERNAL` | `UNOPENED` | `NOT_REVIEWED` | `agent/pivot-fibonacci-formula-substitution` @ `0febc662` |
 
 ## Reading rule
 
