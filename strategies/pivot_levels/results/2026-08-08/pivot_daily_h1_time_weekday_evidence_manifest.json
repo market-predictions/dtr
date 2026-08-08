@@ -1,0 +1,40 @@
+{
+  "schema_version": "1.0.0",
+  "study_id": "DFXC-20260808-007-pivot-daily-time-weekday",
+  "work_package": "PIV-WP-20260808-07",
+  "repository": "market-predictions/dtr",
+  "branch": "agent/pivot-daily-h1-time-weekday-v4",
+  "preregistration_freeze": {
+    "base_commit": "524545d7a4cccdda6be24658489d758ea02e9f0d",
+    "continuity_amendment_commit": "3891d6c74b1c49bd2a4e88573de7de65a7a496c0",
+    "paths": [
+      "strategies/pivot_levels/docs/PIVOT_DAILY_H1_TIME_WEEKDAY_PREREGISTRATION_2026-08-08.md",
+      "strategies/pivot_levels/docs/PIVOT_DAILY_H1_TIME_WEEKDAY_PREREGISTRATION_AMENDMENT_01_2026-08-08.md"
+    ]
+  },
+  "accepted_evidence_snapshot": {
+    "commit": "c88b42f5737cb465c045be09ced8ed4367a0ba48",
+    "summary": "strategies/pivot_levels/results/2026-08-08/pivot_daily_h1_time_weekday_summary.json",
+    "report": "strategies/pivot_levels/reports/PIVOT_DAILY_H1_TIME_WEEKDAY_REPORT_2026-08-08.md",
+    "implementation_validation": "strategies/pivot_levels/reviews/PIVOT_DAILY_H1_TIME_WEEKDAY_IMPLEMENTATION_VALIDATION_2026-08-08.md",
+    "claim": "claims/PIV-WP-20260808-07.md",
+    "handover": "handovers/PIV-WP-20260808-07.md"
+  },
+  "local_artifact_sha256": {
+    "pivot_daily_h1_time_weekday_summary.json": "c130cd003e732deb821bb668555853bc592f66acf02200ed63cee5c665f6240c",
+    "PIVOT_DAILY_H1_TIME_WEEKDAY_REPORT_2026-08-08.md": "827cb60396d74e8768993a28cc1f69ac6e7bc8d8410f597ff987d62fd3f53f17"
+  },
+  "data_boundaries": {
+    "outcome_years": [2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025],
+    "2026_read_for_outcomes": false,
+    "pairs": ["EURUSD","GBPUSD","USDCHF","AUDUSD","NZDUSD","USDCAD","USDJPY","EURJPY","GBPJPY","EURGBP"]
+  },
+  "reproduction": {
+    "recent_sample_event_count": 65135,
+    "event_keys_exact": true,
+    "groups_exact": true,
+    "distance_wick_atr_exact": true,
+    "forward_and_excursion_fields_exact": true
+  },
+  "implementation_assurance": "PENDING_INDEPENDENT_GOVERNANCE_RELEASE_ASSURANCE"
+}
