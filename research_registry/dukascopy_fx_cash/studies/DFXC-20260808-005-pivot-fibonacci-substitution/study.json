@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0.0",
+  "study_id": "DFXC-20260808-005-pivot-fibonacci-substitution",
+  "title": "Fibonacci pivot formula substitution — Daily/H1 and Weekly/H4",
+  "family": "pivot_levels",
+  "date": "2026-08-08",
+  "study_type": "robustness",
+  "lifecycle_status": "PREREGISTERED",
+  "dataset": {
+    "canonical_name": "Dukascopy FX Cash",
+    "dataset_id": "dukascopy_fx_cash_m1_bid_ask_v1",
+    "pairs": ["EURUSD", "GBPUSD", "USDCHF", "AUDUSD", "NZDUSD", "USDCAD", "USDJPY", "EURJPY", "GBPJPY", "EURGBP"],
+    "base_timeframe": "M1",
+    "analysis_timeframe": "Daily Fibonacci pivots/H1 and Weekly Fibonacci pivots/H4",
+    "quote_sides": ["BID", "ASK"],
+    "timezone": "UTC",
+    "price_basis": "midpoint structural measurement",
+    "windows": {"development": "2015-2019", "internal_validation": "2020-2021", "protected_holdout": "2022-2025 already exposed for related Daily/H1 classic-pivot question; not used as pristine holdout here"},
+    "pip_convention": "0.0001 non-JPY; 0.01 JPY",
+    "cache_registry": "data/private_market_data_cache_registry.json"
+  },
+  "hypotheses": {
+    "market_question": "Does replacing classic floor-pivot coordinates with standard Fibonacci pivot coordinates preserve or improve the successful Daily/H1 and Weekly/H4 pivot-zone wick/terminal relationships when response logic and zone geometry are held fixed?",
+    "null": "Fibonacci pivot coordinates do not produce a robust positive structural terminal effect and pivot-specific wick interaction under the frozen Daily/H1 and Weekly/H4 designs.",
+    "alternative": "At least one frozen Fibonacci pivot horizon preserves a robust positive structural and wick interaction, with paired formula comparison identifying whether Fibonacci improves, degrades or is equivalent to classic pivots.",
+    "mechanism": "If the pivot phenomenon reflects range-proportional support/resistance geometry rather than the classic floor-pivot algebra specifically, Fibonacci-distributed levels may preserve or strengthen the local exhaustion relationship."
+  },
+  "method": {
+    "primary_endpoint": "Daily/H1 Fibonacci wick interaction at 0-20% spacing core vs 30-50% outer; Weekly/H4 Fibonacci wick interaction at SP10 0-10% core vs 40-50% outer; structural core-minus-outer terminal effects are required companion endpoints.",
+    "economic_effect_size": "Percentage-point terminal-hazard and pivot-specific wick-interaction effects, plus paired Fibonacci-minus-Classic effect differences by pair-year cluster.",
+    "event_definition": "Standard Fibonacci pivots PP=(H+L+C)/3; R/S1=PP±0.382R, R/S2=PP±0.618R, R/S3=PP±1.0R. Terminal labels remain pivot-blind ATR24/0.75 with strictly later-bar confirmation; wick strong >=30%, weak <10%.",
+    "controls": ["same-engine classic floor-pivot comparator", "development/internal-validation split", "pair breadth", "leave-one-pair-out", "five-bin wick gradient", "paired Fibonacci-minus-Classic pair-year effect difference"],
+    "variants": ["FIB_D_H1_SP20", "FIB_W_H4_SP10", "CLASSIC_D_H1_SP20_COMPARATOR", "CLASSIC_W_H4_SP10_COMPARATOR"],
+    "selection_family_size": 2,
+    "inference": {"method": "pair-year clustered bootstrap", "cluster_or_block_unit": "pair-year", "draws": 5000, "multiple_testing": "separate Holm correction across two Fibonacci structural hypotheses and two Fibonacci wick hypotheses"},
+    "execution": {"applicable": false, "spread_policy": "structural midpoint study", "slippage_policy": "not_applicable", "same_bar_policy": "candidate endpoint cannot self-confirm on same response candle"}
+  },
+  "source": {
+    "repository": "market-predictions/dtr",
+    "ref": "agent/pivot-fibonacci-formula-substitution",
+    "commit_sha": "0febc662d071f90363a44cf6f3e95a76b87155d0",
+    "paths": ["strategies/pivot_levels/docs/PIVOT_FIBONACCI_FORMULA_SUBSTITUTION_PREREGISTRATION_2026-08-08.md", "strategies/pivot_levels/governance/WORKPACKAGE_2026-08-08_FIBONACCI_SUBSTITUTION.md"]
+  },
+  "holdout": {"state": "UNOPENED", "protected_window": "2022-2025 already exposed for related Daily/H1 classic-pivot question", "opened_in_this_study": false, "authorization_required": true, "authorization_record": null, "prior_exposure": "2022-2025 was consumed for DFXC-20260808-003. This Fibonacci study uses 2015-2021 only and makes no pristine-holdout claim."},
+  "artifacts": {
+    "preregistration": ["strategies/pivot_levels/docs/PIVOT_FIBONACCI_FORMULA_SUBSTITUTION_PREREGISTRATION_2026-08-08.md"],
+    "results": [],
+    "reports": [],
+    "reviews": [],
+    "governance": ["strategies/pivot_levels/governance/WORKPACKAGE_2026-08-08_FIBONACCI_SUBSTITUTION.md"]
+  },
+  "related_studies": ["DFXC-20260808-003-pivot-daily-wick-holdout", "DFXC-20260808-004-pivot-weekly-h4-zone-geometry"],
+  "tags": ["pivots", "fibonacci", "daily", "H1", "weekly", "H4", "wick", "terminal-hazard", "formula-substitution", "robustness"],
+  "provenance": {"registration_mode": "prospective_formula_substitution_preregistration", "registered_on": "2026-08-08", "notes": "Standard 0.382/0.618/1.000 Fibonacci levels frozen before any Fibonacci outcome computation. Zone geometry and response logic inherited unchanged from successful classic-pivot studies."}
+}
