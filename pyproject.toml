@@ -57,3 +57,6 @@ select = ["E", "F", "I", "B", "UP"]
 "src/dtr_lab/research/engine.py" = ["I001", "UP035", "B905"]
 "src/dtr_lab/research/integrity.py" = ["I001"]
 "src/dtr_lab/research/optimize.py" = ["E501"]
+# The standalone replication runner imports a sibling script and package code;
+# Ruff classifies those imports into separate sections inconsistently in CI.
+"scripts/aggregate_wayne_independent_replication.py" = ["I001"]
