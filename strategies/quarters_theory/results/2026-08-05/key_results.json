@@ -1,0 +1,54 @@
+{
+  "events": 6843,
+  "lqp_events": 1373,
+  "non_lqp_round_events": 5470,
+  "development_canonical_60m": {
+    "phase": 0,
+    "outcome": "return_60m_pips",
+    "effect": -0.789094775988071,
+    "n_treated": 1014,
+    "n_control": 3889,
+    "n_strata": 119,
+    "period": "development_2015_2019"
+  },
+  "validation_canonical_60m": {
+    "phase": 0,
+    "outcome": "return_60m_pips",
+    "effect": -0.7538688626364902,
+    "n_treated": 349,
+    "n_control": 1544,
+    "n_strata": 46,
+    "period": "internal_validation_2020_2021"
+  },
+  "all_canonical_60m_bootstrap": {
+    "phase": 0,
+    "outcome": "return_60m_pips",
+    "point": -0.7799077709456929,
+    "ci_low": -2.5754686471153843,
+    "ci_high": 1.1952599205832328,
+    "n_boot": 5000,
+    "period": "all_2015_2021"
+  },
+  "development_phase_rank_60m": {
+    "period": "development_2015_2019",
+    "outcome": "return_60m_pips",
+    "canonical_effect_pips": -0.789094775988071,
+    "canonical_rank_desc": 5,
+    "canonical_percentile": 0.2,
+    "best_phase": 150,
+    "best_effect_pips": 1.4299859923958378,
+    "worst_phase": 0,
+    "worst_effect_pips": -0.789094775988071
+  },
+  "validation_phase_rank_60m": {
+    "period": "internal_validation_2020_2021",
+    "outcome": "return_60m_pips",
+    "canonical_effect_pips": -0.7538688626364902,
+    "canonical_rank_desc": 3,
+    "canonical_percentile": 0.6,
+    "best_phase": 100,
+    "best_effect_pips": 2.6487589522429076,
+    "worst_phase": 150,
+    "worst_effect_pips": -1.440991122055215
+  }
+}
